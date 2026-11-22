@@ -72,9 +72,9 @@
   .pin-innen { position: absolute; left: 0; top: 0; width: 46px; height: 56px; transform-origin: 50% 100%; animation: ploppen 0.55s cubic-bezier(0.2, 1.4, 0.4, 1) both; }
   .pin-kopf { position: absolute; left: 3px; top: 0; width: 40px; height: 40px; border-radius: 50%; border: 2.5px solid var(--gold); box-shadow: 0 4px 10px rgba(50, 30, 10, 0.35); display: grid; place-items: center; font-weight: 700; font-size: 15px; color: #fff8ea; letter-spacing: 0.5px; }
   .pin-spitze { position: absolute; left: 18px; top: 36px; width: 10px; height: 10px; background: var(--gold); transform: rotate(45deg); border-radius: 1px; box-shadow: 2px 2px 4px rgba(50, 30, 10, 0.25); }
-  .herz { position: absolute; z-index: 2; top: -6px; font-size: 13px; filter: drop-shadow(0 1px 1px rgba(0,0,0,0.3)); }
+  .herz { position: absolute; z-index: 6; top: -10px; width: 28px; height: 28px; border-radius: 50%; background: var(--karte-bg, #fffdf8); border: 2px solid var(--gold); box-shadow: 0 2px 6px rgba(0,0,0,0.3); display: grid; place-items: center; font-size: 15px; line-height: 1; }
   .pin-du .pin-kopf { border-color: var(--tinte); }
-  .pin-zahl { position: absolute; top: -7px; z-index: 3; min-width: 20px; height: 20px; padding: 0 5px; border-radius: 10px; background: var(--tinte); color: var(--papier); font-size: 12px; font-weight: 700; display: grid; place-items: center; box-shadow: 0 2px 6px rgba(0,0,0,0.3); }
+  .pin-zahl { position: absolute; top: -7px; z-index: 6; min-width: 20px; height: 20px; padding: 0 5px; border-radius: 10px; background: var(--tinte); color: var(--papier); font-size: 12px; font-weight: 700; display: grid; place-items: center; box-shadow: 0 2px 6px rgba(0,0,0,0.3); }
   .pin-du .puls { position: absolute; left: 3px; top: 0; width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--tinte); animation: puls 2.4s ease-out infinite; }
   @keyframes ploppen { from { transform: scale(0) translateY(10px); opacity: 0; } to { transform: scale(1) translateY(0); opacity: 1; } }
   @keyframes puls { from { transform: scale(1); opacity: 0.7; } to { transform: scale(1.8); opacity: 0; } }
@@ -649,8 +649,8 @@ function pinsSetzen() {
     if (leuteHier[0].id === "du") innen.innerHTML = '<div class="puls"></div>';
     leuteHier.slice(0, 3).forEach((p, j) => { innen.innerHTML += `<div class="pin-kopf" style="left:${3 + j * 18}px;background:${p.farbe};z-index:${3 - j}">${leuteHier.length > 3 && j === 2 ? "+" + (leuteHier.length - 2) : kuerzel(p.name)}</div>`; });
     // ❤️ = bestätigtes Paar am selben Ort · 🤝 = Freunde am selben Ort · Zahl = Pins liegen nur auf dem Bildschirm übereinander
-    if (h.gruppen.length === 1 && istPaar(h.gruppen[0])) innen.innerHTML += `<div class="herz" style="left:${breite / 2 - 7}px">❤️</div>`;
-    else if (h.gruppen.length === 1 && leuteHier.length > 1) innen.innerHTML += `<div class="herz" style="left:${breite / 2 - 8}px">🤝</div>`;
+    if (h.gruppen.length === 1 && istPaar(h.gruppen[0])) innen.innerHTML += `<div class="herz" style="left:${breite - 20}px">❤️</div>`;
+    else if (h.gruppen.length === 1 && leuteHier.length > 1) innen.innerHTML += `<div class="herz" style="left:${breite - 20}px">🤝</div>`;
     else if (leuteHier.length > 1) innen.innerHTML += `<div class="pin-zahl" style="left:${breite - 16}px">${leuteHier.length}</div>`;
     innen.innerHTML += `<div class="pin-spitze" style="left:${breite / 2 - 5}px"></div>`;
     el.appendChild(innen);
