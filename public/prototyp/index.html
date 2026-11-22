@@ -4,8 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
 <title>Ahoi – Karten-Prototyp</title>
-<meta name="theme-color" content="#efe0c0" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#231a12" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7efe0" id="theme-farbe">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -16,7 +15,7 @@
 <link rel="preconnect" href="https://tiles.openfreemap.org" crossorigin>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@700&family=DM+Serif+Display&family=Fraunces:opsz,wght@9..144,600&family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl.css">
 <script src="https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl.js"></script>
 <style>
@@ -26,33 +25,35 @@
     --tinte: #4a3220;
     --tinte-weich: #7a5a3a;
     --gold: #b8913f;
-    --karte-hinten: #d8c094;
+    --karte-hinten: #f7efe0;
     --glas: rgba(250, 242, 224, 0.86);
     --glas-rand: rgba(122, 90, 58, 0.25);
     --schatten: 0 10px 30px rgba(60, 38, 16, 0.22);
     --text: #2f2216;
     --text-leise: #7b6650;
     --hand: "Caveat", "Bradley Hand", cursive;
-    --sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
+    --system: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
+    --sans: var(--system);
+    --marke: var(--hand);
+    --marke-gewicht: 700;
+    --marke-groesse: 27px;
   }
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --papier: #2b2117;
-      --papier-tief: #1f1811;
-      --tinte: #d9b56a;
-      --tinte-weich: #b8975c;
-      --gold: #d9b56a;
-      --karte-hinten: #15100b;
-      --glas: rgba(38, 29, 20, 0.86);
-      --glas-rand: rgba(217, 181, 106, 0.22);
-      --schatten: 0 10px 30px rgba(0, 0, 0, 0.45);
-      --text: #f0e2c2;
-      --text-leise: #b8a27e;
-    }
+  :root[data-theme="dunkel"] {
+    --papier: #1e2a36;
+    --papier-tief: #16212b;
+    --tinte: #e3c47f;
+    --tinte-weich: #c4a66a;
+    --gold: #d6b26a;
+    --karte-hinten: #16212b;
+    --glas: rgba(22, 32, 42, 0.86);
+    --glas-rand: rgba(227, 196, 127, 0.2);
+    --schatten: 0 10px 30px rgba(0, 0, 0, 0.45);
+    --text: #efe6d2;
+    --text-leise: #a9b2b8;
   }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html, body { margin: 0; height: 100%; background: var(--karte-hinten); color: var(--text); font-family: var(--sans); overflow: hidden; overscroll-behavior: none; }
-  #map { position: fixed; inset: 0; background: radial-gradient(circle at 50% 45%, var(--papier-tief), var(--karte-hinten) 75%); }
+  #map { position: fixed; inset: 0; min-height: 100lvh; background: var(--papier); }
 
 
   /* Kopfzeile */
@@ -60,7 +61,7 @@
   .marke, .knoepfe { pointer-events: auto; display: flex; align-items: center; gap: 8px; background: var(--glas); border: 1px solid var(--glas-rand); box-shadow: var(--schatten); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-radius: 999px; }
   .marke { padding: 5px 16px 5px 5px; }
   .marke img { width: 34px; height: 34px; border-radius: 50%; }
-  .marke span { font-family: var(--hand); font-weight: 700; font-size: 27px; color: var(--tinte); line-height: 1; }
+  .marke span { font-family: var(--marke); font-weight: var(--marke-gewicht); font-size: var(--marke-groesse); color: var(--tinte); line-height: 1; letter-spacing: -0.2px; }
   .knoepfe { padding: 4px; }
   .knopf { width: 40px; height: 40px; border: 0; border-radius: 999px; background: transparent; color: var(--tinte); font-size: 19px; display: grid; place-items: center; cursor: pointer; }
   .knopf:active { transform: scale(0.92); background: var(--glas-rand); }
@@ -108,9 +109,18 @@
   .start { position: fixed; inset: 0; z-index: 50; display: grid; place-items: center; background: var(--papier); transition: opacity 0.6s ease 0.1s; }
   .start.weg { opacity: 0; pointer-events: none; }
   .start svg { width: 120px; height: 120px; animation: drehen 1.4s cubic-bezier(0.3, 0.7, 0.2, 1) both; }
-  .start p { position: absolute; bottom: 22%; font-family: var(--hand); font-size: 30px; font-weight: 700; color: var(--tinte); margin: 0; }
+  .start p { position: absolute; bottom: 22%; font-family: var(--marke); font-size: 32px; font-weight: 700; color: var(--tinte); margin: 0; }
   @keyframes drehen { from { transform: rotate(-200deg) scale(0.7); opacity: 0; } to { transform: rotate(0) scale(1); opacity: 1; } }
 
+  /* Stil-Auswahl (nur im Prototyp) */
+  .stilwahl { position: fixed; top: calc(env(safe-area-inset-top) + 66px); right: 12px; left: 12px; max-width: 420px; margin-left: auto; z-index: 30; background: var(--glas); border: 1px solid var(--glas-rand); box-shadow: var(--schatten); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); border-radius: 22px; padding: 14px; display: none; }
+  .stilwahl.offen { display: block; }
+  .stilwahl h4 { margin: 10px 2px 6px; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.6px; color: var(--text-leise); }
+  .stilwahl h4:first-child { margin-top: 0; }
+  .segmente { display: grid; grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); gap: 6px; }
+  .segmente button { border: 1px solid var(--glas-rand); background: transparent; color: var(--text); border-radius: 12px; padding: 8px 6px; font: inherit; font-size: 13px; line-height: 1.2; cursor: pointer; }
+  .segmente button b { display: block; font-size: 15px; }
+  .segmente button.aktiv { background: var(--tinte); color: var(--papier); border-color: var(--tinte); }
   .hinweis { position: fixed; left: 50%; top: calc(env(safe-area-inset-top) + 70px); transform: translate(-50%, -10px); z-index: 20; background: var(--tinte); color: var(--papier); padding: 8px 14px; border-radius: 999px; font-size: 13px; opacity: 0; transition: opacity 0.25s, transform 0.25s; pointer-events: none; white-space: nowrap; }
   .hinweis.zeigen { opacity: 1; transform: translate(-50%, 0); }
 
@@ -136,11 +146,20 @@
     <button class="knopf" id="knopf-welt" title="Ganze Welt" aria-label="Ganze Welt">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.8 3 2.8 15 0 18M12 3c-2.8 3-2.8 15 0 18"/></svg>
     </button>
+    <button class="knopf" id="knopf-stil" title="Stil wählen" aria-label="Stil wählen">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 3a9 9 0 1 0 0 18c1.1 0 1.6-.8 1.6-1.6 0-.9-.6-1.3-.6-2.1 0-.9.7-1.5 1.6-1.5H17a4 4 0 0 0 4-4C21 6.8 17 3 12 3Z"/><circle cx="7.5" cy="11" r="1.2"/><circle cx="10" cy="7" r="1.2"/><circle cx="15" cy="7.5" r="1.2"/></svg>
+    </button>
     <button class="knopf" id="knopf-ich" title="Mein Standort" aria-label="Mein Standort">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="3.5"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="7.5"/></svg>
     </button>
   </div>
 </header>
+
+<div class="stilwahl" id="stilwahl">
+  <h4>Karte</h4><div class="segmente" data-art="karte"></div>
+  <h4>Schrift</h4><div class="segmente" data-art="schrift"></div>
+  <h4>Schriftzug „Ahoi“</h4><div class="segmente" data-art="marke"></div>
+</div>
 
 <div class="info" id="info"><button class="knopf zu" id="info-zu" aria-label="Schließen">✕</button><h3></h3><p></p></div>
 
@@ -240,20 +259,45 @@ const kuerzel = n => n.slice(0, 2).toUpperCase();
 // ---------- Farben der Karte (hell / dunkel) ----------
 const dunkel = window.matchMedia("(prefers-color-scheme: dark)");
 const PALETTEN = {
-  hell: {
-    papier: "#efe0c0", wasser: "#bcc7bd", wasserTinte: "#5d7a86", wald: "#d3c896", wiese: "#dfd3a5", sand: "#ead7a6", eis: "#f6f0e2",
-    stadt: "#e6d3ab", haus: "#d9c5a0", hausRand: "#bea47c", strasseGross: "#8b5e34", strasseMittel: "#a3805a", strasseKlein: "#bba282",
-    tinte: "#4a3220", tinteLeise: "#7a5a3a", grenze: "#6b4a2c", halo: "#f3e6c9", relief: 0.14
+  // A: Pergament – klassische Schatzkarten-Farben, hell
+  A: {
+    thema: "hell", papier: "#efe0c0", wasser: "#bcc7bd", wasserTinte: "#5d7a86", wald: "#d3c896", wiese: "#dfd3a5", sand: "#ead7a6", eis: "#f6f0e2",
+    stadt: "#e6d3ab", haus: "#d9c5a0", hausRand: "#bea47c", strasseGross: "#b07a45", strasseMittel: "#c49c70", strasseKlein: "#d1bb94",
+    tinte: "#4a3220", tinteLeise: "#7a5a3a", grenze: "#8a6a48", halo: "#f3e6c9", relief: 0.14
   },
-  dunkel: {
-    papier: "#2b2117", wasser: "#1b2629", wasserTinte: "#8fa9ad", wald: "#30291b", wiese: "#342b1d", sand: "#3a2f20", eis: "#3d3427",
-    stadt: "#34291c", haus: "#3b2f21", hausRand: "#55442c", strasseGross: "#c9a45c", strasseMittel: "#a68a55", strasseKlein: "#7d6a48",
-    tinte: "#e3c47f", tinteLeise: "#bfa06a", grenze: "#d9b56a", halo: "#221a12", relief: 0.1
+  // B: Atlas modern – helles Creme-Land, ruhiges Blaugrün, feine Linien
+  B: {
+    thema: "hell", papier: "#f5f0e6", wasser: "#cfe1e2", wasserTinte: "#5f8790", wald: "#e3e7d0", wiese: "#eaecd9", sand: "#f0e8d2", eis: "#ffffff",
+    stadt: "#eee7d9", haus: "#e5ddcc", hausRand: "#d6ccb8", strasseGross: "#e2b17a", strasseMittel: "#eccfa6", strasseKlein: "#ddd3c1",
+    tinte: "#3b3128", tinteLeise: "#8a7864", grenze: "#b8a184", halo: "#f5f0e6", relief: 0.07
+  },
+  // C: Nacht-Gold – dunkles Nachtblau mit goldenen Linien
+  C: {
+    thema: "dunkel", papier: "#1e2a36", wasser: "#101b25", wasserTinte: "#7397ab", wald: "#22302b", wiese: "#233029", sand: "#29313a", eis: "#2c3a46",
+    stadt: "#243240", haus: "#2a3947", hausRand: "#34465a", strasseGross: "#c9a45c", strasseMittel: "#8f7a54", strasseKlein: "#3a4958",
+    tinte: "#e6cf98", tinteLeise: "#bba57d", grenze: "#c9a45c", halo: "#101b25", relief: 0.1
   }
 };
-const P = () => PALETTEN[dunkel.matches ? "dunkel" : "hell"];
-const SPRACHE = (navigator.language || "de").toLowerCase().startsWith("de") ? "de" : "en";
-
+// Auswahl im Prototyp (wird auf diesem Gerät gemerkt)
+const WAHL = {
+  karte: { auto: ["Auto", "A hell · C nachts"], A: ["A", "Pergament"], B: ["B", "Atlas modern"], C: ["C", "Nacht-Gold"] },
+  schrift: { D: ["D", "iPhone-Schrift", 'var(--system)'], E: ["E", "Inter", '"Inter", var(--system)'], F: ["F", "Jakarta", '"Plus Jakarta Sans", var(--system)'] },
+  marke: { G: ["G", "wie Schrift", null, 800, "24px"], H: ["H", "Fraunces", '"Fraunces", Georgia, serif', 600, "25px"], I: ["I", "DM Serif", '"DM Serif Display", Georgia, serif', 400, "27px"], J: ["J", "Handschrift", 'var(--hand)', 700, "28px"] }
+};
+let auswahl = { karte: "auto", schrift: "D", marke: "J" };
+try { Object.assign(auswahl, JSON.parse(localStorage.getItem("ahoi-stil") || "{}")); } catch (e) {}
+const kartenStil = () => auswahl.karte === "auto" ? (dunkel.matches ? "C" : "A") : auswahl.karte;
+const P = () => PALETTEN[kartenStil()];
+function oberflaecheAnwenden() {
+  const c = P(), r = document.documentElement;
+  r.dataset.theme = c.thema;
+  document.getElementById("theme-farbe").setAttribute("content", c.thema === "dunkel" ? "#16212b" : "#f7efe0");
+  r.style.setProperty("--sans", WAHL.schrift[auswahl.schrift][2]);
+  const m = WAHL.marke[auswahl.marke];
+  r.style.setProperty("--marke", m[2] || "var(--sans)");
+  r.style.setProperty("--marke-gewicht", m[3]);
+  r.style.setProperty("--marke-groesse", m[4]);
+}
 function stilAnpassen(stil) {
   const c = P();
   stil.projection = { type: "mercator" };
@@ -293,8 +337,8 @@ function stilAnpassen(stil) {
       l.paint["text-halo-color"] = c.halo;
       l.paint["text-halo-width"] = 1.4;
       l.paint["text-halo-blur"] = 0.5;
-      if (/country/.test(id)) { l.layout["text-transform"] = "uppercase"; l.layout["text-letter-spacing"] = 0.18; }
-      if (/water_name/.test(id)) { l.layout["text-letter-spacing"] = 0.25; }
+      if (/country/.test(id)) { l.layout["text-letter-spacing"] = 0.04; l.layout["text-transform"] = "none"; }
+      if (/water_name/.test(id)) { l.layout["text-letter-spacing"] = 0.08; l.minzoom = Math.max(l.minzoom || 0, 2); }
     }
   }
   return stil;
@@ -549,7 +593,7 @@ document.getElementById("knopf-ich").onclick = () => {
 };
 
 // Dunkelmodus folgt dem iPhone
-dunkel.addEventListener("change", () => { stilLaden(); });
+dunkel.addEventListener("change", () => { if (auswahl.karte === "auto") { oberflaecheAnwenden(); stilLaden(); } });
 
 // ---------- Neue Version automatisch laden ----------
 const VERSION = "__VERSION__";
@@ -574,7 +618,33 @@ async function aufNeueVersionPruefen() {
 document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") aufNeueVersionPruefen(); });
 aufNeueVersionPruefen();
 
+// ---------- Stil-Auswahl ----------
+function stilwahlAufbauen() {
+  document.querySelectorAll(".segmente").forEach(box => {
+    const art = box.dataset.art; box.innerHTML = "";
+    for (const [schluessel, werte] of Object.entries(WAHL[art])) {
+      const b = document.createElement("button");
+      b.innerHTML = `<b>${werte[0]}</b>${werte[1]}`;
+      if (art === "schrift") b.style.fontFamily = werte[2];
+      if (art === "marke") { b.querySelector("b").style.fontFamily = werte[2] || "var(--sans)"; b.querySelector("b").textContent = werte[0] + " Ahoi"; }
+      b.classList.toggle("aktiv", auswahl[art] === schluessel);
+      b.onclick = () => {
+        const vorher = kartenStil();
+        auswahl[art] = schluessel;
+        try { localStorage.setItem("ahoi-stil", JSON.stringify(auswahl)); } catch (e) {}
+        oberflaecheAnwenden(); stilwahlAufbauen(); blattSetzen(blattOffen);
+        if (kartenStil() !== vorher) stilLaden();
+      };
+      box.appendChild(b);
+    }
+  });
+}
+document.getElementById("knopf-stil").onclick = e => { e.stopPropagation(); document.getElementById("stilwahl").classList.toggle("offen"); };
+map.on("click", () => document.getElementById("stilwahl").classList.remove("offen"));
+
 // ---------- Start ----------
+oberflaecheAnwenden();
+stilwahlAufbauen();
 listeAufbauen();
 blattSetzen(false);
 document.fonts && document.fonts.ready.then(() => blattSetzen(blattOffen));
