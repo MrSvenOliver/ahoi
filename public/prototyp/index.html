@@ -149,6 +149,12 @@
   .leiste button svg { width: 25px; height: 25px; }
   .leiste button.aktiv { color: var(--tinte); }
   .leiste .punkt { position: absolute; top: 7px; left: calc(50% + 8px); min-width: 17px; height: 17px; border-radius: 9px; background: #c0582f; color: #fff; font-size: 10px; display: grid; place-items: center; padding: 0 4px; }
+  .profil-knopf { position: relative; }
+  .sprach-marke { position: absolute; right: -5px; bottom: -4px; width: 21px; height: 21px; border-radius: 50%; background: var(--karte-bg); border: 1.5px solid var(--gold); display: grid; place-items: center; font-size: 12px; line-height: 1; }
+  .sprach-flaggen { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: -4px 0 14px; }
+  .sprach-flaggen button { border: 1.5px solid var(--trenner); background: var(--karte-bg); color: var(--text); border-radius: 14px; padding: 8px 4px; font: inherit; font-size: 12px; font-weight: 600; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 2px; }
+  .sprach-flaggen button span { font-size: 26px; line-height: 1.1; }
+  .sprach-flaggen button.aktiv { border-color: var(--tinte); background: var(--tinte); color: var(--papier); }
   .profil-knopf { width: 44px; height: 44px; border-radius: 50%; border: 2px solid var(--gold); display: grid; place-items: center; color: #fff8ea; font-weight: 700; font-size: 14px; background: #7a5a3a; cursor: pointer; padding: 0; }
 
   /* ---------- Seiten (Reisen, Chat, Ideen, Profil) ---------- */
@@ -361,7 +367,7 @@
     <button class="knopf" id="knopf-ich" title="Mein Standort" aria-label="Mein Standort">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="3.5"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="7.5"/></svg>
     </button>
-    <button class="profil-knopf" id="profil-knopf" title="Profil" aria-label="Profil">DU</button>
+    <button class="profil-knopf" id="profil-knopf" title="Profil" aria-label="Profil">DU<span class="sprach-marke" id="sprach-marke"></span></button>
   </div>
 </header>
 
@@ -475,6 +481,7 @@
 <!-- Profil -->
 <section class="seite" id="seite-profil">
   <div class="seite-kopf"><h1>Profil</h1><button class="knopf-leise" data-zurueck="karte">Fertig</button></div>
+  <div class="sprach-flaggen" id="sprache-wahl" role="radiogroup" aria-label="Sprache"></div>
   <div class="profil-oben">
     <div class="profil-bild">DU<span class="kamera">📷</span></div>
     <h3>Du</h3>
@@ -488,9 +495,6 @@
   <h2 id="laender-titel">Länder-Sammlung</h2>
   <div class="kasten"><div class="stempel" id="stempel"></div>
     <p class="hinweis-band" style="margin-top:12px;text-align:left">Länder aus deinen Reisen kommen automatisch dazu. Frühere Länder trägst du über ＋ nach.</p></div>
-  <h2>Sprache</h2>
-  <div class="kasten"><div class="segmente" id="sprache-wahl"></div>
-    <p class="hinweis-band" style="margin-top:10px;text-align:left">Ortsnamen auf der Karte und Übersetzungen im Chat folgen dieser Sprache. Die Texte der App werden mit dem Bau der echten App übersetzt.</p></div>
   <h2>Kartenstil</h2>
   <div class="kasten"><div class="segmente" data-art="karte"></div></div>
   <h2>Familie</h2>
@@ -1388,7 +1392,9 @@ document.getElementById("familie-standort").onclick = e => { e.currentTarget.cla
 // ---------- Sprache ----------
 (() => {
   const box = document.getElementById("sprache-wahl");
-  box.innerHTML = Object.entries(SPRACHEN).map(([k, n]) => `<button data-s="${k}" class="${k === SPRACHE ? "aktiv" : ""}">${n}</button>`).join("");
+  const FLAGGE = { de: "🇩🇪", en: "🇬🇧", sk: "🇸🇰" };
+  box.innerHTML = Object.entries(SPRACHEN).map(([k, n]) => `<button data-s="${k}" role="radio" aria-checked="${k === SPRACHE}" class="${k === SPRACHE ? "aktiv" : ""}"><span>${FLAGGE[k]}</span>${n}</button>`).join("");
+  document.getElementById("sprach-marke").textContent = FLAGGE[SPRACHE];
   box.querySelectorAll("button").forEach(b => b.onclick = () => { try { localStorage.setItem("ahoi-sprache", b.dataset.s); } catch (e) {} location.reload(); });
 })();
 
