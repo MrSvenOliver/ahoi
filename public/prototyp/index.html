@@ -892,11 +892,11 @@ function reisenAufbauen() {
   for (const r of reisen) {
     if (r.monat !== monat) { monat = r.monat; html += `<h2>${monat}</h2>`; }
     const ps = r.wer.map(person);
-    const gesichter = ps.slice(0, 2).map((p, i) => ava(p).replace('class="klein-ava"', `class="klein-ava" style="left:${ps.length > 1 ? i * 20 : 10}px;z-index:${2 - i};`).replace('" style="background', 'background')).join("");
+    const gesichter = ps.slice(0, 2).map((p, i) => `<div class="klein-ava" style="left:${ps.length > 1 ? i * 20 : 10}px;z-index:${2 - i};background:${p.farbe}">${kuerzel(p.name)}</div>`).join("");
     html += `<div class="kasten reise${r.vielleicht ? " vielleicht" : ""}">
       <div class="gesichter">${gesichter}</div>
       <div class="text"><span class="wer">${ps.map(p => p.name).join(" & ")}</span>
-        <span class="ziel">${flagge(r.land)} ${r.ziel}</span>
+        <span class="ziel">${flagge(r.land)}&nbsp;&nbsp;${r.ziel}</span>
         <span class="wann">${r.von}${r.bis ? " – " + r.bis : ""}${r.info ? " · " + r.info : ""}${r.vielleicht ? '<span class="etikett">Vielleicht</span>' : ""}</span></div>
       <div class="art">${r.vielleicht ? "💭" : r.art}</div></div>`;
   }
