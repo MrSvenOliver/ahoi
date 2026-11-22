@@ -3,6 +3,9 @@
 Jede Entscheidung mit Datum. Neue Einträge kommen oben dazu.
 
 ## 22.11.2026
+- Karten-Prototyp gebaut und über GitHub Pages veröffentlicht (Ordner public/, automatisch bei jeder Änderung)
+- Länderfarben: bis Zoom 6 Fläche und Grenzlinie aus Natural Earth 1:50 Mio.; ab Zoom 5–6 übernehmen die OpenStreetMap-Grenzen, Flächen blenden aus; beide Ebenen zeigen jeweils denselben Datensatz
+- Ortsnamen auf der Karte in der App-Sprache (Deutsch/Englisch), sonst Originalname
 - Kartengenauigkeit als feste Regel: nur echte Geodaten, keine nachgezeichneten Formen, Entfernungen geodätisch
 - Kartenform: Globus beim Herauszoomen, flach beim Hineinzoomen
 - Design: Mischung aus modern und Schatzkarte; Abenteuer voll auf der Karte, außerhalb leichte Akzente

@@ -7,6 +7,8 @@ Gebaut wird erst, wenn die Anforderungen vollständig geklärt sind.
 - [x] Anforderungen gesammelt
 - [x] Ablagesystem angelegt
 - [x] Logo erstellt (ChatGPT, Kompass) → ahoi_logo_master.png, App-Icons daraus erzeugt
+- [x] Karten-Prototyp online: https://mrsvenoliver.github.io/ahoi/prototyp/ (Beispieldaten)
+- [ ] Prototyp auf dem iPhone testen und Rückmeldung geben
 - [ ] Letzte offene Fragen klären
 
 ## Phase 1 – Grundgerüst
