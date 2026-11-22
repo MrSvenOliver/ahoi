@@ -1148,7 +1148,7 @@ function familieSetzen(an) {
   seiteZeigen("karte");
   if (an) familieAufbauen();
   pinsSetzen();
-  if (an) { const b = new maplibregl.LngLatBounds(); sichtbareLeute().forEach(p => b.extend([p.lon, p.lat])); map.fitBounds(b, { padding: { top: 120, bottom: window.innerHeight * 0.5, left: 60, right: 60 }, maxZoom: 6, duration: 900 }); }
+  if (an) { const b = new maplibregl.LngLatBounds(); sichtbareLeute().forEach(p => b.extend([p.lon, p.lat])); map.fitBounds(b, { padding: { top: 120, bottom: Math.min(window.innerHeight * 0.62, document.getElementById("familie-blatt").offsetHeight + 40), left: 60, right: 60 }, maxZoom: 6, duration: 900 }); }
 }
 document.getElementById("familie-start").onclick = () => familieSetzen(true);
 document.getElementById("familie-ende").onclick = () => familieSetzen(false);
