@@ -256,6 +256,11 @@
   .stempel { display: grid; grid-template-columns: repeat(auto-fill, minmax(56px, 1fr)); gap: 10px; }
   .stempel div { aspect-ratio: 1; border-radius: 50%; border: 2px dashed var(--gold); display: grid; place-items: center; font-size: 24px; transform: rotate(-8deg); }
   .stempel div:nth-child(even) { transform: rotate(6deg); }
+  .stempel .plus { border-style: solid; border-color: var(--trenner); font-size: 26px; color: var(--text-leise); cursor: pointer; transform: none !important; }
+  .land-zeile { display: flex; align-items: center; justify-content: space-between; padding: 11px 0; border-bottom: 1px solid var(--trenner); font-size: 16px; cursor: pointer; }
+  .land-zeile:last-child { border-bottom: 0; }
+  .land-zeile .haken { width: 26px; height: 26px; border-radius: 50%; border: 2px solid var(--trenner); display: grid; place-items: center; font-size: 14px; color: transparent; }
+  .land-zeile.an .haken { background: #4f8a5b; border-color: #4f8a5b; color: #fff; }
   .abzeichen { display: flex; gap: 8px; flex-wrap: wrap; }
   .abzeichen span { font-size: 13px; font-weight: 600; padding: 6px 10px; border-radius: 12px; background: var(--trenner); }
   .zeile-einst { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 0; flex-wrap: wrap; border-bottom: 1px solid var(--trenner); font-size: 15px; }
@@ -379,6 +384,13 @@
   <button class="knopf-gross" style="width:100%" id="idee-speichern">Teilen</button>
 </section>
 
+<!-- Länder nachtragen -->
+<section class="seite" id="seite-laender">
+  <div class="seite-kopf"><h1>Länder</h1><button class="knopf-leise" data-zurueck="profil">Fertig</button></div>
+  <div class="kasten formular"><label>Land suchen<input id="land-suche" placeholder="z. B. Japan" autocomplete="off"></label></div>
+  <div class="kasten" id="land-liste" style="padding:4px 14px"></div>
+</section>
+
 <!-- Profil -->
 <section class="seite" id="seite-profil">
   <div class="seite-kopf"><h1>Profil</h1><button class="knopf-leise" data-zurueck="karte">Fertig</button></div>
@@ -387,10 +399,9 @@
     <h3>Du</h3>
     <p>„Surfen in Ericeira 🏄“ · Stadt sichtbar</p>
   </div>
-  <h2>Länder-Sammlung · 12</h2>
-  <div class="kasten"><div class="stempel"><div>🇩🇪</div><div>🇪🇸</div><div>🇵🇹</div><div>🇸🇰</div><div>🇮🇹</div><div>🇫🇷</div><div>🇹🇭</div><div>🇻🇳</div><div>🇮🇩</div><div>🇲🇽</div><div>🇬🇷</div><div>🇭🇷</div></div></div>
-  <h2>Abzeichen</h2>
-  <div class="kasten"><div class="abzeichen"><span>🌍 3 Kontinente</span><span>🤝 5 Treffen</span><span>✈️ 20 Flüge</span><span>🏝️ Inselhüpfer</span></div></div>
+  <h2 id="laender-titel">Länder-Sammlung</h2>
+  <div class="kasten"><div class="stempel" id="stempel"></div>
+    <p class="hinweis-band" style="margin-top:12px;text-align:left">Länder aus deinen Reisen kommen automatisch dazu. Frühere Länder trägst du über ＋ nach.</p></div>
   <h2>Kartenstil</h2>
   <div class="kasten"><div class="segmente" data-art="karte"></div></div>
   <h2>Mitteilungen</h2>
@@ -882,7 +893,7 @@ function stilwahlAufbauen() {
   });
 }
 // ---------- Bereiche wechseln ----------
-const seiten = ["reisen", "reise-neu", "chat", "ideen", "idee-neu", "profil"];
+const seiten = ["reisen", "reise-neu", "chat", "ideen", "idee-neu", "profil", "laender"];
 function seiteZeigen(name) {
   for (const s of seiten) document.getElementById("seite-" + s).classList.toggle("offen", s === name);
   document.querySelectorAll("#leiste button").forEach(b => b.setAttribute("aria-current", b.dataset.seite === name ? "page" : "false"));
@@ -1046,6 +1057,31 @@ document.querySelectorAll("#sicht-wahl button").forEach(b => b.onclick = () => {
   d.querySelectorAll(".chips button").forEach(x => x.onclick = () => x.classList.toggle("aktiv"));
 });
 document.getElementById("idee-speichern").onclick = () => { hinweis("Teilen kommt in Phase 5"); seiteZeigen("ideen"); };
+// ---------- Länder-Sammlung ----------
+let besucht = ["DE", "ES", "PT", "SK", "IT", "FR", "TH", "VN", "ID", "MX", "GR", "HR"];
+try { const g = JSON.parse(localStorage.getItem("ahoi-laender") || "null"); if (Array.isArray(g)) besucht = g; } catch (e) {}
+const landName = cc => { try { return new Intl.DisplayNames(["de"], { type: "region" }).of(cc); } catch (e) { return cc; } };
+function stempelAufbauen() {
+  document.getElementById("laender-titel").textContent = `Länder-Sammlung · ${besucht.length}`;
+  document.getElementById("stempel").innerHTML = besucht.map(cc => `<div title="${landName(cc)}">${flagge(cc)}</div>`).join("") + '<div class="plus" id="land-plus" role="button" aria-label="Land hinzufügen">＋</div>';
+  document.getElementById("land-plus").onclick = () => { seiteZeigen("laender"); laenderListe(""); };
+}
+function laenderListe(suche) {
+  if (!laender) return hinweis("Einen Moment, Länder werden geladen …");
+  const alle = [...new Set(laender.features.map(f => f.properties.iso).filter(c => /^[A-Z]{2}$/.test(c)))]
+    .map(cc => [cc, landName(cc)]).sort((a, b) => a[1].localeCompare(b[1], "de"))
+    .filter(([cc, n]) => !suche || n.toLowerCase().includes(suche.toLowerCase()));
+  const box = document.getElementById("land-liste");
+  box.innerHTML = alle.map(([cc, n]) => `<div class="land-zeile${besucht.includes(cc) ? " an" : ""}" data-cc="${cc}"><span>${flagge(cc)}&nbsp;&nbsp;${n}</span><span class="haken">✓</span></div>`).join("");
+  box.querySelectorAll(".land-zeile").forEach(z => z.onclick = () => {
+    const cc = z.dataset.cc, i = besucht.indexOf(cc);
+    if (i >= 0) besucht.splice(i, 1); else besucht.push(cc);
+    try { localStorage.setItem("ahoi-laender", JSON.stringify(besucht)); } catch (e) {}
+    z.classList.toggle("an"); stempelAufbauen();
+  });
+}
+document.getElementById("land-suche").addEventListener("input", e => laenderListe(e.target.value));
+stempelAufbauen();
 reisenAufbauen(); chatAufbauen(); ideenAufbauen();
 
 

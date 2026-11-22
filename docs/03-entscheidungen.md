@@ -3,6 +3,8 @@
 Jede Entscheidung mit Datum. Neue Einträge kommen oben dazu.
 
 ## 22.11.2026
+- Abzeichen gestrichen; Länder-Sammlung bleibt, mit Nachtragen früherer Länder über ＋
+- Rundum-Prüfung (App-Store-Maßstab), direkt behoben: Fingerziele mind. 44 pt, Eingabefelder 16 px (kein Hineinzoomen), Chat-Texte werden nie als HTML eingefügt (Sicherheit), VoiceOver-Beschriftung für Pins/Fenster/Leiste, Fokusrahmen, reduzierte Bewegung, kein Gummiband-Scrollen, Leiste verschwindet beim Tippen im Chat, Abreise nicht vor Ankunft, Profil-Auswahlen nicht mehr gequetscht, Desktop-Lesebreite, Offline-Start (Service Worker), Manifest vervollständigt, übrig gebliebene Kartenebene entfernt, Startansicht etwas näher und südlicher
 - Ursache des Balkens unten gefunden: WebKit-Fehler 301108 (iOS 26, durchsichtige Statusleiste + viewport-fit=cover; App wird eine Statusleisten-Höhe zu kurz gebaut, wenn das Dokument nicht höher als der Bildschirm ist). Lösung: in der installierten App html/body auf volle Bildschirmhöhe (100vh bzw. min(100lvh, 100% + Statusleiste)). Alle vorherigen Behelfe entfernt.
 - Reisen nur mit Ort und Zeitraum (keine Flug-/Zugangaben, keine Flugnummer, kein Screenshot)
 - Gestrichelte Paar-Linie auf der Weltkarte entfernt; Entfernungen nur in „Wer ist wo“

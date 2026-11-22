@@ -74,11 +74,11 @@ Gesammelte Wünsche und Entscheidungen von Sven. Gebaut wird erst, wenn die Anfo
 - Öffentliches Repository, Hosting kostenlos über GitHub Pages
 
 ## Gadgets
-- Länder-Sammlung (Stempel im Reisepass-Look)
+- Länder-Sammlung (Stempel): Länder aus eingetragenen Reisen kommen automatisch dazu, frühere Länder trägt man über ＋ nach (Suchliste)
+- Keine Abzeichen
 - Ortszeit der Freunde
 - Countdown zum Treffen
-- Abzeichen
-- Status-Satz am Pin
+- Status-Satz
 
 ## Netzwerk und Einladungen
 - Einladungen: Mitglieder schlagen vor, Sven gibt frei
