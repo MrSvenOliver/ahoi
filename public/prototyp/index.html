@@ -123,6 +123,109 @@
   .segmente button { border: 1px solid var(--glas-rand); background: transparent; color: var(--text); border-radius: 12px; padding: 8px 6px; font: inherit; font-size: 13px; line-height: 1.2; cursor: pointer; }
   .segmente button b { display: block; font-size: 15px; }
   .segmente button.aktiv { background: var(--tinte); color: var(--papier); border-color: var(--tinte); }
+  /* ---------- Leiste unten ---------- */
+  :root { --leiste-h: calc(62px + env(safe-area-inset-bottom)); --flaeche: #f8f3ea; --karte-bg: #fffdf8; --trenner: rgba(90, 64, 40, 0.12); }
+  :root[data-theme="dunkel"] { --flaeche: #131c25; --karte-bg: #1c2733; --trenner: rgba(227, 196, 127, 0.12); }
+  .leiste { position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; height: var(--leiste-h); padding-bottom: env(safe-area-inset-bottom); display: grid; grid-template-columns: repeat(4, 1fr); background: var(--glas); border-top: 1px solid var(--glas-rand); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+  .leiste button { border: 0; background: transparent; color: var(--text-leise); font: inherit; font-size: 11px; font-weight: 600; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; cursor: pointer; position: relative; }
+  .leiste button svg { width: 25px; height: 25px; }
+  .leiste button.aktiv { color: var(--tinte); }
+  .leiste .punkt { position: absolute; top: 7px; left: calc(50% + 8px); min-width: 17px; height: 17px; border-radius: 9px; background: #c0582f; color: #fff; font-size: 10px; display: grid; place-items: center; padding: 0 4px; }
+  .profil-knopf { width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--gold); display: grid; place-items: center; color: #fff8ea; font-weight: 700; font-size: 14px; background: #7a5a3a; cursor: pointer; padding: 0; }
+
+  /* ---------- Seiten (Reisen, Chat, Ideen, Profil) ---------- */
+  .seite { position: fixed; left: 0; right: 0; top: 0; bottom: var(--leiste-h); z-index: 35; background: var(--flaeche); overflow-y: auto; -webkit-overflow-scrolling: touch; display: none; padding: calc(env(safe-area-inset-top) + 14px) 16px 24px; }
+  .seite.offen { display: block; animation: einblenden 0.22s ease; }
+  @keyframes einblenden { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  .seite-kopf { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+  .seite-kopf h1 { margin: 0; font-size: 30px; font-weight: 800; letter-spacing: -0.6px; }
+  .seite h2 { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: var(--text-leise); margin: 22px 4px 8px; }
+  .kasten { background: var(--karte-bg); border: 1px solid var(--trenner); border-radius: 18px; padding: 14px; margin-bottom: 10px; }
+  .knopf-gross { border: 0; border-radius: 14px; padding: 12px 16px; background: var(--tinte); color: var(--papier); font: inherit; font-weight: 700; font-size: 15px; cursor: pointer; }
+  .knopf-leise { border: 1px solid var(--trenner); border-radius: 12px; padding: 8px 12px; background: transparent; color: var(--text); font: inherit; font-weight: 600; font-size: 13px; cursor: pointer; }
+  .klein-ava { width: 36px; height: 36px; border-radius: 50%; border: 2px solid var(--gold); display: grid; place-items: center; color: #fff8ea; font-weight: 700; font-size: 12px; flex: none; }
+  .hinweis-band { font-size: 12px; color: var(--text-leise); text-align: center; margin: 18px 0 0; }
+
+  /* Reisen */
+  .treffer { background: linear-gradient(135deg, #c0582f, #b8913f); color: #fff8ea; border: 0; }
+  .treffer b { display: block; font-size: 16px; margin-bottom: 2px; }
+  .treffer span { font-size: 13px; opacity: 0.92; }
+  .reise { display: flex; gap: 12px; align-items: center; }
+  .reise .text { flex: 1; min-width: 0; }
+  .reise .text b { display: block; font-size: 15px; }
+  .reise .text span { display: block; font-size: 13px; color: var(--text-leise); }
+  .reise .art { font-size: 18px; }
+  .reise.vielleicht { border-style: dashed; opacity: 0.85; }
+  .etikett { display: inline-block; font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 8px; background: var(--trenner); color: var(--text-leise); margin-left: 6px; vertical-align: 1px; }
+  .wahlen { display: grid; gap: 10px; }
+  .wahl { display: flex; gap: 12px; align-items: center; text-align: left; width: 100%; border: 1px solid var(--trenner); background: var(--karte-bg); color: var(--text); border-radius: 16px; padding: 14px; font: inherit; cursor: pointer; }
+  .wahl .ikon { width: 42px; height: 42px; border-radius: 12px; background: var(--trenner); display: grid; place-items: center; font-size: 20px; flex: none; }
+  .wahl b { display: block; font-size: 15px; }
+  .wahl span { font-size: 13px; color: var(--text-leise); }
+
+  /* Chat */
+  #seite-chat { display: none; padding-bottom: 0; }
+  #seite-chat.offen { display: flex; flex-direction: column; }
+  .verlauf { flex: 1; overflow-y: auto; padding: 4px 0 12px; }
+  .msg { display: flex; gap: 8px; margin: 10px 0; align-items: flex-end; }
+  .msg.ich { flex-direction: row-reverse; }
+  .blase { max-width: 76%; background: var(--karte-bg); border: 1px solid var(--trenner); border-radius: 18px 18px 18px 6px; padding: 9px 12px; font-size: 15px; line-height: 1.35; position: relative; }
+  .msg.ich .blase { background: var(--tinte); color: var(--papier); border-color: transparent; border-radius: 18px 18px 6px 18px; }
+  .blase small { display: block; font-size: 12px; font-weight: 700; color: var(--text-leise); margin-bottom: 2px; }
+  .erwaehnung { font-weight: 700; color: #c0582f; }
+  .msg.ich .erwaehnung { color: #ffd9a8; }
+  .reaktionen { position: absolute; bottom: -12px; right: 8px; background: var(--karte-bg); border: 1px solid var(--trenner); border-radius: 12px; padding: 1px 6px; font-size: 12px; color: var(--text); }
+  .system { text-align: center; font-size: 12px; color: var(--text-leise); margin: 14px 0; }
+  .system b { color: var(--text); }
+  .sprache { display: flex; align-items: center; gap: 8px; min-width: 170px; }
+  .welle { flex: 1; height: 22px; background: repeating-linear-gradient(90deg, currentColor 0 2px, transparent 2px 5px); -webkit-mask: linear-gradient(180deg, transparent 20%, #000 20% 80%, transparent 80%); opacity: 0.6; border-radius: 2px; }
+  .ortkarte { display: flex; gap: 10px; align-items: center; }
+  .ortkarte .ikon { width: 40px; height: 40px; border-radius: 10px; background: var(--trenner); display: grid; place-items: center; font-size: 18px; }
+  .eingabe { display: flex; gap: 8px; align-items: center; padding: 10px 0 12px; border-top: 1px solid var(--trenner); background: var(--flaeche); }
+  .eingabe input { flex: 1; border: 1px solid var(--trenner); background: var(--karte-bg); color: var(--text); border-radius: 22px; padding: 11px 16px; font: inherit; font-size: 15px; outline: none; }
+  .runder { width: 42px; height: 42px; border-radius: 50%; border: 0; background: var(--trenner); color: var(--tinte); font-size: 20px; display: grid; place-items: center; cursor: pointer; flex: none; }
+  .runder.senden { background: var(--tinte); color: var(--papier); }
+
+  /* Ideen */
+  .chips { display: flex; gap: 8px; overflow-x: auto; padding: 2px 0 6px; margin: 0 -16px; padding-left: 16px; scrollbar-width: none; }
+  .chips button { flex: none; border: 1px solid var(--trenner); background: var(--karte-bg); color: var(--text); border-radius: 18px; padding: 7px 13px; font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; }
+  .chips button.aktiv { background: var(--tinte); color: var(--papier); border-color: var(--tinte); }
+  .idee { padding: 0; overflow: hidden; }
+  .idee .bild { height: 132px; display: grid; place-items: center; font-size: 40px; position: relative; }
+  .idee .bild .flag { position: absolute; left: 12px; top: 12px; background: rgba(255,255,255,0.85); border-radius: 10px; padding: 3px 8px; font-size: 13px; font-weight: 700; color: #3b3128; }
+  .idee .bild .herzen { position: absolute; right: 12px; top: 12px; background: rgba(255,255,255,0.85); border-radius: 12px; padding: 3px 9px; font-size: 13px; font-weight: 700; color: #c0582f; border: 0; cursor: pointer; }
+  .idee .inhalt { padding: 12px 14px 14px; }
+  .idee .inhalt b { font-size: 16px; display: block; }
+  .idee .inhalt .ort { font-size: 13px; color: var(--text-leise); }
+  .preis { display: flex; justify-content: space-between; align-items: center; margin: 10px 0; padding: 10px 12px; border-radius: 12px; background: var(--trenner); font-size: 13px; }
+  .preis b { display: inline; font-size: 15px; }
+  .zaehler { display: flex; align-items: center; gap: 8px; }
+  .zaehler button { width: 26px; height: 26px; border-radius: 50%; border: 0; background: var(--karte-bg); color: var(--text); font-weight: 700; cursor: pointer; }
+  .dabei { font-size: 13px; color: var(--text-leise); margin-bottom: 10px; }
+  .idee .aktionen { display: flex; gap: 8px; flex-wrap: wrap; }
+
+  /* Profil */
+  .profil-oben { text-align: center; padding: 8px 0 4px; }
+  .profil-bild { width: 104px; height: 104px; border-radius: 50%; border: 3px solid var(--gold); margin: 0 auto 10px; display: grid; place-items: center; font-size: 34px; font-weight: 800; color: #fff8ea; background: #7a5a3a; position: relative; }
+  .profil-bild .kamera { position: absolute; right: -2px; bottom: 2px; width: 32px; height: 32px; border-radius: 50%; background: var(--tinte); color: var(--papier); display: grid; place-items: center; font-size: 15px; border: 2px solid var(--flaeche); }
+  .profil-oben h3 { margin: 0; font-size: 24px; font-weight: 800; }
+  .profil-oben p { margin: 4px 0 0; color: var(--text-leise); font-size: 14px; }
+  .stempel { display: grid; grid-template-columns: repeat(auto-fill, minmax(56px, 1fr)); gap: 10px; }
+  .stempel div { aspect-ratio: 1; border-radius: 50%; border: 2px dashed var(--gold); display: grid; place-items: center; font-size: 24px; transform: rotate(-8deg); }
+  .stempel div:nth-child(even) { transform: rotate(6deg); }
+  .abzeichen { display: flex; gap: 8px; flex-wrap: wrap; }
+  .abzeichen span { font-size: 13px; font-weight: 600; padding: 6px 10px; border-radius: 12px; background: var(--trenner); }
+  .zeile-einst { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--trenner); font-size: 15px; }
+  .zeile-einst:last-child { border-bottom: 0; }
+  .zeile-einst small { display: block; color: var(--text-leise); font-size: 12px; }
+  .schalter { width: 50px; height: 30px; border-radius: 15px; background: var(--trenner); position: relative; border: 0; cursor: pointer; flex: none; transition: background 0.2s; }
+  .schalter::after { content: ""; position: absolute; left: 3px; top: 3px; width: 24px; height: 24px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.25); transition: transform 0.2s; }
+  .schalter.an { background: #4f8a5b; }
+  .schalter.an::after { transform: translateX(20px); }
+  .segmente.klein { grid-template-columns: repeat(3, 1fr); }
+
+  /* Unteres Blatt sitzt über der Leiste */
+  .blatt { bottom: var(--leiste-h) !important; padding-bottom: 0 !important; }
   .hinweis { position: fixed; left: 50%; top: calc(env(safe-area-inset-top) + 70px); transform: translate(-50%, -10px); z-index: 20; background: var(--tinte); color: var(--papier); padding: 8px 14px; border-radius: 999px; font-size: 13px; opacity: 0; transition: opacity 0.25s, transform 0.25s; pointer-events: none; white-space: nowrap; }
   .hinweis.zeigen { opacity: 1; transform: translate(-50%, 0); }
 
@@ -148,18 +251,12 @@
     <button class="knopf" id="knopf-welt" title="Ganze Welt" aria-label="Ganze Welt">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.8 3 2.8 15 0 18M12 3c-2.8 3-2.8 15 0 18"/></svg>
     </button>
-    <button class="knopf" id="knopf-stil" title="Kartenstil" aria-label="Kartenstil">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 3a9 9 0 1 0 0 18c1.1 0 1.6-.8 1.6-1.6 0-.9-.6-1.3-.6-2.1 0-.9.7-1.5 1.6-1.5H17a4 4 0 0 0 4-4C21 6.8 17 3 12 3Z"/><circle cx="7.5" cy="11" r="1.2"/><circle cx="10" cy="7" r="1.2"/><circle cx="15" cy="7.5" r="1.2"/></svg>
-    </button>
     <button class="knopf" id="knopf-ich" title="Mein Standort" aria-label="Mein Standort">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="3.5"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="7.5"/></svg>
     </button>
+    <button class="profil-knopf" id="profil-knopf" title="Profil" aria-label="Profil">DU</button>
   </div>
 </header>
-
-<div class="stilwahl" id="stilwahl">
-  <h4>Kartenstil</h4><div class="segmente" data-art="karte"></div>
-</div>
 
 <div class="info" id="info"><button class="knopf zu" id="info-zu" aria-label="Schließen">✕</button><h3></h3><p></p></div>
 
@@ -170,6 +267,83 @@
     <small id="zusammenfassung"></small>
   </div>
   <ul class="liste" id="liste"></ul>
+</section>
+
+<!-- Leiste unten -->
+<nav class="leiste" id="leiste">
+  <button data-seite="karte" class="aktiv"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M9 4 3 6.5v13.5l6-2.5 6 2.5 6-2.5V4l-6 2.5L9 4Z"/><path d="M9 4v13.5M15 6.5V20"/></svg>Karte</button>
+  <button data-seite="reisen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10.5 13.5 3 11l1.5-1.5 7.5 1 4-4.5a2 2 0 0 1 3 3l-4.5 4 1 7.5-1.5 1.5-2.5-7.5-3 3v2.5L7 22l-1-3-3-1 1.5-1.5H7l3.5-3Z"/></svg>Reisen</button>
+  <button data-seite="chat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4V5Z"/></svg>Chat<span class="punkt">3</span></button>
+  <button data-seite="ideen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M3 11 12 4l9 7v9h-6v-6H9v6H3v-9Z"/></svg>Ideen</button>
+</nav>
+
+<!-- Reisen -->
+<section class="seite" id="seite-reisen">
+  <div class="seite-kopf"><h1>Reisen</h1><button class="knopf-gross" id="reise-neu">+ Reise</button></div>
+  <div class="kasten treffer"><b>🧭 Treffer: Lissabon</b><span>Du, Lea &amp; Nico seid vom 10. bis 15.1. gleichzeitig dort.</span></div>
+  <div id="reise-liste"></div>
+  <p class="hinweis-band">Beispieldaten · Eintragen funktioniert ab Phase 3</p>
+</section>
+
+<!-- Neue Reise: Auswahl -->
+<section class="seite" id="seite-reise-neu">
+  <div class="seite-kopf"><h1>Reise eintragen</h1><button class="knopf-leise" data-zurueck="reisen">Abbrechen</button></div>
+  <div class="wahlen">
+    <button class="wahl"><div class="ikon">📅</div><div><b>Zeitraum wählen</b><span>Ort suchen, An- und Abreise im Kalender</span></div></button>
+    <button class="wahl"><div class="ikon">✈️</div><div><b>Flugnummer</b><span>z. B. „TP 1450“ + Datum, der Rest kommt automatisch</span></div></button>
+    <button class="wahl"><div class="ikon">📸</div><div><b>Screenshot oder Ticketfoto</b><span>Airbnb-Buchung oder Bordkarte anhängen</span></div></button>
+  </div>
+  <div class="kasten" style="margin-top:14px"><div class="zeile-einst"><div>Nur ein Vielleicht<small>Wird gestrichelt angezeigt</small></div><button class="schalter"></button></div></div>
+</section>
+
+<!-- Chat -->
+<section class="seite" id="seite-chat">
+  <div class="seite-kopf"><h1>Chat</h1><span style="font-size:13px;color:var(--text-leise)">8 Mitglieder</span></div>
+  <div class="verlauf" id="verlauf"></div>
+  <div class="eingabe">
+    <button class="runder" title="Foto, Ort oder Unterkunft teilen">＋</button>
+    <input id="chat-text" placeholder="Nachricht … (@ zum Erwähnen)" autocomplete="off">
+    <button class="runder senden" id="chat-senden" title="Senden">↑</button>
+  </div>
+</section>
+
+<!-- Ideen -->
+<section class="seite" id="seite-ideen">
+  <div class="seite-kopf"><h1>Ideen</h1><button class="knopf-gross">+ Teilen</button></div>
+  <div class="chips" id="ideen-filter"></div>
+  <div id="ideen-liste"></div>
+  <p class="hinweis-band">Beispieldaten</p>
+</section>
+
+<!-- Profil -->
+<section class="seite" id="seite-profil">
+  <div class="seite-kopf"><h1>Profil</h1><button class="knopf-leise" data-zurueck="karte">Fertig</button></div>
+  <div class="profil-oben">
+    <div class="profil-bild">DU<span class="kamera">📷</span></div>
+    <h3>Du</h3>
+    <p>„Surfen in Ericeira 🏄“ · Stadt sichtbar</p>
+  </div>
+  <h2>Länder-Sammlung · 12</h2>
+  <div class="kasten"><div class="stempel"><div>🇩🇪</div><div>🇪🇸</div><div>🇵🇹</div><div>🇸🇰</div><div>🇮🇹</div><div>🇫🇷</div><div>🇹🇭</div><div>🇻🇳</div><div>🇮🇩</div><div>🇲🇽</div><div>🇬🇷</div><div>🇭🇷</div></div></div>
+  <h2>Abzeichen</h2>
+  <div class="kasten"><div class="abzeichen"><span>🌍 3 Kontinente</span><span>🤝 5 Treffen</span><span>✈️ 20 Flüge</span><span>🏝️ Inselhüpfer</span></div></div>
+  <h2>Kartenstil</h2>
+  <div class="kasten"><div class="segmente" data-art="karte"></div></div>
+  <h2>Mitteilungen</h2>
+  <div class="kasten" id="mitteilungen"></div>
+  <h2>Privatsphäre</h2>
+  <div class="kasten">
+    <div class="zeile-einst"><div>Was andere sehen<small>Standort-Genauigkeit</small></div><div class="segmente klein" style="width:190px"><button>Land</button><button class="aktiv">Stadt</button><button>Genau</button></div></div>
+    <div class="zeile-einst"><div>Treffer-Alarm ab<small>Wann du benachrichtigt wirst</small></div><div class="segmente klein" style="width:190px"><button class="aktiv">Stadt</button><button>Region</button><button>Land</button></div></div>
+    <div class="zeile-einst"><div>Geistermodus<small>Standort vorübergehend verbergen</small></div><button class="schalter"></button></div>
+  </div>
+  <h2>Mehr</h2>
+  <div class="kasten">
+    <div class="zeile-einst"><div>Paar verknüpfen<small>Der andere muss bestätigen</small></div><button class="knopf-leise">Anfragen</button></div>
+    <div class="zeile-einst"><div>Jemanden vorschlagen<small>Sven gibt die Einladung frei</small></div><button class="knopf-leise">Vorschlagen</button></div>
+    <div class="zeile-einst"><div>Feedback an Sven<small>Fehler oder Idee, gern mit Screenshot</small></div><button class="knopf-leise">Schreiben</button></div>
+  </div>
+  <p class="hinweis-band">Beispieldaten · Einstellungen werden ab Phase 2 gespeichert (Kartenstil schon jetzt)</p>
 </section>
 
 <div class="hinweis" id="hinweis"></div>
@@ -556,7 +730,7 @@ function blattSetzen(offen) {
   blattOffen = offen && true;
   blatt.classList.toggle("offen", blattOffen);
   blattPos(blattOffen ? 0 : blattZuY());
-  document.documentElement.style.setProperty("--blatt-sichtbar", (blatt.offsetHeight - blattZuY()) + "px");
+  document.documentElement.style.setProperty("--blatt-sichtbar", (blatt.offsetHeight - blattZuY() + document.getElementById("leiste").offsetHeight) + "px");
 }
 let zug = null;
 blattKopf.addEventListener("pointerdown", e => {
@@ -644,7 +818,7 @@ aufNeueVersionPruefen();
 
 // ---------- Stil-Auswahl ----------
 function stilwahlAufbauen() {
-  document.querySelectorAll(".segmente").forEach(box => {
+  document.querySelectorAll(".segmente[data-art]").forEach(box => {
     const art = box.dataset.art; box.innerHTML = "";
     for (const [schluessel, werte] of Object.entries(WAHL[art])) {
       const b = document.createElement("button");
@@ -663,8 +837,113 @@ function stilwahlAufbauen() {
     }
   });
 }
-document.getElementById("knopf-stil").onclick = e => { e.stopPropagation(); document.getElementById("stilwahl").classList.toggle("offen"); };
-map.on("click", () => document.getElementById("stilwahl").classList.remove("offen"));
+// ---------- Bereiche wechseln ----------
+const seiten = ["reisen", "reise-neu", "chat", "ideen", "profil"];
+function seiteZeigen(name) {
+  for (const s of seiten) document.getElementById("seite-" + s).classList.toggle("offen", s === name);
+  document.querySelectorAll("#leiste button").forEach(b => b.classList.toggle("aktiv", b.dataset.seite === name || (name === "reise-neu" && b.dataset.seite === "reisen")));
+  document.getElementById("info").classList.remove("offen");
+  if (name === "chat") { document.querySelector('#leiste [data-seite="chat"] .punkt')?.remove(); const v = document.getElementById("verlauf"); v.scrollTop = v.scrollHeight; }
+  if (name === "karte") { blattSetzen(false); map.resize(); }
+}
+document.querySelectorAll("#leiste button").forEach(b => b.onclick = () => seiteZeigen(b.dataset.seite));
+document.querySelectorAll("[data-zurueck]").forEach(b => b.onclick = () => seiteZeigen(b.dataset.zurueck));
+document.getElementById("profil-knopf").onclick = () => seiteZeigen("profil");
+document.getElementById("reise-neu").onclick = () => seiteZeigen("reise-neu");
+document.querySelectorAll(".wahl").forEach(b => b.onclick = () => hinweis("Kommt in Phase 3"));
+document.querySelectorAll(".schalter").forEach(b => b.onclick = () => b.classList.toggle("an"));
+document.querySelectorAll(".segmente.klein").forEach(box => box.querySelectorAll("button").forEach(b => b.onclick = () => { box.querySelectorAll("button").forEach(x => x.classList.remove("aktiv")); b.classList.add("aktiv"); }));
+
+const person = id => leute.find(p => p.id === id);
+const ava = (p, gross) => `<div class="klein-ava" style="background:${p.farbe}${gross ? ";width:42px;height:42px" : ""}">${kuerzel(p.name)}</div>`;
+
+// ---------- Reisen ----------
+const reisen = [
+  { monat: "Dezember 2026", wer: ["alex"], ziel: "Marrakesch", land: "MA", von: "3.12.", bis: "14.12.", art: "✈️", info: "Flug TP 1450" },
+  { monat: "Dezember 2026", wer: ["sam"], ziel: "Wien", land: "AT", von: "10.12.", bis: "12.12.", art: "🚆", info: "Zug" },
+  { monat: "Dezember 2026", wer: ["mia"], ziel: "Oaxaca", land: "MX", von: "20.12.", bis: "5.1.", art: "🏠", info: "Airbnb" },
+  { monat: "Januar 2027", wer: ["du"], ziel: "Lissabon", land: "PT", von: "10.1.", bis: "15.1.", art: "✈️", info: "Flug" },
+  { monat: "Januar 2027", wer: ["lea", "nico"], ziel: "Lissabon", land: "PT", von: "8.1.", bis: "20.1.", art: "🏠", info: "Airbnb" },
+  { monat: "Februar 2027", wer: ["jonas", "ben"], ziel: "Vietnam", land: "VN", von: "Februar", bis: "", art: "🤔", info: "", vielleicht: true },
+];
+function reisenAufbauen() {
+  let html = "", monat = "";
+  for (const r of reisen) {
+    if (r.monat !== monat) { monat = r.monat; html += `<h2>${monat}</h2>`; }
+    const ps = r.wer.map(person);
+    html += `<div class="kasten reise${r.vielleicht ? " vielleicht" : ""}">
+      <div style="display:flex">${ps.map((p, i) => `<div style="margin-left:${i ? -12 : 0}px">${ava(p)}</div>`).join("")}</div>
+      <div class="text"><b>${ps.map(p => p.name).join(" & ")} → ${flagge(r.land)} ${r.ziel}${r.vielleicht ? '<span class="etikett">Vielleicht</span>' : ""}</b>
+      <span>${r.von}${r.bis ? " – " + r.bis : ""}${r.info ? " · " + r.info : ""}</span></div>
+      <div class="art">${r.art}</div></div>`;
+  }
+  document.getElementById("reise-liste").innerHTML = html;
+}
+
+// ---------- Chat ----------
+const nachrichten = [
+  { system: "<b>Lea</b> hat eine Reise eingetragen: Lissabon, 8.–20.1." },
+  { von: "lea", text: "Wer ist im Januar noch in Portugal? 🇵🇹", reaktion: "👍 2" },
+  { von: "alex", text: "Ich bin bis Mitte Dezember in Marrakesch, danach wieder Lissabon!" },
+  { von: "lea", ort: "Lissabon · Alfama", text: "Hier haben wir unser Airbnb" },
+  { system: "🧭 Treffer: <b>Du</b>, <b>Lea</b> & <b>Nico</b> seid vom 10. bis 15.1. in Lissabon" },
+  { von: "nico", text: "@Du perfekt, dann gehen wir zusammen surfen 🏄", reaktion: "❤️ 3" },
+  { von: "mia", sprache: "0:14" },
+];
+function textMitErwaehnung(t) { return t.replace(/@(\p{L}+)/gu, '<span class="erwaehnung">@$1</span>'); }
+function chatAufbauen() {
+  document.getElementById("verlauf").innerHTML = nachrichten.map(n => {
+    if (n.system) return `<div class="system">${n.system}</div>`;
+    const p = person(n.von), ich = n.von === "du";
+    let inhalt = n.text ? textMitErwaehnung(n.text) : "";
+    if (n.ort) inhalt = `<div class="ortkarte"><div class="ikon">📍</div><div><b>${n.ort}</b><br><span style="font-size:13px;opacity:.8">${n.text}</span></div></div>`;
+    if (n.sprache) inhalt = `<div class="sprache">▶︎<div class="welle"></div>${n.sprache}</div>`;
+    return `<div class="msg${ich ? " ich" : ""}">${ich ? "" : ava(p)}<div class="blase">${ich ? "" : `<small>${p.name}</small>`}${inhalt}${n.reaktion ? `<span class="reaktionen">${n.reaktion}</span>` : ""}</div></div>`;
+  }).join("");
+}
+function senden() {
+  const feld = document.getElementById("chat-text"), t = feld.value.trim();
+  if (!t) return;
+  nachrichten.push({ von: "du", text: t }); feld.value = "";
+  chatAufbauen(); const v = document.getElementById("verlauf"); v.scrollTop = v.scrollHeight;
+}
+document.getElementById("chat-senden").onclick = senden;
+document.getElementById("chat-text").addEventListener("keydown", e => { if (e.key === "Enter") senden(); });
+
+// ---------- Ideen ----------
+const ideen = [
+  { titel: "Altbau mit Dachterrasse", ort: "Lissabon, Alfama", land: "PT", preis: 96, personen: 4, herzen: 4, dabei: ["lea", "nico"], wann: "Januar", farbe: "linear-gradient(135deg,#e9c99a,#c0582f)", ikon: "🏛️" },
+  { titel: "Surfhaus am Strand", ort: "Ericeira", land: "PT", preis: 140, personen: 6, herzen: 2, dabei: ["alex"], wann: "flexibel", farbe: "linear-gradient(135deg,#bcd6d8,#3f6b8a)", ikon: "🏄" },
+  { titel: "Villa mit Pool", ort: "Canggu, Bali", land: "ID", preis: 180, personen: 8, herzen: 5, dabei: ["lea", "nico", "jonas"], wann: "März", farbe: "linear-gradient(135deg,#cfe0b8,#6f8a3a)", ikon: "🌴" },
+  { titel: "Haus im Grünen", ort: "Chiang Mai", land: "TH", preis: 55, personen: 4, herzen: 1, dabei: ["ben"], wann: "flexibel", farbe: "linear-gradient(135deg,#f0dca8,#b98a2e)", ikon: "🛖" },
+];
+let ideenFilter = "alle";
+function ideenAufbauen() {
+  const laender = ["alle", ...new Set(ideen.map(i => i.land))];
+  document.getElementById("ideen-filter").innerHTML = laender.map(l => `<button data-l="${l}" class="${l === ideenFilter ? "aktiv" : ""}">${l === "alle" ? "Alle" : flagge(l) + " " + new Intl.DisplayNames(["de"], { type: "region" }).of(l)}</button>`).join("");
+  document.querySelectorAll("#ideen-filter button").forEach(b => b.onclick = () => { ideenFilter = b.dataset.l; ideenAufbauen(); });
+  document.getElementById("ideen-liste").innerHTML = ideen.map((i, n) => (ideenFilter !== "alle" && i.land !== ideenFilter) ? "" : `
+    <div class="kasten idee">
+      <div class="bild" style="background:${i.farbe}"><span class="flag">${flagge(i.land)} ${i.ort.split(",")[0]}</span><button class="herzen" data-n="${n}">❤️ ${i.herzen}</button>${i.ikon}</div>
+      <div class="inhalt">
+        <b>${i.titel}</b><span class="ort">${i.ort} · ${i.wann}</span>
+        <div class="preis"><span><b>${i.preis} €</b> / Nacht</span>
+          <span class="zaehler"><button data-n="${n}" data-d="-1">−</button>${i.personen} Pers.<button data-n="${n}" data-d="1">+</button></span>
+          <span><b>${Math.round(i.preis / i.personen)} €</b> p. P.</span></div>
+        <div class="dabei">Wären dabei: ${i.dabei.map(id => person(id).name).join(", ")}</div>
+        <div class="aktionen"><button class="knopf-leise">🙋 Ich wäre dabei</button><button class="knopf-leise">💬 Kommentare</button><a class="knopf-leise" style="text-decoration:none" href="https://www.airbnb.de" target="_blank" rel="noopener">Auf Airbnb öffnen ↗</a></div>
+      </div></div>`).join("");
+  document.querySelectorAll(".zaehler button").forEach(b => b.onclick = () => { const i = ideen[b.dataset.n]; i.personen = Math.max(1, i.personen + +b.dataset.d); ideenAufbauen(); });
+  document.querySelectorAll(".herzen").forEach(b => b.onclick = () => { ideen[b.dataset.n].herzen++; ideenAufbauen(); });
+}
+
+// ---------- Profil: Mitteilungen ----------
+document.getElementById("mitteilungen").innerHTML = [["Neue Chat-Nachricht", "Bei Erwähnungen immer"], ["Jemand ist in der Nähe", "Nach deiner Treffer-Einstellung"], ["Neuer Reiseplan", "Wenn ein Freund eine Reise einträgt"], ["Neue Unterkunfts-Idee", ""]]
+  .map(([t, u], i) => `<div class="zeile-einst"><div>${t}${u ? `<small>${u}</small>` : ""}</div><button class="schalter${i < 2 ? " an" : ""}"></button></div>`).join("");
+document.querySelectorAll("#mitteilungen .schalter").forEach(b => b.onclick = () => b.classList.toggle("an"));
+
+reisenAufbauen(); chatAufbauen(); ideenAufbauen();
+
 
 // ---------- Start ----------
 oberflaecheAnwenden();
