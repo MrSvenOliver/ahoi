@@ -53,7 +53,7 @@
   }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html, body { margin: 0; height: 100%; background: var(--karte-hinten); color: var(--text); font-family: var(--sans); overflow: hidden; overscroll-behavior: none; }
-  #map { position: fixed; inset: 0; bottom: calc(0px - var(--luecke, 0px)); background: var(--papier); }
+  #map { position: fixed; inset: 0; background: var(--papier); }
 
 
   /* Kopfzeile */
@@ -80,7 +80,7 @@
   @keyframes puls { from { transform: scale(1); opacity: 0.7; } to { transform: scale(1.8); opacity: 0; } }
 
   /* Infokarte zu einer Person */
-  .info { position: fixed; left: 12px; right: 12px; bottom: calc(var(--blatt-sichtbar, 96px) + 12px - var(--luecke, 0px)); z-index: 11; background: var(--glas); border: 1px solid var(--glas-rand); box-shadow: var(--schatten); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-radius: 22px; padding: 14px 16px; transform: translateY(20px); opacity: 0; pointer-events: none; transition: transform 0.3s cubic-bezier(0.2, 0.9, 0.3, 1), opacity 0.25s; max-width: 520px; margin: 0 auto; }
+  .info { position: fixed; left: 12px; right: 12px; bottom: calc(var(--blatt-sichtbar, 96px) + 12px); z-index: 11; background: var(--glas); border: 1px solid var(--glas-rand); box-shadow: var(--schatten); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-radius: 22px; padding: 14px 16px; transform: translateY(20px); opacity: 0; pointer-events: none; transition: transform 0.3s cubic-bezier(0.2, 0.9, 0.3, 1), opacity 0.25s; max-width: 520px; margin: 0 auto; }
   .info.offen { transform: none; opacity: 1; pointer-events: auto; }
   .info h3 { margin: 0; font-size: 20px; color: var(--text); font-weight: 700; letter-spacing: -0.2px; }
   .info p { margin: 4px 0 0; color: var(--text-leise); font-size: 14px; line-height: 1.45; }
@@ -107,7 +107,7 @@
   .weite span { font-size: 12px; color: var(--text-leise); }
 
   /* Startbild mit Kompass */
-  .start { position: fixed; inset: 0; bottom: calc(0px - var(--luecke, 0px)); z-index: 50; display: grid; place-items: center; background: var(--papier); transition: opacity 0.6s ease 0.1s; }
+  .start { position: fixed; inset: 0; z-index: 50; display: grid; place-items: center; background: var(--papier); transition: opacity 0.6s ease 0.1s; }
   .start.weg { opacity: 0; pointer-events: none; }
   .start svg { width: 120px; height: 120px; animation: drehen 1.4s cubic-bezier(0.3, 0.7, 0.2, 1) both; }
   .start p { position: absolute; bottom: 22%; font-family: var(--marke); font-size: 32px; font-weight: 700; color: var(--tinte); margin: 0; }
@@ -124,9 +124,10 @@
   .segmente button b { display: block; font-size: 15px; }
   .segmente button.aktiv { background: var(--tinte); color: var(--papier); border-color: var(--tinte); }
   /* ---------- Leiste unten ---------- */
-  :root { --leiste-h: calc(62px + env(safe-area-inset-bottom)); --flaeche: #f8f3ea; --karte-bg: #fffdf8; --trenner: rgba(90, 64, 40, 0.12); }
+  .leiste { background: var(--karte-hinten) !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
+  :root { --leiste-unten: max(0px, calc(env(safe-area-inset-bottom) - var(--luecke, 0px))); --leiste-h: calc(62px + var(--leiste-unten)); --flaeche: #f8f3ea; --karte-bg: #fffdf8; --trenner: rgba(90, 64, 40, 0.12); }
   :root[data-theme="dunkel"] { --flaeche: #131c25; --karte-bg: #1c2733; --trenner: rgba(227, 196, 127, 0.12); }
-  .leiste { position: fixed; left: 0; right: 0; bottom: calc(0px - var(--luecke, 0px)); z-index: 40; height: var(--leiste-h); padding-bottom: env(safe-area-inset-bottom); display: grid; grid-template-columns: repeat(4, 1fr); background: var(--glas); border-top: 1px solid var(--glas-rand); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+  .leiste { position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; height: var(--leiste-h); padding-bottom: var(--leiste-unten); display: grid; grid-template-columns: repeat(4, 1fr); background: var(--glas); border-top: 1px solid var(--glas-rand); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
   .leiste button { border: 0; background: transparent; color: var(--text-leise); font: inherit; font-size: 11px; font-weight: 600; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; cursor: pointer; position: relative; }
   .leiste button svg { width: 25px; height: 25px; }
   .leiste button.aktiv { color: var(--tinte); }
@@ -134,7 +135,7 @@
   .profil-knopf { width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--gold); display: grid; place-items: center; color: #fff8ea; font-weight: 700; font-size: 14px; background: #7a5a3a; cursor: pointer; padding: 0; }
 
   /* ---------- Seiten (Reisen, Chat, Ideen, Profil) ---------- */
-  .seite { position: fixed; left: 0; right: 0; top: 0; bottom: calc(var(--leiste-h) - var(--luecke, 0px)); z-index: 35; background: var(--flaeche); overflow-y: auto; -webkit-overflow-scrolling: touch; display: none; padding: calc(env(safe-area-inset-top) + 14px) 16px 24px; }
+  .seite { position: fixed; left: 0; right: 0; top: 0; bottom: var(--leiste-h); z-index: 35; background: var(--flaeche); overflow-y: auto; -webkit-overflow-scrolling: touch; display: none; padding: calc(env(safe-area-inset-top) + 14px) 16px 24px; }
   .seite.offen { display: block; animation: einblenden 0.22s ease; }
   @keyframes einblenden { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
   .seite-kopf { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
@@ -250,13 +251,13 @@
   .segmente.klein { grid-template-columns: repeat(3, 1fr); }
 
   /* Unteres Blatt sitzt über der Leiste */
-  .blatt { bottom: calc(var(--leiste-h) - var(--luecke, 0px)) !important; padding-bottom: 0 !important; }
+  .blatt { bottom: var(--leiste-h) !important; padding-bottom: 0 !important; }
   .hinweis { position: fixed; left: 50%; top: calc(env(safe-area-inset-top) + 70px); transform: translate(-50%, -10px); z-index: 20; background: var(--tinte); color: var(--papier); padding: 8px 14px; border-radius: 999px; font-size: 13px; opacity: 0; transition: opacity 0.25s, transform 0.25s; pointer-events: none; white-space: nowrap; }
   .hinweis.zeigen { opacity: 1; transform: translate(-50%, 0); }
 
   .maplibregl-ctrl-attrib { background: transparent !important; font-size: 10px; }
   .maplibregl-ctrl-attrib a { color: var(--text-leise) !important; }
-  .maplibregl-ctrl-bottom-right { bottom: calc(var(--blatt-sichtbar, 96px) - var(--luecke, 0px)); }
+  .maplibregl-ctrl-bottom-right { bottom: var(--blatt-sichtbar, 96px); }
   @media (min-width: 900px) {
     .blatt { left: 16px; right: auto; width: 380px; bottom: 16px; border-radius: 26px; transform: none !important; border: 1px solid var(--glas-rand); }
     .blatt .liste { opacity: 1 !important; pointer-events: auto !important; }
@@ -527,7 +528,7 @@ function oberflaecheAnwenden() {
   r.dataset.theme = c.thema;
   // Streifen oben (Statusleiste) in der Farbe des Meeres auf der Karte
   document.getElementById("theme-farbe").setAttribute("content", c.wasser);
-  r.style.setProperty("--karte-hinten", c.wasser);
+  r.style.setProperty("--karte-hinten", c.thema === "dunkel" ? "#18232e" : "#f7f0e3");
   r.style.setProperty("--sans", WAHL.schrift[auswahl.schrift][2]);
   const m = WAHL.marke[auswahl.marke];
   r.style.setProperty("--marke", m[2] || "var(--sans)");
@@ -582,7 +583,7 @@ function stilAnpassen(stil) {
 
 // ---------- Karte ----------
 // Kleinster Zoom, bei dem die Weltkarte den Bildschirm in der Höhe ganz ausfüllt (keine leeren Ränder)
-function fuellZoom() { return Math.max(0, Math.log2((window.innerHeight + lueckeMessen()) / 512) + 0.05); }
+function fuellZoom() { lueckeMessen(); return Math.max(0, Math.log2(window.innerHeight / 512) + 0.05); }
 window.addEventListener("resize", () => { lueckeMessen(); map.resize(); map.setMinZoom(fuellZoom()); });
 const map = new maplibregl.Map({
   container: "map",
