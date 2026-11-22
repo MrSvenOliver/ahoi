@@ -26,7 +26,7 @@ Gesammelte Wünsche und Entscheidungen von Sven. Gebaut wird erst, wenn die Anfo
 
 ## Aufbau der App
 - Leiste unten: Karte · Reisen · Chat · Ideen
-- Profil als rundes Foto oben rechts; dort auch Kartenstil, Mitteilungen, Privatsphäre, Paar verknüpfen, Jemanden vorschlagen, Feedback
+- Profil als rundes Foto oben rechts; dort Kacheln (Freund einladen, Freundeskreise, Paar verknüpfen), Länder-Sammlung, Kartenstil, Familie, Mitteilungen, Privatsphäre
 
 ## Kartengenauigkeit (feste Regel, kein Spielraum)
 - Echte Kartendaten aus OpenStreetMap für Küsten, Grenzen und Städte; der Schatzkarten-Look entsteht nur über Farben, Linien und Schrift
