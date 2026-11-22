@@ -274,7 +274,7 @@ function stilAnpassen(stil) {
     if (l.type === "background") l.paint["background-color"] = c.papier;
     else if (id === "natural_earth") { l.paint = { "raster-saturation": -1, "raster-contrast": 0.1, "raster-opacity": ["interpolate", ["linear"], ["zoom"], 0, c.relief, 6, c.relief * 0.6, 8, 0] }; }
     else if (id === "water") { l.paint["fill-color"] = c.wasser; l.paint["fill-opacity"] = 1; delete l.paint["fill-outline-color"]; }
-    else if (id.startsWith("waterway")) { l.paint["line-color"] = c.wasserTinte; l.paint["line-opacity"] = 0.6; }
+    else if (id.startsWith("waterway") && l.type === "line") { l.paint["line-color"] = c.wasserTinte; l.paint["line-opacity"] = 0.6; }
     else if (id === "park") { l.paint["fill-color"] = c.wald; l.paint["fill-opacity"] = 0.45; }
     else if (id === "landcover_wood") { l.paint["fill-color"] = c.wald; l.paint["fill-opacity"] = 0.55; }
     else if (id === "landcover_grass" || id === "landcover_wetland") { l.paint["fill-color"] = c.wiese; l.paint["fill-opacity"] = 0.5; }
