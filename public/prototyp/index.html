@@ -347,7 +347,7 @@
   <div class="verlauf" id="verlauf"></div>
   <div class="eingabe">
     <button class="runder" title="Foto, Ort oder Unterkunft teilen">＋</button>
-    <input id="chat-text" placeholder="Nachricht … (@ zum Erwähnen)" autocomplete="off">
+    <input id="chat-text" placeholder="Nachricht …" autocomplete="off">
     <button class="runder senden" id="chat-senden" title="Senden">↑</button>
   </div>
 </section>
@@ -647,10 +647,6 @@ function ebenenHinzufuegen() {
     paint: { "fill-color": zuordnung, "fill-opacity": ["interpolate", ["linear"], ["zoom"], 0, 0.42, 4.5, 0.32, 6.5, 0] } }, vorBeschriftung);
   map.addLayer({ id: "laender-linie", type: "line", source: "laender", maxzoom: 7,
     paint: { "line-color": c.grenze, "line-width": ["interpolate", ["linear"], ["zoom"], 0, 0.5, 5, 1.1], "line-opacity": ["interpolate", ["linear"], ["zoom"], 0, 0.85, 5.5, 0.85, 6.5, 0] } }, vorBeschriftung);
-
-  map.addLayer({ id: "paar-entfernung", type: "symbol", source: "paar-text",
-    layout: { "text-field": ["get", "text"], "text-font": ["Noto Sans Bold"], "text-size": 13, "text-offset": [0, -0.9], "text-allow-overlap": true },
-    paint: { "text-color": "#c0582f", "text-halo-color": c.halo, "text-halo-width": 2 } });
 
   pinsSetzen();
   map.once("idle", () => setTimeout(() => document.getElementById("start").classList.add("weg"), 300));
