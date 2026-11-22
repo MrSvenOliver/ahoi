@@ -564,7 +564,7 @@ const SPRACHE = (() => {
   const n = (navigator.language || "de").toLowerCase();
   return n.startsWith("de") ? "de" : n.startsWith("sk") ? "sk" : "en";
 })();
-const LOC = { de: LOC, en: "en-GB", sk: "sk-SK" }[SPRACHE];
+const LOC = { de: "de-DE", en: "en-GB", sk: "sk-SK" }[SPRACHE];
 document.documentElement.lang = SPRACHE;
 const FEHLT = new Set();
 // t("Deutscher Text", { platzhalter: wert }) gibt den Text in der App-Sprache zurück
