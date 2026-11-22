@@ -192,10 +192,37 @@
   .wahl span { font-size: 13px; color: var(--text-leise); }
 
   /* Chat */
-  #seite-chat { display: none; padding-bottom: 0; }
+  #seite-unterhaltung { display: none; padding-bottom: 0; }
   html.tippt .leiste { display: none; }
-  html.tippt #seite-chat { bottom: 0; }
-  #seite-chat.offen { display: flex; flex-direction: column; }
+  html.tippt #seite-unterhaltung { bottom: 0; }
+  #seite-unterhaltung.offen { display: flex; flex-direction: column; }
+  .chat-liste { list-style: none; margin: 0; padding: 0; }
+  .chat-zeile { display: flex; gap: 12px; align-items: center; padding: 12px 2px; border-bottom: 1px solid var(--trenner); cursor: pointer; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+  .chat-zeile .bildchen { width: 50px; height: 50px; border-radius: 50%; display: grid; place-items: center; font-size: 22px; background: var(--trenner); flex: none; color: #fff8ea; font-weight: 700; }
+  .chat-zeile .bildchen.person { font-size: 16px; border: 2px solid var(--gold); }
+  .chat-zeile .mitte { flex: 1; min-width: 0; }
+  .chat-zeile .mitte b { display: flex; gap: 6px; align-items: center; font-size: 16px; }
+  .chat-zeile .mitte span { display: block; font-size: 14px; color: var(--text-leise); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
+  .chat-zeile .ungelesen { min-width: 21px; height: 21px; border-radius: 11px; background: #c0582f; color: #fff; font-size: 11px; font-weight: 700; display: grid; place-items: center; padding: 0 6px; }
+  .marke-klein { font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 8px; border: 1px solid var(--gold); color: var(--text-leise); }
+  .gespraech-kopf { display: flex; align-items: center; gap: 8px; padding-bottom: 10px; border-bottom: 1px solid var(--trenner); }
+  .gespraech-kopf .zurueck { border: 0; background: transparent; font-size: 34px; color: var(--text); cursor: pointer; padding: 0 6px 4px 0; line-height: 1; font-family: inherit; }
+  .gespraech-kopf .titel { flex: 1; min-width: 0; }
+  .gespraech-kopf .titel b { display: block; font-size: 17px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .gespraech-kopf .titel span { font-size: 12px; color: var(--text-leise); }
+  .uebersetzen-knopf { white-space: nowrap; }
+  .uebersetzen-knopf.an { background: var(--tinte); color: var(--papier); border-color: var(--tinte); }
+  .ue-band { font-size: 12px; color: var(--text-leise); text-align: center; background: var(--trenner); border-radius: 10px; padding: 6px 10px; margin: 10px 0 0; }
+  .ue-hinweis { display: block; font-size: 11px; margin-top: 5px; opacity: 0.75; }
+  .ue-hinweis button { border: 0; background: none; padding: 0; font: inherit; text-decoration: underline; color: inherit; cursor: pointer; }
+  .aktion-blatt { position: fixed; inset: 0; z-index: 70; background: rgba(0, 0, 0, 0.35); display: none; align-items: flex-end; justify-content: center; }
+  .aktion-blatt.offen { display: flex; }
+  .aktion-blatt .innen { background: var(--flaeche); width: 100%; max-width: 560px; border-radius: 22px 22px 0 0; padding: 18px 16px calc(16px + env(safe-area-inset-bottom)); }
+  .aktion-blatt button { width: 100%; margin-top: 8px; padding: 13px; font-size: 15px; }
+  .aktion-blatt .gefahr { color: #c0582f; }
+  .fam-kopf { font-size: 12px; color: var(--text-leise); text-align: center; margin: 2px 0 0; }
+  .fam-karte .weitere { margin-top: 6px; font-size: 13px; color: var(--text-leise); line-height: 1.6; }
+  .idee .bild .gebucht { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); background: #4f8a5b; color: #fff; border-radius: 14px; padding: 6px 14px; font-size: 15px; font-weight: 700; }
   .verlauf { flex: 1; overflow-y: auto; padding: 4px 0 12px; }
   .msg { display: flex; gap: 8px; margin: 10px 0; align-items: flex-end; }
   .msg.ich { flex-direction: row-reverse; }
@@ -334,7 +361,7 @@
   </div>
 </header>
 
-<div class="info" id="info"><button class="knopf zu" id="info-zu" aria-label="Schließen" style="font-size:17px">✕</button><h3></h3><p></p></div>
+<div class="info" id="info"><button class="knopf zu" id="info-zu" aria-label="Schließen" style="font-size:17px">✕</button><h3></h3><p></p><button class="knopf-leise" id="info-chat" style="margin-top:10px;display:none">💬 Nachricht schreiben</button></div>
 
 <section class="blatt" id="blatt">
   <div class="blatt-kopf" id="blatt-kopf" role="button" tabindex="0" aria-expanded="false" aria-controls="liste">
@@ -375,7 +402,12 @@
 
 <!-- Chat -->
 <section class="seite" id="seite-chat">
-  <div class="seite-kopf"><h1>Chat</h1><span style="font-size:13px;color:var(--text-leise)">8 Mitglieder</span></div>
+  <div class="seite-kopf"><h1>Chats</h1><button class="knopf-gross" id="gruppe-neu-knopf">+ Gruppe</button></div>
+  <ul class="chat-liste" id="chat-liste"></ul>
+  <p class="hinweis-band">Einzelchat: Person auf der Karte antippen · Gedrückt halten: löschen oder verlassen</p>
+</section>
+<section class="seite" id="seite-unterhaltung">
+  <div class="gespraech-kopf"><button class="zurueck" id="gespraech-zurueck" aria-label="Zurück zu den Chats">‹</button><div class="titel"><b id="gespraech-name"></b><span id="gespraech-unter"></span></div><button class="knopf-leise uebersetzen-knopf" id="uebersetzen" aria-pressed="false">🌐 Übersetzen</button></div>
   <div class="verlauf" id="verlauf"></div>
   <div class="eingabe">
     <button class="runder" title="Foto, Ort oder Unterkunft teilen">＋</button>
@@ -384,13 +416,24 @@
     <button class="runder senden" id="chat-senden" title="Senden" aria-label="Senden">↑</button>
   </div>
 </section>
+<section class="seite" id="seite-gruppe-neu">
+  <div class="seite-kopf"><h1>Neue Gruppe</h1><button class="knopf-leise" data-zurueck="chat">Abbrechen</button></div>
+  <div class="kasten formular">
+    <label>Name der Gruppe<input id="gruppe-name" placeholder="z. B. Portugal im Januar"></label>
+    <div style="font-size:13px;font-weight:600;color:var(--text-leise);margin-bottom:8px">Wer ist dabei?</div>
+    <div class="chips" id="gruppe-leute" style="flex-wrap:wrap;margin:0;padding:0"></div>
+  </div>
+  <button class="knopf-gross" style="width:100%" id="gruppe-erstellen">Gruppe erstellen</button>
+  <p class="hinweis-band">Gruppen entstehen auch von selbst: bei einem Treffer und wenn jemand bei einer Idee dabei ist</p>
+</section>
+<div class="aktion-blatt" id="aktion-blatt"><div class="innen"><b id="aktion-titel" style="display:block;text-align:center;margin-bottom:4px"></b><div id="aktion-knoepfe"></div><button class="knopf-leise" id="aktion-abbrechen">Abbrechen</button></div></div>
 
 <!-- Ideen -->
 <section class="seite" id="seite-ideen">
   <div class="seite-kopf"><h1>Ideen</h1><button class="knopf-gross" id="idee-neu">+ Teilen</button></div>
   <div class="chips" id="ideen-filter"></div>
   <div id="ideen-liste"></div>
-  <p class="hinweis-band">Beispieldaten</p>
+  <p class="hinweis-band">Ideen mit Zeitraum verschwinden nach dem Abreisetag von selbst</p>
 </section>
 
 <!-- Idee teilen -->
@@ -445,8 +488,11 @@
   <div class="kasten"><div class="segmente" data-art="karte"></div></div>
   <h2>Familie</h2>
   <div class="kasten">
-    <div class="zeile-einst"><div>Familie darf mich sehen<small>Mama, Papa, Schwester · sehen deinen Ort und deine nächsten Reisen, teilen selbst nichts</small></div><button class="knopf-leise" data-hinweis="Familienmitglied einladen – kommt mit Phase 2">＋ Einladen</button></div>
-    <div class="zeile-einst"><div>So sieht es deine Familie<small>Prototyp: Familien-Ansicht ausprobieren</small></div><button class="knopf-leise" id="familie-start">Ansehen</button></div>
+    <p style="margin:0 0 2px;font-size:13px;color:var(--text-leise);line-height:1.4">Du lädst deine eigene Familie ein. Sie sieht nur dich: wo du bist, deine nächste Reise, alle geplanten Reisen und Vielleicht-Pläne. Sie teilt selbst nichts.</p>
+    <div class="zeile-einst"><div>Mama<small>sieht dich</small></div><button class="schalter an" aria-label="Mama darf mich sehen"></button></div>
+    <div class="zeile-einst"><div>Papa<small>Einladung verschickt</small></div><button class="schalter an" aria-label="Papa darf mich sehen"></button></div>
+    <div class="zeile-einst"><div>Familienmitglied einladen<small>Link per WhatsApp, SMS oder E-Mail</small></div><button class="knopf-leise" data-hinweis="Einladungslink – kommt mit Phase 2">＋ Einladen</button></div>
+    <div class="zeile-einst"><div>So sieht es deine Familie<small>Beispiel ausprobieren</small></div><button class="knopf-leise" id="familie-start">Ansehen</button></div>
   </div>
   <h2>Mitteilungen</h2>
   <div class="kasten" id="mitteilungen"></div>
@@ -465,6 +511,7 @@
 
 <section class="familie-blatt" id="familie-blatt">
   <div class="griff"></div>
+  <p class="fam-kopf">Familien-Ansicht · Beispiel: Mama sieht dich und Alex</p>
   <div id="familie-karten"></div>
   <div class="zeile-einst"><div>Meinen Standort zeigen<small>Nur für dich, um die Entfernung zu sehen. Niemand sonst sieht ihn.</small></div><button class="schalter" id="familie-standort"></button></div>
   <button class="knopf-leise" id="familie-ende" style="width:100%;margin-top:6px">Prototyp: zurück zur Nomaden-Ansicht</button>
@@ -725,9 +772,12 @@ const NAH_KM = 50;
 // Ein Herz gibt es nur, wenn genau zwei Personen zusammen sind UND beide ihr Paar gegenseitig bestätigt haben
 const istPaar = g => g.length === 2 && g[0].paar && g[0].paar === g[1].paar;
 // Familien-Zugang: sieht nur die Personen, die ihn freigeschaltet haben; den eigenen Standort nur, wenn selbst gewählt
-const FAMILIE_SIEHT = ["alex", "sam"];
+// Beispiel: Mama wurde von dir und von Alex eingeladen. Ihr eigener Standort erscheint nur, wenn sie ihn selbst einschaltet.
+const FAMILIE_SIEHT = ["du", "alex"];
+const BETRACHTER = { id: "betrachter", name: "Ich", ort: "Köln", land: "DE", lat: 50.9375, lon: 6.9603, tz: "Europe/Berlin", farbe: "#8a8478" };
 let familieModus = false, familieMitStandort = false;
-const sichtbareLeute = () => familieModus ? leute.filter(p => FAMILIE_SIEHT.includes(p.id) || (p.id === "du" && familieMitStandort)) : leute;
+const sichtbareLeute = () => familieModus ? [...leute.filter(p => FAMILIE_SIEHT.includes(p.id)), ...(familieMitStandort ? [BETRACHTER] : [])] : leute;
+const selbstId = () => familieModus ? "betrachter" : "du";
 function gruppenBilden() {
   const gruppen = [];
   for (const p of sichtbareLeute()) {
@@ -752,12 +802,12 @@ function pinsSetzen() {
     const leuteHier = h.gruppen.flat();
     const n = Math.min(leuteHier.length, 3), breite = 46 + (n - 1) * 18;
     const el = document.createElement("div");
-    el.className = "pin" + (leuteHier.some(p => p.id === "du") ? " pin-du" : "");
+    el.className = "pin" + (leuteHier.some(p => p.id === selbstId()) ? " pin-du" : "");
     el.style.width = breite + "px";
     const innen = document.createElement("div"); innen.className = "pin-innen";
     innen.style.width = breite + "px";
     if (ersteDarstellung) innen.style.animationDelay = (0.15 + i * 0.09) + "s"; else innen.style.animation = "none";
-    if (leuteHier[0].id === "du") innen.innerHTML = '<div class="puls"></div>';
+    if (leuteHier[0].id === selbstId()) innen.innerHTML = '<div class="puls"></div>';
     leuteHier.slice(0, 3).forEach((p, j) => { innen.innerHTML += `<div class="pin-kopf" style="left:${3 + j * 18}px;background:${p.farbe};z-index:${3 - j}">${leuteHier.length > 3 && j === 2 ? "+" + (leuteHier.length - 2) : kuerzel(p.name)}</div>`; });
     // ❤️ = bestätigtes Paar am selben Ort · 🤝 = Freunde am selben Ort · Zahl = Pins liegen nur auf dem Bildschirm übereinander
     if (h.gruppen.length === 1 && istPaar(h.gruppen[0])) innen.innerHTML += `<div class="herz" style="left:${breite - 20}px">❤️</div>`;
@@ -808,15 +858,18 @@ function listeAufbauen() {
 }
 
 function infoZeigen(gruppe) {
-  const du = ich(), p = gruppe[0], info = document.getElementById("info");
+  const du = familieModus ? BETRACHTER : ich(), p = gruppe[0], info = document.getElementById("info");
   const name = gruppe.map(x => x.name).join(" & ");
   let text = `${flagge(p.land)} <b>${p.ort}</b> · Ortszeit <b>${uhrzeit(p.tz)} Uhr</b>`;
-  if (p.id !== "du" && (!familieModus || familieMitStandort)) text += `<br>Entfernung zu dir: <b>${km(entfernungKm(du.lat, du.lon, p.lat, p.lon))}</b>`;
+  if (p.id !== du.id && (!familieModus || familieMitStandort)) text += `<br>Entfernung zu dir: <b>${km(entfernungKm(du.lat, du.lon, p.lat, p.lon))}</b>`;
   if (istPaar(gruppe)) text += `<br>❤️ Paar · gerade zusammen unterwegs`;
   else if (gruppe.length > 1) text += `<br>🤝 Zusammen unterwegs`;
-  else if (p.paar) { const q = leute.find(x => x.paar === p.paar && x.id !== p.id); text += `<br>${q.name} ist in ${q.ort}, <b>${km(entfernungKm(p.lat, p.lon, q.lat, q.lon))}</b> entfernt`; }
+  else if (p.paar && !familieModus) { const q = leute.find(x => x.paar === p.paar && x.id !== p.id); text += `<br>${q.name} ist in ${q.ort}, <b>${km(entfernungKm(p.lat, p.lon, q.lat, q.lon))}</b> entfernt`; }
   info.querySelector("h3").textContent = name;
   info.querySelector("p").innerHTML = text;
+  const chatKnopf = document.getElementById("info-chat");
+  chatKnopf.style.display = !familieModus && gruppe.length === 1 && p.id !== "du" ? "inline-block" : "none";
+  chatKnopf.onclick = () => einzelChat(p.id);
   info.classList.add("offen");
   blattSetzen(false);
 }
@@ -953,13 +1006,14 @@ function stilwahlAufbauen() {
   });
 }
 // ---------- Bereiche wechseln ----------
-const seiten = ["reisen", "reise-neu", "chat", "ideen", "idee-neu", "profil", "laender", "feedback"];
+const seiten = ["reisen", "reise-neu", "chat", "unterhaltung", "gruppe-neu", "ideen", "idee-neu", "profil", "laender", "feedback"];
+const TAB_VON = { "reise-neu": "reisen", "idee-neu": "ideen", "unterhaltung": "chat", "gruppe-neu": "chat" };
 function seiteZeigen(name) {
   for (const s of seiten) document.getElementById("seite-" + s).classList.toggle("offen", s === name);
   document.querySelectorAll("#leiste button").forEach(b => b.setAttribute("aria-current", b.dataset.seite === name ? "page" : "false"));
-  document.querySelectorAll("#leiste button").forEach(b => b.classList.toggle("aktiv", b.dataset.seite === name || (name === "reise-neu" && b.dataset.seite === "reisen") || (name === "idee-neu" && b.dataset.seite === "ideen")));
+  document.querySelectorAll("#leiste button").forEach(b => b.classList.toggle("aktiv", b.dataset.seite === (TAB_VON[name] || name)));
   document.getElementById("info").classList.remove("offen");
-  if (name === "chat") { document.querySelector('#leiste [data-seite="chat"] .punkt')?.remove(); const v = document.getElementById("verlauf"); v.scrollTop = v.scrollHeight; }
+  if (name === "chat") chatListeAufbauen();
   if (name === "karte") { blattSetzen(false); map.resize(); }
 }
 document.querySelectorAll("#leiste button").forEach(b => b.onclick = () => seiteZeigen(b.dataset.seite));
@@ -987,11 +1041,16 @@ const reisen = [
   { wer: ["du"], ziel: "Lissabon", land: "PT", von: "2027-01-10", bis: "2027-01-15" },
   { wer: ["lea", "nico"], ziel: "Lissabon", land: "PT", von: "2027-01-08", bis: "2027-01-20" },
   { wer: ["jonas", "ben"], ziel: "Vietnam", land: "VN", monat: "2027-02", vielleicht: true },
+  { wer: ["alex"], ziel: "Porto", land: "PT", von: "2027-02-01", bis: "2027-02-10" },
+  { wer: ["du"], ziel: "Mexiko", land: "MX", monat: "2027-03", vielleicht: true },
+  { wer: ["alex"], ziel: "Kapstadt", land: "ZA", monat: "2027-04", vielleicht: true },
 ];
+const reiseSchluessel = r => r.von || r.monat + "-32";
 const datum = iso => new Date(iso + "T12:00:00");
 const kurz = iso => datum(iso).toLocaleDateString("de-DE", { day: "numeric", month: "numeric" });
 const monatName = iso => datum(iso.length === 7 ? iso + "-01" : iso).toLocaleDateString("de-DE", { month: "long", year: "numeric" });
 function reisenAufbauen() {
+  reisen.sort((a, b) => reiseSchluessel(a).localeCompare(reiseSchluessel(b)));
   let html = "", monat = "";
   for (const r of reisen) {
     const m = monatName(r.von || r.monat);
@@ -1010,63 +1069,215 @@ function reisenAufbauen() {
 }
 
 // ---------- Chat ----------
-const nachrichten = [
-  { system: "<b>Lea</b> hat eine Reise eingetragen: Lissabon, 8.–20.1." },
-  { von: "lea", text: "Wer ist im Januar noch in Portugal? 🇵🇹", reaktion: "👍 2" },
-  { von: "alex", text: "Ich bin bis Mitte Dezember in Marrakesch, danach wieder Lissabon!" },
-  { von: "lea", ort: "Lissabon · Alfama", text: "Hier haben wir unser Airbnb" },
-  { system: "🧭 Treffer: <b>Du</b>, <b>Lea</b> & <b>Nico</b> seid vom 10. bis 15.1. in Lissabon" },
-  { von: "nico", text: "@Du perfekt, dann gehen wir zusammen surfen 🏄", reaktion: "❤️ 3" },
-  { von: "mia", sprache: "0:14" },
+// Chatliste: „Alle“ (nur in der Beta), Reisegruppen (selbst erstellt oder automatisch aus Treffer/Idee), Einzelchats.
+// Fremdsprachige Nachrichten tragen ihre Übersetzung mit (später DeepL über Supabase, je Sprache einmal gespeichert).
+const chats = [
+  { id: "alle", art: "alle", name: "Alle", ungelesen: 1, nachrichten: [
+    { system: "<b>Lea</b> hat eine Reise eingetragen: Lissabon, 8.–20.1." },
+    { von: "lea", text: "Wer ist im Januar noch in Portugal? 🇵🇹", reaktion: "👍 2" },
+    { von: "alex", text: "Ich bin bis Mitte Dezember in Marrakesch, danach wieder Lissabon!" },
+    { von: "lea", ort: "Lissabon · Alfama", text: "Hier haben wir unser Airbnb" },
+    { system: "🧭 Treffer: <b>Du</b>, <b>Lea</b> & <b>Nico</b> seid vom 10. bis 15.1. in Lissabon" },
+    { von: "nico", text: "@Du perfekt, dann gehen wir zusammen surfen 🏄", reaktion: "❤️ 3" },
+    { von: "jonas", text: "Anyone around Chiang Mai in February? We found a great coworking space 🙌", lang: "en", ue: { de: "Ist im Februar jemand in der Nähe von Chiang Mai? Wir haben einen tollen Coworking-Space gefunden 🙌" } },
+    { von: "mia", sprache: "0:14" },
+  ] },
+  { id: "lissabon", art: "gruppe", name: "Lissabon im Januar", herkunft: "Treffer", mitglieder: ["du", "lea", "nico"], ungelesen: 1, nachrichten: [
+    { system: "🧭 Gruppe aus dem Treffer: <b>Du</b>, <b>Lea</b> & <b>Nico</b> in Lissabon" },
+    { von: "lea", text: "Wir kommen am 8. an, du am 10.?" },
+    { von: "nico", text: "Surfbretter leihen wir vor Ort 🏄" },
+  ] },
+  { id: "idee-ericeira", art: "gruppe", name: "Haus in Ericeira", herkunft: "Idee", idee: "ericeira", mitglieder: ["alex", "sam", "du"], nachrichten: [
+    { system: "🏠 Gruppe aus der Idee von <b>Alex</b>: Haus in Ericeira" },
+    { von: "sam", text: "Februar passt mir gut!" },
+  ] },
+  { id: "e-mia", art: "einzel", mit: "mia", ungelesen: 1, nachrichten: [
+    { von: "mia", text: "¡Hola! ¿Cuándo vienes a México? 🌮", lang: "es", ue: { de: "Hallo! Wann kommst du nach Mexiko? 🌮" } },
+    { von: "du", text: "Vielleicht im März!" },
+    { von: "mia", text: "¡Perfecto! Te guardo una habitación en Oaxaca.", lang: "es", ue: { de: "Perfekt! Ich halte dir ein Zimmer in Oaxaca frei." } },
+  ] },
+  { id: "e-alex", art: "einzel", mit: "alex", nachrichten: [
+    { von: "alex", text: "Bist du im Dezember noch in Málaga?" },
+  ] },
 ];
+let aktuellerChat = null;
+const uebersetzt = {};
 const ohneHtml = t => String(t).replace(/[&<>"']/g, z => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[z]);
 function textMitErwaehnung(t) { return ohneHtml(t).replace(/@(\p{L}+)/gu, '<span class="erwaehnung">@$1</span>'); }
+const spracheName = code => new Intl.DisplayNames(["de"], { type: "language" }).of(code);
+const chatName = c => c.art === "einzel" ? person(c.mit).name : c.name;
+const istFremd = n => n.lang && n.lang !== SPRACHE && n.ue && n.ue[SPRACHE];
+function vorschau(c) {
+  const n = c.nachrichten[c.nachrichten.length - 1];
+  if (!n) return "Noch keine Nachricht";
+  if (n.system) return n.system.replace(/<[^>]+>/g, "");
+  const wer = c.art !== "einzel" ? (n.von === "du" ? "Du" : person(n.von).name) + ": " : n.von === "du" ? "Du: " : "";
+  if (n.sprache) return wer + "🎤 Sprachnachricht";
+  if (n.ort) return wer + "📍 " + n.ort;
+  return wer + (istFremd(n) && uebersetzt[c.id] ? n.ue[SPRACHE] : n.text);
+}
+function chatPunkt() {
+  const summe = chats.reduce((s, c) => s + (c.ungelesen || 0), 0), knopf = document.querySelector('#leiste [data-seite="chat"]');
+  let punkt = knopf.querySelector(".punkt");
+  if (!summe) return punkt?.remove();
+  if (!punkt) { punkt = document.createElement("span"); punkt.className = "punkt"; knopf.appendChild(punkt); }
+  punkt.textContent = summe;
+}
+function chatListeAufbauen() {
+  const reihe = [...chats.filter(c => c.art === "alle"), ...chats.filter(c => c.art !== "alle")];
+  document.getElementById("chat-liste").innerHTML = reihe.map(c => {
+    let bild;
+    if (c.art === "einzel") { const p = person(c.mit); bild = `<div class="bildchen person" style="background:${p.farbe}">${kuerzel(p.name)}</div>`; }
+    else bild = `<div class="bildchen">${c.art === "alle" ? "🌍" : c.herkunft === "Idee" ? "🏠" : c.herkunft === "Treffer" ? "🧭" : "👥"}</div>`;
+    const marke = c.art === "alle" ? '<span class="marke-klein">Beta</span>' : c.herkunft ? `<span class="marke-klein">aus ${c.herkunft}</span>` : "";
+    return `<li class="chat-zeile" data-id="${c.id}">${bild}<div class="mitte"><b>${ohneHtml(chatName(c))} ${marke}${c.stumm ? " 🔕" : ""}</b><span>${ohneHtml(vorschau(c))}</span></div>${c.ungelesen ? `<div class="ungelesen">${c.ungelesen}</div>` : ""}</li>`;
+  }).join("");
+  document.querySelectorAll(".chat-zeile").forEach(z => {
+    const c = chats.find(x => x.id === z.dataset.id);
+    let timer = null, lang = false;
+    z.addEventListener("pointerdown", () => { lang = false; timer = setTimeout(() => { lang = true; chatAktionen(c); }, 550); });
+    ["pointerup", "pointerleave", "pointercancel", "pointermove"].forEach(ev => z.addEventListener(ev, e => { if (ev !== "pointermove" || Math.abs(e.movementY) > 3) clearTimeout(timer); }));
+    z.addEventListener("contextmenu", e => { e.preventDefault(); clearTimeout(timer); lang = true; chatAktionen(c); });
+    z.addEventListener("click", () => { if (!lang) gespraechOeffnen(c); });
+  });
+  chatPunkt();
+}
+function chatAktionen(c) {
+  const blatt = document.getElementById("aktion-blatt");
+  document.getElementById("aktion-titel").textContent = chatName(c);
+  const knoepfe = c.art === "alle" ? [[c.stumm ? "🔔 Wieder einschalten" : "🔕 Stummschalten", () => { c.stumm = !c.stumm; }]]
+    : c.art === "gruppe" ? [["🔕 Stummschalten", () => { c.stumm = !c.stumm; }], ["Gruppe verlassen", () => gruppeVerlassen(c), true]]
+    : [["Chat löschen (nur bei dir)", () => { chats.splice(chats.indexOf(c), 1); hinweis("Nur bei dir gelöscht – " + person(c.mit).name + " sieht den Chat weiter"); }, true]];
+  const box = document.getElementById("aktion-knoepfe"); box.innerHTML = "";
+  knoepfe.forEach(([t, f, gefahr]) => { const b = document.createElement("button"); b.className = "knopf-leise" + (gefahr ? " gefahr" : ""); b.textContent = t; b.onclick = () => { blatt.classList.remove("offen"); f(); chatListeAufbauen(); }; box.appendChild(b); });
+  blatt.classList.add("offen");
+}
+document.getElementById("aktion-abbrechen").onclick = () => document.getElementById("aktion-blatt").classList.remove("offen");
+document.getElementById("aktion-blatt").onclick = e => { if (e.target.id === "aktion-blatt") e.target.classList.remove("offen"); };
+function gruppeVerlassen(c) {
+  c.nachrichten.push({ system: "<b>Du</b> hast die Gruppe verlassen" });
+  chats.splice(chats.indexOf(c), 1);
+  hinweis("Die anderen sehen: „Du hast die Gruppe verlassen“");
+}
+function gespraechOeffnen(c) {
+  aktuellerChat = c; c.ungelesen = 0;
+  document.getElementById("gespraech-name").textContent = chatName(c);
+  const p = c.art === "einzel" && person(c.mit);
+  document.getElementById("gespraech-unter").textContent = c.art === "alle" ? "Alle Mitglieder · nur in der Beta" : c.art === "gruppe" ? c.mitglieder.map(id => id === "du" ? "Du" : person(id).name).join(", ") : `${flagge(p.land)} ${p.ort} · ${uhrzeit(p.tz)} Uhr`;
+  document.getElementById("uebersetzen").style.display = c.nachrichten.some(istFremd) ? "" : "none";
+  seiteZeigen("unterhaltung");
+  chatAufbauen(); chatPunkt();
+}
+function einzelChat(id) {
+  let c = chats.find(x => x.art === "einzel" && x.mit === id);
+  if (!c) { c = { id: "e-" + id, art: "einzel", mit: id, nachrichten: [] }; chats.splice(1, 0, c); }
+  gespraechOeffnen(c);
+}
 function chatAufbauen() {
-  document.getElementById("verlauf").innerHTML = nachrichten.map(n => {
+  const c = aktuellerChat, an = !!uebersetzt[c.id], v = document.getElementById("verlauf");
+  const knopf = document.getElementById("uebersetzen");
+  knopf.classList.toggle("an", an); knopf.setAttribute("aria-pressed", an); knopf.textContent = an ? "🌐 Original" : "🌐 Übersetzen";
+  v.innerHTML = (an ? `<div class="ue-band">Nachrichten in anderen Sprachen werden auf ${spracheName(SPRACHE)} angezeigt</div>` : "") + c.nachrichten.map((n, k) => {
     if (n.system) return `<div class="system">${n.system}</div>`;
     const p = person(n.von), ich = n.von === "du";
-    let inhalt = n.text ? textMitErwaehnung(n.text) : "";
-    if (n.ort) inhalt = `<div class="ortkarte"><div class="ikon">📍</div><div><b>${n.ort}</b><br><span style="font-size:13px;opacity:.8">${n.text}</span></div></div>`;
+    const zeigUe = istFremd(n) && an && !n.original;
+    let inhalt = n.text ? textMitErwaehnung(zeigUe ? n.ue[SPRACHE] : n.text) : "";
+    if (istFremd(n) && an) inhalt += `<span class="ue-hinweis">${zeigUe ? "Übersetzt aus " + spracheName(n.lang) : "Original auf " + spracheName(n.lang)} · <button data-k="${k}">${zeigUe ? "Original anzeigen" : "Übersetzung anzeigen"}</button></span>`;
+    if (n.ort) inhalt = `<div class="ortkarte"><div class="ikon">📍</div><div><b>${n.ort}</b><br><span style="font-size:13px;opacity:.8">${ohneHtml(n.text)}</span></div></div>`;
     if (n.sprache) inhalt = `<div class="sprache">▶︎<div class="welle"></div>${n.sprache}</div>`;
-    return `<div class="msg${ich ? " ich" : ""}">${ich ? "" : ava(p)}<div class="blase">${ich ? "" : `<small>${p.name}</small>`}${inhalt}${n.reaktion ? `<span class="reaktionen">${n.reaktion}</span>` : ""}</div></div>`;
+    const nameZeigen = !ich && c.art !== "einzel";
+    return `<div class="msg${ich ? " ich" : ""}">${ich ? "" : ava(p)}<div class="blase">${nameZeigen ? `<small>${p.name}</small>` : ""}${inhalt}${n.reaktion ? `<span class="reaktionen">${n.reaktion}</span>` : ""}</div></div>`;
   }).join("");
+  v.querySelectorAll(".ue-hinweis button").forEach(b => b.onclick = () => { const n = c.nachrichten[b.dataset.k]; n.original = !n.original; chatAufbauen(); });
+  v.scrollTop = v.scrollHeight;
 }
+document.getElementById("uebersetzen").onclick = () => { const c = aktuellerChat; uebersetzt[c.id] = !uebersetzt[c.id]; c.nachrichten.forEach(n => delete n.original); chatAufbauen(); };
+document.getElementById("gespraech-zurueck").onclick = () => seiteZeigen("chat");
 function senden() {
   const feld = document.getElementById("chat-text"), t = feld.value.trim();
-  if (!t) return;
-  nachrichten.push({ von: "du", text: t }); feld.value = "";
-  chatAufbauen(); const v = document.getElementById("verlauf"); v.scrollTop = v.scrollHeight;
+  if (!t || !aktuellerChat) return;
+  aktuellerChat.nachrichten.push({ von: "du", text: t }); feld.value = "";
+  chatAufbauen();
 }
 document.getElementById("chat-senden").onclick = senden;
 document.getElementById("chat-mikro").onclick = () => hinweis("Gedrückt halten zum Aufnehmen – kommt mit dem echten Chat");
 document.getElementById("chat-text").addEventListener("keydown", e => { if (e.key === "Enter") senden(); });
 document.getElementById("chat-text").addEventListener("focus", () => document.documentElement.classList.add("tippt"));
 document.getElementById("chat-text").addEventListener("blur", () => document.documentElement.classList.remove("tippt"));
+// Neue Gruppe
+const gruppeAuswahl = new Set();
+document.getElementById("gruppe-neu-knopf").onclick = () => {
+  gruppeAuswahl.clear(); document.getElementById("gruppe-name").value = "";
+  document.getElementById("gruppe-leute").innerHTML = leute.filter(p => p.id !== "du").map(p => `<button data-id="${p.id}">${p.name}</button>`).join("");
+  document.querySelectorAll("#gruppe-leute button").forEach(b => b.onclick = () => { b.classList.toggle("aktiv"); gruppeAuswahl.has(b.dataset.id) ? gruppeAuswahl.delete(b.dataset.id) : gruppeAuswahl.add(b.dataset.id); });
+  seiteZeigen("gruppe-neu");
+};
+document.getElementById("gruppe-erstellen").onclick = () => {
+  if (!gruppeAuswahl.size) return hinweis("Bitte mindestens eine Person auswählen");
+  const name = document.getElementById("gruppe-name").value.trim() || [...gruppeAuswahl].map(id => person(id).name).join(", ");
+  const c = { id: "g-" + Date.now(), art: "gruppe", name, mitglieder: ["du", ...gruppeAuswahl], nachrichten: [{ system: "<b>Du</b> hast die Gruppe erstellt" }] };
+  chats.splice(1, 0, c); gespraechOeffnen(c);
+};
+// Automatische Gruppe, sobald man bei einer Idee dabei ist
+function ideeGruppe(i, dazu) {
+  let c = chats.find(x => x.idee === i.id);
+  if (dazu) {
+    if (!c) { c = { id: "idee-" + i.id, art: "gruppe", name: `${i.art} in ${i.ort}`, herkunft: "Idee", idee: i.id, mitglieder: [i.von, ...i.dabei], nachrichten: [{ system: `🏠 Gruppe aus der Idee von <b>${person(i.von).name}</b>: ${i.art} in ${i.ort}` }] }; chats.splice(1, 0, c); }
+    else if (!c.mitglieder.includes("du")) { c.mitglieder.push("du"); c.nachrichten.push({ system: "<b>Du</b> bist dazugekommen" }); }
+  } else if (c) { chats.splice(chats.indexOf(c), 1); }
+  return c;
+}
 
 // ---------- Ideen ----------
 // Jede Idee ist ein geteilter Link. Bei Airbnb liest die App Foto, Art, Ort und Bewertung aus der Vorschau des Links.
 // Plätze und Preis legt die teilende Person fest (vorausgefüllt, sofern die Seite sie verrät).
 const ideen = [
-  { von: "lea", art: "Wohnung", ort: "Lissabon", land: "PT", bewertung: "4,9", zimmer: "2 Schlafzimmer", gaeste: 4, notiz: "Für Januar?", zeitraum: "8.–20.1.", preis: 96, plaetze: 4, dabei: ["nico"], sicht: "🌍 Alle", herzen: 4, kommentare: 3, quelle: "Airbnb", farbe: "linear-gradient(135deg,#e9c99a,#c0582f)" },
-  { von: "alex", art: "Haus", ort: "Ericeira", land: "PT", bewertung: "4,8", zimmer: "3 Schlafzimmer", gaeste: 8, notiz: "Direkt am Surfstrand", zeitraum: "flexibel", preis: null, plaetze: 6, dabei: ["sam", "du"], sicht: "👥 Lieblingsleute", herzen: 2, kommentare: 1, quelle: "Airbnb", farbe: "linear-gradient(135deg,#bcd6d8,#3f6b8a)" },
-  { von: "jonas", art: "Villa", ort: "Canggu", land: "ID", bewertung: "4,95", zimmer: "4 Schlafzimmer", gaeste: 8, notiz: "", zeitraum: "März", preis: 180, plaetze: 6, dabei: ["ben", "lea", "nico", "mia", "alex"], sicht: "🌍 Alle", herzen: 5, kommentare: 6, quelle: "Airbnb", farbe: "linear-gradient(135deg,#cfe0b8,#6f8a3a)" },
-  { von: "ben", art: "Gästehaus", ort: "Chiang Mai", land: "TH", bewertung: "", zimmer: "1 Schlafzimmer", gaeste: 3, notiz: "Günstig für länger", zeitraum: "flexibel", preis: null, plaetze: 3, dabei: [], sicht: "👤 3 Personen", herzen: 1, kommentare: 0, quelle: "booking.com", farbe: "linear-gradient(135deg,#f0dca8,#b98a2e)" },
+  { id: "lissabon", von: "lea", art: "Wohnung", ort: "Lissabon", land: "PT", bewertung: "4,9", zimmer: "2 Schlafzimmer", gaeste: 4, notiz: "Für Januar?", anreise: "2027-01-08", abreise: "2027-01-20", preis: 96, plaetze: 4, dabei: ["nico"], sicht: "🌍 Alle", herzen: 4, kommentare: 3, quelle: "Airbnb", farbe: "linear-gradient(135deg,#e9c99a,#c0582f)" },
+  { id: "ericeira", von: "alex", art: "Haus", ort: "Ericeira", land: "PT", bewertung: "4,8", zimmer: "3 Schlafzimmer", gaeste: 8, notiz: "Direkt am Surfstrand", anreise: "2027-02-13", abreise: "2027-02-20", preis: null, plaetze: 6, dabei: ["sam", "du"], sicht: "👥 Lieblingsleute", herzen: 2, kommentare: 1, quelle: "Airbnb", farbe: "linear-gradient(135deg,#bcd6d8,#3f6b8a)" },
+  { id: "canggu", von: "jonas", art: "Villa", ort: "Canggu", land: "ID", bewertung: "4,95", zimmer: "4 Schlafzimmer", gaeste: 8, notiz: "", zeitraum: "März", preis: 180, plaetze: 6, dabei: ["ben", "lea", "nico", "mia", "alex"], sicht: "🌍 Alle", herzen: 5, kommentare: 6, quelle: "Airbnb", farbe: "linear-gradient(135deg,#cfe0b8,#6f8a3a)" },
+  { id: "chiangmai", von: "ben", art: "Gästehaus", ort: "Chiang Mai", land: "TH", bewertung: "", zimmer: "1 Schlafzimmer", gaeste: 3, notiz: "Günstig für länger", zeitraum: "flexibel", preis: null, plaetze: 3, dabei: [], sicht: "👤 3 Personen", herzen: 1, kommentare: 0, quelle: "booking.com", farbe: "linear-gradient(135deg,#f0dca8,#b98a2e)" },
 ];
 let ideenFilter = "alle";
+// „Preis ansehen“: öffnet die Unterkunft mit Zeitraum und Personenzahl; aktueller Preis und Verfügbarkeit kommen immer von der Seite selbst.
+// Im Prototyp gibt es keine echten Inserat-Links, deshalb die Suche am Ort.
+function ansehenLink(i) {
+  const leuteZahl = 1 + i.dabei.length;
+  if (i.quelle === "booking.com") { const u = new URL("https://www.booking.com/searchresults.html"); u.searchParams.set("ss", i.ort); u.searchParams.set("group_adults", leuteZahl); if (i.anreise) { u.searchParams.set("checkin", i.anreise); u.searchParams.set("checkout", i.abreise); } return u.href; }
+  const echt = !!i.link, u = new URL(i.link || `https://www.airbnb.de/s/${encodeURIComponent(i.ort)}/homes`);
+  if (i.anreise) { u.searchParams.set(echt ? "check_in" : "checkin", i.anreise); u.searchParams.set(echt ? "check_out" : "checkout", i.abreise); }
+  u.searchParams.set("adults", leuteZahl);
+  return u.href;
+}
+// „Gebucht“: aus der Idee wird eine Reise für alle, die dabei sind
+function gebuchtMelden(i) {
+  const wer = [i.von, ...i.dabei];
+  if (!i.anreise) {
+    seiteZeigen("reise-neu");
+    document.querySelector("#seite-reise-neu input").value = i.ort;
+    return hinweis("Nur noch die Daten eintragen");
+  }
+  i.gebucht = true;
+  reisen.push({ wer, ziel: i.ort, land: i.land, von: i.anreise, bis: i.abreise });
+  reisenAufbauen();
+  const c = ideeGruppe(i, true); c.nachrichten.push({ system: `✅ <b>Gebucht!</b> ${i.art} in ${i.ort}, ${kurz(i.anreise)}–${kurz(i.abreise)} steht jetzt in den Reisen` });
+  ideenAufbauen();
+  hinweis("In Reisen eingetragen für " + wer.map(id => id === "du" ? "dich" : person(id).name).join(", "));
+}
 function ideenAufbauen() {
   const laender = ["alle", ...new Set(ideen.map(i => i.land))];
   document.getElementById("ideen-filter").innerHTML = laender.map(l => `<button data-l="${l}" class="${l === ideenFilter ? "aktiv" : ""}">${l === "alle" ? "Alle" : flagge(l) + " " + new Intl.DisplayNames(["de"], { type: "region" }).of(l)}</button>`).join("");
   document.querySelectorAll("#ideen-filter button").forEach(b => b.onclick = () => { ideenFilter = b.dataset.l; ideenAufbauen(); });
   document.getElementById("ideen-liste").innerHTML = ideen.map((i, n) => {
     if (ideenFilter !== "alle" && i.land !== ideenFilter) return "";
+    if (i.abreise && i.abreise < new Date().toISOString().slice(0, 10)) return "";
     const belegt = 1 + i.dabei.length, frei = Math.max(0, i.plaetze - belegt), ichDabei = i.dabei.includes("du");
     const proPerson = Math.round(i.preis / belegt);
     return `
     <div class="kasten idee">
-      <div class="bild" style="background:${i.farbe}"><span class="quelle">${i.quelle}</span><span class="sicht">${i.sicht}</span><button class="herzen" data-n="${n}">❤️ ${i.herzen}</button></div>
+      <div class="bild" style="background:${i.farbe}"><span class="quelle">${i.quelle}</span><span class="sicht">${i.sicht}</span>${i.gebucht ? '<span class="gebucht">✅ Gebucht</span>' : ""}<button class="herzen" data-n="${n}">❤️ ${i.herzen}</button></div>
       <div class="inhalt">
         <b>${i.art} in ${i.ort} ${flagge(i.land)}</b>
-        <span class="ort">${[i.bewertung ? "★ " + i.bewertung : "", i.zeitraum].filter(Boolean).join(" · ")}</span>
+        <span class="ort">${[i.bewertung ? "★ " + i.bewertung : "", i.anreise ? kurz(i.anreise) + "–" + kurz(i.abreise) : i.zeitraum].filter(Boolean).join(" · ")}</span>
         <div class="geteilt">${ava(person(i.von))}<span><b>${person(i.von).name}</b><br>${i.notiz ? "„" + ohneHtml(i.notiz) + "“" : "hat das geteilt"}</span></div>
         <div class="zahlen">
           <div><b>🛏 ${parseInt(i.zimmer) || "–"}</b><small>Schlafzimmer</small></div>
@@ -1076,18 +1287,23 @@ function ideenAufbauen() {
         ${i.preis ? `<div class="rechner">💶 ${i.preis} € / Nacht · <b>${proPerson} € pro Person</b> bei ${belegt}</div>` : ""}
         <div class="dabei-leiste"><div class="dabei-gesichter">${[i.von, ...i.dabei].map(id => ava(person(id))).join("")}</div></div>
         <div class="aktionen">
-          <button class="knopf-gross dabei-knopf ${ichDabei ? "ist-dabei" : ""}" data-n="${n}" ${!frei && !ichDabei ? "disabled" : ""}>${ichDabei ? "✓ Du bist dabei" : frei ? "🙋 Ich wäre dabei" : "Leider voll"}</button>
+          ${i.gebucht ? `<button class="knopf-gross ist-dabei" disabled style="opacity:1">✅ Gebucht · steht in Reisen</button>` : `<button class="knopf-gross dabei-knopf ${ichDabei ? "ist-dabei" : ""}" data-n="${n}" ${!frei && !ichDabei ? "disabled" : ""}>${ichDabei ? "✓ Du bist dabei" : frei ? "🙋 Ich wäre dabei" : "Leider voll"}</button>`}
           <button class="knopf-leise">💬 ${i.kommentare}</button>
-          <a class="knopf-leise" href="https://www.airbnb.de" target="_blank" rel="noopener" style="text-decoration:none">Ansehen ↗</a>
+        </div>
+        <div class="aktionen" style="margin-top:8px">
+          <a class="knopf-leise" href="${ansehenLink(i)}" target="_blank" rel="noopener" style="text-decoration:none;flex:1;text-align:center">${i.anreise ? "Preis ansehen ↗" : "Ansehen ↗"}</a>
+          ${(ichDabei || i.von === "du") && !i.gebucht ? `<button class="knopf-leise gebucht-knopf" data-n="${n}" style="flex:1">✓ Gebucht</button>` : ""}
         </div>
       </div></div>`;
   }).join("");
   document.querySelectorAll(".herzen").forEach(b => b.onclick = () => { ideen[b.dataset.n].herzen++; ideenAufbauen(); });
   document.querySelectorAll(".dabei-knopf").forEach(b => b.onclick = () => {
     const i = ideen[b.dataset.n], k = i.dabei.indexOf("du");
-    if (k >= 0) i.dabei.splice(k, 1); else { i.dabei.push("du"); hinweis(person(i.von).name + " wird benachrichtigt"); }
+    if (k >= 0) { i.dabei.splice(k, 1); ideeGruppe(i, false); }
+    else { i.dabei.push("du"); ideeGruppe(i, true); hinweis(person(i.von).name + " wird benachrichtigt · Gruppe im Chat"); }
     ideenAufbauen();
   });
+  document.querySelectorAll(".gebucht-knopf").forEach(b => b.onclick = () => gebuchtMelden(ideen[b.dataset.n]));
 }
 
 // ---------- Profil: Mitteilungen ----------
@@ -1130,14 +1346,16 @@ function naechsteReise(id) {
   return reisen.filter(r => r.wer.includes(id) && r.von && r.bis >= heute).sort((a, b) => a.von.localeCompare(b.von))[0];
 }
 function familieAufbauen() {
-  const du = ich();
+  const du = BETRACHTER;
   document.getElementById("familie-karten").innerHTML = leute.filter(p => FAMILIE_SIEHT.includes(p.id)).map(p => {
-    const r = naechsteReise(p.id);
+    const r = naechsteReise(p.id), heute = new Date().toISOString().slice(0, 10);
     const naechte = r ? Math.round((datum(r.bis) - datum(r.von)) / 864e5) : 0;
+    const weitere = reisen.filter(x => x !== r && x.wer.includes(p.id) && (x.vielleicht || x.bis >= heute));
     return `<div class="fam-karte" data-id="${p.id}"><div class="ava" style="background:${p.farbe}">${kuerzel(p.name)}</div><div style="flex:1">
-      <b>${p.name}</b><div class="wo">${flagge(p.land)}&nbsp; ist in <b style="display:inline;font-size:16px">${p.ort}</b></div>
+      <b>${p.name}</b><div class="wo">${flagge(p.land)}&nbsp; ${p.id === "du" ? "bist" : "ist"} in <b style="display:inline;font-size:16px">${p.ort}</b></div>
       <div class="klein">Dort ist es ${uhrzeit(p.tz)} Uhr${familieMitStandort ? " · " + km(entfernungKm(du.lat, du.lon, p.lat, p.lon)) + " von dir" : ""}</div>
       ${r ? `<div class="naechste">✈︎ Nächste Reise: ${flagge(r.land)} ${r.ziel} · ab ${kurz(r.von)} (${naechte} Nächte)</div>` : ""}
+      ${weitere.length ? `<div class="weitere">${weitere.map(x => `${flagge(x.land)} ${x.ziel} · ${x.von ? kurz(x.von) + "–" + kurz(x.bis) : "vielleicht im " + datum(x.monat + "-01").toLocaleDateString("de-DE", { month: "long" })}`).join("<br>")}</div>` : ""}
     </div></div>`;
   }).join("");
   document.querySelectorAll(".fam-karte").forEach(k => k.onclick = () => { const p = leute.find(x => x.id === k.dataset.id); map.flyTo({ center: [p.lon, p.lat], zoom: 10, speed: 1.3, essential: true }); });
@@ -1179,7 +1397,7 @@ function laenderListe(suche) {
 }
 document.getElementById("land-suche").addEventListener("input", e => laenderListe(e.target.value));
 stempelAufbauen();
-reisenAufbauen(); chatAufbauen(); ideenAufbauen();
+reisenAufbauen(); chatListeAufbauen(); ideenAufbauen();
 
 
 // ---------- Start ----------
