@@ -9,6 +9,10 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Ahoi">
+<script>
+  // Installierte App erkennen, bevor die Seite aufgebaut wird
+  if (navigator.standalone || window.matchMedia("(display-mode: standalone)").matches) document.documentElement.classList.add("standalone");
+</script>
 <link rel="manifest" href="manifest.webmanifest?v=4">
 <link rel="apple-touch-icon" href="../icons/apple-touch-icon.png?v=2">
 <link rel="icon" href="../icons/favicon-32.png" sizes="32x32">
@@ -52,6 +56,10 @@
     --text-leise: #a9b2b8;
   }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  /* iOS 26 (WebKit-Fehler 301108): Mit durchsichtiger Statusleiste wird eine installierte App eine Statusleisten-Höhe
+     zu kurz gebaut, solange das Dokument nicht höher als der Bildschirm ist. Volle Höhe für html und body behebt das. */
+  html.standalone { min-height: min(100lvh, calc(100% + env(safe-area-inset-top))); }
+  html.standalone, html.standalone body { height: 100vh; }
   html, body { margin: 0; height: 100%; background: var(--karte-hinten); color: var(--text); font-family: var(--sans); overflow: hidden; overscroll-behavior: none; }
   #map { position: fixed; inset: 0; background: var(--papier); }
 
@@ -124,10 +132,9 @@
   .segmente button b { display: block; font-size: 15px; }
   .segmente button.aktiv { background: var(--tinte); color: var(--papier); border-color: var(--tinte); }
   /* ---------- Leiste unten ---------- */
-  .leiste { background: var(--karte-hinten) !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
-  :root { --leiste-unten: max(0px, calc(env(safe-area-inset-bottom) - var(--luecke, 0px))); --leiste-h: calc(62px + var(--leiste-unten)); --flaeche: #f8f3ea; --karte-bg: #fffdf8; --trenner: rgba(90, 64, 40, 0.12); }
+  :root { --leiste-h: calc(62px + env(safe-area-inset-bottom)); --flaeche: #f8f3ea; --karte-bg: #fffdf8; --trenner: rgba(90, 64, 40, 0.12); }
   :root[data-theme="dunkel"] { --flaeche: #131c25; --karte-bg: #1c2733; --trenner: rgba(227, 196, 127, 0.12); }
-  .leiste { position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; height: var(--leiste-h); padding-bottom: var(--leiste-unten); display: grid; grid-template-columns: repeat(4, 1fr); background: var(--glas); border-top: 1px solid var(--glas-rand); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+  .leiste { position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; height: var(--leiste-h); padding-bottom: env(safe-area-inset-bottom); display: grid; grid-template-columns: repeat(4, 1fr); background: var(--glas); border-top: 1px solid var(--glas-rand); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
   .leiste button { border: 0; background: transparent; color: var(--text-leise); font: inherit; font-size: 11px; font-weight: 600; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; cursor: pointer; position: relative; }
   .leiste button svg { width: 25px; height: 25px; }
   .leiste button.aktiv { color: var(--tinte); }
@@ -412,20 +419,6 @@
 </div>
 
 <script>
-// iOS 26: Bei Home-Bildschirm-Apps mit durchsichtiger Statusleiste ist die nutzbare Höhe um die Statusleiste zu klein.
-// Wir messen die Differenz und ziehen Karte, Leiste und Fenster um genau so viel nach unten bis zum Bildschirmrand.
-function lueckeMessen() {
-  const app = navigator.standalone || window.matchMedia("(display-mode: standalone)").matches;
-  let l = 0;
-  if (app) {
-    const voll = window.innerWidth > window.innerHeight ? Math.min(screen.width, screen.height) : Math.max(screen.width, screen.height);
-    const d = voll - window.innerHeight;
-    if (d > 0 && d < 140) l = d;
-  }
-  document.documentElement.style.setProperty("--luecke", l + "px");
-  return l;
-}
-lueckeMessen();
 // ---------- Beispiel-Daten (nur für den Prototyp) ----------
 const leute = [
   { id: "du",    name: "Du",    ort: "Málaga",      land: "ES", lat: 36.7213, lon: -4.4214,  tz: "Europe/Madrid",       farbe: "#7a5a3a" },
@@ -528,7 +521,7 @@ function oberflaecheAnwenden() {
   r.dataset.theme = c.thema;
   // Streifen oben (Statusleiste) in der Farbe des Meeres auf der Karte
   document.getElementById("theme-farbe").setAttribute("content", c.wasser);
-  r.style.setProperty("--karte-hinten", c.thema === "dunkel" ? "#18232e" : "#f7f0e3");
+  r.style.setProperty("--karte-hinten", c.wasser);
   r.style.setProperty("--sans", WAHL.schrift[auswahl.schrift][2]);
   const m = WAHL.marke[auswahl.marke];
   r.style.setProperty("--marke", m[2] || "var(--sans)");
@@ -583,8 +576,8 @@ function stilAnpassen(stil) {
 
 // ---------- Karte ----------
 // Kleinster Zoom, bei dem die Weltkarte den Bildschirm in der Höhe ganz ausfüllt (keine leeren Ränder)
-function fuellZoom() { lueckeMessen(); return Math.max(0, Math.log2(window.innerHeight / 512) + 0.05); }
-window.addEventListener("resize", () => { lueckeMessen(); map.resize(); map.setMinZoom(fuellZoom()); });
+function fuellZoom() { return Math.max(0, Math.log2(window.innerHeight / 512) + 0.05); }
+window.addEventListener("resize", () => { map.resize(); map.setMinZoom(fuellZoom()); blattSetzen(blattOffen); });
 const map = new maplibregl.Map({
   container: "map",
   style: { version: 8, sources: {}, layers: [] },
