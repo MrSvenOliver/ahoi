@@ -150,13 +150,16 @@
   .treffer { background: linear-gradient(135deg, #c0582f, #b8913f); color: #fff8ea; border: 0; }
   .treffer b { display: block; font-size: 16px; margin-bottom: 2px; }
   .treffer span { font-size: 13px; opacity: 0.92; }
-  .reise { display: flex; gap: 12px; align-items: center; }
-  .reise .text { flex: 1; min-width: 0; }
-  .reise .text b { display: block; font-size: 15px; }
-  .reise .text span { display: block; font-size: 13px; color: var(--text-leise); }
-  .reise .art { font-size: 18px; }
-  .reise.vielleicht { border-style: dashed; opacity: 0.85; }
-  .etikett { display: inline-block; font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 8px; background: var(--trenner); color: var(--text-leise); margin-left: 6px; vertical-align: 1px; }
+  .reise { display: grid; grid-template-columns: 58px 1fr 40px; gap: 12px; align-items: center; }
+  .reise .gesichter { position: relative; height: 40px; }
+  .reise .gesichter .klein-ava { position: absolute; top: 2px; width: 36px; height: 36px; font-size: 12px; box-shadow: 0 0 0 2px var(--karte-bg); }
+  .reise .text { min-width: 0; }
+  .reise .wer { display: block; font-size: 13px; font-weight: 600; color: var(--text-leise); }
+  .reise .ziel { display: block; font-size: 16px; font-weight: 700; margin: 1px 0 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .reise .wann { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text-leise); }
+  .reise .art { width: 40px; height: 40px; border-radius: 12px; background: var(--trenner); display: grid; place-items: center; font-size: 18px; }
+  .reise.vielleicht { border: 1.5px dashed var(--gold); background: transparent; }
+  .etikett { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 10px; border: 1px dashed var(--gold); color: var(--tinte); line-height: 1.4; }
   .wahlen { display: grid; gap: 10px; }
   .wahl { display: flex; gap: 12px; align-items: center; text-align: left; width: 100%; border: 1px solid var(--trenner); background: var(--karte-bg); color: var(--text); border-radius: 16px; padding: 14px; font: inherit; cursor: pointer; }
   .wahl .ikon { width: 42px; height: 42px; border-radius: 12px; background: var(--trenner); display: grid; place-items: center; font-size: 20px; flex: none; }
@@ -889,11 +892,13 @@ function reisenAufbauen() {
   for (const r of reisen) {
     if (r.monat !== monat) { monat = r.monat; html += `<h2>${monat}</h2>`; }
     const ps = r.wer.map(person);
+    const gesichter = ps.slice(0, 2).map((p, i) => ava(p).replace('class="klein-ava"', `class="klein-ava" style="left:${ps.length > 1 ? i * 20 : 10}px;z-index:${2 - i};`).replace('" style="background', 'background')).join("");
     html += `<div class="kasten reise${r.vielleicht ? " vielleicht" : ""}">
-      <div style="display:flex">${ps.map((p, i) => `<div style="margin-left:${i ? -12 : 0}px">${ava(p)}</div>`).join("")}</div>
-      <div class="text"><b>${ps.map(p => p.name).join(" & ")} → ${flagge(r.land)} ${r.ziel}${r.vielleicht ? '<span class="etikett">Vielleicht</span>' : ""}</b>
-      <span>${r.von}${r.bis ? " – " + r.bis : ""}${r.info ? " · " + r.info : ""}</span></div>
-      <div class="art">${r.art}</div></div>`;
+      <div class="gesichter">${gesichter}</div>
+      <div class="text"><span class="wer">${ps.map(p => p.name).join(" & ")}</span>
+        <span class="ziel">${flagge(r.land)} ${r.ziel}</span>
+        <span class="wann">${r.von}${r.bis ? " – " + r.bis : ""}${r.info ? " · " + r.info : ""}${r.vielleicht ? '<span class="etikett">Vielleicht</span>' : ""}</span></div>
+      <div class="art">${r.vielleicht ? "💭" : r.art}</div></div>`;
   }
   document.getElementById("reise-liste").innerHTML = html;
 }
