@@ -437,7 +437,7 @@ function listeAufbauen() {
   const du = ich();
   const andere = leute.filter(p => p.id !== "du").map(p => ({ ...p, d: entfernungKm(du.lat, du.lon, p.lat, p.lon) })).sort((x, y) => x.d - y.d);
   const laenderZahl = new Set(andere.map(p => p.land)).size;
-  document.getElementById("zusammenfassung").textContent = `${andere.length} Freunde · ${laenderZahl} Länder · Beispieldaten · ${versionText(VERSION)}`;
+  document.getElementById("zusammenfassung").textContent = `${andere.length} Freunde · ${laenderZahl} Länder · ${versionText(VERSION)}`;
   const ul = document.getElementById("liste"); ul.innerHTML = "";
   for (const p of andere) {
     const partner = p.paar && leute.find(q => q.paar === p.paar && q.id !== p.id);

@@ -3,6 +3,9 @@
 Jede Entscheidung mit Datum. Neue Einträge kommen oben dazu.
 
 ## 22.11.2026
+- "Wer ist wo"-Fenster: per Finger hochziehen oder antippen; zugeklappt nur Überschrift sichtbar
+- Paar-Herz nur, wenn genau zwei Personen zusammen sind und beide die Paar-Verknüpfung bestätigt haben; Freunde zusammen bekommen einen gemeinsamen Pin ohne Herz
+- App prüft beim Öffnen selbst, ob es einen neuen Stand gibt, und lädt ihn automatisch; Stand wird im Fenster "Wer ist wo" angezeigt
 - Nach Prototyp-Test geändert: deutlich moderner, Schatzkarte nur noch in Farben und Logo; Papier-Textur, Wellen und Handschrift-Überschriften entfernt (Handschrift nur im Schriftzug "Ahoi")
 - Nach Prototyp-Test geändert: kein Globus, flache Weltkarte füllt den Bildschirm (ersetzt die Globus-Entscheidung)
 - Logo oben links rund
