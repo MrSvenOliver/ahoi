@@ -285,7 +285,7 @@ const WAHL = {
   schrift: { D: ["D", "iPhone-Schrift", 'var(--system)'], E: ["E", "Inter", '"Inter", var(--system)'], F: ["F", "Jakarta", '"Plus Jakarta Sans", var(--system)'] },
   marke: { G: ["G", "wie Schrift", null, 800, "24px"], H: ["H", "Fraunces", '"Fraunces", Georgia, serif', 600, "25px"], I: ["I", "DM Serif", '"DM Serif Display", Georgia, serif', 400, "27px"], J: ["J", "Handschrift", 'var(--hand)', 700, "28px"] }
 };
-let auswahl = { karte: "auto", schrift: "D", marke: "J" };
+let auswahl = { karte: "auto", schrift: "D", marke: "H" };
 try { Object.assign(auswahl, JSON.parse(localStorage.getItem("ahoi-stil") || "{}")); } catch (e) {}
 const SPRACHE = (navigator.language || "de").toLowerCase().startsWith("de") ? "de" : "en";
 const kartenStil = () => auswahl.karte === "auto" ? (dunkel.matches ? "C" : "A") : auswahl.karte;
