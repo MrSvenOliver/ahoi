@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<title>Ahoi – Karten-Prototyp</title>
+<meta name="theme-color" content="#efe0c0" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#231a12" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Ahoi">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="../icons/apple-touch-icon.png">
+<link rel="icon" href="../icons/favicon-32.png" sizes="32x32">
+<link rel="preconnect" href="https://tiles.openfreemap.org" crossorigin>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl.css">
+<script src="https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl.js"></script>
+<style>
+  :root {
+    --papier: #efe0c0;
+    --papier-tief: #e2cc9f;
+    --tinte: #4a3220;
+    --tinte-weich: #7a5a3a;
+    --gold: #b8913f;
+    --karte-hinten: #d8c094;
+    --glas: rgba(250, 242, 224, 0.86);
+    --glas-rand: rgba(122, 90, 58, 0.25);
+    --schatten: 0 10px 30px rgba(60, 38, 16, 0.22);
+    --text: #2f2216;
+    --text-leise: #7b6650;
+    --papier-deckkraft: 0.22;
+    --hand: "Caveat", "Bradley Hand", cursive;
+    --sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --papier: #2b2117;
+      --papier-tief: #1f1811;
+      --tinte: #d9b56a;
+      --tinte-weich: #b8975c;
+      --gold: #d9b56a;
+      --karte-hinten: #15100b;
+      --glas: rgba(38, 29, 20, 0.86);
+      --glas-rand: rgba(217, 181, 106, 0.22);
+      --schatten: 0 10px 30px rgba(0, 0, 0, 0.45);
+      --text: #f0e2c2;
+      --text-leise: #b8a27e;
+      --papier-deckkraft: 0.12;
+    }
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; height: 100%; background: var(--karte-hinten); color: var(--text); font-family: var(--sans); overflow: hidden; overscroll-behavior: none; }
+  #map { position: fixed; inset: 0; background: radial-gradient(circle at 50% 45%, var(--papier-tief), var(--karte-hinten) 75%); }
+
+  /* Papier und Vignette: liegen über der Karte, aber unter den Pins */
+  .papier, .vignette { position: absolute; inset: 0; pointer-events: none; }
+  .papier { background: url("papier.png") repeat; background-size: 256px; opacity: var(--papier-deckkraft); }
+  .vignette { background: radial-gradient(ellipse at center, transparent 55%, rgba(70, 42, 15, 0.28) 100%); }
+  @media (prefers-color-scheme: dark) { .vignette { background: radial-gradient(ellipse at center, transparent 50%, rgba(0, 0, 0, 0.5) 100%); } }
+
+  /* Kopfzeile */
+  .kopf { position: fixed; top: calc(env(safe-area-inset-top) + 10px); left: 12px; right: 12px; display: flex; justify-content: space-between; align-items: center; z-index: 10; pointer-events: none; }
+  .marke, .knoepfe { pointer-events: auto; display: flex; align-items: center; gap: 8px; background: var(--glas); border: 1px solid var(--glas-rand); box-shadow: var(--schatten); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-radius: 999px; }
+  .marke { padding: 5px 16px 5px 5px; }
+  .marke img { width: 34px; height: 34px; border-radius: 10px; }
+  .marke span { font-family: var(--hand); font-weight: 700; font-size: 27px; color: var(--tinte); line-height: 1; }
+  .knoepfe { padding: 4px; }
+  .knopf { width: 40px; height: 40px; border: 0; border-radius: 999px; background: transparent; color: var(--tinte); font-size: 19px; display: grid; place-items: center; cursor: pointer; }
+  .knopf:active { transform: scale(0.92); background: var(--glas-rand); }
+  .knopf svg { width: 22px; height: 22px; }
+
+  /* Pins */
+  .pin { position: relative; width: 46px; height: 56px; cursor: pointer; }
+  .pin-innen { position: absolute; left: 0; top: 0; width: 46px; height: 56px; transform-origin: 50% 100%; animation: ploppen 0.55s cubic-bezier(0.2, 1.4, 0.4, 1) both; }
+  .pin-kopf { position: absolute; left: 3px; top: 0; width: 40px; height: 40px; border-radius: 50%; border: 2.5px solid var(--gold); box-shadow: 0 4px 10px rgba(50, 30, 10, 0.35); display: grid; place-items: center; font-weight: 700; font-size: 15px; color: #fff8ea; letter-spacing: 0.5px; }
+  .pin-spitze { position: absolute; left: 18px; top: 36px; width: 10px; height: 10px; background: var(--gold); transform: rotate(45deg); border-radius: 1px; box-shadow: 2px 2px 4px rgba(50, 30, 10, 0.25); }
+  .pin-paar { width: 62px; }
+  .pin-paar .pin-innen { width: 62px; }
+  .pin-paar .pin-kopf.b { left: 21px; }
+  .pin-paar .pin-spitze { left: 26px; }
+  .pin-paar .herz { position: absolute; left: 24px; top: -6px; font-size: 13px; filter: drop-shadow(0 1px 1px rgba(0,0,0,0.3)); }
+  .pin-du .pin-kopf { border-color: var(--tinte); }
+  .pin-du .puls { position: absolute; left: 3px; top: 0; width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--tinte); animation: puls 2.4s ease-out infinite; }
+  @keyframes ploppen { from { transform: scale(0) translateY(10px); opacity: 0; } to { transform: scale(1) translateY(0); opacity: 1; } }
+  @keyframes puls { from { transform: scale(1); opacity: 0.7; } to { transform: scale(1.8); opacity: 0; } }
+
+  /* Infokarte zu einer Person */
+  .info { position: fixed; left: 12px; right: 12px; bottom: calc(env(safe-area-inset-bottom) + 108px); z-index: 11; background: var(--glas); border: 1px solid var(--glas-rand); box-shadow: var(--schatten); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-radius: 22px; padding: 14px 16px; transform: translateY(20px); opacity: 0; pointer-events: none; transition: transform 0.3s cubic-bezier(0.2, 0.9, 0.3, 1), opacity 0.25s; max-width: 520px; margin: 0 auto; }
+  .info.offen { transform: none; opacity: 1; pointer-events: auto; }
+  .info h3 { margin: 0; font-family: var(--hand); font-size: 28px; color: var(--tinte); font-weight: 700; }
+  .info p { margin: 4px 0 0; color: var(--text-leise); font-size: 14px; line-height: 1.45; }
+  .info p b { color: var(--text); font-weight: 600; }
+  .info .zu { position: absolute; right: 8px; top: 8px; }
+
+  /* Unteres Fenster */
+  .blatt { position: fixed; left: 0; right: 0; bottom: 0; z-index: 12; background: var(--glas); border-top: 1px solid var(--glas-rand); box-shadow: 0 -10px 30px rgba(60, 38, 16, 0.18); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); border-radius: 26px 26px 0 0; max-width: 560px; margin: 0 auto; transform: translateY(calc(100% - 96px - env(safe-area-inset-bottom))); transition: transform 0.38s cubic-bezier(0.2, 0.9, 0.3, 1); padding-bottom: env(safe-area-inset-bottom); }
+  .blatt.offen { transform: none; }
+  .blatt-kopf { padding: 8px 20px 12px; cursor: pointer; }
+  .griff { width: 40px; height: 5px; border-radius: 3px; background: var(--glas-rand); margin: 0 auto 8px; }
+  .blatt-kopf h2 { margin: 0; font-family: var(--hand); font-size: 30px; font-weight: 700; color: var(--tinte); line-height: 1.05; }
+  .blatt-kopf small { color: var(--text-leise); font-size: 13px; }
+  .liste { list-style: none; margin: 0; padding: 0 10px 14px; max-height: 50vh; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+  .liste li { display: flex; align-items: center; gap: 12px; padding: 10px; border-radius: 16px; cursor: pointer; }
+  .liste li:active { background: var(--glas-rand); }
+  .ava { width: 42px; height: 42px; border-radius: 50%; border: 2px solid var(--gold); display: grid; place-items: center; color: #fff8ea; font-weight: 700; font-size: 14px; flex: none; }
+  .zeile { flex: 1; min-width: 0; }
+  .zeile b { display: block; font-size: 16px; font-weight: 600; }
+  .zeile span { display: block; font-size: 13px; color: var(--text-leise); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .weite { text-align: right; flex: none; }
+  .weite b { display: block; font-family: var(--hand); font-size: 22px; font-weight: 700; color: var(--tinte); line-height: 1; }
+  .weite span { font-size: 12px; color: var(--text-leise); }
+
+  /* Startbild mit Kompass */
+  .start { position: fixed; inset: 0; z-index: 50; display: grid; place-items: center; background: var(--papier); transition: opacity 0.6s ease 0.1s; }
+  .start.weg { opacity: 0; pointer-events: none; }
+  .start svg { width: 120px; height: 120px; animation: drehen 1.4s cubic-bezier(0.3, 0.7, 0.2, 1) both; }
+  .start p { position: absolute; bottom: 22%; font-family: var(--hand); font-size: 26px; color: var(--tinte-weich); margin: 0; }
+  @keyframes drehen { from { transform: rotate(-200deg) scale(0.7); opacity: 0; } to { transform: rotate(0) scale(1); opacity: 1; } }
+
+  .hinweis { position: fixed; left: 50%; top: calc(env(safe-area-inset-top) + 70px); transform: translate(-50%, -10px); z-index: 20; background: var(--tinte); color: var(--papier); padding: 8px 14px; border-radius: 999px; font-size: 13px; opacity: 0; transition: opacity 0.25s, transform 0.25s; pointer-events: none; white-space: nowrap; }
+  .hinweis.zeigen { opacity: 1; transform: translate(-50%, 0); }
+
+  .maplibregl-ctrl-attrib { background: transparent !important; font-size: 10px; }
+  .maplibregl-ctrl-attrib a { color: var(--text-leise) !important; }
+  .maplibregl-ctrl-bottom-right { bottom: calc(96px + env(safe-area-inset-bottom)); }
+  @media (min-width: 900px) {
+    .blatt { left: 16px; right: auto; width: 380px; bottom: 16px; border-radius: 26px; transform: none; border: 1px solid var(--glas-rand); }
+    .blatt .griff { display: none; }
+    .info { left: auto; right: 16px; width: 360px; bottom: 16px; margin: 0; }
+    .maplibregl-ctrl-bottom-right { bottom: 0; }
+  }
+</style>
+</head>
+<body>
+<div id="map"></div>
+
+<header class="kopf">
+  <div class="marke"><img src="../icons/icon-192.png" alt=""><span>Ahoi</span></div>
+  <div class="knoepfe">
+    <button class="knopf" id="knopf-welt" title="Ganze Welt" aria-label="Ganze Welt">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.8 3 2.8 15 0 18M12 3c-2.8 3-2.8 15 0 18"/></svg>
+    </button>
+    <button class="knopf" id="knopf-ich" title="Mein Standort" aria-label="Mein Standort">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="3.5"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="7.5"/></svg>
+    </button>
+  </div>
+</header>
+
+<div class="info" id="info"><button class="knopf zu" id="info-zu" aria-label="Schließen">✕</button><h3></h3><p></p></div>
+
+<section class="blatt" id="blatt">
+  <div class="blatt-kopf" id="blatt-kopf">
+    <div class="griff"></div>
+    <h2>Wer ist wo</h2>
+    <small id="zusammenfassung"></small>
+  </div>
+  <ul class="liste" id="liste"></ul>
+</section>
+
+<div class="hinweis" id="hinweis"></div>
+
+<div class="start" id="start">
+  <svg viewBox="0 0 100 100" aria-hidden="true">
+    <circle cx="50" cy="50" r="44" fill="none" stroke="var(--tinte)" stroke-width="1.5"/>
+    <circle cx="50" cy="50" r="36" fill="none" stroke="var(--tinte)" stroke-width="0.8" stroke-dasharray="1.5 3"/>
+    <polygon points="50,4 56,44 50,50 44,44" fill="var(--tinte)"/>
+    <polygon points="50,96 44,56 50,50 56,56" fill="var(--tinte-weich)"/>
+    <polygon points="4,50 44,44 50,50 44,56" fill="var(--tinte-weich)"/>
+    <polygon points="96,50 56,56 50,50 56,44" fill="var(--tinte)"/>
+    <polygon points="20,20 47,45 50,50 45,47" fill="var(--gold)"/>
+    <polygon points="80,80 53,55 50,50 55,53" fill="var(--gold)"/>
+    <polygon points="80,20 55,47 50,50 53,45" fill="var(--gold)"/>
+    <polygon points="20,80 45,53 50,50 47,55" fill="var(--gold)"/>
+    <circle cx="50" cy="50" r="3.2" fill="#c0582f"/>
+  </svg>
+  <p>Ahoi</p>
+</div>
+
+<script>
+// ---------- Beispiel-Daten (nur für den Prototyp) ----------
+const leute = [
+  { id: "du",    name: "Du",    ort: "Málaga",      land: "ES", lat: 36.7213, lon: -4.4214,  tz: "Europe/Madrid",       farbe: "#7a5a3a" },
+  { id: "alex",  name: "Alex",  ort: "Lissabon",    land: "PT", lat: 38.7223, lon: -9.1393,  tz: "Europe/Lisbon",       farbe: "#c0582f", paar: "p1" },
+  { id: "sam",   name: "Sam",   ort: "Bratislava",  land: "SK", lat: 48.1486, lon: 17.1077,  tz: "Europe/Bratislava",   farbe: "#3f6b8a", paar: "p1" },
+  { id: "lea",   name: "Lea",   ort: "Canggu, Bali",land: "ID", lat: -8.6478, lon: 115.1385, tz: "Asia/Makassar",       farbe: "#6f8a3a", paar: "p2" },
+  { id: "nico",  name: "Nico",  ort: "Canggu, Bali",land: "ID", lat: -8.6478, lon: 115.1385, tz: "Asia/Makassar",       farbe: "#4f7a6a", paar: "p2" },
+  { id: "mia",   name: "Mia",   ort: "Mexiko-Stadt",land: "MX", lat: 19.4326, lon: -99.1332, tz: "America/Mexico_City", farbe: "#a8467a" },
+  { id: "jonas", name: "Jonas", ort: "Chiang Mai",  land: "TH", lat: 18.7883, lon: 98.9853,  tz: "Asia/Bangkok",        farbe: "#b98a2e" },
+];
+const ich = () => leute.find(p => p.id === "du");
+
+// ---------- Entfernung auf dem Erdellipsoid (Vincenty, WGS84) ----------
+function entfernungKm(lat1, lon1, lat2, lon2) {
+  const a = 6378137, f = 1 / 298.257223563, b = (1 - f) * a, rad = Math.PI / 180;
+  const L = (lon2 - lon1) * rad;
+  const U1 = Math.atan((1 - f) * Math.tan(lat1 * rad)), U2 = Math.atan((1 - f) * Math.tan(lat2 * rad));
+  const sinU1 = Math.sin(U1), cosU1 = Math.cos(U1), sinU2 = Math.sin(U2), cosU2 = Math.cos(U2);
+  let lambda = L, iter = 0, sinSigma, cosSigma, sigma, cosSqAlpha, cos2SigmaM;
+  do {
+    const sinL = Math.sin(lambda), cosL = Math.cos(lambda);
+    sinSigma = Math.sqrt((cosU2 * sinL) ** 2 + (cosU1 * sinU2 - sinU1 * cosU2 * cosL) ** 2);
+    if (sinSigma === 0) return 0;
+    cosSigma = sinU1 * sinU2 + cosU1 * cosU2 * cosL;
+    sigma = Math.atan2(sinSigma, cosSigma);
+    const sinAlpha = cosU1 * cosU2 * sinL / sinSigma;
+    cosSqAlpha = 1 - sinAlpha * sinAlpha;
+    cos2SigmaM = cosSqAlpha ? cosSigma - 2 * sinU1 * sinU2 / cosSqAlpha : 0;
+    const C = f / 16 * cosSqAlpha * (4 + f * (4 - 3 * cosSqAlpha));
+    const prev = lambda;
+    lambda = L + (1 - C) * f * sinAlpha * (sigma + C * sinSigma * (cos2SigmaM + C * cosSigma * (-1 + 2 * cos2SigmaM ** 2)));
+    if (Math.abs(lambda - prev) < 1e-12) break;
+  } while (++iter < 200);
+  if (iter >= 200) { // Rückfall für fast gegenüberliegende Punkte: Großkreis
+    const R = 6371.0088, dLat = (lat2 - lat1) * rad, dLon = (lon2 - lon1) * rad;
+    const h = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * rad) * Math.cos(lat2 * rad) * Math.sin(dLon / 2) ** 2;
+    return 2 * R * Math.asin(Math.sqrt(h));
+  }
+  const uSq = cosSqAlpha * (a * a - b * b) / (b * b);
+  const A = 1 + uSq / 16384 * (4096 + uSq * (-768 + uSq * (320 - 175 * uSq)));
+  const B = uSq / 1024 * (256 + uSq * (-128 + uSq * (74 - 47 * uSq)));
+  const dSigma = B * sinSigma * (cos2SigmaM + B / 4 * (cosSigma * (-1 + 2 * cos2SigmaM ** 2) - B / 6 * cos2SigmaM * (-3 + 4 * sinSigma ** 2) * (-3 + 4 * cos2SigmaM ** 2)));
+  return b * A * (sigma - dSigma) / 1000;
+}
+const km = d => d < 1 ? "hier" : (d < 10 ? d.toFixed(1).replace(".", ",") : Math.round(d).toLocaleString("de-DE")) + " km";
+
+// Großkreis-Linie (kürzester Weg auf der Kugel) als Punktfolge
+function grosskreis(lon1, lat1, lon2, lat2, n = 128) {
+  const r = Math.PI / 180, toV = (lo, la) => [Math.cos(la * r) * Math.cos(lo * r), Math.cos(la * r) * Math.sin(lo * r), Math.sin(la * r)];
+  const A = toV(lon1, lat1), B = toV(lon2, lat2);
+  const w = Math.acos(Math.min(1, A[0] * B[0] + A[1] * B[1] + A[2] * B[2]));
+  const pts = [];
+  for (let i = 0; i <= n; i++) {
+    const t = i / n, s1 = Math.sin((1 - t) * w) / Math.sin(w), s2 = Math.sin(t * w) / Math.sin(w);
+    const x = s1 * A[0] + s2 * B[0], y = s1 * A[1] + s2 * B[1], z = s1 * A[2] + s2 * B[2];
+    pts.push([Math.atan2(y, x) / r, Math.atan2(z, Math.hypot(x, y)) / r]);
+  }
+  return pts;
+}
+const flagge = cc => cc.toUpperCase().replace(/./g, c => String.fromCodePoint(127397 + c.charCodeAt()));
+const uhrzeit = tz => new Intl.DateTimeFormat("de-DE", { timeZone: tz, hour: "2-digit", minute: "2-digit" }).format(new Date());
+const kuerzel = n => n.slice(0, 2).toUpperCase();
+
+// ---------- Farben der Karte (hell / dunkel) ----------
+const dunkel = window.matchMedia("(prefers-color-scheme: dark)");
+const PALETTEN = {
+  hell: {
+    papier: "#efe0c0", wasser: "#bcc7bd", wasserTinte: "#5d7a86", wald: "#d3c896", wiese: "#dfd3a5", sand: "#ead7a6", eis: "#f6f0e2",
+    stadt: "#e6d3ab", haus: "#d9c5a0", hausRand: "#bea47c", strasseGross: "#8b5e34", strasseMittel: "#a3805a", strasseKlein: "#bba282",
+    tinte: "#4a3220", tinteLeise: "#7a5a3a", grenze: "#6b4a2c", halo: "#f3e6c9", relief: 0.32, wellen: 0.35
+  },
+  dunkel: {
+    papier: "#2b2117", wasser: "#1b2629", wasserTinte: "#8fa9ad", wald: "#30291b", wiese: "#342b1d", sand: "#3a2f20", eis: "#3d3427",
+    stadt: "#34291c", haus: "#3b2f21", hausRand: "#55442c", strasseGross: "#c9a45c", strasseMittel: "#a68a55", strasseKlein: "#7d6a48",
+    tinte: "#e3c47f", tinteLeise: "#bfa06a", grenze: "#d9b56a", halo: "#221a12", relief: 0.18, wellen: 0.22
+  }
+};
+const P = () => PALETTEN[dunkel.matches ? "dunkel" : "hell"];
+
+function stilAnpassen(stil) {
+  const c = P();
+  stil.projection = { type: "globe" };
+  stil.sky = {
+    "sky-color": c.papier, "horizon-color": c.papier, "fog-color": c.papier,
+    "atmosphere-blend": ["interpolate", ["linear"], ["zoom"], 0, 0.9, 5, 0.6, 7, 0]
+  };
+  const weg = id => /^(poi_|highway-shield|road_shield|building-3d|park_outline|boundary_3$)/.test(id);
+  stil.layers = stil.layers.filter(l => !weg(l.id));
+  for (const l of stil.layers) {
+    const id = l.id; l.paint = l.paint || {}; l.layout = l.layout || {};
+    if (l.type === "background") l.paint["background-color"] = c.papier;
+    else if (id === "natural_earth") { l.paint = { "raster-saturation": -1, "raster-contrast": 0.1, "raster-opacity": ["interpolate", ["linear"], ["zoom"], 0, c.relief, 6, c.relief * 0.6, 8, 0] }; }
+    else if (id === "water") { l.paint["fill-color"] = c.wasser; l.paint["fill-opacity"] = 1; delete l.paint["fill-outline-color"]; }
+    else if (id.startsWith("waterway")) { l.paint["line-color"] = c.wasserTinte; l.paint["line-opacity"] = 0.6; }
+    else if (id === "park") { l.paint["fill-color"] = c.wald; l.paint["fill-opacity"] = 0.45; }
+    else if (id === "landcover_wood") { l.paint["fill-color"] = c.wald; l.paint["fill-opacity"] = 0.55; }
+    else if (id === "landcover_grass" || id === "landcover_wetland") { l.paint["fill-color"] = c.wiese; l.paint["fill-opacity"] = 0.5; }
+    else if (id === "landcover_sand") { l.paint["fill-color"] = c.sand; l.paint["fill-opacity"] = 0.7; }
+    else if (id === "landcover_ice") { l.paint["fill-color"] = c.eis; l.paint["fill-opacity"] = 0.85; }
+    else if (id.startsWith("landuse") || id.startsWith("aeroway_fill") || id === "road_area_pattern") { if (l.type === "fill") { l.paint["fill-color"] = c.stadt; l.paint["fill-opacity"] = 0.6; delete l.paint["fill-pattern"]; } }
+    else if (id === "building") { l.paint["fill-color"] = c.haus; l.paint["fill-outline-color"] = c.hausRand; l.paint["fill-opacity"] = 0.9; }
+    else if (l["source-layer"] === "transportation" && l.type === "line") {
+      if (id.includes("casing")) { l.layout.visibility = "none"; continue; }
+      const farbe = /motorway|trunk_primary/.test(id) ? c.strasseGross : /secondary_tertiary|link|rail/.test(id) ? c.strasseMittel : c.strasseKlein;
+      l.paint["line-color"] = farbe;
+      if (/rail/.test(id)) l.paint["line-opacity"] = 0.7;
+    }
+    else if (id.startsWith("aeroway")) { if (l.type === "line") l.paint["line-color"] = c.strasseKlein; }
+    else if (id === "boundary_2" || id === "boundary_disputed") {
+      // Ab Zoom 5 übernehmen die genauen OpenStreetMap-Grenzen
+      l.minzoom = 5;
+      l.paint["line-color"] = c.grenze;
+      l.paint["line-dasharray"] = id === "boundary_disputed" ? [1, 2] : [3, 1.6];
+      l.paint["line-opacity"] = ["interpolate", ["linear"], ["zoom"], 5, 0, 6, 0.85];
+    }
+    if (l.type === "symbol" && l.layout["text-field"]) {
+      l.paint["text-color"] = /water/.test(id) ? c.wasserTinte : (/country/.test(id) ? c.tinteLeise : c.tinte);
+      l.paint["text-halo-color"] = c.halo;
+      l.paint["text-halo-width"] = 1.4;
+      l.paint["text-halo-blur"] = 0.5;
+      if (/country/.test(id)) { l.layout["text-transform"] = "uppercase"; l.layout["text-letter-spacing"] = 0.18; }
+      if (/water_name/.test(id)) { l.layout["text-letter-spacing"] = 0.25; }
+    }
+  }
+  return stil;
+}
+
+// ---------- Karte ----------
+const map = new maplibregl.Map({
+  container: "map",
+  style: { version: 8, sources: {}, layers: [] },
+  center: [25, 22],
+  zoom: 1.35,
+  minZoom: 0.6,
+  maxZoom: 18,
+  pixelRatio: Math.min(window.devicePixelRatio || 1, 2),
+  attributionControl: { compact: true },
+  dragRotate: false,
+  pitchWithRotate: false,
+  touchPitch: false,
+  fadeDuration: 150
+});
+map.touchZoomRotate.disableRotation();
+
+// Papier und Vignette direkt über die Kartenfläche (unter die Pins) legen
+const flaeche = map.getCanvasContainer();
+const papier = document.createElement("div"); papier.className = "papier";
+const vignette = document.createElement("div"); vignette.className = "vignette";
+flaeche.appendChild(papier); flaeche.appendChild(vignette);
+
+// Wellenmuster für das Meer (reine Verzierung, verändert keine Formen)
+function wellenBild(farbe) {
+  const w = 64, h = 40, cv = document.createElement("canvas"); cv.width = w * 2; cv.height = h * 2;
+  const g = cv.getContext("2d"); g.scale(2, 2); g.strokeStyle = farbe; g.lineWidth = 0.9; g.lineCap = "round";
+  const welle = (x, y) => { g.beginPath(); g.moveTo(x, y); g.quadraticCurveTo(x + 3, y - 2.5, x + 6, y); g.quadraticCurveTo(x + 9, y + 2.5, x + 12, y); g.stroke(); };
+  welle(6, 12); welle(38, 32);
+  return { width: w * 2, height: h * 2, data: g.getImageData(0, 0, w * 2, h * 2).data };
+}
+
+let laender = null;
+async function stilLaden() {
+  const [stil, geo] = await Promise.all([
+    fetch("https://tiles.openfreemap.org/styles/liberty").then(r => r.json()),
+    laender ? Promise.resolve(laender) : fetch("laender-50m.geojson").then(r => r.json())
+  ]);
+  laender = geo;
+  map.setStyle(stilAnpassen(stil), { diff: false });
+  map.once("style.load", ebenenHinzufuegen);
+}
+
+function landFarben() {
+  const proLand = {};
+  for (const p of leute) (proLand[p.land] = proLand[p.land] || []).push(p);
+  const zuordnung = ["match", ["get", "iso"]];
+  for (const [land, ps] of Object.entries(proLand)) {
+    const paare = new Set(ps.map(p => p.paar || p.id));
+    zuordnung.push(land, paare.size === 1 ? ps[0].farbe : P().tinteLeise);
+  }
+  zuordnung.push("rgba(0,0,0,0)");
+  return { zuordnung, laenderMitLeuten: Object.keys(proLand) };
+}
+
+function ebenenHinzufuegen() {
+  const c = P();
+  map.addImage("wellen", wellenBild(c.wasserTinte), { pixelRatio: 2 });
+  map.addLayer({ id: "wasser-wellen", type: "fill", source: "openmaptiles", "source-layer": "water", maxzoom: 9,
+    paint: { "fill-pattern": "wellen", "fill-opacity": ["interpolate", ["linear"], ["zoom"], 0, c.wellen, 7, c.wellen, 9, 0] } }, "waterway_tunnel");
+
+  // Ländergrenzen und Länderfarben aus demselben Datensatz (Natural Earth 1:50 Mio.), bis Zoom 6
+  map.addSource("laender", { type: "geojson", data: laender, tolerance: 0.2 });
+  const { zuordnung, laenderMitLeuten } = landFarben();
+  const vorBeschriftung = "waterway_line_label";
+  map.addLayer({ id: "laender-farbe", type: "fill", source: "laender", maxzoom: 7,
+    filter: ["in", ["get", "iso"], ["literal", laenderMitLeuten]],
+    paint: { "fill-color": zuordnung, "fill-opacity": ["interpolate", ["linear"], ["zoom"], 0, 0.42, 4.5, 0.32, 6.5, 0] } }, vorBeschriftung);
+  map.addLayer({ id: "kueste-schatten", type: "line", source: "laender", maxzoom: 7,
+    paint: { "line-color": c.wasserTinte, "line-width": ["interpolate", ["linear"], ["zoom"], 0, 2.5, 6, 6], "line-blur": 3, "line-opacity": ["interpolate", ["linear"], ["zoom"], 0, 0.25, 5, 0.2, 6.5, 0] } }, vorBeschriftung);
+  map.addLayer({ id: "laender-linie", type: "line", source: "laender", maxzoom: 7,
+    paint: { "line-color": c.grenze, "line-width": ["interpolate", ["linear"], ["zoom"], 0, 0.5, 5, 1.1], "line-opacity": ["interpolate", ["linear"], ["zoom"], 0, 0.85, 5.5, 0.85, 6.5, 0] } }, vorBeschriftung);
+
+  // Getrennte Paare: gestrichelte Linie auf dem kürzesten Weg, mit Entfernung
+  map.addSource("paar-linien", { type: "geojson", data: { type: "FeatureCollection", features: [] } });
+  map.addLayer({ id: "paar-linie", type: "line", source: "paar-linien",
+    layout: { "line-cap": "round" },
+    paint: { "line-color": "#c0582f", "line-width": 2.2, "line-dasharray": [1.5, 1.8], "line-opacity": 0.95 } });
+  map.addSource("paar-text", { type: "geojson", data: { type: "FeatureCollection", features: [] } });
+  map.addLayer({ id: "paar-entfernung", type: "symbol", source: "paar-text",
+    layout: { "text-field": ["get", "text"], "text-font": ["Noto Sans Bold"], "text-size": 13, "text-offset": [0, -0.9], "text-allow-overlap": true },
+    paint: { "text-color": "#c0582f", "text-halo-color": c.halo, "text-halo-width": 2 } });
+
+  pinsSetzen();
+  paarLinienZeichnen(true);
+  map.once("idle", () => setTimeout(() => document.getElementById("start").classList.add("weg"), 300));
+}
+
+// ---------- Pins ----------
+let marker = [];
+function pinsSetzen() {
+  marker.forEach(m => m.remove()); marker = [];
+  const gruppen = [];
+  for (const p of leute) {
+    const partner = p.paar && leute.find(q => q.paar === p.paar && q.id !== p.id);
+    if (partner && entfernungKm(p.lat, p.lon, partner.lat, partner.lon) < 50) {
+      if (!gruppen.some(g => g.includes(partner))) gruppen.push([p, partner]);
+    } else gruppen.push([p]);
+  }
+  gruppen.forEach((g, i) => {
+    const el = document.createElement("div");
+    el.className = "pin" + (g.length === 2 ? " pin-paar" : "") + (g[0].id === "du" ? " pin-du" : "");
+    const innen = document.createElement("div"); innen.className = "pin-innen";
+    innen.style.animationDelay = (0.15 + i * 0.09) + "s";
+    if (g[0].id === "du") innen.innerHTML = '<div class="puls"></div>';
+    g.forEach((p, j) => { innen.innerHTML += `<div class="pin-kopf ${j ? "b" : ""}" style="background:${p.farbe}">${kuerzel(p.name)}</div>`; });
+    if (g.length === 2) innen.innerHTML += '<div class="herz">❤️</div>';
+    innen.innerHTML += '<div class="pin-spitze"></div>';
+    el.appendChild(innen);
+    el.addEventListener("click", e => { e.stopPropagation(); infoZeigen(g); });
+    const m = new maplibregl.Marker({ element: el, anchor: "bottom", opacityWhenCovered: "0" }).setLngLat([g[0].lon, g[0].lat]).addTo(map);
+    marker.push(m);
+  });
+}
+
+function paarLinienZeichnen(animiert) {
+  const paare = {};
+  for (const p of leute) if (p.paar) (paare[p.paar] = paare[p.paar] || []).push(p);
+  const linien = [], texte = [];
+  for (const [a, b] of Object.values(paare)) {
+    const d = entfernungKm(a.lat, a.lon, b.lat, b.lon);
+    if (d < 50) continue;
+    const pts = grosskreis(a.lon, a.lat, b.lon, b.lat);
+    linien.push(pts);
+    texte.push({ type: "Feature", properties: { text: km(d) }, geometry: { type: "Point", coordinates: pts[Math.floor(pts.length / 2)] } });
+  }
+  const setzen = anteil => map.getSource("paar-linien").setData({ type: "FeatureCollection", features: linien.map(pts => ({ type: "Feature", properties: {}, geometry: { type: "LineString", coordinates: pts.slice(0, Math.max(2, Math.ceil(pts.length * anteil))) } })) });
+  map.getSource("paar-text").setData({ type: "FeatureCollection", features: [] });
+  if (!animiert) { setzen(1); map.getSource("paar-text").setData({ type: "FeatureCollection", features: texte }); return; }
+  const start = performance.now() + 700, dauer = 1100;
+  const schritt = t => {
+    const k = Math.min(1, Math.max(0, (t - start) / dauer));
+    setzen(1 - Math.pow(1 - k, 3));
+    if (k < 1) requestAnimationFrame(schritt);
+    else map.getSource("paar-text").setData({ type: "FeatureCollection", features: texte });
+  };
+  requestAnimationFrame(schritt);
+}
+
+// ---------- Liste und Infokarte ----------
+function listeAufbauen() {
+  const du = ich();
+  const andere = leute.filter(p => p.id !== "du").map(p => ({ ...p, d: entfernungKm(du.lat, du.lon, p.lat, p.lon) })).sort((x, y) => x.d - y.d);
+  const laenderZahl = new Set(andere.map(p => p.land)).size;
+  document.getElementById("zusammenfassung").textContent = `${andere.length} Freunde · ${laenderZahl} Länder · Beispieldaten`;
+  const ul = document.getElementById("liste"); ul.innerHTML = "";
+  for (const p of andere) {
+    const partner = p.paar && leute.find(q => q.paar === p.paar && q.id !== p.id);
+    let paarText = "";
+    if (partner) { const dp = entfernungKm(p.lat, p.lon, partner.lat, partner.lon); paarText = dp < 50 ? ` · mit ${partner.name}` : ` · ${partner.name} ist ${km(dp)} entfernt`; }
+    const li = document.createElement("li");
+    li.innerHTML = `<div class="ava" style="background:${p.farbe}">${kuerzel(p.name)}</div>
+      <div class="zeile"><b>${p.name}</b><span>${flagge(p.land)} ${p.ort} · ${uhrzeit(p.tz)} Uhr${paarText}</span></div>
+      <div class="weite"><b>${km(p.d)}</b><span>von dir</span></div>`;
+    li.onclick = () => { zuPerson(p); infoZeigen([p]); };
+    ul.appendChild(li);
+  }
+}
+
+function infoZeigen(gruppe) {
+  const du = ich(), p = gruppe[0], info = document.getElementById("info");
+  const name = gruppe.map(x => x.name).join(" & ");
+  let text = `${flagge(p.land)} <b>${p.ort}</b> · Ortszeit <b>${uhrzeit(p.tz)} Uhr</b>`;
+  if (p.id !== "du") text += `<br>Entfernung zu dir: <b>${km(entfernungKm(du.lat, du.lon, p.lat, p.lon))}</b>`;
+  if (gruppe.length === 2) text += `<br>Gerade zusammen unterwegs`;
+  else if (p.paar) { const q = leute.find(x => x.paar === p.paar && x.id !== p.id); text += `<br>${q.name} ist in ${q.ort}, <b>${km(entfernungKm(p.lat, p.lon, q.lat, q.lon))}</b> entfernt`; }
+  info.querySelector("h3").textContent = name;
+  info.querySelector("p").innerHTML = text;
+  info.classList.add("offen");
+  document.getElementById("blatt").classList.remove("offen");
+}
+document.getElementById("info-zu").onclick = () => document.getElementById("info").classList.remove("offen");
+map.on("click", () => document.getElementById("info").classList.remove("offen"));
+
+function zuPerson(p) {
+  document.getElementById("blatt").classList.remove("offen");
+  map.flyTo({ center: [p.lon, p.lat], zoom: Math.max(map.getZoom(), 9), speed: 1.4, curve: 1.5, essential: true });
+}
+
+document.getElementById("blatt-kopf").onclick = () => document.getElementById("blatt").classList.toggle("offen");
+document.getElementById("knopf-welt").onclick = () => {
+  document.getElementById("info").classList.remove("offen");
+  map.flyTo({ center: [ich().lon + 30, 20], zoom: 1.35, speed: 1.2, essential: true });
+};
+
+function hinweis(t) {
+  const h = document.getElementById("hinweis"); h.textContent = t; h.classList.add("zeigen");
+  clearTimeout(hinweis.t); hinweis.t = setTimeout(() => h.classList.remove("zeigen"), 2600);
+}
+
+// Echter Standort: bleibt nur auf diesem Gerät, wird nirgendwo gespeichert
+document.getElementById("knopf-ich").onclick = () => {
+  if (!navigator.geolocation) return hinweis("Standort wird hier nicht unterstützt");
+  hinweis("Standort wird gesucht …");
+  navigator.geolocation.getCurrentPosition(pos => {
+    const du = ich();
+    du.lat = pos.coords.latitude; du.lon = pos.coords.longitude; du.ort = "Dein Standort";
+    du.tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    pinsSetzen(); listeAufbauen();
+    map.flyTo({ center: [du.lon, du.lat], zoom: 11, speed: 1.4, essential: true });
+    hinweis(`Genauigkeit: ± ${Math.round(pos.coords.accuracy)} m`);
+  }, () => hinweis("Standort nicht freigegeben"), { enableHighAccuracy: true, timeout: 12000 });
+};
+
+// Dunkelmodus folgt dem iPhone
+dunkel.addEventListener("change", () => { stilLaden(); });
+
+// ---------- Start ----------
+listeAufbauen();
+stilLaden().catch(() => hinweis("Karte konnte nicht geladen werden"));
+setTimeout(() => document.getElementById("start").classList.add("weg"), 4500);
+setInterval(listeAufbauen, 60000);
+</script>
+</body>
+</html>
