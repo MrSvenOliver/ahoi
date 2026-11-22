@@ -24,6 +24,10 @@ Gesammelte Wünsche und Entscheidungen von Sven. Gebaut wird erst, wenn die Anfo
 - Animationen lebendig: Pins ploppen auf, Reiselinien zeichnen sich, Kompass dreht sich beim Laden
 - Darf nicht ruckeln: Vektorkarte über den Grafikchip, nur flüssige Animationsarten; Prüfung über den Karten-Prototyp
 
+## Aufbau der App
+- Leiste unten: Karte · Reisen · Chat · Ideen
+- Profil als rundes Foto oben rechts; dort auch Kartenstil, Mitteilungen, Privatsphäre, Paar verknüpfen, Jemanden vorschlagen, Feedback
+
 ## Kartengenauigkeit (feste Regel, kein Spielraum)
 - Echte Kartendaten aus OpenStreetMap für Küsten, Grenzen und Städte; der Schatzkarten-Look entsteht nur über Farben, Linien und Schrift
 - Nichts wird von Hand nachgezeichnet oder verschoben

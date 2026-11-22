@@ -3,6 +3,8 @@
 Jede Entscheidung mit Datum. Neue Einträge kommen oben dazu.
 
 ## 22.11.2026
+- Aufbau der App (D): Leiste unten mit Karte · Reisen · Chat · Ideen; Profil als rundes Foto oben rechts; Kartenstil-Auswahl wandert ins Profil
+- Erste Bildschirme als Prototyp mit Beispieldaten: Reisen (Treffer, Zeitleiste, Vielleicht-Pläne, Eintragen per Kalender/Flugnummer/Screenshot), Chat, Ideen (Filter nach Land, Herz, Kostenrechner, Airbnb-Link), Profil (Länder-Sammlung, Abzeichen, Mitteilungen, Privatsphäre)
 - Ortsnamen auf der Karte immer in der Sprache des iPhones
 - Pins, die sich auf dem Bildschirm überdecken würden, werden zu einem Pin mit leicht überlappenden Gesichtern und einer Zahl zusammengefasst; Antippen zoomt hinein, bis sie sich trennen
 - Option "Auto" gestrichen: Kartenstil nur A, B oder C, Standard A; kein automatischer Dunkelmodus mehr (ersetzt die frühere Entscheidung)
