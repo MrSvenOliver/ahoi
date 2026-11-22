@@ -23,6 +23,11 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v5
+      - name: Versionsstempel setzen (damit die App neue Stände selbst erkennt)
+        run: |
+          V="$(date -u +%Y%m%d%H%M)-${GITHUB_SHA::7}"
+          sed -i "s/__VERSION__/$V/g" public/prototyp/index.html
+          echo "{\"version\":\"$V\"}" > public/prototyp/version.json
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v4
         with:

@@ -71,18 +71,14 @@
   .pin-innen { position: absolute; left: 0; top: 0; width: 46px; height: 56px; transform-origin: 50% 100%; animation: ploppen 0.55s cubic-bezier(0.2, 1.4, 0.4, 1) both; }
   .pin-kopf { position: absolute; left: 3px; top: 0; width: 40px; height: 40px; border-radius: 50%; border: 2.5px solid var(--gold); box-shadow: 0 4px 10px rgba(50, 30, 10, 0.35); display: grid; place-items: center; font-weight: 700; font-size: 15px; color: #fff8ea; letter-spacing: 0.5px; }
   .pin-spitze { position: absolute; left: 18px; top: 36px; width: 10px; height: 10px; background: var(--gold); transform: rotate(45deg); border-radius: 1px; box-shadow: 2px 2px 4px rgba(50, 30, 10, 0.25); }
-  .pin-paar { width: 62px; }
-  .pin-paar .pin-innen { width: 62px; }
-  .pin-paar .pin-kopf.b { left: 21px; }
-  .pin-paar .pin-spitze { left: 26px; }
-  .pin-paar .herz { position: absolute; left: 24px; top: -6px; font-size: 13px; filter: drop-shadow(0 1px 1px rgba(0,0,0,0.3)); }
+  .herz { position: absolute; z-index: 2; top: -6px; font-size: 13px; filter: drop-shadow(0 1px 1px rgba(0,0,0,0.3)); }
   .pin-du .pin-kopf { border-color: var(--tinte); }
   .pin-du .puls { position: absolute; left: 3px; top: 0; width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--tinte); animation: puls 2.4s ease-out infinite; }
   @keyframes ploppen { from { transform: scale(0) translateY(10px); opacity: 0; } to { transform: scale(1) translateY(0); opacity: 1; } }
   @keyframes puls { from { transform: scale(1); opacity: 0.7; } to { transform: scale(1.8); opacity: 0; } }
 
   /* Infokarte zu einer Person */
-  .info { position: fixed; left: 12px; right: 12px; bottom: calc(env(safe-area-inset-bottom) + 108px); z-index: 11; background: var(--glas); border: 1px solid var(--glas-rand); box-shadow: var(--schatten); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-radius: 22px; padding: 14px 16px; transform: translateY(20px); opacity: 0; pointer-events: none; transition: transform 0.3s cubic-bezier(0.2, 0.9, 0.3, 1), opacity 0.25s; max-width: 520px; margin: 0 auto; }
+  .info { position: fixed; left: 12px; right: 12px; bottom: calc(var(--blatt-sichtbar, 96px) + 12px); z-index: 11; background: var(--glas); border: 1px solid var(--glas-rand); box-shadow: var(--schatten); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-radius: 22px; padding: 14px 16px; transform: translateY(20px); opacity: 0; pointer-events: none; transition: transform 0.3s cubic-bezier(0.2, 0.9, 0.3, 1), opacity 0.25s; max-width: 520px; margin: 0 auto; }
   .info.offen { transform: none; opacity: 1; pointer-events: auto; }
   .info h3 { margin: 0; font-size: 20px; color: var(--text); font-weight: 700; letter-spacing: -0.2px; }
   .info p { margin: 4px 0 0; color: var(--text-leise); font-size: 14px; line-height: 1.45; }
@@ -90,10 +86,11 @@
   .info .zu { position: absolute; right: 8px; top: 8px; }
 
   /* Unteres Fenster */
-  .blatt { position: fixed; left: 0; right: 0; bottom: 0; z-index: 12; background: var(--glas); border-top: 1px solid var(--glas-rand); box-shadow: 0 -10px 30px rgba(60, 38, 16, 0.18); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); border-radius: 26px 26px 0 0; max-width: 560px; margin: 0 auto; transform: translateY(calc(100% - 96px - env(safe-area-inset-bottom))); transition: transform 0.38s cubic-bezier(0.2, 0.9, 0.3, 1); padding-bottom: env(safe-area-inset-bottom); }
-  .blatt.offen { transform: none; }
-  .blatt-kopf { padding: 8px 20px 12px; cursor: pointer; }
-  .griff { width: 40px; height: 5px; border-radius: 3px; background: var(--glas-rand); margin: 0 auto 8px; }
+  .blatt { position: fixed; left: 0; right: 0; bottom: 0; z-index: 12; background: var(--glas); border-top: 1px solid var(--glas-rand); box-shadow: 0 -10px 30px rgba(60, 38, 16, 0.18); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); border-radius: 26px 26px 0 0; max-width: 560px; margin: 0 auto; transform: translateY(100%); transition: transform 0.38s cubic-bezier(0.2, 0.9, 0.3, 1); padding-bottom: env(safe-area-inset-bottom); will-change: transform; }
+  .blatt-kopf { padding: 10px 20px 14px; cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none; }
+  .blatt .liste { transition: opacity 0.2s; }
+  .blatt:not(.offen) .liste { opacity: 0; pointer-events: none; }
+  .griff { width: 44px; height: 5px; border-radius: 3px; background: var(--text-leise); opacity: 0.45; margin: 0 auto 10px; }
   .blatt-kopf h2 { margin: 0; font-size: 22px; font-weight: 700; color: var(--text); letter-spacing: -0.3px; line-height: 1.2; }
   .blatt-kopf small { color: var(--text-leise); font-size: 13px; }
   .liste { list-style: none; margin: 0; padding: 0 10px 14px; max-height: 50vh; overflow-y: auto; -webkit-overflow-scrolling: touch; }
@@ -119,11 +116,13 @@
 
   .maplibregl-ctrl-attrib { background: transparent !important; font-size: 10px; }
   .maplibregl-ctrl-attrib a { color: var(--text-leise) !important; }
-  .maplibregl-ctrl-bottom-right { bottom: calc(96px + env(safe-area-inset-bottom)); }
+  .maplibregl-ctrl-bottom-right { bottom: var(--blatt-sichtbar, 96px); }
   @media (min-width: 900px) {
-    .blatt { left: 16px; right: auto; width: 380px; bottom: 16px; border-radius: 26px; transform: none; border: 1px solid var(--glas-rand); }
+    .blatt { left: 16px; right: auto; width: 380px; bottom: 16px; border-radius: 26px; transform: none !important; border: 1px solid var(--glas-rand); }
+    .blatt .liste { opacity: 1 !important; pointer-events: auto !important; }
+    .blatt-kopf { cursor: default; }
     .blatt .griff { display: none; }
-    .info { left: auto; right: 16px; width: 360px; bottom: 16px; margin: 0; }
+    .info { left: auto; right: 16px; width: 360px; bottom: 16px !important; margin: 0; }
     .maplibregl-ctrl-bottom-right { bottom: 0; }
   }
 </style>
@@ -183,6 +182,7 @@ const leute = [
   { id: "nico",  name: "Nico",  ort: "Canggu, Bali",land: "ID", lat: -8.6478, lon: 115.1385, tz: "Asia/Makassar",       farbe: "#4f7a6a", paar: "p2" },
   { id: "mia",   name: "Mia",   ort: "Mexiko-Stadt",land: "MX", lat: 19.4326, lon: -99.1332, tz: "America/Mexico_City", farbe: "#a8467a" },
   { id: "jonas", name: "Jonas", ort: "Chiang Mai",  land: "TH", lat: 18.7883, lon: 98.9853,  tz: "Asia/Bangkok",        farbe: "#b98a2e" },
+  { id: "ben",   name: "Ben",   ort: "Chiang Mai",  land: "TH", lat: 18.7953, lon: 98.9620,  tz: "Asia/Bangkok",        farbe: "#5a6fa0" },
 ];
 const ich = () => leute.find(p => p.id === "du");
 
@@ -376,24 +376,31 @@ function ebenenHinzufuegen() {
 
 // ---------- Pins ----------
 let marker = [];
-function pinsSetzen() {
-  marker.forEach(m => m.remove()); marker = [];
+const NAH_KM = 50;
+// Ein Herz gibt es nur, wenn genau zwei Personen zusammen sind UND beide ihr Paar gegenseitig bestätigt haben
+const istPaar = g => g.length === 2 && g[0].paar && g[0].paar === g[1].paar;
+function gruppenBilden() {
   const gruppen = [];
   for (const p of leute) {
-    const partner = p.paar && leute.find(q => q.paar === p.paar && q.id !== p.id);
-    if (partner && entfernungKm(p.lat, p.lon, partner.lat, partner.lon) < 50) {
-      if (!gruppen.some(g => g.includes(partner))) gruppen.push([p, partner]);
-    } else gruppen.push([p]);
+    const g = gruppen.find(g => g.some(q => entfernungKm(p.lat, p.lon, q.lat, q.lon) < NAH_KM));
+    g ? g.push(p) : gruppen.push([p]);
   }
-  gruppen.forEach((g, i) => {
+  return gruppen;
+}
+function pinsSetzen() {
+  marker.forEach(m => m.remove()); marker = [];
+  gruppenBilden().forEach((g, i) => {
+    const n = Math.min(g.length, 3), breite = 46 + (n - 1) * 18;
     const el = document.createElement("div");
-    el.className = "pin" + (g.length === 2 ? " pin-paar" : "") + (g[0].id === "du" ? " pin-du" : "");
+    el.className = "pin" + (g.some(p => p.id === "du") ? " pin-du" : "");
+    el.style.width = breite + "px";
     const innen = document.createElement("div"); innen.className = "pin-innen";
+    innen.style.width = breite + "px";
     innen.style.animationDelay = (0.15 + i * 0.09) + "s";
     if (g[0].id === "du") innen.innerHTML = '<div class="puls"></div>';
-    g.forEach((p, j) => { innen.innerHTML += `<div class="pin-kopf ${j ? "b" : ""}" style="background:${p.farbe}">${kuerzel(p.name)}</div>`; });
-    if (g.length === 2) innen.innerHTML += '<div class="herz">❤️</div>';
-    innen.innerHTML += '<div class="pin-spitze"></div>';
+    g.slice(0, 3).forEach((p, j) => { innen.innerHTML += `<div class="pin-kopf" style="left:${3 + j * 18}px;background:${p.farbe}">${g.length > 3 && j === 2 ? "+" + (g.length - 2) : kuerzel(p.name)}</div>`; });
+    if (istPaar(g)) innen.innerHTML += `<div class="herz" style="left:${breite / 2 - 7}px">❤️</div>`;
+    innen.innerHTML += `<div class="pin-spitze" style="left:${breite / 2 - 5}px"></div>`;
     el.appendChild(innen);
     el.addEventListener("click", e => { e.stopPropagation(); infoZeigen(g); });
     const m = new maplibregl.Marker({ element: el, anchor: "bottom", opacityWhenCovered: "0" }).setLngLat([g[0].lon, g[0].lat]).addTo(map);
@@ -430,12 +437,14 @@ function listeAufbauen() {
   const du = ich();
   const andere = leute.filter(p => p.id !== "du").map(p => ({ ...p, d: entfernungKm(du.lat, du.lon, p.lat, p.lon) })).sort((x, y) => x.d - y.d);
   const laenderZahl = new Set(andere.map(p => p.land)).size;
-  document.getElementById("zusammenfassung").textContent = `${andere.length} Freunde · ${laenderZahl} Länder · Beispieldaten`;
+  document.getElementById("zusammenfassung").textContent = `${andere.length} Freunde · ${laenderZahl} Länder · Beispieldaten · ${versionText(VERSION)}`;
   const ul = document.getElementById("liste"); ul.innerHTML = "";
   for (const p of andere) {
     const partner = p.paar && leute.find(q => q.paar === p.paar && q.id !== p.id);
     let paarText = "";
-    if (partner) { const dp = entfernungKm(p.lat, p.lon, partner.lat, partner.lon); paarText = dp < 50 ? ` · mit ${partner.name}` : ` · ${partner.name} ist ${km(dp)} entfernt`; }
+    const dabei = leute.filter(q => q.id !== p.id && q.id !== "du" && entfernungKm(p.lat, p.lon, q.lat, q.lon) < NAH_KM);
+    if (dabei.length) paarText = ` · mit ${dabei.map(q => q.name).join(", ")}`;
+    else if (partner) paarText = ` · ${partner.name} ist ${km(entfernungKm(p.lat, p.lon, partner.lat, partner.lon))} entfernt`;
     const li = document.createElement("li");
     li.innerHTML = `<div class="ava" style="background:${p.farbe}">${kuerzel(p.name)}</div>
       <div class="zeile"><b>${p.name}</b><span>${flagge(p.land)} ${p.ort} · ${uhrzeit(p.tz)} Uhr${paarText}</span></div>
@@ -450,22 +459,71 @@ function infoZeigen(gruppe) {
   const name = gruppe.map(x => x.name).join(" & ");
   let text = `${flagge(p.land)} <b>${p.ort}</b> · Ortszeit <b>${uhrzeit(p.tz)} Uhr</b>`;
   if (p.id !== "du") text += `<br>Entfernung zu dir: <b>${km(entfernungKm(du.lat, du.lon, p.lat, p.lon))}</b>`;
-  if (gruppe.length === 2) text += `<br>Gerade zusammen unterwegs`;
+  if (istPaar(gruppe)) text += `<br>❤️ Paar · gerade zusammen unterwegs`;
+  else if (gruppe.length > 1) text += `<br>Zusammen unterwegs`;
   else if (p.paar) { const q = leute.find(x => x.paar === p.paar && x.id !== p.id); text += `<br>${q.name} ist in ${q.ort}, <b>${km(entfernungKm(p.lat, p.lon, q.lat, q.lon))}</b> entfernt`; }
   info.querySelector("h3").textContent = name;
   info.querySelector("p").innerHTML = text;
   info.classList.add("offen");
-  document.getElementById("blatt").classList.remove("offen");
+  blattSetzen(false);
 }
 document.getElementById("info-zu").onclick = () => document.getElementById("info").classList.remove("offen");
-map.on("click", () => document.getElementById("info").classList.remove("offen"));
+map.on("click", () => { document.getElementById("info").classList.remove("offen"); if (blattOffen) blattSetzen(false); });
 
 function zuPerson(p) {
-  document.getElementById("blatt").classList.remove("offen");
+  blattSetzen(false);
   map.flyTo({ center: [p.lon, p.lat], zoom: Math.max(map.getZoom(), 9), speed: 1.4, curve: 1.5, essential: true });
 }
 
-document.getElementById("blatt-kopf").onclick = () => document.getElementById("blatt").classList.toggle("offen");
+// ---------- Unteres Fenster: ziehen oder antippen ----------
+const blatt = document.getElementById("blatt"), blattKopf = document.getElementById("blatt-kopf");
+let blattOffen = false, blattY = 0;
+const breit = () => window.matchMedia("(min-width: 900px)").matches;
+const blattZuY = () => blatt.offsetHeight - blattKopf.offsetHeight - parseFloat(getComputedStyle(blatt).paddingBottom || 0);
+function blattPos(y) {
+  blattY = y;
+  blatt.style.transform = `translateY(${y}px)`;
+}
+function blattSetzen(offen) {
+  blattOffen = offen && true;
+  blatt.classList.toggle("offen", blattOffen);
+  blattPos(blattOffen ? 0 : blattZuY());
+  document.documentElement.style.setProperty("--blatt-sichtbar", (blatt.offsetHeight - blattZuY()) + "px");
+}
+let zug = null;
+blattKopf.addEventListener("pointerdown", e => {
+  if (breit()) return;
+  zug = { startY: e.clientY, startPos: blattY, letzteY: e.clientY, letzteZeit: performance.now(), tempo: 0, bewegt: false };
+  blatt.style.transition = "none";
+  blattKopf.setPointerCapture(e.pointerId);
+});
+blattKopf.addEventListener("pointermove", e => {
+  if (!zug) return;
+  const dy = e.clientY - zug.startY;
+  if (Math.abs(dy) > 5) zug.bewegt = true;
+  const zu = blattZuY();
+  let y = zug.startPos + dy;
+  if (y < 0) y = y / 4; if (y > zu) y = zu + (y - zu) / 4; // leichter Widerstand an den Enden
+  blattPos(y);
+  blatt.classList.add("offen");
+  blatt.querySelector(".liste").style.opacity = Math.max(0, Math.min(1, 1 - y / zu));
+  const jetzt = performance.now();
+  zug.tempo = (e.clientY - zug.letzteY) / Math.max(1, jetzt - zug.letzteZeit);
+  zug.letzteY = e.clientY; zug.letzteZeit = jetzt;
+});
+const zugEnde = () => {
+  if (!zug) return;
+  blatt.style.transition = "";
+  blatt.querySelector(".liste").style.opacity = "";
+  if (!zug.bewegt) blattSetzen(!blattOffen);
+  else if (zug.tempo < -0.3) blattSetzen(true);
+  else if (zug.tempo > 0.3) blattSetzen(false);
+  else blattSetzen(blattY < blattZuY() / 2);
+  zug = null;
+};
+blattKopf.addEventListener("pointerup", zugEnde);
+blattKopf.addEventListener("pointercancel", zugEnde);
+window.addEventListener("resize", () => blattSetzen(blattOffen));
 document.getElementById("knopf-welt").onclick = () => {
   document.getElementById("info").classList.remove("offen");
   map.flyTo({ center: [15, 30], zoom: fuellZoom(), speed: 1.2, essential: true });
@@ -493,8 +551,33 @@ document.getElementById("knopf-ich").onclick = () => {
 // Dunkelmodus folgt dem iPhone
 dunkel.addEventListener("change", () => { stilLaden(); });
 
+// ---------- Neue Version automatisch laden ----------
+const VERSION = "__VERSION__";
+function versionText(v) {
+  const m = /^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})/.exec(v);
+  if (!m) return "Entwurf";
+  const d = new Date(Date.UTC(+m[1], m[2] - 1, +m[3], +m[4], +m[5]));
+  return "Stand " + d.toLocaleString("de-DE", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" });
+}
+async function aufNeueVersionPruefen() {
+  if (VERSION.startsWith("__")) return;
+  try {
+    const j = await fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then(r => r.json());
+    if (j.version && j.version !== VERSION) {
+      const schluessel = "ahoi-neu-" + j.version;
+      let schonVersucht = false;
+      try { schonVersucht = sessionStorage.getItem(schluessel); sessionStorage.setItem(schluessel, "1"); } catch (e) {}
+      if (!schonVersucht) location.replace(location.pathname + "?v=" + j.version);
+    }
+  } catch (e) {}
+}
+document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") aufNeueVersionPruefen(); });
+aufNeueVersionPruefen();
+
 // ---------- Start ----------
 listeAufbauen();
+blattSetzen(false);
+document.fonts && document.fonts.ready.then(() => blattSetzen(blattOffen));
 stilLaden().catch(() => hinweis("Karte konnte nicht geladen werden"));
 setTimeout(() => document.getElementById("start").classList.add("weg"), 4500);
 setInterval(listeAufbauen, 60000);
