@@ -3,6 +3,7 @@
 Jede Entscheidung mit Datum. Neue Einträge kommen oben dazu.
 
 ## 22.11.2026
+- Balken unten behoben: Statusleiste auf "default" statt "black-translucent" (iOS 26.1 rechnet bei durchsichtiger Statusleiste die Bildschirmhöhe falsch und lässt unten eine Lücke in Höhe der Statusleiste; Svenolingo nutzt "default" und hat den Fehler nicht). Home-Bildschirm-Icon muss danach einmal neu hinzugefügt werden.
 - Aufbau der App (D): Leiste unten mit Karte · Reisen · Chat · Ideen; Profil als rundes Foto oben rechts; Kartenstil-Auswahl wandert ins Profil
 - Erste Bildschirme als Prototyp mit Beispieldaten: Reisen (Treffer, Zeitleiste, Vielleicht-Pläne, Eintragen per Kalender/Flugnummer/Screenshot), Chat, Ideen (Filter nach Land, Herz, Kostenrechner, Airbnb-Link), Profil (Länder-Sammlung, Abzeichen, Mitteilungen, Privatsphäre)
 - Ortsnamen auf der Karte immer in der Sprache des iPhones
