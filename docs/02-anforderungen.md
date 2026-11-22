@@ -17,10 +17,10 @@ Gesammelte Wünsche und Entscheidungen von Sven. Gebaut wird erst, wenn die Anfo
 - Schatzkarte nur in Farben und Logo: Pergament, Sepia, Terrakotta, Ozeanblau, Gold, Kompass-Logo
 - Alles andere modern: klare Fenster, moderne Schrift, keine Papier-Textur, keine Zierwellen
 - Schrift der App: Plus Jakarta Sans; Schriftzug "Ahoi" in Fraunces
-- Kartenstil wählt jeder selbst (Reihenfolge: A Pergament, B Atlas modern, C Nacht-Gold, Auto = tagsüber A, nachts C); Standard: Auto
+- Kartenstil wählt jeder selbst: A Pergament, B Atlas modern, C Nacht-Gold; Standard: A; kein automatischer Wechsel
 - Logo oben links rund in der runden Leiste
 - Karte füllt immer den ganzen Bildschirm, keine leeren Ränder
-- Dunkelmodus automatisch nach iPhone-Einstellung (dunkle Töne mit goldenen Linien)
+- Dunkle Ansicht nur über Kartenstil C (Nachtblau mit Gold), kein automatischer Dunkelmodus
 - Animationen lebendig: Pins ploppen auf, Reiselinien zeichnen sich, Kompass dreht sich beim Laden
 - Darf nicht ruckeln: Vektorkarte über den Grafikchip, nur flüssige Animationsarten; Prüfung über den Karten-Prototyp
 

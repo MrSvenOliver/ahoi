@@ -279,14 +279,14 @@ const PALETTEN = {
 };
 // Auswahl im Prototyp (wird auf diesem Gerät gemerkt)
 const WAHL = {
-  karte: { A: ["A", "Pergament"], B: ["B", "Atlas modern"], C: ["C", "Nacht-Gold"], auto: ["Auto", "A hell · C nachts"] },
+  karte: { A: ["A", "Pergament"], B: ["B", "Atlas modern"], C: ["C", "Nacht-Gold"] },
   schrift: { D: ["D", "iPhone-Schrift", 'var(--system)'], E: ["E", "Inter", '"Inter", var(--system)'], F: ["F", "Jakarta", '"Plus Jakarta Sans", var(--system)'] },
   marke: { G: ["G", "wie Schrift", null, 800, "24px"], H: ["H", "Fraunces", '"Fraunces", Georgia, serif', 600, "25px"], I: ["I", "DM Serif", '"DM Serif Display", Georgia, serif', 400, "27px"], J: ["J", "Handschrift", 'var(--hand)', 700, "28px"] }
 };
-let auswahl = { karte: "auto", schrift: "F", marke: "H" };
+let auswahl = { karte: "A", schrift: "F", marke: "H" };
 try { const gemerkt = JSON.parse(localStorage.getItem("ahoi-stil") || "{}"); if (WAHL.karte[gemerkt.karte]) auswahl.karte = gemerkt.karte; } catch (e) {}
 const SPRACHE = (navigator.language || "de").toLowerCase().startsWith("de") ? "de" : "en";
-const kartenStil = () => auswahl.karte === "auto" ? (dunkel.matches ? "C" : "A") : auswahl.karte;
+const kartenStil = () => auswahl.karte;
 const P = () => PALETTEN[kartenStil()];
 function oberflaecheAnwenden() {
   const c = P(), r = document.documentElement;
@@ -593,7 +593,7 @@ document.getElementById("knopf-ich").onclick = () => {
 };
 
 // Dunkelmodus folgt dem iPhone
-dunkel.addEventListener("change", () => { if (auswahl.karte === "auto") { oberflaecheAnwenden(); stilLaden(); } });
+
 
 // ---------- Neue Version automatisch laden ----------
 const VERSION = "__VERSION__";

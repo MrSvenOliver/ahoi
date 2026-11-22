@@ -3,6 +3,7 @@
 Jede Entscheidung mit Datum. Neue Einträge kommen oben dazu.
 
 ## 22.11.2026
+- Option "Auto" gestrichen: Kartenstil nur A, B oder C, Standard A; kein automatischer Dunkelmodus mehr (ersetzt die frühere Entscheidung)
 - Schrift der App: Plus Jakarta Sans (F)
 - Kartenstil bleibt als Auswahl für jeden in der App: A, B, C, Auto (in dieser Reihenfolge); Standard Auto
 - Schriftzug "Ahoi": Fraunces (ersetzt die Handschrift)
