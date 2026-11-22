@@ -3,6 +3,11 @@
 Jede Entscheidung mit Datum. Neue Einträge kommen oben dazu.
 
 ## 22.11.2026
+- Design: Mischung aus modern und Schatzkarte; Abenteuer voll auf der Karte, außerhalb leichte Akzente
+- Schrift: Handschrift-Akzente für Ortsnamen und Überschriften, sonst moderne Schrift
+- Dunkelmodus: automatisch nach iPhone-Einstellung
+- Animationen: lebendig
+- Vor dem Bau: Karten-Prototyp zum Testen auf dem iPhone
 - Projekt gestartet: App für Nomaden-Freunde mit Weltkarte, Standorten, Paaren, Distanzen, Treffen
 - Technik: Web-App (PWA) für iPhone, Android und Desktop aus einem Code
 - Hosting: öffentliches GitHub-Archiv, kostenlos über GitHub Pages

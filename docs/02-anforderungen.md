@@ -13,6 +13,14 @@ Gesammelte Wünsche und Entscheidungen von Sven. Gebaut wird erst, wenn die Anfo
 - Kartenstil: A Schatzkarte (Pergament, Sepia, handgezeichnete Küsten, Kompassrose), modern und schön integriert, wenige Knöpfe, übersichtlich
 - Supabase-Keepalive: wöchentlicher automatischer Aufruf über GitHub Actions
 
+## Design
+- Karte im Schatzkarten-Stil (Pergament, Sepia-Küsten, Kompassrose, gestrichelte Reiselinien)
+- Außerhalb der Karte modern mit leichten Akzenten: Pergament-Töne im Hintergrund, kleine Kompass- und Siegel-Details, Farben aus dem Logo (Pergament, Terrakotta, Ozeanblau)
+- Schrift: Ortsnamen und Überschriften wie mit Feder geschrieben, restlicher Text in klarer moderner Schrift
+- Dunkelmodus automatisch nach iPhone-Einstellung (dunkles Pergament mit goldenen Linien)
+- Animationen lebendig: Pins ploppen auf, Reiselinien zeichnen sich, Kompass dreht sich beim Laden
+- Darf nicht ruckeln: Karte über Grafikchip (Vektorkarte), eine leichte Papier-Textur, nur flüssige Animationsarten; vor dem Bau ein Karten-Prototyp zum Testen auf dem iPhone
+
 ## Profil und Login
 - Nur echtes Profilbild (Foto-Upload), Pins zeigen das Foto
 - Login: E-Mail-Code + Google; Apple-Login später mit dem App-Store-Schritt (Apple-Entwicklerkonto)
