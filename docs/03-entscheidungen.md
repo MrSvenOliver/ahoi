@@ -3,6 +3,8 @@
 Jede Entscheidung mit Datum. Neue Einträge kommen oben dazu.
 
 ## 22.11.2026
+- Schriftzug "Ahoi": Fraunces (ersetzt die Handschrift)
+- Prototyp hat eine Stil-Auswahl (Farbpaletten-Knopf): Karte A Pergament / B Atlas modern / C Nacht-Gold, Schrift D/E/F; Nachtansicht neu in Nachtblau mit Gold
 - "Wer ist wo"-Fenster: per Finger hochziehen oder antippen; zugeklappt nur Überschrift sichtbar
 - Paar-Herz nur, wenn genau zwei Personen zusammen sind und beide die Paar-Verknüpfung bestätigt haben; Freunde zusammen bekommen einen gemeinsamen Pin ohne Herz
 - App prüft beim Öffnen selbst, ob es einen neuen Stand gibt, und lädt ihn automatisch; Stand wird im Fenster "Wer ist wo" angezeigt

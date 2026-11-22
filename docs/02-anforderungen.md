@@ -16,7 +16,7 @@ Gesammelte Wünsche und Entscheidungen von Sven. Gebaut wird erst, wenn die Anfo
 ## Design
 - Schatzkarte nur in Farben und Logo: Pergament, Sepia, Terrakotta, Ozeanblau, Gold, Kompass-Logo
 - Alles andere modern: klare Fenster, moderne Schrift, keine Papier-Textur, keine Zierwellen
-- Handschrift nur im Schriftzug "Ahoi"
+- Schriftzug "Ahoi" in Fraunces (moderne Serifenschrift); Kartenstil und Grundschrift werden über die Stil-Auswahl im Prototyp entschieden
 - Logo oben links rund in der runden Leiste
 - Karte füllt immer den ganzen Bildschirm, keine leeren Ränder
 - Dunkelmodus automatisch nach iPhone-Einstellung (dunkle Töne mit goldenen Linien)
