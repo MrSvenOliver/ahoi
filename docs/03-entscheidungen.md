@@ -3,6 +3,7 @@
 Jede Entscheidung mit Datum. Neue Einträge kommen oben dazu.
 
 ## 22.11.2026
+- Komplette App schon in der Beta auf Deutsch, Englisch, Slowakisch (Texte in texte.js); Sprachwahl im Profil kleiner und dezenter
 - Infokarte und „Wer ist wo“ zeigen nur die angetippte Person, keine Hinweise auf den Partner
 - Sprachen schon in der Beta: Deutsch, Englisch, Slowakisch; automatisch nach Handysprache, sonst Englisch; Flaggen oben im Profil, kleine Flagge am Profilknopf
 - Familie: jeder Nomade lädt seine eigene Familie ein (B); sie sieht Ort, nächste Reise, alle Reisen und Vielleicht-Pläne (C + D + E)

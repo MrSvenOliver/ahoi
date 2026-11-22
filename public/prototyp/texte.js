@@ -153,6 +153,7 @@ const TEXTE = {
   "Gästehaus": ["Guesthouse", "Penzión"],
   "März": ["March", "marec"],
   "flexibel": ["flexible", "flexibilne"],
+  "👥 Lieblingsleute": ["👥 Favourites", "👥 Obľúbení"],
   "👤 3 Personen": ["👤 3 people", "👤 3 osoby"],
   "hat das geteilt": ["shared this", "zdieľal(a) toto"],
   "Schlafzimmer": ["Bedrooms", "Spálne"],
