@@ -576,13 +576,16 @@ function stilAnpassen(stil) {
 
 // ---------- Karte ----------
 // Kleinster Zoom, bei dem die Weltkarte den Bildschirm in der Höhe ganz ausfüllt (keine leeren Ränder)
+// Startansicht: etwas näher und weiter südlich, damit nicht Grönland und die Arktis den Bildschirm füllen
+const START_MITTE = [15, 18];
+function startZoom() { return fuellZoom() + 0.35; }
 function fuellZoom() { return Math.max(0, Math.log2(window.innerHeight / 512) + 0.05); }
 window.addEventListener("resize", () => { map.resize(); map.setMinZoom(fuellZoom()); blattSetzen(blattOffen); });
 const map = new maplibregl.Map({
   container: "map",
   style: { version: 8, sources: {}, layers: [] },
-  center: [15, 30],
-  zoom: fuellZoom(),
+  center: START_MITTE,
+  zoom: startZoom(),
   minZoom: fuellZoom(),
   maxZoom: 18,
   pixelRatio: Math.min(window.devicePixelRatio || 1, 2),
@@ -794,7 +797,7 @@ blattKopf.addEventListener("pointercancel", zugEnde);
 window.addEventListener("resize", () => blattSetzen(blattOffen));
 document.getElementById("knopf-welt").onclick = () => {
   document.getElementById("info").classList.remove("offen");
-  map.flyTo({ center: [15, 30], zoom: fuellZoom(), speed: 1.2, essential: true });
+  map.flyTo({ center: START_MITTE, zoom: startZoom(), speed: 1.2, essential: true });
 };
 
 function hinweis(t) {
