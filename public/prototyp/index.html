@@ -74,6 +74,7 @@
   .pin-spitze { position: absolute; left: 18px; top: 36px; width: 10px; height: 10px; background: var(--gold); transform: rotate(45deg); border-radius: 1px; box-shadow: 2px 2px 4px rgba(50, 30, 10, 0.25); }
   .herz { position: absolute; z-index: 2; top: -6px; font-size: 13px; filter: drop-shadow(0 1px 1px rgba(0,0,0,0.3)); }
   .pin-du .pin-kopf { border-color: var(--tinte); }
+  .pin-zahl { position: absolute; top: -7px; z-index: 3; min-width: 20px; height: 20px; padding: 0 5px; border-radius: 10px; background: var(--tinte); color: var(--papier); font-size: 12px; font-weight: 700; display: grid; place-items: center; box-shadow: 0 2px 6px rgba(0,0,0,0.3); }
   .pin-du .puls { position: absolute; left: 3px; top: 0; width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--tinte); animation: puls 2.4s ease-out infinite; }
   @keyframes ploppen { from { transform: scale(0) translateY(10px); opacity: 0; } to { transform: scale(1) translateY(0); opacity: 1; } }
   @keyframes puls { from { transform: scale(1); opacity: 0.7; } to { transform: scale(1.8); opacity: 0; } }
@@ -431,26 +432,49 @@ function gruppenBilden() {
   }
   return gruppen;
 }
+// Pins, die sich auf dem Bildschirm überdecken würden, werden zu einem Pin zusammengefasst:
+// Gesichter leicht überlappend nebeneinander, dazu eine Zahl, wie viele Personen es sind.
+const PIN_ABSTAND_PX = 46;
+let ersteDarstellung = true;
 function pinsSetzen() {
   marker.forEach(m => m.remove()); marker = [];
-  gruppenBilden().forEach((g, i) => {
-    const n = Math.min(g.length, 3), breite = 46 + (n - 1) * 18;
+  const haufen = [];
+  for (const g of gruppenBilden()) {
+    const pt = map.project([g[0].lon, g[0].lat]);
+    const h = haufen.find(h => Math.hypot(h.x - pt.x, h.y - pt.y) < PIN_ABSTAND_PX);
+    if (h) { h.gruppen.push(g); } else haufen.push({ x: pt.x, y: pt.y, gruppen: [g] });
+  }
+  haufen.forEach((h, i) => {
+    const leuteHier = h.gruppen.flat();
+    const n = Math.min(leuteHier.length, 3), breite = 46 + (n - 1) * 18;
     const el = document.createElement("div");
-    el.className = "pin" + (g.some(p => p.id === "du") ? " pin-du" : "");
+    el.className = "pin" + (leuteHier.some(p => p.id === "du") ? " pin-du" : "");
     el.style.width = breite + "px";
     const innen = document.createElement("div"); innen.className = "pin-innen";
     innen.style.width = breite + "px";
-    innen.style.animationDelay = (0.15 + i * 0.09) + "s";
-    if (g[0].id === "du") innen.innerHTML = '<div class="puls"></div>';
-    g.slice(0, 3).forEach((p, j) => { innen.innerHTML += `<div class="pin-kopf" style="left:${3 + j * 18}px;background:${p.farbe}">${g.length > 3 && j === 2 ? "+" + (g.length - 2) : kuerzel(p.name)}</div>`; });
-    if (istPaar(g)) innen.innerHTML += `<div class="herz" style="left:${breite / 2 - 7}px">❤️</div>`;
+    if (ersteDarstellung) innen.style.animationDelay = (0.15 + i * 0.09) + "s"; else innen.style.animation = "none";
+    if (leuteHier[0].id === "du") innen.innerHTML = '<div class="puls"></div>';
+    leuteHier.slice(0, 3).forEach((p, j) => { innen.innerHTML += `<div class="pin-kopf" style="left:${3 + j * 18}px;background:${p.farbe};z-index:${3 - j}">${leuteHier.length > 3 && j === 2 ? "+" + (leuteHier.length - 2) : kuerzel(p.name)}</div>`; });
+    if (h.gruppen.length === 1 && istPaar(h.gruppen[0])) innen.innerHTML += `<div class="herz" style="left:${breite / 2 - 7}px">❤️</div>`;
+    else if (leuteHier.length > 1) innen.innerHTML += `<div class="pin-zahl" style="left:${breite - 16}px">${leuteHier.length}</div>`;
     innen.innerHTML += `<div class="pin-spitze" style="left:${breite / 2 - 5}px"></div>`;
     el.appendChild(innen);
-    el.addEventListener("click", e => { e.stopPropagation(); infoZeigen(g); });
-    const m = new maplibregl.Marker({ element: el, anchor: "bottom", opacityWhenCovered: "0" }).setLngLat([g[0].lon, g[0].lat]).addTo(map);
-    marker.push(m);
+    el.addEventListener("click", e => {
+      e.stopPropagation();
+      if (h.gruppen.length === 1) return infoZeigen(h.gruppen[0]);
+      // Mehrere Orte übereinander: so weit hineinzoomen, dass sie sich trennen
+      const b = new maplibregl.LngLatBounds();
+      leuteHier.forEach(p => b.extend([p.lon, p.lat]));
+      map.fitBounds(b, { padding: { top: 120, bottom: 160, left: 60, right: 60 }, maxZoom: 11, duration: 900 });
+    });
+    const ll = map.unproject([h.x, h.y]);
+    const anker = h.gruppen.length === 1 ? [h.gruppen[0][0].lon, h.gruppen[0][0].lat] : [ll.lng, ll.lat];
+    marker.push(new maplibregl.Marker({ element: el, anchor: "bottom", opacityWhenCovered: "0" }).setLngLat(anker).addTo(map));
   });
+  ersteDarstellung = false;
 }
+let letzterPinZoom = null;
+map.on("zoomend", () => { if (letzterPinZoom === null || Math.abs(map.getZoom() - letzterPinZoom) > 0.2) { letzterPinZoom = map.getZoom(); pinsSetzen(); } });
 
 function paarLinienZeichnen(animiert) {
   const paare = {};

@@ -30,6 +30,8 @@ Gesammelte Wünsche und Entscheidungen von Sven. Gebaut wird erst, wenn die Anfo
 - Länderfarben und Grenzlinien aus demselben Datensatz, damit sie deckungsgleich sind
 - Entfernungen geodätisch auf dem Erdellipsoid berechnet (auf wenige Meter genau)
 - Zoom von der ganzen Welt bis Straßenebene
+- Ortsnamen in der Sprache des iPhones
+- Liegen Pins übereinander, zeigt ein gemeinsamer Pin die Gesichter leicht überlappend plus die Anzahl der Personen
 - Kartenform: flache Weltkarte (wie Google Maps), kein Globus; Lage, Grenzen und Entfernungen bleiben exakt, nur die Flächen nahe den Polen wirken größer als in Wirklichkeit
 
 ## Profil und Login

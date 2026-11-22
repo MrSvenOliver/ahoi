@@ -3,6 +3,8 @@
 Jede Entscheidung mit Datum. Neue Einträge kommen oben dazu.
 
 ## 22.11.2026
+- Ortsnamen auf der Karte immer in der Sprache des iPhones
+- Pins, die sich auf dem Bildschirm überdecken würden, werden zu einem Pin mit leicht überlappenden Gesichtern und einer Zahl zusammengefasst; Antippen zoomt hinein, bis sie sich trennen
 - Option "Auto" gestrichen: Kartenstil nur A, B oder C, Standard A; kein automatischer Dunkelmodus mehr (ersetzt die frühere Entscheidung)
 - Schrift der App: Plus Jakarta Sans (F)
 - Kartenstil bleibt als Auswahl für jeden in der App: A, B, C, Auto (in dieser Reihenfolge); Standard Auto
