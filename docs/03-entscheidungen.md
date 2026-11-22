@@ -3,6 +3,7 @@
 Jede Entscheidung mit Datum. Neue Einträge kommen oben dazu.
 
 ## 22.11.2026
+- Karte wieder bis ganz oben hinter die Statusleiste (durchsichtig); die iOS-Lücke unten wird gemessen und ausgeglichen (Test auf Svens iPhone ausstehend; Rückfall: Streifen in Meeresfarbe)
 - Paar-Verknüpfung: keine Frage beim Anmelden (zu privat); einmal verknüpft, zeigt die App das ❤️ automatisch, sobald beide am selben Ort sind, und trennt die Pins, wenn einer allein reist
 - Freunde am selben Ort bekommen 🤝 am gemeinsamen Pin; die Zahl am Pin bleibt nur für Pins, die auf dem Bildschirm übereinanderliegen
 - Balken unten behoben: Statusleiste auf "default" statt "black-translucent" (iOS 26.1 rechnet bei durchsichtiger Statusleiste die Bildschirmhöhe falsch und lässt unten eine Lücke in Höhe der Statusleiste; Svenolingo nutzt "default" und hat den Fehler nicht). Home-Bildschirm-Icon muss danach einmal neu hinzugefügt werden.
