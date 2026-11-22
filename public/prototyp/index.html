@@ -259,6 +259,7 @@ const PALETTEN = {
   }
 };
 const P = () => PALETTEN[dunkel.matches ? "dunkel" : "hell"];
+const SPRACHE = (navigator.language || "de").toLowerCase().startsWith("de") ? "de" : "en";
 
 function stilAnpassen(stil) {
   const c = P();
@@ -297,6 +298,8 @@ function stilAnpassen(stil) {
       l.paint["line-opacity"] = ["interpolate", ["linear"], ["zoom"], 5, 0, 6, 0.85];
     }
     if (l.type === "symbol" && l.layout["text-field"]) {
+      // Ortsnamen in der App-Sprache, sonst im Originalnamen
+      if (l["source-layer"] !== "transportation_name") l.layout["text-field"] = ["coalesce", ["get", "name:" + SPRACHE], ["get", "name:latin"], ["get", "name"]];
       l.paint["text-color"] = /water/.test(id) ? c.wasserTinte : (/country/.test(id) ? c.tinteLeise : c.tinte);
       l.paint["text-halo-color"] = c.halo;
       l.paint["text-halo-width"] = 1.4;
