@@ -3,6 +3,8 @@
 Jede Entscheidung mit Datum. Neue Einträge kommen oben dazu.
 
 ## 22.11.2026
+- Kartengenauigkeit als feste Regel: nur echte Geodaten, keine nachgezeichneten Formen, Entfernungen geodätisch
+- Kartenform: Globus beim Herauszoomen, flach beim Hineinzoomen
 - Design: Mischung aus modern und Schatzkarte; Abenteuer voll auf der Karte, außerhalb leichte Akzente
 - Schrift: Handschrift-Akzente für Ortsnamen und Überschriften, sonst moderne Schrift
 - Dunkelmodus: automatisch nach iPhone-Einstellung

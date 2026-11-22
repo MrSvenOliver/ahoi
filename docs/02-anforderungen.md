@@ -21,6 +21,14 @@ Gesammelte Wünsche und Entscheidungen von Sven. Gebaut wird erst, wenn die Anfo
 - Animationen lebendig: Pins ploppen auf, Reiselinien zeichnen sich, Kompass dreht sich beim Laden
 - Darf nicht ruckeln: Karte über Grafikchip (Vektorkarte), eine leichte Papier-Textur, nur flüssige Animationsarten; vor dem Bau ein Karten-Prototyp zum Testen auf dem iPhone
 
+## Kartengenauigkeit (feste Regel, kein Spielraum)
+- Echte Kartendaten aus OpenStreetMap für Küsten, Grenzen und Städte; der Schatzkarten-Look entsteht nur über Farben, Linien und Schrift
+- Nichts wird von Hand nachgezeichnet oder verschoben
+- Länderfarben und Grenzlinien aus demselben Datensatz, damit sie deckungsgleich sind
+- Entfernungen geodätisch auf dem Erdellipsoid berechnet (auf wenige Meter genau)
+- Zoom von der ganzen Welt bis Straßenebene
+- Kartenform: Globus beim Herauszoomen (echte Größenverhältnisse), flache Detailkarte beim Hineinzoomen
+
 ## Profil und Login
 - Nur echtes Profilbild (Foto-Upload), Pins zeigen das Foto
 - Login: E-Mail-Code + Google; Apple-Login später mit dem App-Store-Schritt (Apple-Entwicklerkonto)
