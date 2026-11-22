@@ -107,6 +107,8 @@
   .blatt { position: fixed; left: 0; right: 0; bottom: 0; z-index: 12; background: var(--glas); border-top: 1px solid var(--glas-rand); box-shadow: 0 -10px 30px rgba(60, 38, 16, 0.18); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); border-radius: 26px 26px 0 0; max-width: 560px; margin: 0 auto; transform: translateY(100%); transition: transform 0.38s cubic-bezier(0.2, 0.9, 0.3, 1); padding-bottom: env(safe-area-inset-bottom); will-change: transform; }
   .blatt-kopf { padding: 10px 20px 14px; cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none; }
   .blatt .liste { transition: opacity 0.2s; }
+  .einladen-zeile { display: block; width: calc(100% - 20px); margin: 0 10px 14px; padding: 12px; border: 1px dashed var(--gold); border-radius: 14px; background: transparent; color: var(--tinte); font: inherit; font-weight: 700; cursor: pointer; }
+  .blatt:not(.offen) .einladen-zeile { opacity: 0; pointer-events: none; }
   .blatt:not(.offen) .liste { opacity: 0; pointer-events: none; }
   .griff { width: 44px; height: 5px; border-radius: 3px; background: var(--text-leise); opacity: 0.45; margin: 0 auto 10px; }
   .blatt-kopf h2 { margin: 0; font-size: 22px; font-weight: 700; color: var(--text); letter-spacing: -0.3px; line-height: 1.2; }
@@ -230,12 +232,20 @@
   .zahlen div { background: var(--trenner); border-radius: 12px; padding: 8px 6px; text-align: center; line-height: 1.15; }
   .zahlen b { display: block; font-size: 16px; }
   .zahlen small { font-size: 11px; color: var(--text-leise); }
+  .rechner { font-size: 13px; color: var(--text-leise); margin: -4px 0 12px; }
+  .rechner b { color: var(--text); }
   .zahlen .voll { background: rgba(192, 88, 47, 0.15); }
   .dabei-gesichter { display: flex; margin-bottom: 12px; }
   .dabei-gesichter .klein-ava { width: 30px; height: 30px; font-size: 10px; margin-right: -8px; box-shadow: 0 0 0 2px var(--karte-bg); }
   .idee .aktionen .knopf-gross { flex: 1; font-size: 14px; padding: 10px 12px; }
   .idee .aktionen .knopf-gross[disabled] { opacity: 0.45; }
   .ist-dabei { background: #4f8a5b !important; }
+  .schritte div { display: flex; align-items: center; gap: 10px; padding: 6px 0; font-size: 15px; }
+  .schritte span { width: 26px; height: 26px; border-radius: 50%; background: var(--tinte); color: var(--papier); display: grid; place-items: center; font-size: 13px; font-weight: 700; flex: none; }
+  .knopf-riesig { width: 100%; border: 0; border-radius: 18px; padding: 20px; margin-bottom: 10px; background: #e0565b; color: #fff; font: inherit; font-size: 18px; font-weight: 800; cursor: pointer; box-shadow: 0 8px 20px rgba(224, 86, 91, 0.3); }
+  .mehr-optionen summary { font-weight: 700; cursor: pointer; list-style: none; }
+  .mehr-optionen summary::after { content: " ›"; color: var(--text-leise); }
+  .mehr-optionen[open] summary::after { content: " ⌄"; }
   .geteilt { display: flex; align-items: center; gap: 10px; margin: 12px 0; font-size: 14px; color: var(--text-leise); line-height: 1.3; }
   .geteilt .klein-ava { width: 30px; height: 30px; font-size: 11px; }
   .geteilt b { color: var(--text); }
@@ -253,6 +263,9 @@
   .profil-bild .kamera { position: absolute; right: -2px; bottom: 2px; width: 32px; height: 32px; border-radius: 50%; background: var(--tinte); color: var(--papier); display: grid; place-items: center; font-size: 15px; border: 2px solid var(--flaeche); }
   .profil-oben h3 { margin: 0; font-size: 24px; font-weight: 800; }
   .profil-oben p { margin: 4px 0 0; color: var(--text-leise); font-size: 14px; }
+  .kacheln { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 16px 0 4px; }
+  .kacheln button { border: 1px solid var(--trenner); background: var(--karte-bg); color: var(--text); border-radius: 16px; padding: 14px 6px; font: inherit; font-size: 13px; font-weight: 700; line-height: 1.2; cursor: pointer; }
+  .kacheln span { display: block; font-size: 22px; margin-bottom: 6px; }
   .stempel { display: grid; grid-template-columns: repeat(auto-fill, minmax(56px, 1fr)); gap: 10px; }
   .stempel div { aspect-ratio: 1; border-radius: 50%; border: 2px dashed var(--gold); display: grid; place-items: center; font-size: 24px; transform: rotate(-8deg); }
   .stempel div:nth-child(even) { transform: rotate(6deg); }
@@ -274,6 +287,9 @@
 
   /* Unteres Blatt sitzt über der Leiste */
   .blatt { bottom: var(--leiste-h) !important; padding-bottom: 0 !important; }
+  .feedback-lasche { position: fixed; right: 0; top: 46%; z-index: 44; transform: translateY(-50%) rotate(-90deg); transform-origin: 100% 50%; translate: 0 0; border: 0; border-radius: 10px 10px 0 0; padding: 5px 10px; background: var(--tinte); color: var(--papier); font: inherit; font-size: 11px; font-weight: 700; letter-spacing: 0.3px; opacity: 0.55; cursor: pointer; margin-right: 13px; }
+  .feedback-lasche:active { opacity: 1; }
+  html.tippt .feedback-lasche { display: none; }
   .hinweis { position: fixed; left: 50%; top: calc(env(safe-area-inset-top) + 70px); transform: translate(-50%, -10px); z-index: 20; background: var(--tinte); color: var(--papier); padding: 8px 14px; border-radius: 999px; font-size: 13px; opacity: 0; transition: opacity 0.25s, transform 0.25s; pointer-events: none; white-space: nowrap; }
   .hinweis.zeigen { opacity: 1; transform: translate(-50%, 0); }
 
@@ -317,6 +333,7 @@
     <small id="zusammenfassung"></small>
   </div>
   <ul class="liste" id="liste"></ul>
+  <button class="einladen-zeile" data-hinweis="Freunde vorschlagen: Sven gibt die Einladung frei">➕ Freund einladen</button>
 </section>
 
 <!-- Leiste unten -->
@@ -353,7 +370,8 @@
   <div class="eingabe">
     <button class="runder" title="Foto, Ort oder Unterkunft teilen">＋</button>
     <input id="chat-text" placeholder="Nachricht …" autocomplete="off">
-    <button class="runder senden" id="chat-senden" title="Senden">↑</button>
+    <button class="runder" id="chat-mikro" title="Sprachnachricht" aria-label="Sprachnachricht aufnehmen">🎙️</button>
+    <button class="runder senden" id="chat-senden" title="Senden" aria-label="Senden">↑</button>
   </div>
 </section>
 
@@ -367,20 +385,26 @@
 
 <!-- Idee teilen -->
 <section class="seite" id="seite-idee-neu">
-  <div class="seite-kopf"><h1>Teilen</h1><button class="knopf-leise" data-zurueck="ideen">Abbrechen</button></div>
-  <button class="wahl" id="einfuegen"><div class="ikon">📋</div><div><b>Link einfügen</b><span>Vorher in Airbnb auf „Teilen“ → „Link kopieren“ tippen</span></div></button>
-  <div class="kasten formular" style="margin-top:12px">
-    <label>Link<input id="idee-link" placeholder="airbnb.com/rooms/… oder jede andere Webseite"></label>
-    <label>Notiz (freiwillig)<input placeholder="z. B. Für Januar?"></label>
-    <div class="zwei"><label>Preis pro Nacht<input inputmode="numeric" placeholder="€ – aus dem Link"></label><label>Zeitraum<input placeholder="z. B. 8.–20.1."></label></div>
-    <div class="zeile-einst"><div>Plätze<small>Laut Airbnb 8 Gäste – du kannst weniger freigeben</small></div><span class="zaehler"><button id="pl-minus">−</button><b id="pl-zahl">6</b><button id="pl-plus">+</button></span></div>
+  <div class="seite-kopf"><h1>Unterkunft teilen</h1><button class="knopf-leise" data-zurueck="ideen">Abbrechen</button></div>
+  <div class="kasten schritte">
+    <div><span>1</span>In der Airbnb-App die Unterkunft öffnen</div>
+    <div><span>2</span>Oben auf <b>Teilen ⬆︎</b> → <b>Link kopieren</b></div>
+    <div><span>3</span>Hier auf den großen Knopf tippen</div>
   </div>
-  <h2>Wer sieht das?</h2>
-  <div class="kasten">
+  <button class="knopf-riesig" id="einfuegen">📋 Airbnb-Link einfügen</button>
+  <div class="kasten" id="idee-vorschau" style="display:none"></div>
+  <details class="kasten mehr-optionen">
+    <summary>Weitere Angaben (freiwillig)</summary>
+    <div class="formular" style="margin-top:12px">
+      <label>Anderer Link (Booking, Webseite …)<input id="idee-link" placeholder="https://…"></label>
+      <label>Notiz<input placeholder="z. B. Für Januar?"></label>
+      <div class="zwei"><label>Zeitraum<input placeholder="z. B. 8.–20.1."></label><label>Preis pro Nacht<input inputmode="numeric" placeholder="€ (für den Rechner)"></label></div>
+      <div class="zeile-einst"><div>Plätze für die Gruppe<small>Laut Airbnb 8 Gäste – du kannst weniger freigeben</small></div><span class="zaehler"><button id="pl-minus">−</button><b id="pl-zahl">8</b><button id="pl-plus">+</button></span></div>
+    </div>
+    <h2 style="margin-left:0">Wer sieht das?</h2>
     <div class="segmente klein" id="sicht-wahl"><button class="aktiv" data-s="alle">🌍 Alle</button><button data-s="kreis">👥 Kreis</button><button data-s="einzeln">👤 Einzeln</button></div>
     <div id="sicht-detail" style="margin-top:12px;display:none"></div>
-  </div>
-  <div class="kasten" id="idee-vorschau" style="display:none"></div>
+  </details>
   <button class="knopf-gross" style="width:100%" id="idee-speichern">Teilen</button>
 </section>
 
@@ -399,6 +423,11 @@
     <h3>Du</h3>
     <p>„Surfen in Ericeira 🏄“ · Stadt sichtbar</p>
   </div>
+  <div class="kacheln">
+    <button data-hinweis="Freunde vorschlagen: Sven gibt die Einladung frei"><span>➕</span>Freund einladen</button>
+    <button data-hinweis="Freundeskreise anlegen, z. B. Lieblingsleute"><span>👥</span>Freundes­kreise</button>
+    <button data-hinweis="Anfrage an deinen Partner – er oder sie bestätigt"><span>❤️</span>Paar verknüpfen</button>
+  </div>
   <h2 id="laender-titel">Länder-Sammlung</h2>
   <div class="kasten"><div class="stempel" id="stempel"></div>
     <p class="hinweis-band" style="margin-top:12px;text-align:left">Länder aus deinen Reisen kommen automatisch dazu. Frühere Länder trägst du über ＋ nach.</p></div>
@@ -414,14 +443,20 @@
   </div>
   <h2>Mehr</h2>
   <div class="kasten">
-    <div class="zeile-einst"><div>Freundeskreise<small>Lieblingsleute, Bali-Crew – zum schnellen Teilen</small></div><button class="knopf-leise">Bearbeiten</button></div>
-    <div class="zeile-einst"><div>Paar verknüpfen<small>Der andere muss bestätigen</small></div><button class="knopf-leise">Anfragen</button></div>
-    <div class="zeile-einst"><div>Jemanden vorschlagen<small>Sven gibt die Einladung frei</small></div><button class="knopf-leise">Vorschlagen</button></div>
-    <div class="zeile-einst"><div>Feedback an Sven<small>Fehler oder Idee, gern mit Screenshot</small></div><button class="knopf-leise">Schreiben</button></div>
+    <div class="zeile-einst"><div>Feedback an Sven<small>Fehler oder Idee, gern mit Screenshot</small></div><button class="knopf-leise" onclick="feedbackOeffnen()">Schreiben</button></div>
   </div>
   <p class="hinweis-band">Beispieldaten · Einstellungen werden ab Phase 2 gespeichert (Kartenstil schon jetzt)</p>
 </section>
 
+<button class="feedback-lasche" id="feedback-lasche" aria-label="Feedback an Sven">Feedback</button>
+<section class="seite" id="seite-feedback" style="z-index:45">
+  <div class="seite-kopf"><h1>Feedback</h1><button class="knopf-leise" data-zurueck="__zurueck">Schließen</button></div>
+  <p style="color:var(--text-leise);margin-top:-6px">Fehler gefunden oder eine Idee? Geht direkt an Sven.</p>
+  <div class="segmente klein" style="margin-bottom:10px"><button class="aktiv">🐞 Fehler</button><button>💡 Idee</button><button>💬 Sonstiges</button></div>
+  <div class="kasten formular"><label>Was ist dir aufgefallen?<textarea rows="5" style="display:block;width:100%;margin-top:6px;border:1px solid var(--trenner);background:var(--flaeche);color:var(--text);border-radius:12px;padding:12px;font:inherit;font-size:16px"></textarea></label>
+    <button class="knopf-leise" onclick="hinweis('Screenshot anhängen kommt in Phase 6')">📎 Screenshot anhängen</button></div>
+  <button class="knopf-gross" style="width:100%" onclick="hinweis('Danke! Senden kommt in Phase 6'); feedbackSchliessen()">Senden</button>
+</section>
 <div class="hinweis" id="hinweis"></div>
 
 <div class="start" id="start">
@@ -893,7 +928,7 @@ function stilwahlAufbauen() {
   });
 }
 // ---------- Bereiche wechseln ----------
-const seiten = ["reisen", "reise-neu", "chat", "ideen", "idee-neu", "profil", "laender"];
+const seiten = ["reisen", "reise-neu", "chat", "ideen", "idee-neu", "profil", "laender", "feedback"];
 function seiteZeigen(name) {
   for (const s of seiten) document.getElementById("seite-" + s).classList.toggle("offen", s === name);
   document.querySelectorAll("#leiste button").forEach(b => b.setAttribute("aria-current", b.dataset.seite === name ? "page" : "false"));
@@ -903,7 +938,12 @@ function seiteZeigen(name) {
   if (name === "karte") { blattSetzen(false); map.resize(); }
 }
 document.querySelectorAll("#leiste button").forEach(b => b.onclick = () => seiteZeigen(b.dataset.seite));
-document.querySelectorAll("[data-zurueck]").forEach(b => b.onclick = () => seiteZeigen(b.dataset.zurueck));
+let vorFeedback = "karte";
+function feedbackOeffnen() { const offen = seiten.find(n => document.getElementById("seite-" + n).classList.contains("offen")); vorFeedback = offen || "karte"; seiteZeigen("feedback"); }
+function feedbackSchliessen() { seiteZeigen(vorFeedback); }
+document.getElementById("feedback-lasche").onclick = feedbackOeffnen;
+document.querySelectorAll("[data-hinweis]").forEach(b => b.onclick = () => hinweis(b.dataset.hinweis));
+document.querySelectorAll("[data-zurueck]").forEach(b => b.onclick = () => b.dataset.zurueck === "__zurueck" ? feedbackSchliessen() : seiteZeigen(b.dataset.zurueck));
 document.getElementById("profil-knopf").onclick = () => seiteZeigen("profil");
 document.getElementById("reise-neu").onclick = () => seiteZeigen("reise-neu");
 document.getElementById("reise-an").addEventListener("change", e => { const ab = document.getElementById("reise-ab"); ab.min = e.target.value; if (ab.value && ab.value < e.target.value) ab.value = e.target.value; });
@@ -973,6 +1013,7 @@ function senden() {
   chatAufbauen(); const v = document.getElementById("verlauf"); v.scrollTop = v.scrollHeight;
 }
 document.getElementById("chat-senden").onclick = senden;
+document.getElementById("chat-mikro").onclick = () => hinweis("Gedrückt halten zum Aufnehmen – kommt mit dem echten Chat");
 document.getElementById("chat-text").addEventListener("keydown", e => { if (e.key === "Enter") senden(); });
 document.getElementById("chat-text").addEventListener("focus", () => document.documentElement.classList.add("tippt"));
 document.getElementById("chat-text").addEventListener("blur", () => document.documentElement.classList.remove("tippt"));
@@ -981,10 +1022,10 @@ document.getElementById("chat-text").addEventListener("blur", () => document.doc
 // Jede Idee ist ein geteilter Link. Bei Airbnb liest die App Foto, Art, Ort und Bewertung aus der Vorschau des Links.
 // Plätze und Preis legt die teilende Person fest (vorausgefüllt, sofern die Seite sie verrät).
 const ideen = [
-  { von: "lea", art: "Wohnung", ort: "Lissabon", land: "PT", bewertung: "4,9", zimmer: "2 Schlafzimmer", notiz: "Für Januar?", zeitraum: "8.–20.1.", preis: 96, plaetze: 4, dabei: ["nico"], sicht: "🌍 Alle", herzen: 4, kommentare: 3, quelle: "Airbnb", farbe: "linear-gradient(135deg,#e9c99a,#c0582f)" },
-  { von: "alex", art: "Haus", ort: "Ericeira", land: "PT", bewertung: "4,8", zimmer: "3 Schlafzimmer", notiz: "Direkt am Surfstrand", zeitraum: "flexibel", preis: 140, plaetze: 6, dabei: ["sam", "du"], sicht: "👥 Lieblingsleute", herzen: 2, kommentare: 1, quelle: "Airbnb", farbe: "linear-gradient(135deg,#bcd6d8,#3f6b8a)" },
-  { von: "jonas", art: "Villa", ort: "Canggu", land: "ID", bewertung: "4,95", zimmer: "4 Schlafzimmer", notiz: "", zeitraum: "März", preis: 180, plaetze: 6, dabei: ["ben", "lea", "nico", "mia", "alex"], sicht: "🌍 Alle", herzen: 5, kommentare: 6, quelle: "Airbnb", farbe: "linear-gradient(135deg,#cfe0b8,#6f8a3a)" },
-  { von: "ben", art: "Gästehaus", ort: "Chiang Mai", land: "TH", bewertung: "", zimmer: "", notiz: "Günstig für länger", zeitraum: "flexibel", preis: 55, plaetze: 3, dabei: [], sicht: "👤 3 Personen", herzen: 1, kommentare: 0, quelle: "booking.com", farbe: "linear-gradient(135deg,#f0dca8,#b98a2e)" },
+  { von: "lea", art: "Wohnung", ort: "Lissabon", land: "PT", bewertung: "4,9", zimmer: "2 Schlafzimmer", gaeste: 4, notiz: "Für Januar?", zeitraum: "8.–20.1.", preis: 96, plaetze: 4, dabei: ["nico"], sicht: "🌍 Alle", herzen: 4, kommentare: 3, quelle: "Airbnb", farbe: "linear-gradient(135deg,#e9c99a,#c0582f)" },
+  { von: "alex", art: "Haus", ort: "Ericeira", land: "PT", bewertung: "4,8", zimmer: "3 Schlafzimmer", gaeste: 8, notiz: "Direkt am Surfstrand", zeitraum: "flexibel", preis: null, plaetze: 6, dabei: ["sam", "du"], sicht: "👥 Lieblingsleute", herzen: 2, kommentare: 1, quelle: "Airbnb", farbe: "linear-gradient(135deg,#bcd6d8,#3f6b8a)" },
+  { von: "jonas", art: "Villa", ort: "Canggu", land: "ID", bewertung: "4,95", zimmer: "4 Schlafzimmer", gaeste: 8, notiz: "", zeitraum: "März", preis: 180, plaetze: 6, dabei: ["ben", "lea", "nico", "mia", "alex"], sicht: "🌍 Alle", herzen: 5, kommentare: 6, quelle: "Airbnb", farbe: "linear-gradient(135deg,#cfe0b8,#6f8a3a)" },
+  { von: "ben", art: "Gästehaus", ort: "Chiang Mai", land: "TH", bewertung: "", zimmer: "1 Schlafzimmer", gaeste: 3, notiz: "Günstig für länger", zeitraum: "flexibel", preis: null, plaetze: 3, dabei: [], sicht: "👤 3 Personen", herzen: 1, kommentare: 0, quelle: "booking.com", farbe: "linear-gradient(135deg,#f0dca8,#b98a2e)" },
 ];
 let ideenFilter = "alle";
 function ideenAufbauen() {
@@ -1000,13 +1041,14 @@ function ideenAufbauen() {
       <div class="bild" style="background:${i.farbe}"><span class="quelle">${i.quelle}</span><span class="sicht">${i.sicht}</span><button class="herzen" data-n="${n}">❤️ ${i.herzen}</button></div>
       <div class="inhalt">
         <b>${i.art} in ${i.ort} ${flagge(i.land)}</b>
-        <span class="ort">${[i.bewertung ? "★ " + i.bewertung : "", i.zimmer, i.zeitraum].filter(Boolean).join(" · ")}</span>
+        <span class="ort">${[i.bewertung ? "★ " + i.bewertung : "", i.zeitraum].filter(Boolean).join(" · ")}</span>
         <div class="geteilt">${ava(person(i.von))}<span><b>${person(i.von).name}</b><br>${i.notiz ? "„" + ohneHtml(i.notiz) + "“" : "hat das geteilt"}</span></div>
         <div class="zahlen">
-          <div><b>${i.preis} €</b><small>pro Nacht</small></div>
-          <div><b>${proPerson} €</b><small>p. P. bei ${belegt}</small></div>
-          <div class="${frei ? "" : "voll"}"><b>${frei ? frei + " / " + i.plaetze : "Voll"}</b><small>${frei ? "Plätze frei" : i.plaetze + " von " + i.plaetze}</small></div>
+          <div><b>🛏 ${parseInt(i.zimmer) || "–"}</b><small>Schlafzimmer</small></div>
+          <div><b>👥 ${i.plaetze}</b><small>${i.plaetze < i.gaeste ? "von " + i.gaeste + " Gästen" : "Gäste"}</small></div>
+          <div class="${frei ? "" : "voll"}"><b>${frei ? frei : "Voll"}</b><small>${frei ? "Plätze frei" : "alle vergeben"}</small></div>
         </div>
+        ${i.preis ? `<div class="rechner">💶 ${i.preis} € / Nacht · <b>${proPerson} € pro Person</b> bei ${belegt}</div>` : ""}
         <div class="dabei-leiste"><div class="dabei-gesichter">${[i.von, ...i.dabei].map(id => ava(person(id))).join("")}</div></div>
         <div class="aktionen">
           <button class="knopf-gross dabei-knopf ${ichDabei ? "ist-dabei" : ""}" data-n="${n}" ${!frei && !ichDabei ? "disabled" : ""}>${ichDabei ? "✓ Du bist dabei" : frei ? "🙋 Ich wäre dabei" : "Leider voll"}</button>
@@ -1031,7 +1073,7 @@ document.querySelectorAll("#mitteilungen .schalter").forEach(b => b.onclick = ()
 document.getElementById("idee-neu").onclick = () => seiteZeigen("idee-neu");
 document.getElementById("einfuegen").onclick = async () => {
   try { document.getElementById("idee-link").value = await navigator.clipboard.readText(); vorschauZeigen(); }
-  catch (e) { hinweis("Bitte den Link ins Feld einfügen"); document.getElementById("idee-link").focus(); }
+  catch (e) { document.querySelector(".mehr-optionen").open = true; hinweis("Link bitte ins Feld einfügen"); document.getElementById("idee-link").focus(); }
 };
 document.getElementById("idee-link").addEventListener("input", vorschauZeigen);
 function vorschauZeigen() {
@@ -1040,10 +1082,10 @@ function vorschauZeigen() {
   const airbnb = /(airbnb\.[a-z.]+\/(rooms|h)\/|abnb\.me\/)/i.test(v);
   box.style.display = "block";
   box.innerHTML = airbnb
-    ? "✅ <b>Airbnb erkannt</b><br><span style='font-size:13px;color:var(--text-leise)'>Foto, Art, Ort und Bewertung werden automatisch übernommen (ab Phase 5).</span>"
-    : "🔗 <b>Webseite</b><br><span style='font-size:13px;color:var(--text-leise)'>Titel und Bild werden aus der Vorschau übernommen, sofern die Seite eine hat.</span>";
+    ? "✅ <b>Airbnb erkannt</b><br><span style='font-size:13px;color:var(--text-leise)'>Foto, Art, Ort, Bewertung, Schlafzimmer und Gäste werden automatisch übernommen (im Prototyp noch Beispiel).</span>"
+    : "🔗 <b>Webseite erkannt</b><br><span style='font-size:13px;color:var(--text-leise)'>Titel und Bild kommen aus der Vorschau der Seite.</span>";
 }
-let plaetze = 6;
+let plaetze = 8;
 document.getElementById("pl-minus").onclick = () => { plaetze = Math.max(2, plaetze - 1); document.getElementById("pl-zahl").textContent = plaetze; };
 document.getElementById("pl-plus").onclick = () => { plaetze = Math.min(8, plaetze + 1); document.getElementById("pl-zahl").textContent = plaetze; };
 const kreise = { "Lieblingsleute": ["alex", "sam", "lea", "nico"], "Bali-Crew": ["lea", "nico", "jonas"] };
