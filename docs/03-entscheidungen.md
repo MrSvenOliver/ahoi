@@ -3,6 +3,10 @@
 Jede Entscheidung mit Datum. Neue Einträge kommen oben dazu.
 
 ## 22.11.2026
+- Familie: jeder Nomade lädt seine eigene Familie ein (B); sie sieht Ort, nächste Reise, alle Reisen und Vielleicht-Pläne (C + D + E)
+- Chat: Chatliste mit „Alle“ (Beta), Reisegruppen und Einzelchats; Löschen nur für mich (A); Hinweis beim Verlassen einer Gruppe (D)
+- Chat-Übersetzung wie bei Airbnb (später DeepL API Free)
+- Ideen: „Preis ansehen“ mit Zeitraum und Personenzahl, „Gebucht“ trägt die Reise ein, abgelaufene Ideen verschwinden
 - Familien-Zugang (nur zuschauen) als eigene Ansicht; im Prototyp über Profil → Familie → „Ansehen“ testbar
 - Ideen: Teilen als Ein-Tipp-Ablauf mit großem Airbnb-Knopf; Preis nur freiwillig für den Rechner; Schlafzimmer und Gäste im Vordergrund
 - Chat: Knopf für Sprachnachrichten (Aufnahme kommt mit dem echten Chat)

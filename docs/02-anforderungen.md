@@ -46,7 +46,11 @@ Gesammelte Wünsche und Entscheidungen von Sven. Gebaut wird erst, wenn die Anfo
 - Standort-Genauigkeit Standard: Stadt (jeder kann es ändern)
 
 ## Chat
-- Normaler Gruppenchat mit allen Mitgliedern
+- Chatliste: „Alle“ oben (nur in der Beta, kann stummgeschaltet werden), darunter Reisegruppen und Einzelchats
+- Einzelchat: Person auf der Karte antippen → „Nachricht schreiben“
+- Reisegruppen: selbst erstellen (Name + Personen) oder automatisch aus einem Treffer und sobald jemand bei einer Idee dabei ist
+- Gedrückt halten: Einzelchat löschen (nur bei mir) · Gruppe verlassen (die anderen sehen „… hat die Gruppe verlassen“) · Stummschalten
+- Übersetzung wie bei Airbnb: Original zuerst; Knopf „Übersetzen“ zeigt alle fremdsprachigen Nachrichten in der iPhone-Sprache; pro Nachricht „Übersetzt aus … · Original anzeigen“ (später DeepL API Free über Supabase, jede Übersetzung wird einmal gespeichert)
 - @-Erwähnungen, Emoji-Reaktionen, Fotos/Videos, Sprachnachrichten, Ort/Pin/Airbnb teilen
 - Treffen werden nur über den Chat organisiert (keine eigene Treffen-Funktion)
 
@@ -62,7 +66,9 @@ Gesammelte Wünsche und Entscheidungen von Sven. Gebaut wird erst, wenn die Anfo
 - Im Vordergrund der Karte: Schlafzimmer, Gäste/Plätze, freie Plätze
 - Weitere Angaben freiwillig und eingeklappt: anderer Link, Notiz, Zeitraum, Preis pro Nacht (nur für den Rechner „pro Person“), Plätze begrenzen, Sichtbarkeit (Alle / Freundeskreis / Einzeln)
 - „Preis ansehen“ öffnet Airbnb mit Zeitraum und Personenzahl (aktueller Preis und Verfügbarkeit kommen immer von Airbnb)
-- „Ich wäre dabei“ zählt freie Plätze herunter, Benachrichtigung an die teilende Person; „Gebucht“ als ein Knopf; nach Ablauf des Zeitraums verschwindet die Idee automatisch
+- „Ich wäre dabei“ zählt freie Plätze herunter, Benachrichtigung an die teilende Person, man kommt automatisch in die Gruppe der Idee
+- „Gebucht“ (für alle, die dabei sind): trägt die Reise für alle Beteiligten ein; ohne Zeitraum öffnet sich das Reise-Formular mit dem Ort
+- Nach dem Abreisetag verschwindet die Idee von selbst
 - Kommentare, Herz, Filter nach Ländern
 
 ## KI
@@ -83,11 +89,12 @@ Gesammelte Wünsche und Entscheidungen von Sven. Gebaut wird erst, wenn die Anfo
 - Status-Satz
 
 ## Familien-Zugang (nur zuschauen)
-- Für Eltern, Geschwister u. a., die keine Nomaden sind: sehen nur die Personen, die sie freigeschaltet haben (wie ein AirTag auf dem Bildschirm)
-- Teilen selbst nichts und erscheinen für niemanden auf der Karte
-- Eigene Ansicht ohne Leiste: große Karten mit „ist in …“, Ortszeit und nächster Reise; Antippen zeigt den Ort auf der Karte
+- Für Eltern, Geschwister u. a., die keine Nomaden sind (wie ein AirTag auf dem Bildschirm)
+- Jeder Nomade lädt seine eigene Familie ein und kann sie jederzeit wieder ausschalten
+- Die Familie sieht nur, wer sie eingeladen hat: Ort, Ortszeit, nächste Reise, alle geplanten Reisen und Vielleicht-Pläne
+- Teilt selbst nichts und erscheint für niemanden auf der Karte
+- Eigene Ansicht ohne Leiste; nächste Reise in drei Zeilen (Überschrift, Ort, Daten mit Nächten); Antippen zeigt den Ort auf der Karte
 - Optional: eigenen Standort nur für sich einschalten, um die Entfernung zu sehen
-- Nomaden laden Familienmitglieder im Profil unter „Familie“ ein
 
 ## Netzwerk und Einladungen
 - Einladungen: Mitglieder schlagen vor, Sven gibt frei
