@@ -4,12 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
 <title>Ahoi – Karten-Prototyp</title>
-<meta name="theme-color" content="#f7efe0" id="theme-farbe">
+<meta name="theme-color" content="#bcc7bd" id="theme-farbe">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Ahoi">
-<link rel="manifest" href="manifest.webmanifest?v=2">
+<link rel="manifest" href="manifest.webmanifest?v=3">
 <link rel="apple-touch-icon" href="../icons/apple-touch-icon.png?v=2">
 <link rel="icon" href="../icons/favicon-32.png" sizes="32x32">
 <link rel="preconnect" href="https://tiles.openfreemap.org" crossorigin>
@@ -466,7 +466,9 @@ const P = () => PALETTEN[kartenStil()];
 function oberflaecheAnwenden() {
   const c = P(), r = document.documentElement;
   r.dataset.theme = c.thema;
-  document.getElementById("theme-farbe").setAttribute("content", c.thema === "dunkel" ? "#16212b" : "#f7efe0");
+  // Streifen oben (Statusleiste) in der Farbe des Meeres auf der Karte
+  document.getElementById("theme-farbe").setAttribute("content", c.wasser);
+  r.style.setProperty("--karte-hinten", c.wasser);
   r.style.setProperty("--sans", WAHL.schrift[auswahl.schrift][2]);
   const m = WAHL.marke[auswahl.marke];
   r.style.setProperty("--marke", m[2] || "var(--sans)");
