@@ -151,10 +151,10 @@
   .leiste .punkt { position: absolute; top: 7px; left: calc(50% + 8px); min-width: 17px; height: 17px; border-radius: 9px; background: #c0582f; color: #fff; font-size: 10px; display: grid; place-items: center; padding: 0 4px; }
   .profil-knopf { position: relative; }
   .sprach-marke { position: absolute; right: -5px; bottom: -4px; width: 21px; height: 21px; border-radius: 50%; background: var(--karte-bg); border: 1.5px solid var(--gold); display: grid; place-items: center; font-size: 12px; line-height: 1; }
-  .sprach-flaggen { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: -4px 0 14px; }
-  .sprach-flaggen button { border: 1.5px solid var(--trenner); background: var(--karte-bg); color: var(--text); border-radius: 14px; padding: 8px 4px; font: inherit; font-size: 12px; font-weight: 600; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 2px; }
-  .sprach-flaggen button span { font-size: 26px; line-height: 1.1; }
-  .sprach-flaggen button.aktiv { border-color: var(--tinte); background: var(--tinte); color: var(--papier); }
+  .sprach-flaggen { display: flex; gap: 6px; margin: -6px 0 12px; }
+  .sprach-flaggen button { display: flex; align-items: center; gap: 5px; border: 1px solid var(--trenner); background: transparent; color: var(--text-leise); border-radius: 999px; padding: 4px 10px 4px 7px; font: inherit; font-size: 12px; font-weight: 600; cursor: pointer; }
+  .sprach-flaggen button span { font-size: 15px; line-height: 1; }
+  .sprach-flaggen button.aktiv { background: var(--karte-bg); border-color: var(--gold); color: var(--text); }
   .profil-knopf { width: 44px; height: 44px; border-radius: 50%; border: 2px solid var(--gold); display: grid; place-items: center; color: #fff8ea; font-weight: 700; font-size: 14px; background: #7a5a3a; cursor: pointer; padding: 0; }
 
   /* ---------- Seiten (Reisen, Chat, Ideen, Profil) ---------- */
@@ -555,7 +555,41 @@
   <p>Ahoi</p>
 </div>
 
+<script src="texte.js"></script>
 <script>
+// App-Sprachen: Deutsch, Englisch, Slowakisch. Standard ist die iPhone-Sprache, im Profil änderbar.
+const SPRACHEN = { de: "Deutsch", en: "English", sk: "Slovenčina" };
+const SPRACHE = (() => {
+  try { const g = localStorage.getItem("ahoi-sprache"); if (SPRACHEN[g]) return g; } catch (e) {}
+  const n = (navigator.language || "de").toLowerCase();
+  return n.startsWith("de") ? "de" : n.startsWith("sk") ? "sk" : "en";
+})();
+const LOC = { de: LOC, en: "en-GB", sk: "sk-SK" }[SPRACHE];
+document.documentElement.lang = SPRACHE;
+const FEHLT = new Set();
+// t("Deutscher Text", { platzhalter: wert }) gibt den Text in der App-Sprache zurück
+function t(de, w) {
+  const schluessel = de.replace(/\u00ad/g, ""), basis = de.split("|")[0];
+  let s = basis;
+  if (SPRACHE !== "de") { const e = TEXTE[schluessel]; if (e) s = e[SPRACHE === "en" ? 0 : 1]; else FEHLT.add(schluessel); }
+  if (w) for (const k in w) s = s.split("{" + k + "}").join(w[k]);
+  return s;
+}
+const hatText = de => SPRACHE === "de" || !!TEXTE[de.replace(/\u00ad/g, "")];
+// Feste Texte der Seite (HTML) einmal übersetzen
+(function seiteUebersetzen() {
+  if (SPRACHE === "de") return;
+  const w = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT), knoten = [];
+  while (w.nextNode()) knoten.push(w.currentNode);
+  for (const n of knoten) {
+    if (n.parentElement.closest("script,style,svg,noscript")) continue;
+    const roh = n.nodeValue, kern = roh.trim();
+    if (!kern || !/\p{L}/u.test(kern) || !hatText(kern)) continue;
+    n.nodeValue = roh.replace(kern, t(kern));
+  }
+  document.body.querySelectorAll("[placeholder],[title],[aria-label],[data-hinweis]").forEach(el => ["placeholder", "title", "aria-label", "data-hinweis"].forEach(a => { const v = el.getAttribute(a); if (v && hatText(v)) el.setAttribute(a, t(v)); }));
+})();
+
 // ---------- Beispiel-Daten (nur für den Prototyp) ----------
 const leute = [
   { id: "du",    name: "Du",    ort: "Málaga",      land: "ES", lat: 36.7213, lon: -4.4214,  tz: "Europe/Madrid",       farbe: "#7a5a3a" },
@@ -568,6 +602,7 @@ const leute = [
   { id: "ben",   name: "Ben",   ort: "Chiang Mai",  land: "TH", lat: 18.7953, lon: 98.9620,  tz: "Asia/Bangkok",        farbe: "#5a6fa0" },
 ];
 const ich = () => leute.find(p => p.id === "du");
+leute.forEach(p => p.ort = t(p.ort)); ich().name = t("Du");
 
 // ---------- Entfernung auf dem Erdellipsoid (Vincenty, WGS84) ----------
 function entfernungKm(lat1, lon1, lat2, lon2) {
@@ -601,7 +636,7 @@ function entfernungKm(lat1, lon1, lat2, lon2) {
   const dSigma = B * sinSigma * (cos2SigmaM + B / 4 * (cosSigma * (-1 + 2 * cos2SigmaM ** 2) - B / 6 * cos2SigmaM * (-3 + 4 * sinSigma ** 2) * (-3 + 4 * cos2SigmaM ** 2)));
   return b * A * (sigma - dSigma) / 1000;
 }
-const km = d => d < 1 ? "hier" : (d < 10 ? d.toFixed(1).replace(".", ",") : Math.round(d).toLocaleString("de-DE")) + " km";
+const km = d => d < 1 ? t("hier") : d.toLocaleString(LOC, { maximumFractionDigits: d < 10 ? 1 : 0 }) + " km";
 
 // Großkreis-Linie (kürzester Weg auf der Kugel) als Punktfolge
 function grosskreis(lon1, lat1, lon2, lat2, n = 128) {
@@ -617,8 +652,8 @@ function grosskreis(lon1, lat1, lon2, lat2, n = 128) {
   return pts;
 }
 const flagge = cc => cc.toUpperCase().replace(/./g, c => String.fromCodePoint(127397 + c.charCodeAt()));
-const uhrzeit = tz => new Intl.DateTimeFormat("de-DE", { timeZone: tz, hour: "2-digit", minute: "2-digit" }).format(new Date());
-const kuerzel = n => n.slice(0, 2).toUpperCase();
+const uhrzeit = tz => new Intl.DateTimeFormat(LOC, { timeZone: tz, hour: "2-digit", minute: "2-digit" }).format(new Date());
+const kuerzel = n => n === t("Du") ? t("DU") : n.slice(0, 2).toUpperCase();
 
 // ---------- Farben der Karte (hell / dunkel) ----------
 const dunkel = window.matchMedia("(prefers-color-scheme: dark)");
@@ -644,19 +679,12 @@ const PALETTEN = {
 };
 // Auswahl im Prototyp (wird auf diesem Gerät gemerkt)
 const WAHL = {
-  karte: { A: ["A", "Pergament"], B: ["B", "Atlas modern"], C: ["C", "Nacht-Gold"] },
+  karte: { A: ["A", t("Pergament")], B: ["B", t("Atlas modern")], C: ["C", t("Nacht-Gold")] },
   schrift: { D: ["D", "iPhone-Schrift", 'var(--system)'], E: ["E", "Inter", '"Inter", var(--system)'], F: ["F", "Jakarta", '"Plus Jakarta Sans", var(--system)'] },
   marke: { G: ["G", "wie Schrift", null, 800, "24px"], H: ["H", "Fraunces", '"Fraunces", Georgia, serif', 600, "25px"], I: ["I", "DM Serif", '"DM Serif Display", Georgia, serif', 400, "27px"], J: ["J", "Handschrift", 'var(--hand)', 700, "28px"] }
 };
 let auswahl = { karte: "A", schrift: "F", marke: "H" };
 try { const gemerkt = JSON.parse(localStorage.getItem("ahoi-stil") || "{}"); if (WAHL.karte[gemerkt.karte]) auswahl.karte = gemerkt.karte; } catch (e) {}
-// App-Sprachen: Deutsch, Englisch, Slowakisch. Standard ist die iPhone-Sprache, im Profil änderbar.
-const SPRACHEN = { de: "Deutsch", en: "English", sk: "Slovenčina" };
-const SPRACHE = (() => {
-  try { const g = localStorage.getItem("ahoi-sprache"); if (SPRACHEN[g]) return g; } catch (e) {}
-  const n = (navigator.language || "de").toLowerCase();
-  return n.startsWith("de") ? "de" : n.startsWith("sk") ? "sk" : "en";
-})();
 const kartenStil = () => auswahl.karte;
 const P = () => PALETTEN[kartenStil()];
 function oberflaecheAnwenden() {
@@ -791,7 +819,7 @@ const istPaar = g => g.length === 2 && g[0].paar && g[0].paar === g[1].paar;
 // Familien-Zugang: sieht nur die Personen, die ihn freigeschaltet haben; den eigenen Standort nur, wenn selbst gewählt
 // Beispiel: Mama wurde von dir und von Alex eingeladen. Ihr eigener Standort erscheint nur, wenn sie ihn selbst einschaltet.
 const FAMILIE_SIEHT = ["du", "alex"];
-const BETRACHTER = { id: "betrachter", name: "Ich", ort: "Köln", land: "DE", lat: 50.9375, lon: 6.9603, tz: "Europe/Berlin", farbe: "#8a8478" };
+const BETRACHTER = { id: "betrachter", name: t("Ich"), ort: t("Köln"), land: "DE", lat: 50.9375, lon: 6.9603, tz: "Europe/Berlin", farbe: "#8a8478" };
 let familieModus = false, familieMitStandort = false;
 const sichtbareLeute = () => familieModus ? [...leute.filter(p => FAMILIE_SIEHT.includes(p.id)), ...(familieMitStandort ? [BETRACHTER] : [])] : leute;
 const selbstId = () => familieModus ? "betrachter" : "du";
@@ -857,16 +885,16 @@ function listeAufbauen() {
   const du = ich();
   const andere = leute.filter(p => p.id !== "du").map(p => ({ ...p, d: entfernungKm(du.lat, du.lon, p.lat, p.lon) })).sort((x, y) => x.d - y.d);
   const laenderZahl = new Set(andere.map(p => p.land)).size;
-  document.getElementById("zusammenfassung").textContent = `${andere.length} Freunde · ${laenderZahl} Länder · ${versionText(VERSION)}`;
+  document.getElementById("zusammenfassung").textContent = `${t("{n} Freunde", { n: andere.length })} · ${t("{n} Länder", { n: laenderZahl })} · ${versionText(VERSION)}`;
   const ul = document.getElementById("liste"); ul.innerHTML = "";
   for (const p of andere) {
     let paarText = "";
     const dabei = leute.filter(q => q.id !== p.id && q.id !== "du" && entfernungKm(p.lat, p.lon, q.lat, q.lon) < NAH_KM);
-    if (dabei.length) paarText = ` · mit ${dabei.map(q => q.name).join(", ")}`;
+    if (dabei.length) paarText = ` · ${t("mit")} ${dabei.map(q => q.name).join(", ")}`;
     const li = document.createElement("li");
     li.innerHTML = `<div class="ava" style="background:${p.farbe}">${kuerzel(p.name)}</div>
-      <div class="zeile"><b>${p.name}</b><span>${flagge(p.land)} ${p.ort} · ${uhrzeit(p.tz)} Uhr${paarText}</span></div>
-      <div class="weite"><b>${km(p.d)}</b><span>von dir</span></div>`;
+      <div class="zeile"><b>${p.name}</b><span>${flagge(p.land)} ${p.ort} · ${uhrzeit(p.tz)}${t(" Uhr")}${paarText}</span></div>
+      <div class="weite"><b>${km(p.d)}</b><span>${t("von dir")}</span></div>`;
     li.onclick = () => { zuPerson(p); infoZeigen([p]); };
     ul.appendChild(li);
   }
@@ -875,10 +903,10 @@ function listeAufbauen() {
 function infoZeigen(gruppe) {
   const du = familieModus ? BETRACHTER : ich(), p = gruppe[0], info = document.getElementById("info");
   const name = gruppe.map(x => x.name).join(" & ");
-  let text = `${flagge(p.land)} <b>${p.ort}</b> · Ortszeit <b>${uhrzeit(p.tz)} Uhr</b>`;
-  if (p.id !== du.id && (!familieModus || familieMitStandort)) text += `<br>Entfernung zu dir: <b>${km(entfernungKm(du.lat, du.lon, p.lat, p.lon))}</b>`;
-  if (istPaar(gruppe)) text += `<br>❤️ Paar · gerade zusammen unterwegs`;
-  else if (gruppe.length > 1) text += `<br>🤝 Zusammen unterwegs`;
+  let text = `${flagge(p.land)} <b>${p.ort}</b> · ${t("Ortszeit")} <b>${uhrzeit(p.tz)}${t(" Uhr")}</b>`;
+  if (p.id !== du.id && (!familieModus || familieMitStandort)) text += `<br>${t("Entfernung zu dir:")} <b>${km(entfernungKm(du.lat, du.lon, p.lat, p.lon))}</b>`;
+  if (istPaar(gruppe)) text += `<br>${t("❤️ Paar · gerade zusammen unterwegs")}`;
+  else if (gruppe.length > 1) text += `<br>${t("🤝 Zusammen unterwegs")}`;
   info.querySelector("h3").textContent = name;
   info.querySelector("p").innerHTML = text;
   const chatKnopf = document.getElementById("info-chat");
@@ -951,7 +979,7 @@ document.getElementById("knopf-welt").onclick = () => {
 };
 
 function hinweis(t) {
-  const h = document.getElementById("hinweis"); h.textContent = t; h.classList.add("zeigen");
+  const h = document.getElementById("hinweis"); h.textContent = hatText(t) ? window.t(t) : t; h.classList.add("zeigen");
   clearTimeout(hinweis.t); hinweis.t = setTimeout(() => h.classList.remove("zeigen"), 2600);
 }
 
@@ -961,11 +989,11 @@ document.getElementById("knopf-ich").onclick = () => {
   hinweis("Standort wird gesucht …");
   navigator.geolocation.getCurrentPosition(pos => {
     const du = ich();
-    du.lat = pos.coords.latitude; du.lon = pos.coords.longitude; du.ort = "Dein Standort";
+    du.lat = pos.coords.latitude; du.lon = pos.coords.longitude; du.ort = t("Dein Standort");
     du.tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
     pinsSetzen(); listeAufbauen();
     map.flyTo({ center: [du.lon, du.lat], zoom: 11, speed: 1.4, essential: true });
-    hinweis(`Genauigkeit: ± ${Math.round(pos.coords.accuracy)} m`);
+    hinweis(t("Genauigkeit: ± {n} m", { n: Math.round(pos.coords.accuracy) }));
   }, () => hinweis("Standort nicht freigegeben"), { enableHighAccuracy: true, timeout: 12000 });
 };
 
@@ -979,9 +1007,9 @@ if ("serviceWorker" in navigator) window.addEventListener("load", () => navigato
 const VERSION = "__VERSION__";
 function versionText(v) {
   const m = /^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})/.exec(v);
-  if (!m) return "Entwurf";
+  if (!m) return t("Entwurf");
   const d = new Date(Date.UTC(+m[1], m[2] - 1, +m[3], +m[4], +m[5]));
-  return "Stand " + d.toLocaleString("de-DE", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" });
+  return t("Stand") + " " + d.toLocaleString(LOC, { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" });
 }
 async function aufNeueVersionPruefen() {
   if (VERSION.startsWith("__")) return;
@@ -1059,10 +1087,11 @@ const reisen = [
   { wer: ["du"], ziel: "Mexiko", land: "MX", monat: "2027-03", vielleicht: true },
   { wer: ["alex"], ziel: "Kapstadt", land: "ZA", monat: "2027-04", vielleicht: true },
 ];
+reisen.forEach(r => r.ziel = t(r.ziel));
 const reiseSchluessel = r => r.von || r.monat + "-32";
 const datum = iso => new Date(iso + "T12:00:00");
-const kurz = iso => datum(iso).toLocaleDateString("de-DE", { day: "numeric", month: "numeric" });
-const monatName = iso => datum(iso.length === 7 ? iso + "-01" : iso).toLocaleDateString("de-DE", { month: "long", year: "numeric" });
+const kurz = iso => datum(iso).toLocaleDateString(LOC, { day: "numeric", month: "numeric" });
+const monatName = iso => datum(iso.length === 7 ? iso + "-01" : iso).toLocaleDateString(LOC, { month: "long", year: "numeric" });
 function reisenAufbauen() {
   reisen.sort((a, b) => reiseSchluessel(a).localeCompare(reiseSchluessel(b)));
   let html = "", monat = "";
@@ -1076,8 +1105,8 @@ function reisenAufbauen() {
       <div class="gesichter">${gesichter}</div>
       <div class="text"><span class="wer">${ps.map(p => p.name).join(" & ")}</span>
         <span class="ziel">${flagge(r.land)}&nbsp;&nbsp;${r.ziel}</span>
-        <span class="wann">${r.von ? kurz(r.von) + " – " + kurz(r.bis) : "irgendwann im " + datum(r.monat + "-01").toLocaleDateString("de-DE", { month: "long" })}</span></div>
-      <div class="art">${r.vielleicht ? '<span class="vielleicht-text">Vielleicht</span>' : `<b>${naechte}</b><small>Nächte</small>`}</div></div>`;
+        <span class="wann">${r.von ? kurz(r.von) + " – " + kurz(r.bis) : t("irgendwann im {m}", { m: datum(r.monat + "-01").toLocaleDateString(LOC, { month: "long" }) })}</span></div>
+      <div class="art">${r.vielleicht ? '<span class="vielleicht-text">' + t("Vielleicht") + '</span>' : `<b>${naechte}</b><small>${t(naechte === 1 ? "Nacht" : "Nächte")}</small>`}</div></div>`;
   }
   document.getElementById("reise-liste").innerHTML = html;
 }
@@ -1088,22 +1117,22 @@ function reisenAufbauen() {
 const chats = [
   { id: "alle", art: "alle", name: "Alle", ungelesen: 1, nachrichten: [
     { system: "<b>Lea</b> hat eine Reise eingetragen: Lissabon, 8.–20.1." },
-    { von: "lea", text: "Wer ist im Januar noch in Portugal? 🇵🇹", reaktion: "👍 2" },
-    { von: "alex", text: "Ich bin bis Mitte Dezember in Marrakesch, danach wieder Lissabon!" },
-    { von: "lea", ort: "Lissabon · Alfama", text: "Hier haben wir unser Airbnb" },
+    { von: "lea", text: "Wer ist im Januar noch in Portugal? 🇵🇹", lang: "de", ue: { en: "Who else is in Portugal in January? 🇵🇹", sk: "Kto ešte bude v januári v Portugalsku? 🇵🇹" }, reaktion: "👍 2" },
+    { von: "alex", text: "Ich bin bis Mitte Dezember in Marrakesch, danach wieder Lissabon!", lang: "de", ue: { en: "I'm in Marrakesh until mid-December, then back to Lisbon!", sk: "Do polovice decembra som v Marakéši, potom zase v Lisabone!" } },
+    { von: "lea", ort: "Lissabon · Alfama", text: "Hier haben wir unser Airbnb", lang: "de", ue: { en: "This is where our Airbnb is", sk: "Tu máme naše Airbnb" } },
     { system: "🧭 Treffer: <b>Du</b>, <b>Lea</b> & <b>Nico</b> seid vom 10. bis 15.1. in Lissabon" },
-    { von: "nico", text: "@Du perfekt, dann gehen wir zusammen surfen 🏄", reaktion: "❤️ 3" },
+    { von: "nico", text: "@Du perfekt, dann gehen wir zusammen surfen 🏄", lang: "de", ue: { en: "@You perfect, then we'll go surfing together 🏄", sk: "@Ty super, tak pôjdeme spolu surfovať 🏄" }, reaktion: "❤️ 3" },
     { von: "jonas", text: "Anyone around Chiang Mai in February? We found a great coworking space 🙌", lang: "en", ue: { de: "Ist im Februar jemand in der Nähe von Chiang Mai? Wir haben einen tollen Coworking-Space gefunden 🙌", sk: "Je niekto vo februári v okolí Chiang Mai? Našli sme skvelý coworking 🙌" } },
     { von: "mia", sprache: "0:14" },
   ] },
   { id: "lissabon", art: "gruppe", name: "Lissabon im Januar", herkunft: "Treffer", mitglieder: ["du", "lea", "nico"], ungelesen: 1, nachrichten: [
     { system: "🧭 Gruppe aus dem Treffer: <b>Du</b>, <b>Lea</b> & <b>Nico</b> in Lissabon" },
-    { von: "lea", text: "Wir kommen am 8. an, du am 10.?" },
-    { von: "nico", text: "Surfbretter leihen wir vor Ort 🏄" },
+    { von: "lea", text: "Wir kommen am 8. an, du am 10.?", lang: "de", ue: { en: "We arrive on the 8th, you on the 10th?", sk: "My prídeme 8., ty 10.?" } },
+    { von: "nico", text: "Surfbretter leihen wir vor Ort 🏄", lang: "de", ue: { en: "We'll rent surfboards there 🏄", sk: "Surfy si požičiame na mieste 🏄" } },
   ] },
   { id: "idee-ericeira", art: "gruppe", name: "Haus in Ericeira", herkunft: "Idee", idee: "ericeira", mitglieder: ["alex", "sam", "du"], nachrichten: [
     { system: "🏠 Gruppe aus der Idee von <b>Alex</b>: Haus in Ericeira" },
-    { von: "sam", text: "Februar passt mir gut!" },
+    { von: "sam", text: "Februar passt mir gut!", lang: "de", ue: { en: "February works for me!", sk: "Február mi vyhovuje!" } },
   ] },
   { id: "e-mia", art: "einzel", mit: "mia", ungelesen: 1, nachrichten: [
     { von: "mia", text: "¡Hola! ¿Cuándo vienes a México? 🌮", lang: "es", ue: { de: "Hallo! Wann kommst du nach Mexiko? 🌮", en: "Hi! When are you coming to Mexico? 🌮", sk: "Ahoj! Kedy prídeš do Mexika? 🌮" } },
@@ -1111,22 +1140,27 @@ const chats = [
     { von: "mia", text: "¡Perfecto! Te guardo una habitación en Oaxaca.", lang: "es", ue: { de: "Perfekt! Ich halte dir ein Zimmer in Oaxaca frei.", en: "Perfect! I'll keep a room free for you in Oaxaca.", sk: "Super! Nechám ti voľnú izbu v Oaxace." } },
   ] },
   { id: "e-alex", art: "einzel", mit: "alex", nachrichten: [
-    { von: "alex", text: "Bist du im Dezember noch in Málaga?" },
+    { von: "alex", text: "Bist du im Dezember noch in Málaga?", lang: "de", ue: { en: "Are you still in Málaga in December?", sk: "Budeš v decembri ešte v Málage?" } },
   ] },
 ];
+// Was die App selbst schreibt, erscheint in der App-Sprache; was Freunde schreiben, bleibt im Original
+chats.forEach(c => {
+  if (c.art !== "einzel") c.name = t(c.name);
+  c.nachrichten.forEach(n => { if (n.system) n.system = t(n.system); if (n.ort) n.ort = t(n.ort); if (n.von === "du" && n.text) n.text = t(n.text); });
+});
 let aktuellerChat = null;
 const uebersetzt = {};
 const ohneHtml = t => String(t).replace(/[&<>"']/g, z => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[z]);
 function textMitErwaehnung(t) { return ohneHtml(t).replace(/@(\p{L}+)/gu, '<span class="erwaehnung">@$1</span>'); }
-const spracheName = code => new Intl.DisplayNames(["de"], { type: "language" }).of(code);
+const spracheName = code => new Intl.DisplayNames([SPRACHE], { type: "language" }).of(code);
 const chatName = c => c.art === "einzel" ? person(c.mit).name : c.name;
 const istFremd = n => n.lang && n.lang !== SPRACHE && n.ue && n.ue[SPRACHE];
 function vorschau(c) {
   const n = c.nachrichten[c.nachrichten.length - 1];
-  if (!n) return "Noch keine Nachricht";
+  if (!n) return t("Noch keine Nachricht");
   if (n.system) return n.system.replace(/<[^>]+>/g, "");
-  const wer = c.art !== "einzel" ? (n.von === "du" ? "Du" : person(n.von).name) + ": " : n.von === "du" ? "Du: " : "";
-  if (n.sprache) return wer + "🎤 Sprachnachricht";
+  const wer = c.art !== "einzel" ? (n.von === "du" ? t("Du") : person(n.von).name) + ": " : n.von === "du" ? t("Du") + ": " : "";
+  if (n.sprache) return wer + t("🎤 Sprachnachricht");
   if (n.ort) return wer + "📍 " + n.ort;
   return wer + (istFremd(n) && uebersetzt[c.id] ? n.ue[SPRACHE] : n.text);
 }
@@ -1143,7 +1177,7 @@ function chatListeAufbauen() {
     let bild;
     if (c.art === "einzel") { const p = person(c.mit); bild = `<div class="bildchen person" style="background:${p.farbe}">${kuerzel(p.name)}</div>`; }
     else bild = `<div class="bildchen">${c.art === "alle" ? "🌍" : c.herkunft === "Idee" ? "🏠" : c.herkunft === "Treffer" ? "🧭" : "👥"}</div>`;
-    const marke = c.art === "alle" ? '<span class="marke-klein">Beta</span>' : c.herkunft ? `<span class="marke-klein">aus ${c.herkunft}</span>` : "";
+    const marke = c.art === "alle" ? '<span class="marke-klein">Beta</span>' : c.herkunft ? `<span class="marke-klein">${t("aus " + c.herkunft)}</span>` : "";
     return `<li class="chat-zeile" data-id="${c.id}">${bild}<div class="mitte"><b>${ohneHtml(chatName(c))} ${marke}${c.stumm ? " 🔕" : ""}</b><span>${ohneHtml(vorschau(c))}</span></div>${c.ungelesen ? `<div class="ungelesen">${c.ungelesen}</div>` : ""}</li>`;
   }).join("");
   document.querySelectorAll(".chat-zeile").forEach(z => {
@@ -1159,9 +1193,9 @@ function chatListeAufbauen() {
 function chatAktionen(c) {
   const blatt = document.getElementById("aktion-blatt");
   document.getElementById("aktion-titel").textContent = chatName(c);
-  const knoepfe = c.art === "alle" ? [[c.stumm ? "🔔 Wieder einschalten" : "🔕 Stummschalten", () => { c.stumm = !c.stumm; }]]
-    : c.art === "gruppe" ? [["🔕 Stummschalten", () => { c.stumm = !c.stumm; }], ["Gruppe verlassen", () => gruppeVerlassen(c), true]]
-    : [["Chat löschen (nur bei dir)", () => { chats.splice(chats.indexOf(c), 1); hinweis("Nur bei dir gelöscht – " + person(c.mit).name + " sieht den Chat weiter"); }, true]];
+  const knoepfe = c.art === "alle" ? [[t(c.stumm ? "🔔 Wieder einschalten" : "🔕 Stummschalten"), () => { c.stumm = !c.stumm; }]]
+    : c.art === "gruppe" ? [[t("🔕 Stummschalten"), () => { c.stumm = !c.stumm; }], [t("Gruppe verlassen"), () => gruppeVerlassen(c), true]]
+    : [[t("Chat löschen (nur bei dir)"), () => { chats.splice(chats.indexOf(c), 1); hinweis(t("Nur bei dir gelöscht – {name} sieht den Chat weiter", { name: person(c.mit).name })); }, true]];
   const box = document.getElementById("aktion-knoepfe"); box.innerHTML = "";
   knoepfe.forEach(([t, f, gefahr]) => { const b = document.createElement("button"); b.className = "knopf-leise" + (gefahr ? " gefahr" : ""); b.textContent = t; b.onclick = () => { blatt.classList.remove("offen"); f(); chatListeAufbauen(); }; box.appendChild(b); });
   blatt.classList.add("offen");
@@ -1169,7 +1203,7 @@ function chatAktionen(c) {
 document.getElementById("aktion-abbrechen").onclick = () => document.getElementById("aktion-blatt").classList.remove("offen");
 document.getElementById("aktion-blatt").onclick = e => { if (e.target.id === "aktion-blatt") e.target.classList.remove("offen"); };
 function gruppeVerlassen(c) {
-  c.nachrichten.push({ system: "<b>Du</b> hast die Gruppe verlassen" });
+  c.nachrichten.push({ system: t("<b>Du</b> hast die Gruppe verlassen") });
   chats.splice(chats.indexOf(c), 1);
   hinweis("Die anderen sehen: „Du hast die Gruppe verlassen“");
 }
@@ -1177,7 +1211,7 @@ function gespraechOeffnen(c) {
   aktuellerChat = c; c.ungelesen = 0;
   document.getElementById("gespraech-name").textContent = chatName(c);
   const p = c.art === "einzel" && person(c.mit);
-  document.getElementById("gespraech-unter").textContent = c.art === "alle" ? "Alle Mitglieder · nur in der Beta" : c.art === "gruppe" ? c.mitglieder.map(id => id === "du" ? "Du" : person(id).name).join(", ") : `${flagge(p.land)} ${p.ort} · ${uhrzeit(p.tz)} Uhr`;
+  document.getElementById("gespraech-unter").textContent = c.art === "alle" ? t("Alle Mitglieder · nur in der Beta") : c.art === "gruppe" ? c.mitglieder.map(id => person(id).name).join(", ") : `${flagge(p.land)} ${p.ort} · ${uhrzeit(p.tz)}${t(" Uhr")}`;
   document.getElementById("uebersetzen").style.display = c.nachrichten.some(istFremd) ? "" : "none";
   seiteZeigen("unterhaltung");
   chatAufbauen(); chatPunkt();
@@ -1190,14 +1224,14 @@ function einzelChat(id) {
 function chatAufbauen() {
   const c = aktuellerChat, an = !!uebersetzt[c.id], v = document.getElementById("verlauf");
   const knopf = document.getElementById("uebersetzen");
-  knopf.classList.toggle("an", an); knopf.setAttribute("aria-pressed", an); knopf.textContent = an ? "🌐 Original" : "🌐 Übersetzen";
-  v.innerHTML = (an ? `<div class="ue-band">Nachrichten in anderen Sprachen werden auf ${spracheName(SPRACHE)} angezeigt</div>` : "") + c.nachrichten.map((n, k) => {
+  knopf.classList.toggle("an", an); knopf.setAttribute("aria-pressed", an); knopf.textContent = t(an ? "🌐 Original" : "🌐 Übersetzen");
+  v.innerHTML = (an ? `<div class="ue-band">${t("Nachrichten in anderen Sprachen werden auf {s} angezeigt", { s: spracheName(SPRACHE) })}</div>` : "") + c.nachrichten.map((n, k) => {
     if (n.system) return `<div class="system">${n.system}</div>`;
     const p = person(n.von), ich = n.von === "du";
     const zeigUe = istFremd(n) && an && !n.original;
     let inhalt = n.text ? textMitErwaehnung(zeigUe ? n.ue[SPRACHE] : n.text) : "";
-    if (istFremd(n) && an) inhalt += `<span class="ue-hinweis">${zeigUe ? "Übersetzt aus " + spracheName(n.lang) : "Original auf " + spracheName(n.lang)} · <button data-k="${k}">${zeigUe ? "Original anzeigen" : "Übersetzung anzeigen"}</button></span>`;
-    if (n.ort) inhalt = `<div class="ortkarte"><div class="ikon">📍</div><div><b>${n.ort}</b><br><span style="font-size:13px;opacity:.8">${ohneHtml(n.text)}</span></div></div>`;
+    if (istFremd(n) && an) inhalt += `<span class="ue-hinweis">${t(zeigUe ? "Übersetzt aus {s}" : "Original auf {s}", { s: spracheName(n.lang) })} · <button data-k="${k}">${t(zeigUe ? "Original anzeigen" : "Übersetzung anzeigen")}</button></span>`;
+    if (n.ort) inhalt = `<div class="ortkarte"><div class="ikon">📍</div><div><b>${n.ort}</b><br><span style="font-size:13px;opacity:.8">${ohneHtml(zeigUe ? n.ue[SPRACHE] : n.text)}</span></div></div>`;
     if (n.sprache) inhalt = `<div class="sprache">▶︎<div class="welle"></div>${n.sprache}</div>`;
     const nameZeigen = !ich && c.art !== "einzel";
     return `<div class="msg${ich ? " ich" : ""}">${ich ? "" : ava(p)}<div class="blase">${nameZeigen ? `<small>${p.name}</small>` : ""}${inhalt}${n.reaktion ? `<span class="reaktionen">${n.reaktion}</span>` : ""}</div></div>`;
@@ -1229,15 +1263,15 @@ document.getElementById("gruppe-neu-knopf").onclick = () => {
 document.getElementById("gruppe-erstellen").onclick = () => {
   if (!gruppeAuswahl.size) return hinweis("Bitte mindestens eine Person auswählen");
   const name = document.getElementById("gruppe-name").value.trim() || [...gruppeAuswahl].map(id => person(id).name).join(", ");
-  const c = { id: "g-" + Date.now(), art: "gruppe", name, mitglieder: ["du", ...gruppeAuswahl], nachrichten: [{ system: "<b>Du</b> hast die Gruppe erstellt" }] };
+  const c = { id: "g-" + Date.now(), art: "gruppe", name, mitglieder: ["du", ...gruppeAuswahl], nachrichten: [{ system: t("<b>Du</b> hast die Gruppe erstellt") }] };
   chats.splice(1, 0, c); gespraechOeffnen(c);
 };
 // Automatische Gruppe, sobald man bei einer Idee dabei ist
 function ideeGruppe(i, dazu) {
   let c = chats.find(x => x.idee === i.id);
   if (dazu) {
-    if (!c) { c = { id: "idee-" + i.id, art: "gruppe", name: `${i.art} in ${i.ort}`, herkunft: "Idee", idee: i.id, mitglieder: [i.von, ...i.dabei], nachrichten: [{ system: `🏠 Gruppe aus der Idee von <b>${person(i.von).name}</b>: ${i.art} in ${i.ort}` }] }; chats.splice(1, 0, c); }
-    else if (!c.mitglieder.includes("du")) { c.mitglieder.push("du"); c.nachrichten.push({ system: "<b>Du</b> bist dazugekommen" }); }
+    if (!c) { c = { id: "idee-" + i.id, art: "gruppe", name: t("{art} in {ort}", { art: i.art, ort: i.ort }), herkunft: "Idee", idee: i.id, mitglieder: [i.von, ...i.dabei], nachrichten: [{ system: t("🏠 Gruppe aus der Idee von <b>{name}</b>: {titel}", { name: person(i.von).name, titel: t("{art} in {ort}", { art: i.art, ort: i.ort }) }) }] }; chats.splice(1, 0, c); }
+    else if (!c.mitglieder.includes("du")) { c.mitglieder.push("du"); c.nachrichten.push({ system: t("<b>Du</b> bist dazugekommen") }); }
   } else if (c) { chats.splice(chats.indexOf(c), 1); }
   return c;
 }
@@ -1251,6 +1285,7 @@ const ideen = [
   { id: "canggu", von: "jonas", art: "Villa", ort: "Canggu", land: "ID", bewertung: "4,95", zimmer: "4 Schlafzimmer", gaeste: 8, notiz: "", zeitraum: "März", preis: 180, plaetze: 6, dabei: ["ben", "lea", "nico", "mia", "alex"], sicht: "🌍 Alle", herzen: 5, kommentare: 6, quelle: "Airbnb", farbe: "linear-gradient(135deg,#cfe0b8,#6f8a3a)" },
   { id: "chiangmai", von: "ben", art: "Gästehaus", ort: "Chiang Mai", land: "TH", bewertung: "", zimmer: "1 Schlafzimmer", gaeste: 3, notiz: "Günstig für länger", zeitraum: "flexibel", preis: null, plaetze: 3, dabei: [], sicht: "👤 3 Personen", herzen: 1, kommentare: 0, quelle: "booking.com", farbe: "linear-gradient(135deg,#f0dca8,#b98a2e)" },
 ];
+ideen.forEach(i => { i.art = t(i.art); i.ort = t(i.ort); if (i.zeitraum) i.zeitraum = t(i.zeitraum); i.sicht = t(i.sicht); });
 let ideenFilter = "alle";
 // „Preis ansehen“: öffnet die Unterkunft mit Zeitraum und Personenzahl; aktueller Preis und Verfügbarkeit kommen immer von der Seite selbst.
 // Im Prototyp gibt es keine echten Inserat-Links, deshalb die Suche am Ort.
@@ -1273,13 +1308,13 @@ function gebuchtMelden(i) {
   i.gebucht = true;
   reisen.push({ wer, ziel: i.ort, land: i.land, von: i.anreise, bis: i.abreise });
   reisenAufbauen();
-  const c = ideeGruppe(i, true); c.nachrichten.push({ system: `✅ <b>Gebucht!</b> ${i.art} in ${i.ort}, ${kurz(i.anreise)}–${kurz(i.abreise)} steht jetzt in den Reisen` });
+  const c = ideeGruppe(i, true); c.nachrichten.push({ system: t("✅ <b>Gebucht!</b> {titel}, {daten} steht jetzt in den Reisen", { titel: t("{art} in {ort}", { art: i.art, ort: i.ort }), daten: kurz(i.anreise) + "–" + kurz(i.abreise) }) });
   ideenAufbauen();
-  hinweis("In Reisen eingetragen für " + wer.map(id => id === "du" ? "dich" : person(id).name).join(", "));
+  hinweis(t("In Reisen eingetragen für {wer}", { wer: wer.map(id => id === "du" ? t("dich") : person(id).name).join(", ") }));
 }
 function ideenAufbauen() {
   const laender = ["alle", ...new Set(ideen.map(i => i.land))];
-  document.getElementById("ideen-filter").innerHTML = laender.map(l => `<button data-l="${l}" class="${l === ideenFilter ? "aktiv" : ""}">${l === "alle" ? "Alle" : flagge(l) + " " + new Intl.DisplayNames(["de"], { type: "region" }).of(l)}</button>`).join("");
+  document.getElementById("ideen-filter").innerHTML = laender.map(l => `<button data-l="${l}" class="${l === ideenFilter ? "aktiv" : ""}">${l === "alle" ? t("Alle|Filter") : flagge(l) + " " + new Intl.DisplayNames([SPRACHE], { type: "region" }).of(l)}</button>`).join("");
   document.querySelectorAll("#ideen-filter button").forEach(b => b.onclick = () => { ideenFilter = b.dataset.l; ideenAufbauen(); });
   document.getElementById("ideen-liste").innerHTML = ideen.map((i, n) => {
     if (ideenFilter !== "alle" && i.land !== ideenFilter) return "";
@@ -1288,25 +1323,25 @@ function ideenAufbauen() {
     const proPerson = Math.round(i.preis / belegt);
     return `
     <div class="kasten idee">
-      <div class="bild" style="background:${i.farbe}"><span class="quelle">${i.quelle}</span><span class="sicht">${i.sicht}</span>${i.gebucht ? '<span class="gebucht">✅ Gebucht</span>' : ""}<button class="herzen" data-n="${n}">❤️ ${i.herzen}</button></div>
+      <div class="bild" style="background:${i.farbe}"><span class="quelle">${i.quelle}</span><span class="sicht">${i.sicht}</span>${i.gebucht ? '<span class="gebucht">' + t("✅ Gebucht") + '</span>' : ""}<button class="herzen" data-n="${n}">❤️ ${i.herzen}</button></div>
       <div class="inhalt">
-        <b>${i.art} in ${i.ort} ${flagge(i.land)}</b>
+        <b>${t("{art} in {ort}", { art: i.art, ort: i.ort })} ${flagge(i.land)}</b>
         <span class="ort">${[i.bewertung ? "★ " + i.bewertung : "", i.anreise ? kurz(i.anreise) + "–" + kurz(i.abreise) : i.zeitraum].filter(Boolean).join(" · ")}</span>
-        <div class="geteilt">${ava(person(i.von))}<span><b>${person(i.von).name}</b><br>${i.notiz ? "„" + ohneHtml(i.notiz) + "“" : "hat das geteilt"}</span></div>
+        <div class="geteilt">${ava(person(i.von))}<span><b>${person(i.von).name}</b><br>${i.notiz ? "„" + ohneHtml(i.notiz) + "“" : t("hat das geteilt")}</span></div>
         <div class="zahlen">
-          <div><b>🛏 ${parseInt(i.zimmer) || "–"}</b><small>Schlafzimmer</small></div>
-          <div><b>👥 ${i.plaetze}</b><small>${i.plaetze < i.gaeste ? "von " + i.gaeste + " Gästen" : "Gäste"}</small></div>
-          <div class="${frei ? "" : "voll"}"><b>${frei ? frei : "Voll"}</b><small>${frei ? "Plätze frei" : "alle vergeben"}</small></div>
+          <div><b>🛏 ${parseInt(i.zimmer) || "–"}</b><small>${t("Schlafzimmer")}</small></div>
+          <div><b>👥 ${i.plaetze}</b><small>${i.plaetze < i.gaeste ? t("von {n} Gästen", { n: i.gaeste }) : t("Gäste")}</small></div>
+          <div class="${frei ? "" : "voll"}"><b>${frei ? frei : t("Voll")}</b><small>${t(frei ? "Plätze frei" : "alle vergeben")}</small></div>
         </div>
-        ${i.preis ? `<div class="rechner">💶 ${i.preis} € / Nacht · <b>${proPerson} € pro Person</b> bei ${belegt}</div>` : ""}
+        ${i.preis ? `<div class="rechner">💶 ${i.preis} € / ${t("Nacht")} · <b>${t("{n} € pro Person", { n: proPerson })}</b> ${t("bei {n}", { n: belegt })}</div>` : ""}
         <div class="dabei-leiste"><div class="dabei-gesichter">${[i.von, ...i.dabei].map(id => ava(person(id))).join("")}</div></div>
         <div class="aktionen">
-          ${i.gebucht ? `<button class="knopf-gross ist-dabei" disabled style="opacity:1">✅ Gebucht · steht in Reisen</button>` : `<button class="knopf-gross dabei-knopf ${ichDabei ? "ist-dabei" : ""}" data-n="${n}" ${!frei && !ichDabei ? "disabled" : ""}>${ichDabei ? "✓ Du bist dabei" : frei ? "🙋 Ich wäre dabei" : "Leider voll"}</button>`}
+          ${i.gebucht ? `<button class="knopf-gross ist-dabei" disabled style="opacity:1">${t("✅ Gebucht · steht in Reisen")}</button>` : `<button class="knopf-gross dabei-knopf ${ichDabei ? "ist-dabei" : ""}" data-n="${n}" ${!frei && !ichDabei ? "disabled" : ""}>${t(ichDabei ? "✓ Du bist dabei" : frei ? "🙋 Ich wäre dabei" : "Leider voll")}</button>`}
           <button class="knopf-leise">💬 ${i.kommentare}</button>
         </div>
         <div class="aktionen" style="margin-top:8px">
-          <a class="knopf-leise" href="${ansehenLink(i)}" target="_blank" rel="noopener" style="text-decoration:none;flex:1;text-align:center">${i.anreise ? "Preis ansehen ↗" : "Ansehen ↗"}</a>
-          ${(ichDabei || i.von === "du") && !i.gebucht ? `<button class="knopf-leise gebucht-knopf" data-n="${n}" style="flex:1">✓ Gebucht</button>` : ""}
+          <a class="knopf-leise" href="${ansehenLink(i)}" target="_blank" rel="noopener" style="text-decoration:none;flex:1;text-align:center">${t(i.anreise ? "Preis ansehen ↗" : "Ansehen ↗")}</a>
+          ${(ichDabei || i.von === "du") && !i.gebucht ? `<button class="knopf-leise gebucht-knopf" data-n="${n}" style="flex:1">${t("✓ Gebucht")}</button>` : ""}
         </div>
       </div></div>`;
   }).join("");
@@ -1314,7 +1349,7 @@ function ideenAufbauen() {
   document.querySelectorAll(".dabei-knopf").forEach(b => b.onclick = () => {
     const i = ideen[b.dataset.n], k = i.dabei.indexOf("du");
     if (k >= 0) { i.dabei.splice(k, 1); ideeGruppe(i, false); }
-    else { i.dabei.push("du"); ideeGruppe(i, true); hinweis(person(i.von).name + " wird benachrichtigt · Gruppe im Chat"); }
+    else { i.dabei.push("du"); ideeGruppe(i, true); hinweis(t("{name} wird benachrichtigt · Gruppe im Chat", { name: person(i.von).name })); }
     ideenAufbauen();
   });
   document.querySelectorAll(".gebucht-knopf").forEach(b => b.onclick = () => gebuchtMelden(ideen[b.dataset.n]));
@@ -1322,7 +1357,7 @@ function ideenAufbauen() {
 
 // ---------- Profil: Mitteilungen ----------
 document.getElementById("mitteilungen").innerHTML = [["Neue Chat-Nachricht", "Bei Erwähnungen immer"], ["Jemand ist in der Nähe", "Nach deiner Treffer-Einstellung"], ["Neuer Reiseplan", "Wenn ein Freund eine Reise einträgt"], ["Neue Unterkunfts-Idee", ""]]
-  .map(([t, u], i) => `<div class="zeile-einst"><div>${t}${u ? `<small>${u}</small>` : ""}</div><button class="schalter${i < 2 ? " an" : ""}"></button></div>`).join("");
+  .map(([a, u], i) => `<div class="zeile-einst"><div>${t(a)}${u ? `<small>${t(u)}</small>` : ""}</div><button class="schalter${i < 2 ? " an" : ""}"></button></div>`).join("");
 document.querySelectorAll("#mitteilungen .schalter").forEach(b => b.onclick = () => b.classList.toggle("an"));
 
 document.getElementById("idee-neu").onclick = () => seiteZeigen("idee-neu");
@@ -1337,8 +1372,8 @@ function vorschauZeigen() {
   const airbnb = /(airbnb\.[a-z.]+\/(rooms|h)\/|abnb\.me\/)/i.test(v);
   box.style.display = "block";
   box.innerHTML = airbnb
-    ? "✅ <b>Airbnb erkannt</b><br><span style='font-size:13px;color:var(--text-leise)'>Foto, Art, Ort, Bewertung, Schlafzimmer und Gäste werden automatisch übernommen (im Prototyp noch Beispiel).</span>"
-    : "🔗 <b>Webseite erkannt</b><br><span style='font-size:13px;color:var(--text-leise)'>Titel und Bild kommen aus der Vorschau der Seite.</span>";
+    ? `✅ <b>${t("Airbnb erkannt")}</b><br><span style='font-size:13px;color:var(--text-leise)'>${t("Foto, Art, Ort, Bewertung, Schlafzimmer und Gäste werden automatisch übernommen (im Prototyp noch Beispiel).")}</span>`
+    : `🔗 <b>${t("Webseite erkannt")}</b><br><span style='font-size:13px;color:var(--text-leise)'>${t("Titel und Bild kommen aus der Vorschau der Seite.")}</span>`;
 }
 let plaetze = 8;
 document.getElementById("pl-minus").onclick = () => { plaetze = Math.max(2, plaetze - 1); document.getElementById("pl-zahl").textContent = plaetze; };
@@ -1348,7 +1383,7 @@ document.querySelectorAll("#sicht-wahl button").forEach(b => b.onclick = () => {
   document.querySelectorAll("#sicht-wahl button").forEach(x => x.classList.toggle("aktiv", x === b));
   const d = document.getElementById("sicht-detail"), art = b.dataset.s;
   d.style.display = art === "alle" ? "none" : "block";
-  if (art === "kreis") d.innerHTML = Object.entries(kreise).map(([n, ids], i) => `<div class="zeile-einst"><div>${n}<small>${ids.map(id => person(id).name).join(", ")}</small></div><button class="schalter${i ? "" : " an"}"></button></div>`).join("") + `<button class="knopf-leise" style="margin-top:8px">+ Neuer Kreis</button>`;
+  if (art === "kreis") d.innerHTML = Object.entries(kreise).map(([n, ids], i) => `<div class="zeile-einst"><div>${n}<small>${ids.map(id => person(id).name).join(", ")}</small></div><button class="schalter${i ? "" : " an"}"></button></div>`).join("") + `<button class="knopf-leise" style="margin-top:8px">${t("+ Neuer Kreis")}</button>`;
   if (art === "einzeln") d.innerHTML = `<div class="chips" style="flex-wrap:wrap;margin:0;padding:0">${leute.filter(p => p.id !== "du").map(p => `<button>${p.name}</button>`).join("")}</div>`;
   d.querySelectorAll(".schalter").forEach(x => x.onclick = () => x.classList.toggle("an"));
   d.querySelectorAll(".chips button").forEach(x => x.onclick = () => x.classList.toggle("aktiv"));
@@ -1366,10 +1401,10 @@ function familieAufbauen() {
     const naechte = r ? Math.round((datum(r.bis) - datum(r.von)) / 864e5) : 0;
     const weitere = reisen.filter(x => x !== r && x.wer.includes(p.id) && (x.vielleicht || x.bis >= heute));
     return `<div class="fam-karte" data-id="${p.id}"><div class="ava" style="background:${p.farbe}">${kuerzel(p.name)}</div><div style="flex:1">
-      <b>${p.name}</b><div class="wo">${flagge(p.land)}&nbsp; ${p.id === "du" ? "bist" : "ist"} in <b style="display:inline;font-size:16px">${p.ort}</b></div>
-      <div class="klein">Dort ist es ${uhrzeit(p.tz)} Uhr${familieMitStandort ? " · " + km(entfernungKm(du.lat, du.lon, p.lat, p.lon)) + " von dir" : ""}</div>
-      ${r ? `<div class="naechste"><span class="nr-titel">✈︎ Nächste Reise</span><span class="nr-ort">${flagge(r.land)}&nbsp; ${r.ziel}</span><span class="nr-daten">${kurz(r.von)} – ${kurz(r.bis)} · ${naechte} ${naechte === 1 ? "Nacht" : "Nächte"}</span></div>` : ""}
-      ${weitere.length ? `<div class="weitere">${weitere.map(x => `${flagge(x.land)} ${x.ziel} · ${x.von ? kurz(x.von) + "–" + kurz(x.bis) : "vielleicht im " + datum(x.monat + "-01").toLocaleDateString("de-DE", { month: "long" })}`).join("<br>")}</div>` : ""}
+      <b>${p.name}</b><div class="wo">${flagge(p.land)}&nbsp; ${t(p.id === "du" ? "bist in" : "ist in")} <b style="display:inline;font-size:16px">${p.ort}</b></div>
+      <div class="klein">${t("Dort ist es {z} Uhr", { z: uhrzeit(p.tz) })}${familieMitStandort ? " · " + t("{km} von dir", { km: km(entfernungKm(du.lat, du.lon, p.lat, p.lon)) }) : ""}</div>
+      ${r ? `<div class="naechste"><span class="nr-titel">${t("✈︎ Nächste Reise")}</span><span class="nr-ort">${flagge(r.land)}&nbsp; ${r.ziel}</span><span class="nr-daten">${kurz(r.von)} – ${kurz(r.bis)} · ${naechte} ${t(naechte === 1 ? "Nacht" : "Nächte")}</span></div>` : ""}
+      ${weitere.length ? `<div class="weitere">${weitere.map(x => `${flagge(x.land)} ${x.ziel} · ${x.von ? kurz(x.von) + "–" + kurz(x.bis) : t("vielleicht im {m}", { m: datum(x.monat + "-01").toLocaleDateString(LOC, { month: "long" }) })}`).join("<br>")}</div>` : ""}
     </div></div>`;
   }).join("");
   document.querySelectorAll(".fam-karte").forEach(k => k.onclick = () => { const p = leute.find(x => x.id === k.dataset.id); map.flyTo({ center: [p.lon, p.lat], zoom: 10, speed: 1.3, essential: true }); });
@@ -1398,16 +1433,16 @@ document.getElementById("familie-standort").onclick = e => { e.currentTarget.cla
 // ---------- Länder-Sammlung ----------
 let besucht = ["DE", "ES", "PT", "SK", "IT", "FR", "TH", "VN", "ID", "MX", "GR", "HR"];
 try { const g = JSON.parse(localStorage.getItem("ahoi-laender") || "null"); if (Array.isArray(g)) besucht = g; } catch (e) {}
-const landName = cc => { try { return new Intl.DisplayNames(["de"], { type: "region" }).of(cc); } catch (e) { return cc; } };
+const landName = cc => { try { return new Intl.DisplayNames([SPRACHE], { type: "region" }).of(cc); } catch (e) { return cc; } };
 function stempelAufbauen() {
-  document.getElementById("laender-titel").textContent = `Länder-Sammlung · ${besucht.length}`;
-  document.getElementById("stempel").innerHTML = besucht.map(cc => `<div title="${landName(cc)}">${flagge(cc)}</div>`).join("") + '<div class="plus" id="land-plus" role="button" aria-label="Land hinzufügen">＋</div>';
+  document.getElementById("laender-titel").textContent = `${t("Länder-Sammlung")} · ${besucht.length}`;
+  document.getElementById("stempel").innerHTML = besucht.map(cc => `<div title="${landName(cc)}">${flagge(cc)}</div>`).join("") + '<div class="plus" id="land-plus" role="button" aria-label="' + t("Land hinzufügen") + '">＋</div>';
   document.getElementById("land-plus").onclick = () => { seiteZeigen("laender"); laenderListe(""); };
 }
 function laenderListe(suche) {
   if (!laender) return hinweis("Einen Moment, Länder werden geladen …");
   const alle = [...new Set(laender.features.map(f => f.properties.iso).filter(c => /^[A-Z]{2}$/.test(c)))]
-    .map(cc => [cc, landName(cc)]).sort((a, b) => a[1].localeCompare(b[1], "de"))
+    .map(cc => [cc, landName(cc)]).sort((a, b) => a[1].localeCompare(b[1], SPRACHE))
     .filter(([cc, n]) => !suche || n.toLowerCase().includes(suche.toLowerCase()));
   const box = document.getElementById("land-liste");
   box.innerHTML = alle.map(([cc, n]) => `<div class="land-zeile${besucht.includes(cc) ? " an" : ""}" data-cc="${cc}"><span>${flagge(cc)}&nbsp;&nbsp;${n}</span><span class="haken">✓</span></div>`).join("");
