@@ -56,14 +56,14 @@ Gesammelte Wünsche und Entscheidungen von Sven. Gebaut wird erst, wenn die Anfo
 - Anzeige: Ort, Zeitraum, Anzahl Nächte
 
 ## Unterkunfts-Ideenliste
-- Geteilt wird ein Link: in erster Linie Airbnb (direkte Erkennung), zusätzlich jede andere Webadresse
-- Auf dem iPhone: in Airbnb „Teilen → Link kopieren“, in Ahoi „Link einfügen“ (iOS erlaubt Web-Apps nicht, im Teilen-Menü zu erscheinen; Android schon)
-- Aus der Link-Vorschau automatisch: Foto, Art, Ort, Bewertung, Zimmer (bei Airbnb vorhanden)
-- Plätze: Vorschlag aus Airbnb (Gästezahl), die teilende Person kann weniger freigeben; „Ich wäre dabei“ zählt die freien Plätze herunter, bei voll keine Zusage mehr möglich
-- Preis pro Nacht und pro Person (nach Anzahl Zusagen); Preis von der teilenden Person bestätigt/eingetragen, da Airbnb-Preise vom Zeitraum abhängen
-- Sichtbarkeit pro Idee: Alle / Freundeskreis / einzelne Personen; Freundeskreise (z. B. „Lieblingsleute“) im Profil anlegen
-- Kommentare (Fragen), Herz, „Ich wäre dabei“ mit Benachrichtigung an die teilende Person
-- Nach Ländern sortiert
+- Teilen als Ein-Tipp-Ablauf: 3-Schritte-Hinweis (Airbnb öffnen → Teilen → Link kopieren) und großer Knopf „Airbnb-Link einfügen“
+- Auf dem iPhone ist das Kopieren nötig (iOS lässt Web-Apps nicht im Teilen-Menü erscheinen; Android schon)
+- Aus dem Link automatisch: Foto, Art, Ort, Bewertung, Schlafzimmer, Gästezahl
+- Im Vordergrund der Karte: Schlafzimmer, Gäste/Plätze, freie Plätze
+- Weitere Angaben freiwillig und eingeklappt: anderer Link, Notiz, Zeitraum, Preis pro Nacht (nur für den Rechner „pro Person“), Plätze begrenzen, Sichtbarkeit (Alle / Freundeskreis / Einzeln)
+- „Preis ansehen“ öffnet Airbnb mit Zeitraum und Personenzahl (aktueller Preis und Verfügbarkeit kommen immer von Airbnb)
+- „Ich wäre dabei“ zählt freie Plätze herunter, Benachrichtigung an die teilende Person; „Gebucht“ als ein Knopf; nach Ablauf des Zeitraums verschwindet die Idee automatisch
+- Kommentare, Herz, Filter nach Ländern
 
 ## KI
 - Zum Start weglassen (zu kompliziert am Anfang); später gewünscht: Screenshots/Tickets auslesen, Treffpunkt vorschlagen, Reise- und Wohntipps, Chat-Zusammenfassung
@@ -77,8 +77,17 @@ Gesammelte Wünsche und Entscheidungen von Sven. Gebaut wird erst, wenn die Anfo
 - Länder-Sammlung (Stempel): Länder aus eingetragenen Reisen kommen automatisch dazu, frühere Länder trägt man über ＋ nach (Suchliste)
 - Keine Abzeichen
 - Ortszeit der Freunde
+- Profil: Freund einladen, Freundeskreise, Paar verknüpfen als gut sichtbare Kacheln oben; „Freund einladen“ auch unten in „Wer ist wo“
+- Feedback in der Beta: kleine Lasche „Feedback“ am rechten Rand auf jedem Bildschirm
 - Countdown zum Treffen
 - Status-Satz
+
+## Familien-Zugang (nur zuschauen)
+- Für Eltern, Geschwister u. a., die keine Nomaden sind: sehen nur die Personen, die sie freigeschaltet haben (wie ein AirTag auf dem Bildschirm)
+- Teilen selbst nichts und erscheinen für niemanden auf der Karte
+- Eigene Ansicht ohne Leiste: große Karten mit „ist in …“, Ortszeit und nächster Reise; Antippen zeigt den Ort auf der Karte
+- Optional: eigenen Standort nur für sich einschalten, um die Entfernung zu sehen
+- Nomaden laden Familienmitglieder im Profil unter „Familie“ ein
 
 ## Netzwerk und Einladungen
 - Einladungen: Mitglieder schlagen vor, Sven gibt frei

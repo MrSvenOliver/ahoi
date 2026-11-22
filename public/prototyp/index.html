@@ -233,7 +233,7 @@
   .zahlen b { display: block; font-size: 16px; }
   .zahlen small { font-size: 11px; color: var(--text-leise); }
   .rechner { font-size: 13px; color: var(--text-leise); margin: -4px 0 12px; }
-  .rechner b { color: var(--text); }
+  .idee .inhalt .rechner b, .rechner b { display: inline; font-size: 13px; color: var(--text); }
   .zahlen .voll { background: rgba(192, 88, 47, 0.15); }
   .dabei-gesichter { display: flex; margin-bottom: 12px; }
   .dabei-gesichter .klein-ava { width: 30px; height: 30px; font-size: 10px; margin-right: -8px; box-shadow: 0 0 0 2px var(--karte-bg); }
@@ -287,6 +287,16 @@
 
   /* Unteres Blatt sitzt über der Leiste */
   .blatt { bottom: var(--leiste-h) !important; padding-bottom: 0 !important; }
+  /* Familien-Ansicht: nur zuschauen, große Karten, keine Leiste */
+  .familie-blatt { display: none; position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; max-height: 62vh; overflow-y: auto; overscroll-behavior: contain; background: var(--glas); border-top: 1px solid var(--glas-rand); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); border-radius: 26px 26px 0 0; padding: 10px 16px calc(16px + env(safe-area-inset-bottom)); max-width: 560px; margin: 0 auto; box-shadow: 0 -10px 30px rgba(60, 38, 16, 0.18); }
+  html.familie .familie-blatt { display: block; }
+  html.familie .leiste, html.familie .blatt, html.familie #knopf-ich, html.familie .profil-knopf { display: none !important; }
+  .fam-karte { display: flex; gap: 14px; align-items: flex-start; padding: 14px 0; border-bottom: 1px solid var(--trenner); cursor: pointer; }
+  .fam-karte .ava { width: 56px; height: 56px; font-size: 18px; }
+  .fam-karte b { font-size: 20px; display: block; }
+  .fam-karte .wo { font-size: 16px; margin-top: 2px; }
+  .fam-karte .klein { font-size: 13px; color: var(--text-leise); margin-top: 4px; }
+  .fam-karte .naechste { margin-top: 8px; font-size: 14px; padding: 8px 10px; border-radius: 12px; background: var(--trenner); }
   .feedback-lasche { position: fixed; right: 0; top: 46%; z-index: 44; transform: translateY(-50%) rotate(-90deg); transform-origin: 100% 50%; translate: 0 0; border: 0; border-radius: 10px 10px 0 0; padding: 5px 10px; background: var(--tinte); color: var(--papier); font: inherit; font-size: 11px; font-weight: 700; letter-spacing: 0.3px; opacity: 0.55; cursor: pointer; margin-right: 13px; }
   .feedback-lasche:active { opacity: 1; }
   html.tippt .feedback-lasche { display: none; }
@@ -433,6 +443,11 @@
     <p class="hinweis-band" style="margin-top:12px;text-align:left">Länder aus deinen Reisen kommen automatisch dazu. Frühere Länder trägst du über ＋ nach.</p></div>
   <h2>Kartenstil</h2>
   <div class="kasten"><div class="segmente" data-art="karte"></div></div>
+  <h2>Familie</h2>
+  <div class="kasten">
+    <div class="zeile-einst"><div>Familie darf mich sehen<small>Mama, Papa, Schwester · sehen deinen Ort und deine nächsten Reisen, teilen selbst nichts</small></div><button class="knopf-leise" data-hinweis="Familienmitglied einladen – kommt mit Phase 2">＋ Einladen</button></div>
+    <div class="zeile-einst"><div>So sieht es deine Familie<small>Prototyp: Familien-Ansicht ausprobieren</small></div><button class="knopf-leise" id="familie-start">Ansehen</button></div>
+  </div>
   <h2>Mitteilungen</h2>
   <div class="kasten" id="mitteilungen"></div>
   <h2>Privatsphäre</h2>
@@ -448,6 +463,12 @@
   <p class="hinweis-band">Beispieldaten · Einstellungen werden ab Phase 2 gespeichert (Kartenstil schon jetzt)</p>
 </section>
 
+<section class="familie-blatt" id="familie-blatt">
+  <div class="griff"></div>
+  <div id="familie-karten"></div>
+  <div class="zeile-einst"><div>Meinen Standort zeigen<small>Nur für dich, um die Entfernung zu sehen. Niemand sonst sieht ihn.</small></div><button class="schalter" id="familie-standort"></button></div>
+  <button class="knopf-leise" id="familie-ende" style="width:100%;margin-top:6px">Prototyp: zurück zur Nomaden-Ansicht</button>
+</section>
 <button class="feedback-lasche" id="feedback-lasche" aria-label="Feedback an Sven">Feedback</button>
 <section class="seite" id="seite-feedback" style="z-index:45">
   <div class="seite-kopf"><h1>Feedback</h1><button class="knopf-leise" data-zurueck="__zurueck">Schließen</button></div>
@@ -703,9 +724,13 @@ let marker = [];
 const NAH_KM = 50;
 // Ein Herz gibt es nur, wenn genau zwei Personen zusammen sind UND beide ihr Paar gegenseitig bestätigt haben
 const istPaar = g => g.length === 2 && g[0].paar && g[0].paar === g[1].paar;
+// Familien-Zugang: sieht nur die Personen, die ihn freigeschaltet haben; den eigenen Standort nur, wenn selbst gewählt
+const FAMILIE_SIEHT = ["alex", "sam"];
+let familieModus = false, familieMitStandort = false;
+const sichtbareLeute = () => familieModus ? leute.filter(p => FAMILIE_SIEHT.includes(p.id) || (p.id === "du" && familieMitStandort)) : leute;
 function gruppenBilden() {
   const gruppen = [];
-  for (const p of leute) {
+  for (const p of sichtbareLeute()) {
     const g = gruppen.find(g => g.some(q => entfernungKm(p.lat, p.lon, q.lat, q.lon) < NAH_KM));
     g ? g.push(p) : gruppen.push([p]);
   }
@@ -786,7 +811,7 @@ function infoZeigen(gruppe) {
   const du = ich(), p = gruppe[0], info = document.getElementById("info");
   const name = gruppe.map(x => x.name).join(" & ");
   let text = `${flagge(p.land)} <b>${p.ort}</b> · Ortszeit <b>${uhrzeit(p.tz)} Uhr</b>`;
-  if (p.id !== "du") text += `<br>Entfernung zu dir: <b>${km(entfernungKm(du.lat, du.lon, p.lat, p.lon))}</b>`;
+  if (p.id !== "du" && (!familieModus || familieMitStandort)) text += `<br>Entfernung zu dir: <b>${km(entfernungKm(du.lat, du.lon, p.lat, p.lon))}</b>`;
   if (istPaar(gruppe)) text += `<br>❤️ Paar · gerade zusammen unterwegs`;
   else if (gruppe.length > 1) text += `<br>🤝 Zusammen unterwegs`;
   else if (p.paar) { const q = leute.find(x => x.paar === p.paar && x.id !== p.id); text += `<br>${q.name} ist in ${q.ort}, <b>${km(entfernungKm(p.lat, p.lon, q.lat, q.lon))}</b> entfernt`; }
@@ -1099,6 +1124,36 @@ document.querySelectorAll("#sicht-wahl button").forEach(b => b.onclick = () => {
   d.querySelectorAll(".chips button").forEach(x => x.onclick = () => x.classList.toggle("aktiv"));
 });
 document.getElementById("idee-speichern").onclick = () => { hinweis("Teilen kommt in Phase 5"); seiteZeigen("ideen"); };
+// ---------- Familien-Ansicht ----------
+function naechsteReise(id) {
+  const heute = new Date().toISOString().slice(0, 10);
+  return reisen.filter(r => r.wer.includes(id) && r.von && r.bis >= heute).sort((a, b) => a.von.localeCompare(b.von))[0];
+}
+function familieAufbauen() {
+  const du = ich();
+  document.getElementById("familie-karten").innerHTML = leute.filter(p => FAMILIE_SIEHT.includes(p.id)).map(p => {
+    const r = naechsteReise(p.id);
+    const naechte = r ? Math.round((datum(r.bis) - datum(r.von)) / 864e5) : 0;
+    return `<div class="fam-karte" data-id="${p.id}"><div class="ava" style="background:${p.farbe}">${kuerzel(p.name)}</div><div style="flex:1">
+      <b>${p.name}</b><div class="wo">${flagge(p.land)}&nbsp; ist in <b style="display:inline;font-size:16px">${p.ort}</b></div>
+      <div class="klein">Dort ist es ${uhrzeit(p.tz)} Uhr${familieMitStandort ? " · " + km(entfernungKm(du.lat, du.lon, p.lat, p.lon)) + " von dir" : ""}</div>
+      ${r ? `<div class="naechste">✈︎ Nächste Reise: ${flagge(r.land)} ${r.ziel} · ab ${kurz(r.von)} (${naechte} Nächte)</div>` : ""}
+    </div></div>`;
+  }).join("");
+  document.querySelectorAll(".fam-karte").forEach(k => k.onclick = () => { const p = leute.find(x => x.id === k.dataset.id); map.flyTo({ center: [p.lon, p.lat], zoom: 10, speed: 1.3, essential: true }); });
+}
+function familieSetzen(an) {
+  familieModus = an;
+  document.documentElement.classList.toggle("familie", an);
+  seiteZeigen("karte");
+  if (an) familieAufbauen();
+  pinsSetzen();
+  if (an) { const b = new maplibregl.LngLatBounds(); sichtbareLeute().forEach(p => b.extend([p.lon, p.lat])); map.fitBounds(b, { padding: { top: 120, bottom: window.innerHeight * 0.5, left: 60, right: 60 }, maxZoom: 6, duration: 900 }); }
+}
+document.getElementById("familie-start").onclick = () => familieSetzen(true);
+document.getElementById("familie-ende").onclick = () => familieSetzen(false);
+document.getElementById("familie-standort").onclick = e => { e.currentTarget.classList.toggle("an"); familieMitStandort = e.currentTarget.classList.contains("an"); familieAufbauen(); pinsSetzen(); };
+
 // ---------- Länder-Sammlung ----------
 let besucht = ["DE", "ES", "PT", "SK", "IT", "FR", "TH", "VN", "ID", "MX", "GR", "HR"];
 try { const g = JSON.parse(localStorage.getItem("ahoi-laender") || "null"); if (Array.isArray(g)) besucht = g; } catch (e) {}
