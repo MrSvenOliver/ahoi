@@ -631,7 +631,9 @@ function pinsSetzen() {
     if (ersteDarstellung) innen.style.animationDelay = (0.15 + i * 0.09) + "s"; else innen.style.animation = "none";
     if (leuteHier[0].id === "du") innen.innerHTML = '<div class="puls"></div>';
     leuteHier.slice(0, 3).forEach((p, j) => { innen.innerHTML += `<div class="pin-kopf" style="left:${3 + j * 18}px;background:${p.farbe};z-index:${3 - j}">${leuteHier.length > 3 && j === 2 ? "+" + (leuteHier.length - 2) : kuerzel(p.name)}</div>`; });
+    // ❤️ = bestätigtes Paar am selben Ort · 🤝 = Freunde am selben Ort · Zahl = Pins liegen nur auf dem Bildschirm übereinander
     if (h.gruppen.length === 1 && istPaar(h.gruppen[0])) innen.innerHTML += `<div class="herz" style="left:${breite / 2 - 7}px">❤️</div>`;
+    else if (h.gruppen.length === 1 && leuteHier.length > 1) innen.innerHTML += `<div class="herz" style="left:${breite / 2 - 8}px">🤝</div>`;
     else if (leuteHier.length > 1) innen.innerHTML += `<div class="pin-zahl" style="left:${breite - 16}px">${leuteHier.length}</div>`;
     innen.innerHTML += `<div class="pin-spitze" style="left:${breite / 2 - 5}px"></div>`;
     el.appendChild(innen);
@@ -704,7 +706,7 @@ function infoZeigen(gruppe) {
   let text = `${flagge(p.land)} <b>${p.ort}</b> · Ortszeit <b>${uhrzeit(p.tz)} Uhr</b>`;
   if (p.id !== "du") text += `<br>Entfernung zu dir: <b>${km(entfernungKm(du.lat, du.lon, p.lat, p.lon))}</b>`;
   if (istPaar(gruppe)) text += `<br>❤️ Paar · gerade zusammen unterwegs`;
-  else if (gruppe.length > 1) text += `<br>Zusammen unterwegs`;
+  else if (gruppe.length > 1) text += `<br>🤝 Zusammen unterwegs`;
   else if (p.paar) { const q = leute.find(x => x.paar === p.paar && x.id !== p.id); text += `<br>${q.name} ist in ${q.ort}, <b>${km(entfernungKm(p.lat, p.lon, q.lat, q.lon))}</b> entfernt`; }
   info.querySelector("h3").textContent = name;
   info.querySelector("p").innerHTML = text;

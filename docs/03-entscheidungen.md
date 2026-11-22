@@ -3,6 +3,8 @@
 Jede Entscheidung mit Datum. Neue Einträge kommen oben dazu.
 
 ## 22.11.2026
+- Paar-Verknüpfung: keine Frage beim Anmelden (zu privat); einmal verknüpft, zeigt die App das ❤️ automatisch, sobald beide am selben Ort sind, und trennt die Pins, wenn einer allein reist
+- Freunde am selben Ort bekommen 🤝 am gemeinsamen Pin; die Zahl am Pin bleibt nur für Pins, die auf dem Bildschirm übereinanderliegen
 - Balken unten behoben: Statusleiste auf "default" statt "black-translucent" (iOS 26.1 rechnet bei durchsichtiger Statusleiste die Bildschirmhöhe falsch und lässt unten eine Lücke in Höhe der Statusleiste; Svenolingo nutzt "default" und hat den Fehler nicht). Home-Bildschirm-Icon muss danach einmal neu hinzugefügt werden.
 - Aufbau der App (D): Leiste unten mit Karte · Reisen · Chat · Ideen; Profil als rundes Foto oben rechts; Kartenstil-Auswahl wandert ins Profil
 - Erste Bildschirme als Prototyp mit Beispieldaten: Reisen (Treffer, Zeitleiste, Vielleicht-Pläne, Eintragen per Kalender/Flugnummer/Screenshot), Chat, Ideen (Filter nach Land, Herz, Kostenrechner, Airbnb-Link), Profil (Länder-Sammlung, Abzeichen, Mitteilungen, Privatsphäre)
