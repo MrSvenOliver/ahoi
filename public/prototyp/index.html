@@ -150,16 +150,23 @@
   .treffer { background: linear-gradient(135deg, #c0582f, #b8913f); color: #fff8ea; border: 0; }
   .treffer b { display: block; font-size: 16px; margin-bottom: 2px; }
   .treffer span { font-size: 13px; opacity: 0.92; }
-  .reise { display: grid; grid-template-columns: 58px 1fr 40px; gap: 12px; align-items: center; }
+  .reise { display: grid; grid-template-columns: 58px 1fr 56px; gap: 12px; align-items: center; }
   .reise .gesichter { position: relative; height: 40px; }
   .reise .gesichter .klein-ava { position: absolute; top: 2px; width: 36px; height: 36px; font-size: 12px; box-shadow: 0 0 0 2px var(--karte-bg); }
   .reise .text { min-width: 0; }
   .reise .wer { display: block; font-size: 13px; font-weight: 600; color: var(--text-leise); }
   .reise .ziel { display: block; font-size: 16px; font-weight: 700; margin: 1px 0 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .reise .wann { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text-leise); }
-  .reise .art { width: 40px; height: 40px; border-radius: 12px; background: var(--trenner); display: grid; place-items: center; font-size: 18px; }
+  .reise .art { min-width: 56px; height: 48px; border-radius: 12px; background: var(--trenner); display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1.1; }
+  .reise .art b { font-size: 17px; }
+  .reise .art small { font-size: 10px; color: var(--text-leise); font-weight: 600; }
+  .reise .art .vielleicht-text { font-size: 11px; font-weight: 700; color: var(--tinte); }
   .reise.vielleicht { border: 1.5px dashed var(--gold); background: transparent; }
+  .reise.vielleicht .art { background: transparent; border: 1px dashed var(--gold); }
   .etikett { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 10px; border: 1px dashed var(--gold); color: var(--tinte); line-height: 1.4; }
+  .formular label { display: block; font-size: 13px; font-weight: 600; color: var(--text-leise); margin-bottom: 12px; }
+  .formular input { display: block; width: 100%; margin-top: 6px; border: 1px solid var(--trenner); background: var(--flaeche); color: var(--text); border-radius: 12px; padding: 12px; font: inherit; font-size: 16px; }
+  .formular .zwei { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .wahlen { display: grid; gap: 10px; }
   .wahl { display: flex; gap: 12px; align-items: center; text-align: left; width: 100%; border: 1px solid var(--trenner); background: var(--karte-bg); color: var(--text); border-radius: 16px; padding: 14px; font: inherit; cursor: pointer; }
   .wahl .ikon { width: 42px; height: 42px; border-radius: 12px; background: var(--trenner); display: grid; place-items: center; font-size: 20px; flex: none; }
@@ -195,11 +202,26 @@
   .chips button.aktiv { background: var(--tinte); color: var(--papier); border-color: var(--tinte); }
   .idee { padding: 0; overflow: hidden; }
   .idee .bild { height: 132px; display: grid; place-items: center; font-size: 40px; position: relative; }
-  .idee .bild .flag { position: absolute; left: 12px; top: 12px; background: rgba(255,255,255,0.85); border-radius: 10px; padding: 3px 8px; font-size: 13px; font-weight: 700; color: #3b3128; }
+  .idee .bild .quelle { position: absolute; left: 12px; top: 12px; background: rgba(255,255,255,0.85); border-radius: 10px; padding: 3px 8px; font-size: 12px; font-weight: 700; color: #3b3128; }
   .idee .bild .herzen { position: absolute; right: 12px; top: 12px; background: rgba(255,255,255,0.85); border-radius: 12px; padding: 3px 9px; font-size: 13px; font-weight: 700; color: #c0582f; border: 0; cursor: pointer; }
   .idee .inhalt { padding: 12px 14px 14px; }
   .idee .inhalt b { font-size: 16px; display: block; }
   .idee .inhalt .ort { font-size: 13px; color: var(--text-leise); }
+  .idee .bild .sicht { position: absolute; left: 12px; bottom: 12px; background: rgba(0,0,0,0.45); color: #fff; border-radius: 10px; padding: 3px 8px; font-size: 12px; font-weight: 600; }
+  .zahlen { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin: 4px 0 12px; }
+  .zahlen div { background: var(--trenner); border-radius: 12px; padding: 8px 6px; text-align: center; line-height: 1.15; }
+  .zahlen b { display: block; font-size: 16px; }
+  .zahlen small { font-size: 11px; color: var(--text-leise); }
+  .zahlen .voll { background: rgba(192, 88, 47, 0.15); }
+  .dabei-gesichter { display: flex; margin-bottom: 12px; }
+  .dabei-gesichter .klein-ava { width: 30px; height: 30px; font-size: 10px; margin-right: -8px; box-shadow: 0 0 0 2px var(--karte-bg); }
+  .idee .aktionen .knopf-gross { flex: 1; font-size: 14px; padding: 10px 12px; }
+  .idee .aktionen .knopf-gross[disabled] { opacity: 0.45; }
+  .ist-dabei { background: #4f8a5b !important; }
+  .geteilt { display: flex; align-items: center; gap: 10px; margin: 12px 0; font-size: 14px; color: var(--text-leise); }
+  .geteilt .klein-ava { width: 30px; height: 30px; font-size: 11px; }
+  .geteilt b { color: var(--text); }
+  .oeffnen { display: block; text-align: center; text-decoration: none; }
   .preis { display: flex; justify-content: space-between; align-items: center; margin: 10px 0; padding: 10px 12px; border-radius: 12px; background: var(--trenner); font-size: 13px; }
   .preis b { display: inline; font-size: 15px; }
   .zaehler { display: flex; align-items: center; gap: 8px; }
@@ -290,13 +312,13 @@
 
 <!-- Neue Reise: Auswahl -->
 <section class="seite" id="seite-reise-neu">
-  <div class="seite-kopf"><h1>Reise eintragen</h1><button class="knopf-leise" data-zurueck="reisen">Abbrechen</button></div>
-  <div class="wahlen">
-    <button class="wahl"><div class="ikon">📅</div><div><b>Zeitraum wählen</b><span>Ort suchen, An- und Abreise im Kalender</span></div></button>
-    <button class="wahl"><div class="ikon">✈️</div><div><b>Flugnummer</b><span>z. B. „TP 1450“ + Datum, der Rest kommt automatisch</span></div></button>
-    <button class="wahl"><div class="ikon">📸</div><div><b>Screenshot oder Ticketfoto</b><span>Airbnb-Buchung oder Bordkarte anhängen</span></div></button>
+  <div class="seite-kopf"><h1>Reise</h1><button class="knopf-leise" data-zurueck="reisen">Abbrechen</button></div>
+  <div class="kasten formular">
+    <label>Wohin?<input placeholder="Ort suchen, z. B. Lissabon"></label>
+    <div class="zwei"><label>Ankunft<input type="date"></label><label>Abreise<input type="date"></label></div>
+    <div class="zeile-einst"><div>Nur ein Vielleicht<small>Noch nicht sicher, ohne genaue Daten</small></div><button class="schalter"></button></div>
   </div>
-  <div class="kasten" style="margin-top:14px"><div class="zeile-einst"><div>Nur ein Vielleicht<small>Wird gestrichelt angezeigt</small></div><button class="schalter"></button></div></div>
+  <button class="knopf-gross" style="width:100%" id="reise-speichern">Speichern</button>
 </section>
 
 <!-- Chat -->
@@ -312,10 +334,29 @@
 
 <!-- Ideen -->
 <section class="seite" id="seite-ideen">
-  <div class="seite-kopf"><h1>Ideen</h1><button class="knopf-gross">+ Teilen</button></div>
+  <div class="seite-kopf"><h1>Ideen</h1><button class="knopf-gross" id="idee-neu">+ Teilen</button></div>
   <div class="chips" id="ideen-filter"></div>
   <div id="ideen-liste"></div>
   <p class="hinweis-band">Beispieldaten</p>
+</section>
+
+<!-- Idee teilen -->
+<section class="seite" id="seite-idee-neu">
+  <div class="seite-kopf"><h1>Teilen</h1><button class="knopf-leise" data-zurueck="ideen">Abbrechen</button></div>
+  <button class="wahl" id="einfuegen"><div class="ikon">📋</div><div><b>Link einfügen</b><span>Vorher in Airbnb auf „Teilen“ → „Link kopieren“ tippen</span></div></button>
+  <div class="kasten formular" style="margin-top:12px">
+    <label>Link<input id="idee-link" placeholder="airbnb.com/rooms/… oder jede andere Webseite"></label>
+    <label>Notiz (freiwillig)<input placeholder="z. B. Für Januar?"></label>
+    <div class="zwei"><label>Preis pro Nacht<input inputmode="numeric" placeholder="€ – aus dem Link"></label><label>Zeitraum<input placeholder="z. B. 8.–20.1."></label></div>
+    <div class="zeile-einst"><div>Plätze<small>Laut Airbnb 8 Gäste – du kannst weniger freigeben</small></div><span class="zaehler"><button id="pl-minus">−</button><b id="pl-zahl">6</b><button id="pl-plus">+</button></span></div>
+  </div>
+  <h2>Wer sieht das?</h2>
+  <div class="kasten">
+    <div class="segmente klein" id="sicht-wahl"><button class="aktiv" data-s="alle">🌍 Alle</button><button data-s="kreis">👥 Kreis</button><button data-s="einzeln">👤 Einzeln</button></div>
+    <div id="sicht-detail" style="margin-top:12px;display:none"></div>
+  </div>
+  <div class="kasten" id="idee-vorschau" style="display:none"></div>
+  <button class="knopf-gross" style="width:100%" id="idee-speichern">Teilen</button>
 </section>
 
 <!-- Profil -->
@@ -342,6 +383,7 @@
   </div>
   <h2>Mehr</h2>
   <div class="kasten">
+    <div class="zeile-einst"><div>Freundeskreise<small>Lieblingsleute, Bali-Crew – zum schnellen Teilen</small></div><button class="knopf-leise">Bearbeiten</button></div>
     <div class="zeile-einst"><div>Paar verknüpfen<small>Der andere muss bestätigen</small></div><button class="knopf-leise">Anfragen</button></div>
     <div class="zeile-einst"><div>Jemanden vorschlagen<small>Sven gibt die Einladung frei</small></div><button class="knopf-leise">Vorschlagen</button></div>
     <div class="zeile-einst"><div>Feedback an Sven<small>Fehler oder Idee, gern mit Screenshot</small></div><button class="knopf-leise">Schreiben</button></div>
@@ -597,18 +639,11 @@ function ebenenHinzufuegen() {
   map.addLayer({ id: "laender-linie", type: "line", source: "laender", maxzoom: 7,
     paint: { "line-color": c.grenze, "line-width": ["interpolate", ["linear"], ["zoom"], 0, 0.5, 5, 1.1], "line-opacity": ["interpolate", ["linear"], ["zoom"], 0, 0.85, 5.5, 0.85, 6.5, 0] } }, vorBeschriftung);
 
-  // Getrennte Paare: gestrichelte Linie auf dem kürzesten Weg, mit Entfernung
-  map.addSource("paar-linien", { type: "geojson", data: { type: "FeatureCollection", features: [] } });
-  map.addLayer({ id: "paar-linie", type: "line", source: "paar-linien",
-    layout: { "line-cap": "round" },
-    paint: { "line-color": "#c0582f", "line-width": 2.2, "line-dasharray": [1.5, 1.8], "line-opacity": 0.95 } });
-  map.addSource("paar-text", { type: "geojson", data: { type: "FeatureCollection", features: [] } });
   map.addLayer({ id: "paar-entfernung", type: "symbol", source: "paar-text",
     layout: { "text-field": ["get", "text"], "text-font": ["Noto Sans Bold"], "text-size": 13, "text-offset": [0, -0.9], "text-allow-overlap": true },
     paint: { "text-color": "#c0582f", "text-halo-color": c.halo, "text-halo-width": 2 } });
 
   pinsSetzen();
-  paarLinienZeichnen(true);
   map.once("idle", () => setTimeout(() => document.getElementById("start").classList.add("weg"), 300));
 }
 
@@ -670,30 +705,6 @@ function pinsSetzen() {
 }
 let letzterPinZoom = null;
 map.on("zoomend", () => { if (letzterPinZoom === null || Math.abs(map.getZoom() - letzterPinZoom) > 0.2) { letzterPinZoom = map.getZoom(); pinsSetzen(); } });
-
-function paarLinienZeichnen(animiert) {
-  const paare = {};
-  for (const p of leute) if (p.paar) (paare[p.paar] = paare[p.paar] || []).push(p);
-  const linien = [], texte = [];
-  for (const [a, b] of Object.values(paare)) {
-    const d = entfernungKm(a.lat, a.lon, b.lat, b.lon);
-    if (d < 50) continue;
-    const pts = grosskreis(a.lon, a.lat, b.lon, b.lat);
-    linien.push(pts);
-    texte.push({ type: "Feature", properties: { text: km(d) }, geometry: { type: "Point", coordinates: pts[Math.floor(pts.length / 2)] } });
-  }
-  const setzen = anteil => map.getSource("paar-linien").setData({ type: "FeatureCollection", features: linien.map(pts => ({ type: "Feature", properties: {}, geometry: { type: "LineString", coordinates: pts.slice(0, Math.max(2, Math.ceil(pts.length * anteil))) } })) });
-  map.getSource("paar-text").setData({ type: "FeatureCollection", features: [] });
-  if (!animiert) { setzen(1); map.getSource("paar-text").setData({ type: "FeatureCollection", features: texte }); return; }
-  const start = performance.now() + 700, dauer = 1100;
-  const schritt = t => {
-    const k = Math.min(1, Math.max(0, (t - start) / dauer));
-    setzen(1 - Math.pow(1 - k, 3));
-    if (k < 1) requestAnimationFrame(schritt);
-    else map.getSource("paar-text").setData({ type: "FeatureCollection", features: texte });
-  };
-  requestAnimationFrame(schritt);
-}
 
 // ---------- Liste und Infokarte ----------
 function listeAufbauen() {
@@ -859,10 +870,10 @@ function stilwahlAufbauen() {
   });
 }
 // ---------- Bereiche wechseln ----------
-const seiten = ["reisen", "reise-neu", "chat", "ideen", "profil"];
+const seiten = ["reisen", "reise-neu", "chat", "ideen", "idee-neu", "profil"];
 function seiteZeigen(name) {
   for (const s of seiten) document.getElementById("seite-" + s).classList.toggle("offen", s === name);
-  document.querySelectorAll("#leiste button").forEach(b => b.classList.toggle("aktiv", b.dataset.seite === name || (name === "reise-neu" && b.dataset.seite === "reisen")));
+  document.querySelectorAll("#leiste button").forEach(b => b.classList.toggle("aktiv", b.dataset.seite === name || (name === "reise-neu" && b.dataset.seite === "reisen") || (name === "idee-neu" && b.dataset.seite === "ideen")));
   document.getElementById("info").classList.remove("offen");
   if (name === "chat") { document.querySelector('#leiste [data-seite="chat"] .punkt')?.remove(); const v = document.getElementById("verlauf"); v.scrollTop = v.scrollHeight; }
   if (name === "karte") { blattSetzen(false); map.resize(); }
@@ -871,7 +882,7 @@ document.querySelectorAll("#leiste button").forEach(b => b.onclick = () => seite
 document.querySelectorAll("[data-zurueck]").forEach(b => b.onclick = () => seiteZeigen(b.dataset.zurueck));
 document.getElementById("profil-knopf").onclick = () => seiteZeigen("profil");
 document.getElementById("reise-neu").onclick = () => seiteZeigen("reise-neu");
-document.querySelectorAll(".wahl").forEach(b => b.onclick = () => hinweis("Kommt in Phase 3"));
+document.getElementById("reise-speichern").onclick = () => { hinweis("Speichern kommt in Phase 3"); seiteZeigen("reisen"); };
 document.querySelectorAll(".schalter").forEach(b => b.onclick = () => b.classList.toggle("an"));
 document.querySelectorAll(".segmente.klein").forEach(box => box.querySelectorAll("button").forEach(b => b.onclick = () => { box.querySelectorAll("button").forEach(x => x.classList.remove("aktiv")); b.classList.add("aktiv"); }));
 
@@ -880,25 +891,30 @@ const ava = (p, gross) => `<div class="klein-ava" style="background:${p.farbe}${
 
 // ---------- Reisen ----------
 const reisen = [
-  { monat: "Dezember 2026", wer: ["alex"], ziel: "Marrakesch", land: "MA", von: "3.12.", bis: "14.12.", art: "✈️", info: "Flug TP 1450" },
-  { monat: "Dezember 2026", wer: ["sam"], ziel: "Wien", land: "AT", von: "10.12.", bis: "12.12.", art: "🚆", info: "Zug" },
-  { monat: "Dezember 2026", wer: ["mia"], ziel: "Oaxaca", land: "MX", von: "20.12.", bis: "5.1.", art: "🏠", info: "Airbnb" },
-  { monat: "Januar 2027", wer: ["du"], ziel: "Lissabon", land: "PT", von: "10.1.", bis: "15.1.", art: "✈️", info: "Flug" },
-  { monat: "Januar 2027", wer: ["lea", "nico"], ziel: "Lissabon", land: "PT", von: "8.1.", bis: "20.1.", art: "🏠", info: "Airbnb" },
-  { monat: "Februar 2027", wer: ["jonas", "ben"], ziel: "Vietnam", land: "VN", von: "Februar", bis: "", art: "🤔", info: "", vielleicht: true },
+  { wer: ["alex"], ziel: "Marrakesch", land: "MA", von: "2026-12-03", bis: "2026-12-14" },
+  { wer: ["sam"], ziel: "Wien", land: "AT", von: "2026-12-10", bis: "2026-12-12" },
+  { wer: ["mia"], ziel: "Oaxaca", land: "MX", von: "2026-12-20", bis: "2027-01-05" },
+  { wer: ["du"], ziel: "Lissabon", land: "PT", von: "2027-01-10", bis: "2027-01-15" },
+  { wer: ["lea", "nico"], ziel: "Lissabon", land: "PT", von: "2027-01-08", bis: "2027-01-20" },
+  { wer: ["jonas", "ben"], ziel: "Vietnam", land: "VN", monat: "2027-02", vielleicht: true },
 ];
+const datum = iso => new Date(iso + "T12:00:00");
+const kurz = iso => datum(iso).toLocaleDateString("de-DE", { day: "numeric", month: "numeric" });
+const monatName = iso => datum(iso.length === 7 ? iso + "-01" : iso).toLocaleDateString("de-DE", { month: "long", year: "numeric" });
 function reisenAufbauen() {
   let html = "", monat = "";
   for (const r of reisen) {
-    if (r.monat !== monat) { monat = r.monat; html += `<h2>${monat}</h2>`; }
+    const m = monatName(r.von || r.monat);
+    if (m !== monat) { monat = m; html += `<h2>${m}</h2>`; }
     const ps = r.wer.map(person);
     const gesichter = ps.slice(0, 2).map((p, i) => `<div class="klein-ava" style="left:${ps.length > 1 ? i * 20 : 10}px;z-index:${2 - i};background:${p.farbe}">${kuerzel(p.name)}</div>`).join("");
+    const naechte = r.von ? Math.round((datum(r.bis) - datum(r.von)) / 864e5) : null;
     html += `<div class="kasten reise${r.vielleicht ? " vielleicht" : ""}">
       <div class="gesichter">${gesichter}</div>
       <div class="text"><span class="wer">${ps.map(p => p.name).join(" & ")}</span>
         <span class="ziel">${flagge(r.land)}&nbsp;&nbsp;${r.ziel}</span>
-        <span class="wann">${r.von}${r.bis ? " – " + r.bis : ""}${r.info ? " · " + r.info : ""}${r.vielleicht ? '<span class="etikett">Vielleicht</span>' : ""}</span></div>
-      <div class="art">${r.vielleicht ? "💭" : r.art}</div></div>`;
+        <span class="wann">${r.von ? kurz(r.von) + " – " + kurz(r.bis) : "irgendwann im " + datum(r.monat + "-01").toLocaleDateString("de-DE", { month: "long" })}</span></div>
+      <div class="art">${r.vielleicht ? '<span class="vielleicht-text">Vielleicht</span>' : `<b>${naechte}</b><small>Nächte</small>`}</div></div>`;
   }
   document.getElementById("reise-liste").innerHTML = html;
 }
@@ -934,30 +950,49 @@ document.getElementById("chat-senden").onclick = senden;
 document.getElementById("chat-text").addEventListener("keydown", e => { if (e.key === "Enter") senden(); });
 
 // ---------- Ideen ----------
+// Jede Idee ist ein geteilter Link. Bei Airbnb liest die App Foto, Art, Ort und Bewertung aus der Vorschau des Links.
+// Plätze und Preis legt die teilende Person fest (vorausgefüllt, sofern die Seite sie verrät).
 const ideen = [
-  { titel: "Altbau mit Dachterrasse", ort: "Lissabon, Alfama", land: "PT", preis: 96, personen: 4, herzen: 4, dabei: ["lea", "nico"], wann: "Januar", farbe: "linear-gradient(135deg,#e9c99a,#c0582f)", ikon: "🏛️" },
-  { titel: "Surfhaus am Strand", ort: "Ericeira", land: "PT", preis: 140, personen: 6, herzen: 2, dabei: ["alex"], wann: "flexibel", farbe: "linear-gradient(135deg,#bcd6d8,#3f6b8a)", ikon: "🏄" },
-  { titel: "Villa mit Pool", ort: "Canggu, Bali", land: "ID", preis: 180, personen: 8, herzen: 5, dabei: ["lea", "nico", "jonas"], wann: "März", farbe: "linear-gradient(135deg,#cfe0b8,#6f8a3a)", ikon: "🌴" },
-  { titel: "Haus im Grünen", ort: "Chiang Mai", land: "TH", preis: 55, personen: 4, herzen: 1, dabei: ["ben"], wann: "flexibel", farbe: "linear-gradient(135deg,#f0dca8,#b98a2e)", ikon: "🛖" },
+  { von: "lea", art: "Wohnung", ort: "Lissabon", land: "PT", bewertung: "4,9", zimmer: "2 Schlafzimmer", notiz: "Für Januar?", zeitraum: "8.–20.1.", preis: 96, plaetze: 4, dabei: ["nico"], sicht: "🌍 Alle", herzen: 4, kommentare: 3, quelle: "Airbnb", farbe: "linear-gradient(135deg,#e9c99a,#c0582f)" },
+  { von: "alex", art: "Haus", ort: "Ericeira", land: "PT", bewertung: "4,8", zimmer: "3 Schlafzimmer", notiz: "Direkt am Surfstrand", zeitraum: "flexibel", preis: 140, plaetze: 6, dabei: ["sam", "du"], sicht: "👥 Lieblingsleute", herzen: 2, kommentare: 1, quelle: "Airbnb", farbe: "linear-gradient(135deg,#bcd6d8,#3f6b8a)" },
+  { von: "jonas", art: "Villa", ort: "Canggu", land: "ID", bewertung: "4,95", zimmer: "4 Schlafzimmer", notiz: "", zeitraum: "März", preis: 180, plaetze: 6, dabei: ["ben", "lea", "nico", "mia", "alex"], sicht: "🌍 Alle", herzen: 5, kommentare: 6, quelle: "Airbnb", farbe: "linear-gradient(135deg,#cfe0b8,#6f8a3a)" },
+  { von: "ben", art: "Gästehaus", ort: "Chiang Mai", land: "TH", bewertung: "", zimmer: "", notiz: "Günstig für länger", zeitraum: "flexibel", preis: 55, plaetze: 3, dabei: [], sicht: "👤 3 Personen", herzen: 1, kommentare: 0, quelle: "booking.com", farbe: "linear-gradient(135deg,#f0dca8,#b98a2e)" },
 ];
 let ideenFilter = "alle";
 function ideenAufbauen() {
   const laender = ["alle", ...new Set(ideen.map(i => i.land))];
   document.getElementById("ideen-filter").innerHTML = laender.map(l => `<button data-l="${l}" class="${l === ideenFilter ? "aktiv" : ""}">${l === "alle" ? "Alle" : flagge(l) + " " + new Intl.DisplayNames(["de"], { type: "region" }).of(l)}</button>`).join("");
   document.querySelectorAll("#ideen-filter button").forEach(b => b.onclick = () => { ideenFilter = b.dataset.l; ideenAufbauen(); });
-  document.getElementById("ideen-liste").innerHTML = ideen.map((i, n) => (ideenFilter !== "alle" && i.land !== ideenFilter) ? "" : `
+  document.getElementById("ideen-liste").innerHTML = ideen.map((i, n) => {
+    if (ideenFilter !== "alle" && i.land !== ideenFilter) return "";
+    const belegt = 1 + i.dabei.length, frei = Math.max(0, i.plaetze - belegt), ichDabei = i.dabei.includes("du");
+    const proPerson = Math.round(i.preis / belegt);
+    return `
     <div class="kasten idee">
-      <div class="bild" style="background:${i.farbe}"><span class="flag">${flagge(i.land)} ${i.ort.split(",")[0]}</span><button class="herzen" data-n="${n}">❤️ ${i.herzen}</button>${i.ikon}</div>
+      <div class="bild" style="background:${i.farbe}"><span class="quelle">${i.quelle}</span><span class="sicht">${i.sicht}</span><button class="herzen" data-n="${n}">❤️ ${i.herzen}</button></div>
       <div class="inhalt">
-        <b>${i.titel}</b><span class="ort">${i.ort} · ${i.wann}</span>
-        <div class="preis"><span><b>${i.preis} €</b> / Nacht</span>
-          <span class="zaehler"><button data-n="${n}" data-d="-1">−</button>${i.personen} Pers.<button data-n="${n}" data-d="1">+</button></span>
-          <span><b>${Math.round(i.preis / i.personen)} €</b> p. P.</span></div>
-        <div class="dabei">Wären dabei: ${i.dabei.map(id => person(id).name).join(", ")}</div>
-        <div class="aktionen"><button class="knopf-leise">🙋 Ich wäre dabei</button><button class="knopf-leise">💬 Kommentare</button><a class="knopf-leise" style="text-decoration:none" href="https://www.airbnb.de" target="_blank" rel="noopener">Auf Airbnb öffnen ↗</a></div>
-      </div></div>`).join("");
-  document.querySelectorAll(".zaehler button").forEach(b => b.onclick = () => { const i = ideen[b.dataset.n]; i.personen = Math.max(1, i.personen + +b.dataset.d); ideenAufbauen(); });
+        <b>${i.art} in ${i.ort} ${flagge(i.land)}</b>
+        <span class="ort">${[i.bewertung ? "★ " + i.bewertung : "", i.zimmer, i.zeitraum].filter(Boolean).join(" · ")}</span>
+        <div class="geteilt">${ava(person(i.von))}<span><b>${person(i.von).name}</b>${i.notiz ? " · „" + i.notiz + "“" : " hat das geteilt"}</span></div>
+        <div class="zahlen">
+          <div><b>${i.preis} €</b><small>pro Nacht</small></div>
+          <div><b>${proPerson} €</b><small>p. P. bei ${belegt}</small></div>
+          <div class="${frei ? "" : "voll"}"><b>${frei ? frei + " / " + i.plaetze : "Voll"}</b><small>${frei ? "Plätze frei" : i.plaetze + " von " + i.plaetze}</small></div>
+        </div>
+        <div class="dabei-leiste"><div class="dabei-gesichter">${[i.von, ...i.dabei].map(id => ava(person(id))).join("")}</div></div>
+        <div class="aktionen">
+          <button class="knopf-gross dabei-knopf ${ichDabei ? "ist-dabei" : ""}" data-n="${n}" ${!frei && !ichDabei ? "disabled" : ""}>${ichDabei ? "✓ Du bist dabei" : frei ? "🙋 Ich wäre dabei" : "Leider voll"}</button>
+          <button class="knopf-leise">💬 ${i.kommentare}</button>
+          <a class="knopf-leise" href="https://www.airbnb.de" target="_blank" rel="noopener" style="text-decoration:none">Ansehen ↗</a>
+        </div>
+      </div></div>`;
+  }).join("");
   document.querySelectorAll(".herzen").forEach(b => b.onclick = () => { ideen[b.dataset.n].herzen++; ideenAufbauen(); });
+  document.querySelectorAll(".dabei-knopf").forEach(b => b.onclick = () => {
+    const i = ideen[b.dataset.n], k = i.dabei.indexOf("du");
+    if (k >= 0) i.dabei.splice(k, 1); else { i.dabei.push("du"); hinweis(person(i.von).name + " wird benachrichtigt"); }
+    ideenAufbauen();
+  });
 }
 
 // ---------- Profil: Mitteilungen ----------
@@ -965,6 +1000,35 @@ document.getElementById("mitteilungen").innerHTML = [["Neue Chat-Nachricht", "Be
   .map(([t, u], i) => `<div class="zeile-einst"><div>${t}${u ? `<small>${u}</small>` : ""}</div><button class="schalter${i < 2 ? " an" : ""}"></button></div>`).join("");
 document.querySelectorAll("#mitteilungen .schalter").forEach(b => b.onclick = () => b.classList.toggle("an"));
 
+document.getElementById("idee-neu").onclick = () => seiteZeigen("idee-neu");
+document.getElementById("einfuegen").onclick = async () => {
+  try { document.getElementById("idee-link").value = await navigator.clipboard.readText(); vorschauZeigen(); }
+  catch (e) { hinweis("Bitte den Link ins Feld einfügen"); document.getElementById("idee-link").focus(); }
+};
+document.getElementById("idee-link").addEventListener("input", vorschauZeigen);
+function vorschauZeigen() {
+  const v = document.getElementById("idee-link").value.trim(), box = document.getElementById("idee-vorschau");
+  if (!v) { box.style.display = "none"; return; }
+  const airbnb = /(airbnb\.[a-z.]+\/(rooms|h)\/|abnb\.me\/)/i.test(v);
+  box.style.display = "block";
+  box.innerHTML = airbnb
+    ? "✅ <b>Airbnb erkannt</b><br><span style='font-size:13px;color:var(--text-leise)'>Foto, Art, Ort und Bewertung werden automatisch übernommen (ab Phase 5).</span>"
+    : "🔗 <b>Webseite</b><br><span style='font-size:13px;color:var(--text-leise)'>Titel und Bild werden aus der Vorschau übernommen, sofern die Seite eine hat.</span>";
+}
+let plaetze = 6;
+document.getElementById("pl-minus").onclick = () => { plaetze = Math.max(2, plaetze - 1); document.getElementById("pl-zahl").textContent = plaetze; };
+document.getElementById("pl-plus").onclick = () => { plaetze = Math.min(8, plaetze + 1); document.getElementById("pl-zahl").textContent = plaetze; };
+const kreise = { "Lieblingsleute": ["alex", "sam", "lea", "nico"], "Bali-Crew": ["lea", "nico", "jonas"] };
+document.querySelectorAll("#sicht-wahl button").forEach(b => b.onclick = () => {
+  document.querySelectorAll("#sicht-wahl button").forEach(x => x.classList.toggle("aktiv", x === b));
+  const d = document.getElementById("sicht-detail"), art = b.dataset.s;
+  d.style.display = art === "alle" ? "none" : "block";
+  if (art === "kreis") d.innerHTML = Object.entries(kreise).map(([n, ids], i) => `<div class="zeile-einst"><div>${n}<small>${ids.map(id => person(id).name).join(", ")}</small></div><button class="schalter${i ? "" : " an"}"></button></div>`).join("") + `<button class="knopf-leise" style="margin-top:8px">+ Neuer Kreis</button>`;
+  if (art === "einzeln") d.innerHTML = `<div class="chips" style="flex-wrap:wrap;margin:0;padding:0">${leute.filter(p => p.id !== "du").map(p => `<button>${p.name}</button>`).join("")}</div>`;
+  d.querySelectorAll(".schalter").forEach(x => x.onclick = () => x.classList.toggle("an"));
+  d.querySelectorAll(".chips button").forEach(x => x.onclick = () => x.classList.toggle("aktiv"));
+});
+document.getElementById("idee-speichern").onclick = () => { hinweis("Teilen kommt in Phase 5"); seiteZeigen("ideen"); };
 reisenAufbauen(); chatAufbauen(); ideenAufbauen();
 
 

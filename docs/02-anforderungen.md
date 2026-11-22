@@ -41,7 +41,7 @@ Gesammelte Wünsche und Entscheidungen von Sven. Gebaut wird erst, wenn die Anfo
 ## Profil und Login
 - Nur echtes Profilbild (Foto-Upload), Pins zeigen das Foto
 - Login: E-Mail-Code + Google; Apple-Login später mit dem App-Store-Schritt (Apple-Entwicklerkonto)
-- Paare: einer fragt an, der andere bestätigt; keine Frage beim Anmelden; Herz erscheint automatisch nur, wenn beide am selben Ort sind
+- Paare: einer fragt an, der andere bestätigt; keine Frage beim Anmelden; Herz erscheint automatisch nur, wenn beide am selben Ort sind; keine Verbindungslinie auf der Karte, Entfernungen stehen in „Wer ist wo“
 - Freunde am selben Ort: gemeinsamer Pin mit 🤝
 - Standort-Genauigkeit Standard: Stadt (jeder kann es ändern)
 
@@ -51,15 +51,19 @@ Gesammelte Wünsche und Entscheidungen von Sven. Gebaut wird erst, wenn die Anfo
 - Treffen werden nur über den Chat organisiert (keine eigene Treffen-Funktion)
 
 ## Reisepläne
-- Kalender-Auswahl wie bei Booking/Airbnb
-- Screenshot hochladen (z. B. Airbnb-Buchung) oder Flugticket fotografieren – KI liest aus
-- Flugnummer + Datum eingeben (wie Flighty)
-- Vielleicht-Pläne (unsicher markiert)
+- Nur Ort + Zeitraum (Ankunft/Abreise), keine Angabe von Flug, Zug o. Ä.
+- Vielleicht-Pläne ohne genaue Daten (gestrichelt)
+- Anzeige: Ort, Zeitraum, Anzahl Nächte
 
 ## Unterkunfts-Ideenliste
-- Airbnbs und andere Unterkünfte teilen, mit Links direkt zu Airbnb, nach Ländern sortiert
-- Optional Zeitraum oder frei/flexibel
-- Herz/Abstimmung, "Ich wäre dabei" mit eigenem Wunsch-Zeitraum, Kommentare, Kostenrechner (pro Nacht/pro Person)
+- Geteilt wird ein Link: in erster Linie Airbnb (direkte Erkennung), zusätzlich jede andere Webadresse
+- Auf dem iPhone: in Airbnb „Teilen → Link kopieren“, in Ahoi „Link einfügen“ (iOS erlaubt Web-Apps nicht, im Teilen-Menü zu erscheinen; Android schon)
+- Aus der Link-Vorschau automatisch: Foto, Art, Ort, Bewertung, Zimmer (bei Airbnb vorhanden)
+- Plätze: Vorschlag aus Airbnb (Gästezahl), die teilende Person kann weniger freigeben; „Ich wäre dabei“ zählt die freien Plätze herunter, bei voll keine Zusage mehr möglich
+- Preis pro Nacht und pro Person (nach Anzahl Zusagen); Preis von der teilenden Person bestätigt/eingetragen, da Airbnb-Preise vom Zeitraum abhängen
+- Sichtbarkeit pro Idee: Alle / Freundeskreis / einzelne Personen; Freundeskreise (z. B. „Lieblingsleute“) im Profil anlegen
+- Kommentare (Fragen), Herz, „Ich wäre dabei“ mit Benachrichtigung an die teilende Person
+- Nach Ländern sortiert
 
 ## KI
 - Zum Start weglassen (zu kompliziert am Anfang); später gewünscht: Screenshots/Tickets auslesen, Treffpunkt vorschlagen, Reise- und Wohntipps, Chat-Zusammenfassung

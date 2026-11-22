@@ -3,6 +3,9 @@
 Jede Entscheidung mit Datum. Neue Einträge kommen oben dazu.
 
 ## 22.11.2026
+- Reisen nur mit Ort und Zeitraum (keine Flug-/Zugangaben, keine Flugnummer, kein Screenshot)
+- Gestrichelte Paar-Linie auf der Weltkarte entfernt; Entfernungen nur in „Wer ist wo“
+- Ideen: Link teilen (Airbnb zuerst, jede Webadresse möglich), Plätze begrenzbar, Preis pro Person, Sichtbarkeit Alle/Kreis/Einzeln, Freundeskreise, Kommentare, „Ich wäre dabei“ mit Benachrichtigung
 - Karte wieder bis ganz oben hinter die Statusleiste (durchsichtig); die iOS-Lücke unten wird gemessen und ausgeglichen (Test auf Svens iPhone ausstehend; Rückfall: Streifen in Meeresfarbe)
 - Paar-Verknüpfung: keine Frage beim Anmelden (zu privat); einmal verknüpft, zeigt die App das ❤️ automatisch, sobald beide am selben Ort sind, und trennt die Pins, wenn einer allein reist
 - Freunde am selben Ort bekommen 🤝 am gemeinsamen Pin; die Zahl am Pin bleibt nur für Pins, die auf dem Bildschirm übereinanderliegen
