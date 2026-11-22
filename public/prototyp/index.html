@@ -117,7 +117,8 @@
   .stilwahl.offen { display: block; }
   .stilwahl h4 { margin: 10px 2px 6px; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.6px; color: var(--text-leise); }
   .stilwahl h4:first-child { margin-top: 0; }
-  .segmente { display: grid; grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); gap: 6px; }
+  .segmente { display: grid; grid-template-columns: repeat(auto-fit, minmax(70px, 1fr)); gap: 6px; }
+  .segmente button { min-width: 0; }
   .segmente button { border: 1px solid var(--glas-rand); background: transparent; color: var(--text); border-radius: 12px; padding: 8px 6px; font: inherit; font-size: 13px; line-height: 1.2; cursor: pointer; }
   .segmente button b { display: block; font-size: 15px; }
   .segmente button.aktiv { background: var(--tinte); color: var(--papier); border-color: var(--tinte); }
@@ -286,6 +287,7 @@ const WAHL = {
 };
 let auswahl = { karte: "auto", schrift: "D", marke: "J" };
 try { Object.assign(auswahl, JSON.parse(localStorage.getItem("ahoi-stil") || "{}")); } catch (e) {}
+const SPRACHE = (navigator.language || "de").toLowerCase().startsWith("de") ? "de" : "en";
 const kartenStil = () => auswahl.karte === "auto" ? (dunkel.matches ? "C" : "A") : auswahl.karte;
 const P = () => PALETTEN[kartenStil()];
 function oberflaecheAnwenden() {
