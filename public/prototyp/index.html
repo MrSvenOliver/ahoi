@@ -860,11 +860,9 @@ function listeAufbauen() {
   document.getElementById("zusammenfassung").textContent = `${andere.length} Freunde · ${laenderZahl} Länder · ${versionText(VERSION)}`;
   const ul = document.getElementById("liste"); ul.innerHTML = "";
   for (const p of andere) {
-    const partner = p.paar && leute.find(q => q.paar === p.paar && q.id !== p.id);
     let paarText = "";
     const dabei = leute.filter(q => q.id !== p.id && q.id !== "du" && entfernungKm(p.lat, p.lon, q.lat, q.lon) < NAH_KM);
     if (dabei.length) paarText = ` · mit ${dabei.map(q => q.name).join(", ")}`;
-    else if (partner) paarText = ` · ${partner.name} ist ${km(entfernungKm(p.lat, p.lon, partner.lat, partner.lon))} entfernt`;
     const li = document.createElement("li");
     li.innerHTML = `<div class="ava" style="background:${p.farbe}">${kuerzel(p.name)}</div>
       <div class="zeile"><b>${p.name}</b><span>${flagge(p.land)} ${p.ort} · ${uhrzeit(p.tz)} Uhr${paarText}</span></div>
@@ -881,7 +879,6 @@ function infoZeigen(gruppe) {
   if (p.id !== du.id && (!familieModus || familieMitStandort)) text += `<br>Entfernung zu dir: <b>${km(entfernungKm(du.lat, du.lon, p.lat, p.lon))}</b>`;
   if (istPaar(gruppe)) text += `<br>❤️ Paar · gerade zusammen unterwegs`;
   else if (gruppe.length > 1) text += `<br>🤝 Zusammen unterwegs`;
-  else if (p.paar && !familieModus) { const q = leute.find(x => x.paar === p.paar && x.id !== p.id); text += `<br>${q.name} ist in ${q.ort}, <b>${km(entfernungKm(p.lat, p.lon, q.lat, q.lon))}</b> entfernt`; }
   info.querySelector("h3").textContent = name;
   info.querySelector("p").innerHTML = text;
   const chatKnopf = document.getElementById("info-chat");
