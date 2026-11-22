@@ -323,7 +323,11 @@
   .fam-karte b { font-size: 20px; display: block; }
   .fam-karte .wo { font-size: 16px; margin-top: 2px; }
   .fam-karte .klein { font-size: 13px; color: var(--text-leise); margin-top: 4px; }
-  .fam-karte .naechste { margin-top: 8px; font-size: 14px; padding: 8px 10px; border-radius: 12px; background: var(--trenner); }
+  .fam-karte .naechste { margin-top: 8px; padding: 9px 12px; border-radius: 12px; background: var(--trenner); line-height: 1.35; }
+  .fam-karte .naechste span { display: block; }
+  .fam-karte .nr-titel { font-size: 12px; font-weight: 700; color: var(--text-leise); text-transform: uppercase; letter-spacing: 0.4px; }
+  .fam-karte .nr-ort { font-size: 17px; font-weight: 700; margin-top: 2px; }
+  .fam-karte .nr-daten { font-size: 14px; color: var(--text-leise); }
   .feedback-lasche { position: fixed; right: 0; top: 46%; z-index: 44; transform: translateY(-50%) rotate(-90deg); transform-origin: 100% 50%; translate: 0 0; border: 0; border-radius: 10px 10px 0 0; padding: 5px 10px; background: var(--tinte); color: var(--papier); font: inherit; font-size: 11px; font-weight: 700; letter-spacing: 0.3px; opacity: 0.55; cursor: pointer; margin-right: 13px; }
   .feedback-lasche:active { opacity: 1; }
   html.tippt .feedback-lasche { display: none; }
@@ -1354,7 +1358,7 @@ function familieAufbauen() {
     return `<div class="fam-karte" data-id="${p.id}"><div class="ava" style="background:${p.farbe}">${kuerzel(p.name)}</div><div style="flex:1">
       <b>${p.name}</b><div class="wo">${flagge(p.land)}&nbsp; ${p.id === "du" ? "bist" : "ist"} in <b style="display:inline;font-size:16px">${p.ort}</b></div>
       <div class="klein">Dort ist es ${uhrzeit(p.tz)} Uhr${familieMitStandort ? " · " + km(entfernungKm(du.lat, du.lon, p.lat, p.lon)) + " von dir" : ""}</div>
-      ${r ? `<div class="naechste">✈︎ Nächste Reise: ${flagge(r.land)} ${r.ziel} · ab ${kurz(r.von)} (${naechte} Nächte)</div>` : ""}
+      ${r ? `<div class="naechste"><span class="nr-titel">✈︎ Nächste Reise</span><span class="nr-ort">${flagge(r.land)}&nbsp; ${r.ziel}</span><span class="nr-daten">${kurz(r.von)} – ${kurz(r.bis)} · ${naechte} ${naechte === 1 ? "Nacht" : "Nächte"}</span></div>` : ""}
       ${weitere.length ? `<div class="weitere">${weitere.map(x => `${flagge(x.land)} ${x.ziel} · ${x.von ? kurz(x.von) + "–" + kurz(x.bis) : "vielleicht im " + datum(x.monat + "-01").toLocaleDateString("de-DE", { month: "long" })}`).join("<br>")}</div>` : ""}
     </div></div>`;
   }).join("");
