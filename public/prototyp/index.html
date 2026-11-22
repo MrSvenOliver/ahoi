@@ -488,6 +488,9 @@
   <h2 id="laender-titel">Länder-Sammlung</h2>
   <div class="kasten"><div class="stempel" id="stempel"></div>
     <p class="hinweis-band" style="margin-top:12px;text-align:left">Länder aus deinen Reisen kommen automatisch dazu. Frühere Länder trägst du über ＋ nach.</p></div>
+  <h2>Sprache</h2>
+  <div class="kasten"><div class="segmente" id="sprache-wahl"></div>
+    <p class="hinweis-band" style="margin-top:10px;text-align:left">Ortsnamen auf der Karte und Übersetzungen im Chat folgen dieser Sprache. Die Texte der App werden mit dem Bau der echten App übersetzt.</p></div>
   <h2>Kartenstil</h2>
   <div class="kasten"><div class="segmente" data-art="karte"></div></div>
   <h2>Familie</h2>
@@ -643,7 +646,13 @@ const WAHL = {
 };
 let auswahl = { karte: "A", schrift: "F", marke: "H" };
 try { const gemerkt = JSON.parse(localStorage.getItem("ahoi-stil") || "{}"); if (WAHL.karte[gemerkt.karte]) auswahl.karte = gemerkt.karte; } catch (e) {}
-const SPRACHE = (navigator.language || "de").toLowerCase().startsWith("de") ? "de" : "en";
+// App-Sprachen: Deutsch, Englisch, Slowakisch. Standard ist die iPhone-Sprache, im Profil änderbar.
+const SPRACHEN = { de: "Deutsch", en: "English", sk: "Slovenčina" };
+const SPRACHE = (() => {
+  try { const g = localStorage.getItem("ahoi-sprache"); if (SPRACHEN[g]) return g; } catch (e) {}
+  const n = (navigator.language || "de").toLowerCase();
+  return n.startsWith("de") ? "de" : n.startsWith("sk") ? "sk" : "en";
+})();
 const kartenStil = () => auswahl.karte;
 const P = () => PALETTEN[kartenStil()];
 function oberflaecheAnwenden() {
@@ -1083,7 +1092,7 @@ const chats = [
     { von: "lea", ort: "Lissabon · Alfama", text: "Hier haben wir unser Airbnb" },
     { system: "🧭 Treffer: <b>Du</b>, <b>Lea</b> & <b>Nico</b> seid vom 10. bis 15.1. in Lissabon" },
     { von: "nico", text: "@Du perfekt, dann gehen wir zusammen surfen 🏄", reaktion: "❤️ 3" },
-    { von: "jonas", text: "Anyone around Chiang Mai in February? We found a great coworking space 🙌", lang: "en", ue: { de: "Ist im Februar jemand in der Nähe von Chiang Mai? Wir haben einen tollen Coworking-Space gefunden 🙌" } },
+    { von: "jonas", text: "Anyone around Chiang Mai in February? We found a great coworking space 🙌", lang: "en", ue: { de: "Ist im Februar jemand in der Nähe von Chiang Mai? Wir haben einen tollen Coworking-Space gefunden 🙌", sk: "Je niekto vo februári v okolí Chiang Mai? Našli sme skvelý coworking 🙌" } },
     { von: "mia", sprache: "0:14" },
   ] },
   { id: "lissabon", art: "gruppe", name: "Lissabon im Januar", herkunft: "Treffer", mitglieder: ["du", "lea", "nico"], ungelesen: 1, nachrichten: [
@@ -1096,9 +1105,9 @@ const chats = [
     { von: "sam", text: "Februar passt mir gut!" },
   ] },
   { id: "e-mia", art: "einzel", mit: "mia", ungelesen: 1, nachrichten: [
-    { von: "mia", text: "¡Hola! ¿Cuándo vienes a México? 🌮", lang: "es", ue: { de: "Hallo! Wann kommst du nach Mexiko? 🌮" } },
+    { von: "mia", text: "¡Hola! ¿Cuándo vienes a México? 🌮", lang: "es", ue: { de: "Hallo! Wann kommst du nach Mexiko? 🌮", en: "Hi! When are you coming to Mexico? 🌮", sk: "Ahoj! Kedy prídeš do Mexika? 🌮" } },
     { von: "du", text: "Vielleicht im März!" },
-    { von: "mia", text: "¡Perfecto! Te guardo una habitación en Oaxaca.", lang: "es", ue: { de: "Perfekt! Ich halte dir ein Zimmer in Oaxaca frei." } },
+    { von: "mia", text: "¡Perfecto! Te guardo una habitación en Oaxaca.", lang: "es", ue: { de: "Perfekt! Ich halte dir ein Zimmer in Oaxaca frei.", en: "Perfect! I'll keep a room free for you in Oaxaca.", sk: "Super! Nechám ti voľnú izbu v Oaxace." } },
   ] },
   { id: "e-alex", art: "einzel", mit: "alex", nachrichten: [
     { von: "alex", text: "Bist du im Dezember noch in Málaga?" },
@@ -1375,6 +1384,13 @@ function familieSetzen(an) {
 document.getElementById("familie-start").onclick = () => familieSetzen(true);
 document.getElementById("familie-ende").onclick = () => familieSetzen(false);
 document.getElementById("familie-standort").onclick = e => { e.currentTarget.classList.toggle("an"); familieMitStandort = e.currentTarget.classList.contains("an"); familieAufbauen(); pinsSetzen(); };
+
+// ---------- Sprache ----------
+(() => {
+  const box = document.getElementById("sprache-wahl");
+  box.innerHTML = Object.entries(SPRACHEN).map(([k, n]) => `<button data-s="${k}" class="${k === SPRACHE ? "aktiv" : ""}">${n}</button>`).join("");
+  box.querySelectorAll("button").forEach(b => b.onclick = () => { try { localStorage.setItem("ahoi-sprache", b.dataset.s); } catch (e) {} location.reload(); });
+})();
 
 // ---------- Länder-Sammlung ----------
 let besucht = ["DE", "ES", "PT", "SK", "IT", "FR", "TH", "VN", "ID", "MX", "GR", "HR"];

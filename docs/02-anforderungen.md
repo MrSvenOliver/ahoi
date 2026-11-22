@@ -5,7 +5,7 @@ Gesammelte Wünsche und Entscheidungen von Sven. Gebaut wird erst, wenn die Anfo
 ## Rahmen
 - Testphase über Wochen/Monate, nur auf Einladung, anfangs max. 10 Leute
 - Skalierbarkeit im Hinterkopf: später evtl. App Store und weitere Sprachen
-- Sprache: Deutsch und Englisch umschaltbar
+- Sprachen schon in der Beta: Deutsch, Englisch, Slowakisch; Standard ist die iPhone-Sprache, im Profil umstellbar (Ortsnamen auf der Karte und Chat-Übersetzung folgen der Sprache)
 - Fast alle nutzen iPhone, mindestens eine Person Android; zusätzlich normale Website für Desktop
 - Interner Arbeitsname: Ahoi
 - Logo: A Kompassrose mit zwei Pins (Schatzkarten-Stil, ohne Text); Entwürfe heißen ahoi_logo_a-kompass_01.png usw., Endstand ahoi_logo_master.png

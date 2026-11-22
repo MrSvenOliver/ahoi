@@ -3,6 +3,7 @@
 Jede Entscheidung mit Datum. Neue Einträge kommen oben dazu.
 
 ## 22.11.2026
+- Sprachen schon in der Beta: Deutsch, Englisch, Slowakisch
 - Familie: jeder Nomade lädt seine eigene Familie ein (B); sie sieht Ort, nächste Reise, alle Reisen und Vielleicht-Pläne (C + D + E)
 - Chat: Chatliste mit „Alle“ (Beta), Reisegruppen und Einzelchats; Löschen nur für mich (A); Hinweis beim Verlassen einer Gruppe (D)
 - Chat-Übersetzung wie bei Airbnb (später DeepL API Free)
