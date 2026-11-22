@@ -3,7 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
-<title>Ahoi – Karten-Prototyp</title>
+<title>Ahoi</title>
+<meta name="description" content="Ahoi – sieh, wo deine Nomaden-Freunde gerade sind, und trefft euch unterwegs.">
 <meta name="theme-color" content="#bcc7bd" id="theme-farbe">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -56,6 +57,13 @@
     --text-leise: #a9b2b8;
   }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  button, .leiste, .kopf, .blatt-kopf, .pin, .chips, .segmente, .profil-bild, .stempel { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+  button { touch-action: manipulation; }
+  .seite, .liste, .verlauf { overscroll-behavior: contain; }
+  :focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+  }
   /* iOS 26 (WebKit-Fehler 301108): Mit durchsichtiger Statusleiste wird eine installierte App eine Statusleisten-Höhe
      zu kurz gebaut, solange das Dokument nicht höher als der Bildschirm ist. Volle Höhe für html und body behebt das. */
   html.standalone { min-height: min(100lvh, calc(100% + env(safe-area-inset-top))); }
@@ -71,7 +79,7 @@
   .marke img { width: 34px; height: 34px; border-radius: 50%; }
   .marke span { font-family: var(--marke); font-weight: var(--marke-gewicht); font-size: var(--marke-groesse); color: var(--tinte); line-height: 1; letter-spacing: -0.2px; }
   .knoepfe { padding: 4px; }
-  .knopf { width: 40px; height: 40px; border: 0; border-radius: 999px; background: transparent; color: var(--tinte); font-size: 19px; display: grid; place-items: center; cursor: pointer; }
+  .knopf { width: 44px; height: 44px; border: 0; border-radius: 999px; background: transparent; color: var(--tinte); font-size: 19px; display: grid; place-items: center; cursor: pointer; }
   .knopf:active { transform: scale(0.92); background: var(--glas-rand); }
   .knopf svg { width: 22px; height: 22px; }
 
@@ -139,7 +147,7 @@
   .leiste button svg { width: 25px; height: 25px; }
   .leiste button.aktiv { color: var(--tinte); }
   .leiste .punkt { position: absolute; top: 7px; left: calc(50% + 8px); min-width: 17px; height: 17px; border-radius: 9px; background: #c0582f; color: #fff; font-size: 10px; display: grid; place-items: center; padding: 0 4px; }
-  .profil-knopf { width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--gold); display: grid; place-items: center; color: #fff8ea; font-weight: 700; font-size: 14px; background: #7a5a3a; cursor: pointer; padding: 0; }
+  .profil-knopf { width: 44px; height: 44px; border-radius: 50%; border: 2px solid var(--gold); display: grid; place-items: center; color: #fff8ea; font-weight: 700; font-size: 14px; background: #7a5a3a; cursor: pointer; padding: 0; }
 
   /* ---------- Seiten (Reisen, Chat, Ideen, Profil) ---------- */
   .seite { position: fixed; left: 0; right: 0; top: 0; bottom: var(--leiste-h); z-index: 35; background: var(--flaeche); overflow-y: auto; -webkit-overflow-scrolling: touch; display: none; padding: calc(env(safe-area-inset-top) + 14px) 16px 24px; }
@@ -183,6 +191,8 @@
 
   /* Chat */
   #seite-chat { display: none; padding-bottom: 0; }
+  html.tippt .leiste { display: none; }
+  html.tippt #seite-chat { bottom: 0; }
   #seite-chat.offen { display: flex; flex-direction: column; }
   .verlauf { flex: 1; overflow-y: auto; padding: 4px 0 12px; }
   .msg { display: flex; gap: 8px; margin: 10px 0; align-items: flex-end; }
@@ -200,7 +210,7 @@
   .ortkarte { display: flex; gap: 10px; align-items: center; }
   .ortkarte .ikon { width: 40px; height: 40px; border-radius: 10px; background: var(--trenner); display: grid; place-items: center; font-size: 18px; }
   .eingabe { display: flex; gap: 8px; align-items: center; padding: 10px 0 12px; border-top: 1px solid var(--trenner); background: var(--flaeche); }
-  .eingabe input { flex: 1; border: 1px solid var(--trenner); background: var(--karte-bg); color: var(--text); border-radius: 22px; padding: 11px 16px; font: inherit; font-size: 15px; outline: none; }
+  .eingabe input { flex: 1; border: 1px solid var(--trenner); background: var(--karte-bg); color: var(--text); border-radius: 22px; padding: 11px 16px; font: inherit; font-size: 16px; outline: none; }
   .runder { width: 42px; height: 42px; border-radius: 50%; border: 0; background: var(--trenner); color: var(--tinte); font-size: 20px; display: grid; place-items: center; cursor: pointer; flex: none; }
   .runder.senden { background: var(--tinte); color: var(--papier); }
 
@@ -226,14 +236,14 @@
   .idee .aktionen .knopf-gross { flex: 1; font-size: 14px; padding: 10px 12px; }
   .idee .aktionen .knopf-gross[disabled] { opacity: 0.45; }
   .ist-dabei { background: #4f8a5b !important; }
-  .geteilt { display: flex; align-items: center; gap: 10px; margin: 12px 0; font-size: 14px; color: var(--text-leise); }
+  .geteilt { display: flex; align-items: center; gap: 10px; margin: 12px 0; font-size: 14px; color: var(--text-leise); line-height: 1.3; }
   .geteilt .klein-ava { width: 30px; height: 30px; font-size: 11px; }
   .geteilt b { color: var(--text); }
   .oeffnen { display: block; text-align: center; text-decoration: none; }
   .preis { display: flex; justify-content: space-between; align-items: center; margin: 10px 0; padding: 10px 12px; border-radius: 12px; background: var(--trenner); font-size: 13px; }
   .preis b { display: inline; font-size: 15px; }
   .zaehler { display: flex; align-items: center; gap: 8px; }
-  .zaehler button { width: 26px; height: 26px; border-radius: 50%; border: 0; background: var(--karte-bg); color: var(--text); font-weight: 700; cursor: pointer; }
+  .zaehler button { width: 34px; height: 34px; font-size: 17px; border-radius: 50%; border: 0; background: var(--karte-bg); color: var(--text); font-weight: 700; cursor: pointer; }
   .dabei { font-size: 13px; color: var(--text-leise); margin-bottom: 10px; }
   .idee .aktionen { display: flex; gap: 8px; flex-wrap: wrap; }
 
@@ -248,7 +258,7 @@
   .stempel div:nth-child(even) { transform: rotate(6deg); }
   .abzeichen { display: flex; gap: 8px; flex-wrap: wrap; }
   .abzeichen span { font-size: 13px; font-weight: 600; padding: 6px 10px; border-radius: 12px; background: var(--trenner); }
-  .zeile-einst { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--trenner); font-size: 15px; }
+  .zeile-einst { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 0; flex-wrap: wrap; border-bottom: 1px solid var(--trenner); font-size: 15px; }
   .zeile-einst:last-child { border-bottom: 0; }
   .zeile-einst small { display: block; color: var(--text-leise); font-size: 12px; }
   .schalter { width: 50px; height: 30px; border-radius: 15px; background: var(--trenner); position: relative; border: 0; cursor: pointer; flex: none; transition: background 0.2s; }
@@ -270,12 +280,14 @@
     .blatt .liste { opacity: 1 !important; pointer-events: auto !important; }
     .blatt-kopf { cursor: default; }
     .blatt .griff { display: none; }
+    .seite { padding-left: max(16px, calc(50% - 340px)); padding-right: max(16px, calc(50% - 340px)); }
     .info { left: auto; right: 16px; width: 360px; bottom: 16px !important; margin: 0; }
     .maplibregl-ctrl-bottom-right { bottom: 0; }
   }
 </style>
 </head>
 <body>
+<noscript><p style="padding:24px;font-family:sans-serif">Ahoi braucht JavaScript. Bitte in den Einstellungen aktivieren.</p></noscript>
 <div id="map"></div>
 
 <header class="kopf">
@@ -291,10 +303,10 @@
   </div>
 </header>
 
-<div class="info" id="info"><button class="knopf zu" id="info-zu" aria-label="Schließen">✕</button><h3></h3><p></p></div>
+<div class="info" id="info"><button class="knopf zu" id="info-zu" aria-label="Schließen" style="font-size:17px">✕</button><h3></h3><p></p></div>
 
 <section class="blatt" id="blatt">
-  <div class="blatt-kopf" id="blatt-kopf">
+  <div class="blatt-kopf" id="blatt-kopf" role="button" tabindex="0" aria-expanded="false" aria-controls="liste">
     <div class="griff"></div>
     <h2>Wer ist wo</h2>
     <small id="zusammenfassung"></small>
@@ -303,7 +315,7 @@
 </section>
 
 <!-- Leiste unten -->
-<nav class="leiste" id="leiste">
+<nav class="leiste" id="leiste" aria-label="Bereiche">
   <button data-seite="karte" class="aktiv"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M9 4 3 6.5v13.5l6-2.5 6 2.5 6-2.5V4l-6 2.5L9 4Z"/><path d="M9 4v13.5M15 6.5V20"/></svg>Karte</button>
   <button data-seite="reisen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10.5 13.5 3 11l1.5-1.5 7.5 1 4-4.5a2 2 0 0 1 3 3l-4.5 4 1 7.5-1.5 1.5-2.5-7.5-3 3v2.5L7 22l-1-3-3-1 1.5-1.5H7l3.5-3Z"/></svg>Reisen</button>
   <button data-seite="chat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4V5Z"/></svg>Chat<span class="punkt">3</span></button>
@@ -323,7 +335,7 @@
   <div class="seite-kopf"><h1>Reise</h1><button class="knopf-leise" data-zurueck="reisen">Abbrechen</button></div>
   <div class="kasten formular">
     <label>Wohin?<input placeholder="Ort suchen, z. B. Lissabon"></label>
-    <div class="zwei"><label>Ankunft<input type="date"></label><label>Abreise<input type="date"></label></div>
+    <div class="zwei"><label>Ankunft<input type="date" id="reise-an"></label><label>Abreise<input type="date" id="reise-ab"></label></div>
     <div class="zeile-einst"><div>Nur ein Vielleicht<small>Noch nicht sicher, ohne genaue Daten</small></div><button class="schalter"></button></div>
   </div>
   <button class="knopf-gross" style="width:100%" id="reise-speichern">Speichern</button>
@@ -385,8 +397,8 @@
   <div class="kasten" id="mitteilungen"></div>
   <h2>Privatsphäre</h2>
   <div class="kasten">
-    <div class="zeile-einst"><div>Was andere sehen<small>Standort-Genauigkeit</small></div><div class="segmente klein" style="width:190px"><button>Land</button><button class="aktiv">Stadt</button><button>Genau</button></div></div>
-    <div class="zeile-einst"><div>Treffer-Alarm ab<small>Wann du benachrichtigt wirst</small></div><div class="segmente klein" style="width:190px"><button class="aktiv">Stadt</button><button>Region</button><button>Land</button></div></div>
+    <div class="zeile-einst"><div>Was andere sehen<small>Standort-Genauigkeit</small></div><div class="segmente klein" style="width:100%"><button>Land</button><button class="aktiv">Stadt</button><button>Genau</button></div></div>
+    <div class="zeile-einst"><div>Treffer-Alarm ab<small>Wann du benachrichtigt wirst</small></div><div class="segmente klein" style="width:100%"><button class="aktiv">Stadt</button><button>Region</button><button>Land</button></div></div>
     <div class="zeile-einst"><div>Geistermodus<small>Standort vorübergehend verbergen</small></div><button class="schalter"></button></div>
   </div>
   <h2>Mehr</h2>
@@ -686,6 +698,9 @@ function pinsSetzen() {
     else if (leuteHier.length > 1) innen.innerHTML += `<div class="pin-zahl" style="left:${breite - 16}px">${leuteHier.length}</div>`;
     innen.innerHTML += `<div class="pin-spitze" style="left:${breite / 2 - 5}px"></div>`;
     el.appendChild(innen);
+    el.setAttribute("role", "button"); el.tabIndex = 0;
+    el.setAttribute("aria-label", leuteHier.map(p => p.name).join(", ") + " – " + leuteHier[0].ort);
+    el.addEventListener("keydown", e => { if (e.key === "Enter") el.click(); });
     el.addEventListener("click", e => {
       e.stopPropagation();
       if (h.gruppen.length === 1) return infoZeigen(h.gruppen[0]);
@@ -758,6 +773,7 @@ function blattPos(y) {
 function blattSetzen(offen) {
   blattOffen = offen && true;
   blatt.classList.toggle("offen", blattOffen);
+  blattKopf.setAttribute("aria-expanded", blattOffen);
   blattPos(blattOffen ? 0 : blattZuY());
   document.documentElement.style.setProperty("--blatt-sichtbar", (blatt.offsetHeight - blattZuY() + document.getElementById("leiste").offsetHeight) + "px");
 }
@@ -822,6 +838,9 @@ document.getElementById("knopf-ich").onclick = () => {
 // Dunkelmodus folgt dem iPhone
 
 
+// ---------- Offline-Start ----------
+if ("serviceWorker" in navigator) window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
+
 // ---------- Neue Version automatisch laden ----------
 const VERSION = "__VERSION__";
 function versionText(v) {
@@ -870,6 +889,7 @@ function stilwahlAufbauen() {
 const seiten = ["reisen", "reise-neu", "chat", "ideen", "idee-neu", "profil"];
 function seiteZeigen(name) {
   for (const s of seiten) document.getElementById("seite-" + s).classList.toggle("offen", s === name);
+  document.querySelectorAll("#leiste button").forEach(b => b.setAttribute("aria-current", b.dataset.seite === name ? "page" : "false"));
   document.querySelectorAll("#leiste button").forEach(b => b.classList.toggle("aktiv", b.dataset.seite === name || (name === "reise-neu" && b.dataset.seite === "reisen") || (name === "idee-neu" && b.dataset.seite === "ideen")));
   document.getElementById("info").classList.remove("offen");
   if (name === "chat") { document.querySelector('#leiste [data-seite="chat"] .punkt')?.remove(); const v = document.getElementById("verlauf"); v.scrollTop = v.scrollHeight; }
@@ -879,6 +899,7 @@ document.querySelectorAll("#leiste button").forEach(b => b.onclick = () => seite
 document.querySelectorAll("[data-zurueck]").forEach(b => b.onclick = () => seiteZeigen(b.dataset.zurueck));
 document.getElementById("profil-knopf").onclick = () => seiteZeigen("profil");
 document.getElementById("reise-neu").onclick = () => seiteZeigen("reise-neu");
+document.getElementById("reise-an").addEventListener("change", e => { const ab = document.getElementById("reise-ab"); ab.min = e.target.value; if (ab.value && ab.value < e.target.value) ab.value = e.target.value; });
 document.getElementById("reise-speichern").onclick = () => { hinweis("Speichern kommt in Phase 3"); seiteZeigen("reisen"); };
 document.querySelectorAll(".schalter").forEach(b => b.onclick = () => b.classList.toggle("an"));
 document.querySelectorAll(".segmente.klein").forEach(box => box.querySelectorAll("button").forEach(b => b.onclick = () => { box.querySelectorAll("button").forEach(x => x.classList.remove("aktiv")); b.classList.add("aktiv"); }));
@@ -926,7 +947,8 @@ const nachrichten = [
   { von: "nico", text: "@Du perfekt, dann gehen wir zusammen surfen 🏄", reaktion: "❤️ 3" },
   { von: "mia", sprache: "0:14" },
 ];
-function textMitErwaehnung(t) { return t.replace(/@(\p{L}+)/gu, '<span class="erwaehnung">@$1</span>'); }
+const ohneHtml = t => String(t).replace(/[&<>"']/g, z => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[z]);
+function textMitErwaehnung(t) { return ohneHtml(t).replace(/@(\p{L}+)/gu, '<span class="erwaehnung">@$1</span>'); }
 function chatAufbauen() {
   document.getElementById("verlauf").innerHTML = nachrichten.map(n => {
     if (n.system) return `<div class="system">${n.system}</div>`;
@@ -945,6 +967,8 @@ function senden() {
 }
 document.getElementById("chat-senden").onclick = senden;
 document.getElementById("chat-text").addEventListener("keydown", e => { if (e.key === "Enter") senden(); });
+document.getElementById("chat-text").addEventListener("focus", () => document.documentElement.classList.add("tippt"));
+document.getElementById("chat-text").addEventListener("blur", () => document.documentElement.classList.remove("tippt"));
 
 // ---------- Ideen ----------
 // Jede Idee ist ein geteilter Link. Bei Airbnb liest die App Foto, Art, Ort und Bewertung aus der Vorschau des Links.
@@ -970,7 +994,7 @@ function ideenAufbauen() {
       <div class="inhalt">
         <b>${i.art} in ${i.ort} ${flagge(i.land)}</b>
         <span class="ort">${[i.bewertung ? "★ " + i.bewertung : "", i.zimmer, i.zeitraum].filter(Boolean).join(" · ")}</span>
-        <div class="geteilt">${ava(person(i.von))}<span><b>${person(i.von).name}</b>${i.notiz ? " · „" + i.notiz + "“" : " hat das geteilt"}</span></div>
+        <div class="geteilt">${ava(person(i.von))}<span><b>${person(i.von).name}</b><br>${i.notiz ? "„" + ohneHtml(i.notiz) + "“" : "hat das geteilt"}</span></div>
         <div class="zahlen">
           <div><b>${i.preis} €</b><small>pro Nacht</small></div>
           <div><b>${proPerson} €</b><small>p. P. bei ${belegt}</small></div>
