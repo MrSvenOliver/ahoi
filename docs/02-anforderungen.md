@@ -14,12 +14,14 @@ Gesammelte Wünsche und Entscheidungen von Sven. Gebaut wird erst, wenn die Anfo
 - Supabase-Keepalive: wöchentlicher automatischer Aufruf über GitHub Actions
 
 ## Design
-- Karte im Schatzkarten-Stil (Pergament, Sepia-Küsten, Kompassrose, gestrichelte Reiselinien)
-- Außerhalb der Karte modern mit leichten Akzenten: Pergament-Töne im Hintergrund, kleine Kompass- und Siegel-Details, Farben aus dem Logo (Pergament, Terrakotta, Ozeanblau)
-- Schrift: Ortsnamen und Überschriften wie mit Feder geschrieben, restlicher Text in klarer moderner Schrift
-- Dunkelmodus automatisch nach iPhone-Einstellung (dunkles Pergament mit goldenen Linien)
+- Schatzkarte nur in Farben und Logo: Pergament, Sepia, Terrakotta, Ozeanblau, Gold, Kompass-Logo
+- Alles andere modern: klare Fenster, moderne Schrift, keine Papier-Textur, keine Zierwellen
+- Handschrift nur im Schriftzug "Ahoi"
+- Logo oben links rund in der runden Leiste
+- Karte füllt immer den ganzen Bildschirm, keine leeren Ränder
+- Dunkelmodus automatisch nach iPhone-Einstellung (dunkle Töne mit goldenen Linien)
 - Animationen lebendig: Pins ploppen auf, Reiselinien zeichnen sich, Kompass dreht sich beim Laden
-- Darf nicht ruckeln: Karte über Grafikchip (Vektorkarte), eine leichte Papier-Textur, nur flüssige Animationsarten; vor dem Bau ein Karten-Prototyp zum Testen auf dem iPhone
+- Darf nicht ruckeln: Vektorkarte über den Grafikchip, nur flüssige Animationsarten; Prüfung über den Karten-Prototyp
 
 ## Kartengenauigkeit (feste Regel, kein Spielraum)
 - Echte Kartendaten aus OpenStreetMap für Küsten, Grenzen und Städte; der Schatzkarten-Look entsteht nur über Farben, Linien und Schrift
@@ -27,7 +29,7 @@ Gesammelte Wünsche und Entscheidungen von Sven. Gebaut wird erst, wenn die Anfo
 - Länderfarben und Grenzlinien aus demselben Datensatz, damit sie deckungsgleich sind
 - Entfernungen geodätisch auf dem Erdellipsoid berechnet (auf wenige Meter genau)
 - Zoom von der ganzen Welt bis Straßenebene
-- Kartenform: Globus beim Herauszoomen (echte Größenverhältnisse), flache Detailkarte beim Hineinzoomen
+- Kartenform: flache Weltkarte (wie Google Maps), kein Globus; Lage, Grenzen und Entfernungen bleiben exakt, nur die Flächen nahe den Polen wirken größer als in Wirklichkeit
 
 ## Profil und Login
 - Nur echtes Profilbild (Foto-Upload), Pins zeigen das Foto
