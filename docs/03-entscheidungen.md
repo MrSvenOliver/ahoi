@@ -1,0 +1,29 @@
+# Ahoi – Entscheidungs-Logbuch
+
+Jede Entscheidung mit Datum. Neue Einträge kommen oben dazu.
+
+## 22.11.2026
+- Projekt gestartet: App für Nomaden-Freunde mit Weltkarte, Standorten, Paaren, Distanzen, Treffen
+- Technik: Web-App (PWA) für iPhone, Android und Desktop aus einem Code
+- Hosting: öffentliches GitHub-Archiv, kostenlos über GitHub Pages
+- Backend: Supabase (Gratis-Plan), wöchentlicher automatischer Wecker gegen die 7-Tage-Pause
+- Karte: MapLibre + OpenFreeMap, Kartenstil A Schatzkarte
+- Logo: A Kompassrose mit zwei Pins
+- Interner Arbeitsname: Ahoi; offizieller Name später, soll "Nomad" enthalten
+- Sprache: Deutsch und Englisch umschaltbar
+- Testphase: nur auf Einladung, max. 10 Leute; App Store später möglich
+- Login: E-Mail-Code + Google; Apple-Login später mit dem App-Store-Schritt
+- Profil: nur echtes Foto
+- Chat: Gruppenchat mit @-Erwähnungen, Emoji-Reaktionen, Fotos/Videos, Sprachnachrichten, Ort teilen; Treffen nur über den Chat
+- Reisepläne: Kalender, Screenshot/Foto anhängen, Flugnummer, Vielleicht-Pläne
+- KI: zum Start weggelassen
+- Unterkunfts-Ideenliste: Herz, "Ich wäre dabei", Kommentare, Kostenrechner
+- Gadgets: Länder-Sammlung, Ortszeit, Countdown zum Treffen, Abzeichen, Status-Satz
+- Einladungen: Mitglieder schlagen vor, Sven gibt frei
+- Netzwerk: "Kenne ich"-Verbindungen und gemeinsame Kontakte
+- Treffer-Alarm: jeder stellt Nähe selbst ein; Push-Arten frei kombinierbar
+- Standort-Genauigkeit Standard: Stadt
+- Feedback: mit Screenshot, Push an Sven, Feedback-Liste nur für Sven
+- Admin: Mitglieder entfernen/sperren, Nachrichten löschen, Aktivitätsübersicht
+- Paare: einer fragt an, der andere bestätigt
+- Ablage: Mac-Ordner Schreibtisch/Ahoi App (app + privat), GitHub "ahoi" öffentlich, GitHub "ahoi-backup" privat
