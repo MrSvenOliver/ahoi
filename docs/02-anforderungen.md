@@ -5,7 +5,7 @@ Gesammelte Wünsche und Entscheidungen von Sven. Gebaut wird erst, wenn die Anfo
 ## Rahmen
 - Testphase über Wochen/Monate, nur auf Einladung, anfangs max. 10 Leute
 - Skalierbarkeit im Hinterkopf: später evtl. App Store und weitere Sprachen
-- Sprachen schon in der Beta: die komplette App auf Deutsch, Englisch oder Slowakisch; automatisch nach Handysprache (Deutsch → Deutsch, Slowakisch → Slowakisch, alles andere → Englisch); kleine Flagge am Profilknopf zeigt die Sprache, im Profil ganz oben dezent per Flagge umstellbar; Ortsnamen auf der Karte und Chat-Übersetzung folgen der Sprache; Texte der App stehen in einer eigenen Datei (texte.js), Nachrichten der Freunde bleiben im Original
+- Sprachen schon in der Beta: die komplette App auf Deutsch, Englisch oder Slowakisch; automatisch nach Handysprache (Deutsch → Deutsch, Slowakisch → Slowakisch, alles andere → Englisch); kleine Flagge am Profilknopf zeigt die Sprache, im Profil unter „Darstellung“ als klassische Einstellungszeile (Sprache › aktueller Wert), Auswahlliste mit Haken; Ortsnamen auf der Karte und Chat-Übersetzung folgen der Sprache; Texte der App stehen in einer eigenen Datei (texte.js), Nachrichten der Freunde bleiben im Original
 - Fast alle nutzen iPhone, mindestens eine Person Android; zusätzlich normale Website für Desktop
 - Interner Arbeitsname: Ahoi
 - Logo: A Kompassrose mit zwei Pins (Schatzkarten-Stil, ohne Text); Entwürfe heißen ahoi_logo_a-kompass_01.png usw., Endstand ahoi_logo_master.png
@@ -15,13 +15,14 @@ Gesammelte Wünsche und Entscheidungen von Sven. Gebaut wird erst, wenn die Anfo
 ## Design: drei Oberflächen
 - Drei komplett eigenständige Oberflächen mit gleichem Inhalt und gleichen Funktionen: Kartenfarben, Schrift, Knöpfe, Symbole, Fensterformen, Leiste unten und Animationen sind je Stil eigen
 - Wahl im Profil unter „Stil“ (mit kleinen Vorschaubildern); gemerkt auf dem Gerät; Standard für neue Nutzer: Modern
-- **Modern (Standard):** klar und hell nach Apples Gestaltung in iOS 26: helle Karte mit hellblauem Meer, Apple-Schrift, ein Akzentblau, schwebende Glas-Leiste unten, runde Knöpfe, Pins mit weißem Rand, Chat-Blasen wie bei iMessage
-- **Mission:** Navy-Lagezentrum im Stil der Bond-Filme: dunkles Marineblau, Cyan und Bernstein, feines Raster über der Karte, Koordinaten- und UTC-Anzeige, Schriften Rajdhani (Titel) und JetBrains Mono (Daten), eckige Formen mit Eckmarken, Radar als Startbild
-- **Abenteuer:** verspielte Schatzkarte: Pergament mit Papierkorn, Handschrift (Caveat) für Überschriften, Kompass, der sich beim Verschieben dreht, Schiffe, Wale und Wellen auf dem Meer (nur in der Weltansicht), Knöpfe mit Tiefe
+- **Modern (Standard):** klar und hell nach Apples Gestaltung in iOS 26: helle Karte mit hellblauem Meer, Apple-Schrift, ein Akzentblau; Glas wie „Liquid Glass“ (starke Unschärfe, helle Lichtkante, Schimmer) für Leiste, Knöpfe, Fenster und Symbole; Knöpfe oben als einzelne Glas-Kreise; Pins mit weißem Rand, Chat-Blasen wie bei iMessage
+- **Mission:** Navy-Lagezentrum im Stil der Bond-Filme: dunkles Marineblau, Cyan und Bernstein, Kennungsleiste oben („Ahoi · nur für Freunde“), feines Raster und Bildschirmlinien über der Karte, Entfernungsringe 1.000 / 2.500 / 5.000 km um den eigenen Standort, Rufnamen unter den Pins, Koordinaten- und UTC-Anzeige, Titel in Schablonenschrift (Saira Stencil), Daten in JetBrains Mono, Fließtext normal wie in einer klassischen App, eckige Formen mit Eckmarken, Radar als Startbild
+- **Abenteuer:** verspielte Schatzkarte: Pergament mit Papierkorn, Handschrift (Caveat) für Überschriften, Kompass, der sich beim Verschieben dreht, wenige liebevoll gezeichnete Figuren auf dem Meer (2 Segelschiffe, 2 Wale, ein paar Wellen; nur in der Weltansicht), Knöpfe mit Tiefe
 - Logo oben links in allen Stilen; Karte füllt immer den ganzen Bildschirm
 - Darf nicht ruckeln: Vektorkarte über den Grafikchip, nur flüssige Animationsarten; bei „Bewegung reduzieren“ keine Animationen
 
 ## Aufbau der App
+- Überschrift der Liste: „Wer ist wo?“ (mit Fragezeichen in allen Sprachen)
 - Leiste unten: Karte · Reisen · Chat · Ideen
 - Profil als rundes Foto oben rechts; dort Kacheln (Freund einladen, Freundeskreise, Paar verknüpfen), Länder-Sammlung, Stil, Familie, Mitteilungen, Privatsphäre
 

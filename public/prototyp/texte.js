@@ -10,7 +10,7 @@ const TEXTE = {
   "Du": ["You", "Ty"],
   "Schließen": ["Close", "Zavrieť"],
   "💬 Nachricht schreiben": ["💬 Send a message", "💬 Napísať správu"],
-  "Wer ist wo": ["Who is where", "Kto je kde"],
+  "Wer ist wo?": ["Who is where?", "Kto je kde?"],
   "Freunde vorschlagen: Sven gibt die Einladung frei": ["Suggest friends: Sven approves the invitation", "Navrhni priateľov: Sven pozvánku schváli"],
   "➕ Freund einladen": ["➕ Invite a friend", "➕ Pozvať priateľa"],
   "Bereiche": ["Sections", "Sekcie"],
@@ -186,6 +186,9 @@ const TEXTE = {
 
   // Profil
   "Sprache": ["Language", "Jazyk"],
+  "Darstellung": ["Appearance", "Vzhľad"],
+  "Standard ist die Sprache deines Handys.": ["By default, the app uses your phone's language.", "Predvolene sa používa jazyk tvojho telefónu."],
+  "Ahoi · nur für Freunde": ["Ahoi · friends only", "Ahoi · len pre priateľov"],
   "„Surfen in Ericeira 🏄“ · Stadt sichtbar": ["“Surfing in Ericeira 🏄” · city visible", "„Surfovanie v Ericeire 🏄“ · viditeľné mesto"],
   "Freundeskreise anlegen, z. B. Lieblingsleute": ["Create friend circles, e.g. favourites", "Vytvor okruhy priateľov, napr. obľúbení"],
   "Anfrage an deinen Partner – er oder sie bestätigt": ["Request to your partner – they confirm", "Žiadosť partnerovi – on alebo ona potvrdí"],

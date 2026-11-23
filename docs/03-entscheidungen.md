@@ -3,6 +3,10 @@
 Jede Entscheidung mit Datum. Neue Einträge kommen oben dazu.
 
 ## 23.11.2026
+- Modern: mehr Glas (Liquid-Glass-Nachbau) bei Symbolen, Knöpfen, Leiste und Fenstern
+- Mission: militärischer (Kennungsleiste, Entfernungsringe, Rufnamen, Schablonen-Titel), Fließtext normal statt Terminal-Schrift
+- Abenteuer: weniger, schönere Figuren (2 Schiffe, 2 Wale, 4 Wellen)
+- Sprachwahl als klassische Einstellungszeile mit Auswahlliste; „Wer ist wo?“ mit Fragezeichen
 - Drei eigenständige Oberflächen mit gleichem Inhalt: Modern (Standard), Mission (Navy-Lagezentrum, Cyan + Bernstein), Abenteuer (Handschrift, Papiergefühl, Schiffe und Wale auf dem Meer); Wahl im Profil
 - Ersetzt die bisherigen Kartenstile Pergament, Atlas modern und Nacht-Gold sowie die Regel „Schatzkarte nur in Farben und Logo“
 
