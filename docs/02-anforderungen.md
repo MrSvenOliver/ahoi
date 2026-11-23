@@ -24,7 +24,7 @@ Gesammelte Wünsche und Entscheidungen von Sven. Gebaut wird erst, wenn die Anfo
 ## Aufbau der App
 - Überschrift der Liste: „Wer ist wo?“ (mit Fragezeichen in allen Sprachen)
 - Leiste unten: Karte · Reisen · Chat · Ideen
-- Profil als rundes Foto oben rechts; dort Kacheln (Freund einladen, Freundeskreise, Paar verknüpfen), Länder-Sammlung, Stil, Familie, Mitteilungen, Privatsphäre
+- Profil als rundes Foto oben rechts; Reihenfolge im Profil: Darstellung (Sprache, Stil) · Freunde (Freund einladen, Freundeskreise, Paar verknüpfen als Einstellungszeilen mit farbigen Symbolen) · Familie · Mitteilungen · Privatsphäre · Über mich (Foto, Name, Status-Satz) · Länder-Sammlung · Mehr (Feedback)
 
 ## Kartengenauigkeit (feste Regel, kein Spielraum)
 - Echte Kartendaten aus OpenStreetMap für Küsten, Grenzen und Städte; alle drei Stile entstehen nur über Farben, Linien und Schrift
@@ -81,7 +81,7 @@ Gesammelte Wünsche und Entscheidungen von Sven. Gebaut wird erst, wenn die Anfo
 - Länder-Sammlung (Stempel): Länder aus eingetragenen Reisen kommen automatisch dazu, frühere Länder trägt man über ＋ nach (Suchliste)
 - Keine Abzeichen
 - Ortszeit der Freunde
-- Profil: Freund einladen, Freundeskreise, Paar verknüpfen als gut sichtbare Kacheln oben; „Freund einladen“ auch unten in „Wer ist wo“
+- „Freund einladen“ auch unten in „Wer ist wo?“
 - Feedback in der Beta: kleine Lasche „Feedback“ am rechten Rand auf jedem Bildschirm
 - Countdown zum Treffen
 - Status-Satz

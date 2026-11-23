@@ -3,6 +3,8 @@
 Jede Entscheidung mit Datum. Neue Einträge kommen oben dazu.
 
 ## 23.11.2026
+- Profil aufgeräumt: oben Sprache und Stil, dann Freunde, Familie, Mitteilungen, Privatsphäre; Über mich und Länder-Sammlung weiter unten
+- Krake mit sich verjüngenden, eingerollten Armen und Saugnäpfen
 - Abenteuer: Figuren kleiner; jedes Tier und Fabelwesen genau einmal (Wal, Seedrache, Krake); zwei Bootstypen (Segelschiff, Dschunke), nie zwei Boote gleichzeitig auf dem Bildschirm
 - Modern: mehr Glas (Liquid-Glass-Nachbau) bei Symbolen, Knöpfen, Leiste und Fenstern
 - Mission: militärischer (Kennungsleiste, Entfernungsringe, Rufnamen, Schablonen-Titel), Fließtext normal statt Terminal-Schrift

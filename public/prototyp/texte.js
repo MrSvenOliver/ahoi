@@ -187,6 +187,9 @@ const TEXTE = {
   // Profil
   "Sprache": ["Language", "Jazyk"],
   "Darstellung": ["Appearance", "Vzhľad"],
+  "Freunde": ["Friends", "Priatelia"],
+  "Über mich": ["About me", "O mne"],
+  "Nicht verknüpft": ["Not linked", "Neprepojené"],
   "Standard ist die Sprache deines Handys.": ["By default, the app uses your phone's language.", "Predvolene sa používa jazyk tvojho telefónu."],
   "Ahoi · nur für Freunde": ["Ahoi · friends only", "Ahoi · len pre priateľov"],
   "„Surfen in Ericeira 🏄“ · Stadt sichtbar": ["“Surfing in Ericeira 🏄” · city visible", "„Surfovanie v Ericeire 🏄“ · viditeľné mesto"],
