@@ -176,7 +176,7 @@ async function registrierungZeigen(code) {
   try {
     const { data, error } = await SB.rpc("einladung_pruefen", { c: code });
     if (error) throw error;
-    if (!data) { fehlerZeigen("registrieren", t("Der Einladungslink ist ungültig oder abgelaufen. Bitte um einen neuen.")); return; }
+    if (!data) { try { localStorage.removeItem("ahoi-einladung"); } catch (e) {} fehlerZeigen("registrieren", t("Der Einladungslink ist ungültig oder abgelaufen. Bitte um einen neuen.")); return; }
     document.getElementById("reg-unter").textContent = t("{name} lädt dich ein. Leg dein Konto an, danach gibt Sven dich frei.", { name: data });
     knopf.disabled = false;
   } catch (e) { fehlerZeigen("registrieren", fehlerText(e)); }
