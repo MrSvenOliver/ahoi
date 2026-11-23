@@ -15,16 +15,16 @@ Gesammelte Wünsche und Entscheidungen von Sven. Gebaut wird erst, wenn die Anfo
 ## Design: drei Oberflächen
 - Drei komplett eigenständige Oberflächen mit gleichem Inhalt und gleichen Funktionen: Kartenfarben, Schrift, Knöpfe, Symbole, Fensterformen, Leiste unten und Animationen sind je Stil eigen
 - Wahl im Profil unter „Stil“ (mit kleinen Vorschaubildern); gemerkt auf dem Gerät; Standard für neue Nutzer: Modern
-- **Modern (Standard):** klar und hell nach Apples Gestaltung in iOS 26: helle Karte mit hellblauem Meer, Apple-Schrift, ein Akzentblau; Glas wie „Liquid Glass“ (starke Unschärfe, helle Lichtkante, Schimmer) für Leiste, Knöpfe, Fenster und Symbole; Knöpfe oben als einzelne Glas-Kreise; Pins mit weißem Rand, Chat-Blasen wie bei iMessage
-- **Mission:** Navy-Lagezentrum im Stil der Bond-Filme: dunkles Marineblau, Cyan und Bernstein, Kennungsleiste oben („Ahoi · nur für Freunde“), feines Raster und Bildschirmlinien über der Karte, Entfernungsringe 1.000 / 2.500 / 5.000 km um den eigenen Standort, Rufnamen unter den Pins, Koordinaten- und UTC-Anzeige, Titel in Schablonenschrift (Saira Stencil), Daten in JetBrains Mono, Fließtext normal wie in einer klassischen App, eckige Formen mit Eckmarken, Radar als Startbild
-- **Abenteuer:** verspielte Schatzkarte: Pergament mit Papierkorn, Handschrift (Caveat) für Überschriften, Kompass, der sich beim Verschieben dreht, liebevoll gezeichnete Figuren auf dem Meer, jede genau einmal: Wal (Nordatlantik), Seedrache (Nordpazifik), Krake (Südpazifik); zwei verschiedene Boote (Segelschiff im Atlantik, Dschunke im Indischen Ozean), davon ist auf dem Bildschirm immer nur eines zu sehen; ein paar Wellen; nur in der Weltansicht, Knöpfe mit Tiefe
+- **Modern (Standard):** klar und hell nach Apples Gestaltung in iOS 26: helle Karte mit hellblauem Meer, Apple-Schrift, ein Akzentblau; Glas wie „Liquid Glass“ (starke Unschärfe, helle Lichtkante, Schimmer) für Leiste, Knöpfe, Fenster und Symbole; Knöpfe oben als einzelne Glas-Kreise; Pins mit weißem Rand, Chat-Blasen wie bei iMessage; Bewegung: Glasflächen federn beim Öffnen, Entfernungen zählen hoch
+- **Mission:** Navy-Lagezentrum im Stil der Bond-Filme: dunkles Marineblau, Cyan und Bernstein, Kennungsleiste oben („Ahoi · nur für Freunde“), feines Raster und Bildschirmlinien über der Karte, Entfernungsringe 1.000 / 2.500 / 5.000 km um den eigenen Standort, Rufnamen unter den Pins, Koordinaten- und UTC-Anzeige, Titel in Schablonenschrift (Saira Stencil), Daten in JetBrains Mono, Fließtext normal wie in einer klassischen App, eckige Formen mit Eckmarken, Radar als Startbild; Bewegung: Radarstrahl zieht über die Karte, beim Antippen erfasst ein Zielrahmen die Person
+- **Abenteuer:** verspielte Schatzkarte: Pergament mit Papierkorn, Handschrift (Caveat) für Überschriften, Kompass, der sich beim Verschieben dreht, liebevoll gezeichnete Figuren auf dem Meer, jede genau einmal (Wal, Seedrache, Krake), bei jedem Öffnen in anderen Meeren; zwei verschiedene Boote (Segelschiff, Dschunke) auf wechselnden Routen, davon ist auf dem Bildschirm immer nur eines zu sehen; nie über Land (geprüft); ein paar Wellen; nur in der Weltansicht; Pins erscheinen wie mit Tinte gezeichnet, Wolkenschatten ziehen langsam über die Karte; Chat-Symbol als gezeichnete Sprechblase; Knöpfe mit Tiefe
 - Logo oben links in allen Stilen; Karte füllt immer den ganzen Bildschirm
 - Darf nicht ruckeln: Vektorkarte über den Grafikchip, nur flüssige Animationsarten; bei „Bewegung reduzieren“ keine Animationen
 
 ## Aufbau der App
 - Überschrift der Liste: „Wer ist wo?“ (mit Fragezeichen in allen Sprachen)
 - Leiste unten: Karte · Reisen · Chat · Ideen
-- Profil als rundes Foto oben rechts; Reihenfolge im Profil: oben Foto, Name und Status · Status-Auswahl · Darstellung (Sprache, Stil als drei kleine Farbverläufe) · Freunde (Freund einladen, Freundeskreise, Paar) · Länder und Rückblicke · Familie · Privatsphäre · Mitteilungen · Konto · Mehr (Feedback)
+- Profil als rundes Foto oben rechts; Reihenfolge im Profil: oben Foto, Name und Status · Status-Auswahl · Darstellung (Sprache, Stil als drei kleine Farbverläufe) · Freunde (Einladen, Freundeskreise, Partner) · Länder und Rückblicke · Familie · Privatsphäre · Mitteilungen · Konto · Mehr (Feedback)
 
 ## Kartengenauigkeit (feste Regel, kein Spielraum)
 - Echte Kartendaten aus OpenStreetMap für Küsten, Grenzen und Städte; alle drei Stile entstehen nur über Farben, Linien und Schrift
@@ -39,7 +39,7 @@ Gesammelte Wünsche und Entscheidungen von Sven. Gebaut wird erst, wenn die Anfo
 ## Profil und Login
 - Nur echtes Profilbild (Foto-Upload), Pins zeigen das Foto
 - Login: E-Mail-Adresse und Passwort, ohne Bestätigungsmail (die App verschickt keine E-Mails); iPhone kann das Passwort im Schlüsselbund speichern und mit Face ID ausfüllen; man bleibt angemeldet, bis man sich abmeldet; Passwort im Profil änderbar; vergessenes Passwort setzt Sven im Admin-Bereich neu; E-Mail-Adresse im Profil korrigierbar; Google und Apple später
-- Paare: einer fragt an, der andere bestätigt; keine Frage beim Anmelden; Herz erscheint automatisch nur, wenn beide am selben Ort sind; keine Verbindungslinie auf der Karte; beim Antippen einer Person erscheint nur diese Person, nie der Partner oder andere Freunde
+- Paare: in der Info-Karte einer Person „❤️ Wir sind ein Paar“ antippen, die andere Person bestätigt; im Profil zeigt „Partner“ den Stand; keine Frage beim Anmelden; Herz erscheint automatisch nur, wenn beide am selben Ort sind; keine Verbindungslinie auf der Karte; beim Antippen einer Person erscheint nur diese Person, nie der Partner oder andere Freunde
 - Freunde am selben Ort: gemeinsamer Pin mit 🤝
 - Standort-Genauigkeit Standard: Stadt (jeder kann es ändern)
 
@@ -86,7 +86,9 @@ Gesammelte Wünsche und Entscheidungen von Sven. Gebaut wird erst, wenn die Anfo
 - Meine Länder: im Profil eine Zeile „Meine Länder · 12 ›“; eigene Seite mit Freirubbel-Weltkarte (besuchte Länder farbig nach Kontinent, Rest abgedeckt; Antippen rubbelt frei oder deckt ab), Fortschrittsring „x von 7 Kontinenten“, Liste nach Kontinenten, Bearbeiten über die Suchliste. Länder aus Reisen kommen automatisch dazu
 - Freunde sehen in der Info-Karte „🌍 23 Länder“
 - Pionier 🚩: wer als Erster aus dem Freundeskreis in einem Land war, bekommt eine Fahne in der Länderliste; kurze Meldung im Chat „Alle“. Keine Abzeichen-Sammlung
-- Dein Nomadenjahr: Jahresrückblick zum Durchtippen (wie Spotify Wrapped), im Dezember automatisch, jederzeit über das Profil: neue Länder, Kilometer, Treffen mit Freunden, längster Aufenthalt, Pionier-Länder
+- Dein Nomadenjahr: Jahresrückblick zum Durchtippen (wie Spotify Wrapped), öffnet sich einmal von selbst zwischen 15. Dezember und 15. Januar, jederzeit über das Profil: neue Länder, Kilometer, Treffen mit Freunden, längster Aufenthalt, Pionier-Länder; Hintergrund ist die Weltkarte im gewählten Stil, besuchte Länder leuchten, die Karte schwenkt pro Seite
+- Dein erstes Halbjahr: kürzerer Rückblick, öffnet sich einmal im Juli
+- Freundeskreise: nur ein Filter für einen selbst (Chips „Alle · ⭐ Lieblingsleute · 🏄 Surf-Crew“ unter „Wer ist wo?“, wirkt auf Karte und Liste); anlegen im Profil mit Symbol, Name und Personen; ändern nichts daran, wer einen sieht
 - Keine Abzeichen
 - Ortszeit der Freunde
 - „Freund einladen“ auch unten in „Wer ist wo?“
@@ -96,6 +98,8 @@ Gesammelte Wünsche und Entscheidungen von Sven. Gebaut wird erst, wenn die Anfo
 
 ## Familien-Zugang (nur zuschauen)
 - Für Eltern, Geschwister u. a., die keine Nomaden sind (wie ein AirTag auf dem Bildschirm)
+- Ein Knopf „Einladen“ fragt zuerst: 🧭 Nomaden-Freund (sieht alle Freunde, Sven gibt frei) oder 🏡 Familie (sieht nur dich, ohne Freigabe)
+- Familie meldet sich nur mit Name, E-Mail und Passwort an, Profilfoto freiwillig; sie gibt keine Orte oder Reisen an
 - Jeder Nomade lädt seine eigene Familie ein und kann sie jederzeit wieder ausschalten
 - Die Familie sieht nur, wer sie eingeladen hat: Ort, Ortszeit, nächste Reise, alle geplanten Reisen und Vielleicht-Pläne
 - Teilt selbst nichts und erscheint für niemanden auf der Karte

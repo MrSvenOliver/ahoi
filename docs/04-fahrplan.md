@@ -24,6 +24,11 @@ Entschieden am 23.11.2026 (A + C + E, danach geändert): Anmeldung mit E-Mail un
 7. **Feedback und Verwaltung:** Feedback-Liste und Admin-Bereich für Sven, kurzer Datenschutz-Hinweis mit Zustimmung, wöchentliche Sicherung und Wachhalte-Aufruf für Supabase
 8. **Beta-Start:** zuerst 2–3 Freunde, dann bis 10
 
+## Als Nächstes in der echten App
+- Familie einladen (Auswahl ist schon da, Anmeldung und schlanke Familien-Ansicht fehlen noch)
+- Paar, Freundeskreise und Meine Länder in der Datenbank (bisher nur im Prototyp bzw. auf dem Gerät)
+- Reisen, Chat, Ideen, Rückblicke mit echten Daten
+
 ## Später
-- Familien-Zugang mit echten Einladungen, Netzwerk („Kenne ich“)
+- Netzwerk („Kenne ich“)
 - KI-Funktionen, Apple-Login und App Store, offizieller Name

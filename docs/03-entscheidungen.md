@@ -3,6 +3,10 @@
 Jede Entscheidung mit Datum. Neue Einträge kommen oben dazu.
 
 ## 23.11.2026
+- Paar (E): in der Info-Karte „❤️ Wir sind ein Paar“, die andere Person bestätigt
+- Freundeskreise (H): nur Filter auf Karte und „Wer ist wo?“, ändern nicht, wer einen sieht
+- Einladen (J + L): ein Knopf, der zuerst fragt: Nomaden-Freund oder Familie; Familie braucht keine Freigabe
+- Bewegung: Mission Radarstrahl und Zielrahmen (N, O), Abenteuer Tinten-Pins und Wolkenschatten (Q, R), Modern federnde Glasflächen und hochzählende Entfernungen (S, T)
 - Echte App und Prototyp merken sich die Sprache getrennt; die echte App startet in der Handysprache, auf dem Anmeldebildschirm oben rechts wählbar
 - Abenteuer: Wal, Seedrache und Krake erscheinen bei jedem Öffnen in drei verschiedenen Meeren, die Boote auf wechselnden Routen; alle Stellen und Routen sind gegen die Landflächen geprüft (nur winzige Inseln, die in der Weltansicht ein Punkt sind, zählen nicht)
 - Rückblicke: Hintergrund ist die Weltkarte im gewählten Stil, besuchte Länder leuchten, die Karte schwenkt pro Seite; Jahresrückblick öffnet sich einmal von selbst zwischen 15. Dezember und 15. Januar, dazu „Dein erstes Halbjahr“ einmal im Juli (B); in der echten App erst mit echten Reisedaten
