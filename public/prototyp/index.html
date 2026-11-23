@@ -886,6 +886,12 @@
   .fb-eintrag .knopf-leise { padding: 6px 11px; font-size: 13px; }
   .reise.eigen { cursor: pointer; }
   #treffer-liste .treffer { margin-bottom: 10px; }
+
+  /* Neu dabei */
+  .neu-banner { position: fixed; left: 50%; top: calc(env(safe-area-inset-top) + 66px); transform: translateX(-50%); z-index: 22; border: 1px solid var(--glas-rand); background: var(--glas); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); color: var(--text); border-radius: 999px; padding: 9px 16px; font: inherit; font-size: 14px; font-weight: 600; box-shadow: var(--schatten); cursor: pointer; white-space: nowrap; max-width: 92vw; overflow: hidden; text-overflow: ellipsis; animation: neu-rein 0.5s cubic-bezier(0.3, 1.3, 0.5, 1); }
+  @keyframes neu-rein { from { transform: translate(-50%, -18px); opacity: 0; } to { transform: translateX(-50%); opacity: 1; } }
+  [data-stil="mission"] .neu-banner { border-radius: 2px; border-color: var(--amber); color: var(--amber); font-family: var(--mono); font-size: 12px; text-transform: uppercase; letter-spacing: 1px; }
+  .fam-leer { color: var(--text-leise); font-size: 14px; padding: 10px 2px; }
 </style>
 </head>
 <body>
@@ -1106,11 +1112,12 @@
     <button class="einst-zeile nur-proto" id="jahr-zeile"><span class="einst-symbol sym-lila"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5l1.8 4.9 4.9 1.8-4.9 1.8L12 16.9l-1.8-4.9-4.9-1.8 4.9-1.8z"/><path d="M18.5 15.5l.8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2-2.2-.8 2.2-.8z"/></svg></span><span class="einst-name" id="jahr-name">Dein Nomadenjahr</span><span class="einst-pfeil">›</span></button>
     <button class="einst-zeile nur-proto" id="halbjahr-zeile"><span class="einst-symbol sym-blau"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 3.5v17"/><path d="M12 3.5a8.5 8.5 0 0 1 0 17Z" fill="currentColor" stroke="none" opacity=".35"/></svg></span><span class="einst-name" id="halbjahr-name">Dein erstes Halbjahr</span><span class="einst-pfeil">›</span></button>
   </div>
-  <h2 class="nur-proto">Familie</h2>
-  <div class="kasten nur-proto">
+  <h2>Familie</h2>
+  <div class="kasten">
     <p class="familie-erklaerung">🏡 Deine Familie sieht, wo du bist und wohin du reist. Mehr nicht. Sie meldet sich nur mit Name und E-Mail an und teilt selbst nichts.</p>
-    <div class="zeile-einst"><div>Mama<small>sieht dich</small></div><button class="schalter an" aria-label="Mama darf mich sehen"></button></div>
-    <div class="zeile-einst"><div>Papa<small>Einladung verschickt</small></div><button class="schalter an" aria-label="Papa darf mich sehen"></button></div>
+    <div class="zeile-einst nur-proto"><div>Mama<small>sieht dich</small></div><button class="schalter an" aria-label="Mama darf mich sehen"></button></div>
+    <div class="zeile-einst nur-proto"><div>Papa<small>Einladung verschickt</small></div><button class="schalter an" aria-label="Papa darf mich sehen"></button></div>
+    <div class="nur-echt" id="familie-liste"></div>
     <div class="familie-knoepfe"><button class="knopf-gross" id="familie-einladen">＋ Familie einladen</button><button class="knopf-leise" id="familie-start">So sieht sie es</button></div>
   </div>
   <h2>Privatsphäre</h2>
@@ -1141,10 +1148,10 @@
 
 <section class="familie-blatt" id="familie-blatt">
   <div class="griff"></div>
-  <p class="fam-kopf">Familien-Ansicht · Beispiel: Mama sieht dich und Alex</p>
+  <p class="fam-kopf" id="fam-kopf">Familien-Ansicht · Beispiel: Mama sieht dich und Alex</p>
   <div id="familie-karten"></div>
   <div class="zeile-einst"><div>Meinen Standort zeigen<small>Nur für dich, um die Entfernung zu sehen. Niemand sonst sieht ihn.</small></div><button class="schalter" id="familie-standort"></button></div>
-  <button class="knopf-leise" id="familie-ende" style="width:100%;margin-top:6px">Prototyp: zurück zur Nomaden-Ansicht</button>
+  <div class="familie-knoepfe"><button class="knopf-leise nur-echt" id="familie-sprache">🌐 Sprache</button><button class="knopf-leise" id="familie-ende">Prototyp: zurück zur Nomaden-Ansicht</button></div>
 </section>
 <button class="feedback-lasche" id="feedback-lasche" aria-label="Feedback an Sven">Feedback</button>
 <section class="seite" id="seite-kreise">
@@ -1188,6 +1195,7 @@
   <button class="knopf-gross" style="width:100%" id="fb-senden">Senden</button>
 </section>
 <div class="hinweis" id="hinweis"></div>
+<button class="neu-banner" id="neu-banner" hidden></button>
 
 <!-- Echte App: Anmeldung, Registrierung, Freigabe, erster Start -->
 <div class="zugang" id="zugang" role="dialog" aria-modal="true">

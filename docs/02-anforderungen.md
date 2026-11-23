@@ -91,6 +91,7 @@ Gesammelte Wünsche und Entscheidungen von Sven. Gebaut wird erst, wenn die Anfo
 - Freundeskreise: nur ein Filter für einen selbst (Chips „Alle · ⭐ Lieblingsleute · 🏄 Surf-Crew“ unter „Wer ist wo?“, wirkt auf Karte und Liste); anlegen im Profil mit Symbol, Name und Personen; ändern nichts daran, wer einen sieht
 - Keine Abzeichen
 - Ortszeit der Freunde
+- „Neu dabei: Name 👋“ oben auf der Karte, wenn jemand dazugekommen ist
 - „Freund einladen“ auch unten in „Wer ist wo?“
 - Feedback in der Beta: kleine Lasche „Feedback“ am rechten Rand auf jedem Bildschirm
 - Countdown zum Treffen
@@ -104,7 +105,9 @@ Gesammelte Wünsche und Entscheidungen von Sven. Gebaut wird erst, wenn die Anfo
 - Die Familie sieht nur, wer sie eingeladen hat: Ort, Ortszeit, nächste Reise, alle geplanten Reisen und Vielleicht-Pläne
 - Teilt selbst nichts und erscheint für niemanden auf der Karte
 - Eigene Ansicht ohne Leiste; nächste Reise in drei Zeilen (Überschrift, Ort, Daten mit Nächten); Antippen zeigt den Ort auf der Karte
-- Optional: eigenen Standort nur für sich einschalten, um die Entfernung zu sehen
+- Optional: eigenen Standort nur für sich einschalten, um die Entfernung zu sehen (bleibt auf dem Gerät)
+- Im Profil des Nomaden: Liste der Familie mit Schalter „sieht dich“ / „pausiert“; Vorschau „So sieht sie es“
+- Familie kann Sprache wählen und sich abmelden, sonst nichts
 
 ## Netzwerk und Einladungen
 - Persönliche Einladungen von Sven: vorab freigegeben, 30 Tage gültig, optional „lebenslang kostenlos“

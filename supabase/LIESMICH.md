@@ -16,6 +16,7 @@
 - `02-verwaltung.sql`: Admin setzt ein neues Startpasswort, wenn jemand sein Passwort vergessen hat
 - `03-vorab-einladungen.sql`: persönliche Einladungen von Sven (sofort frei, 30 Tage, lebenslang kostenlos)
 - `04-reisen-feedback.sql`: Reisen (fest oder vielleicht) und Feedback mit Screenshots
+- `05-familie.sql`: Familien-Zugang, Orte nur noch über die geschützte Ansicht
 
 ## Betrieb
 - Wachhalten: `.github/workflows/wachhalten.yml` (Montag und Donnerstag)

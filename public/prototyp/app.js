@@ -355,7 +355,9 @@ function dekoSetzen() {
 // Entfernungsringe um den eigenen Standort (nur Mission): echte Kreise auf der Erdkugel, 1000 / 2500 / 5000 km
 function ringeZeichnen() {
   const du = ich(), R = 6371.0088, rad = Math.PI / 180, ringe = [1000, 2500, 5000];
-  const kreis = km => { const d = km / R, la = du.lat * rad, lo = du.lon * rad, pkt = [];
+  if (du.lat == null) return;
+  const ohneOrt = du.lat == null; // Familien-Konto ohne eigenen Ort: keine Ringe
+  const kreis = km => { if (ohneOrt) return []; const d = km / R, la = du.lat * rad, lo = du.lon * rad, pkt = [];
     for (let i = 0; i <= 180; i++) { const b = (i / 180) * 2 * Math.PI;
       const la2 = Math.asin(Math.sin(la) * Math.cos(d) + Math.cos(la) * Math.sin(d) * Math.cos(b));
       const lo2 = lo + Math.atan2(Math.sin(b) * Math.sin(d) * Math.cos(la), Math.cos(d) - Math.sin(la) * Math.sin(la2));
@@ -376,7 +378,7 @@ const NAH_KM = 50;
 const istPaar = g => g.length === 2 && g[0].paar && g[0].paar === g[1].paar;
 // Familien-Zugang: sieht nur die Personen, die ihn freigeschaltet haben; den eigenen Standort nur, wenn selbst gewählt
 // Beispiel: Mama wurde von dir und von Alex eingeladen. Ihr eigener Standort erscheint nur, wenn sie ihn selbst einschaltet.
-const FAMILIE_SIEHT = ["du", "alex"];
+let FAMILIE_SIEHT = ["du", "alex"];
 const BETRACHTER = { id: "betrachter", name: t("Ich"), ort: t("Köln"), land: "DE", lat: 50.9375, lon: 6.9603, tz: "Europe/Berlin", farbe: "#8a8478" };
 let familieModus = false, familieMitStandort = false;
 const sichtbareLeute = () => familieModus ? [...leute.filter(p => FAMILIE_SIEHT.includes(p.id)), ...(familieMitStandort ? [BETRACHTER] : [])] : imKreis(leute);
@@ -468,7 +470,7 @@ function hochzaehlen(wurzel) {
 // ---------- Liste und Infokarte ----------
 function listeAufbauen() {
   const du = ich();
-  const andere = sichtbareLeute().filter(p => p.id !== "du").map(p => ({ ...p, d: entfernungKm(du.lat, du.lon, p.lat, p.lon) })).sort((x, y) => x.d - y.d);
+  const andere = sichtbareLeute().filter(p => p.id !== "du").map(p => ({ ...p, d: du.lat == null ? 0 : entfernungKm(du.lat, du.lon, p.lat, p.lon) })).sort((x, y) => x.d - y.d);
   const laenderZahl = new Set(andere.map(p => p.land)).size;
   document.getElementById("zusammenfassung").textContent = `${t("{n} Freunde", { n: andere.length })} · ${t("{n} Länder", { n: laenderZahl })} · ${versionText(VERSION)}`;
   const ul = document.getElementById("liste"); ul.innerHTML = "";
@@ -1081,16 +1083,17 @@ function naechsteReise(id) {
   return reisen.filter(r => r.wer.includes(id) && r.von && r.bis >= heute).sort((a, b) => a.von.localeCompare(b.von))[0];
 }
 function familieAufbauen() {
-  const du = BETRACHTER;
-  document.getElementById("familie-karten").innerHTML = leute.filter(p => FAMILIE_SIEHT.includes(p.id)).map(p => {
+  const du = BETRACHTER, sichtbar = leute.filter(p => FAMILIE_SIEHT.includes(p.id) && p.lat != null);
+  if (!sichtbar.length) { document.getElementById("familie-karten").innerHTML = `<p class="fam-leer">${t("Gerade teilt niemand seinen Ort mit dir.")}</p>`; return; }
+  document.getElementById("familie-karten").innerHTML = sichtbar.map(p => {
     const r = naechsteReise(p.id), heute = new Date().toISOString().slice(0, 10);
     const naechte = r ? Math.round((datum(r.bis) - datum(r.von)) / 864e5) : 0;
     const weitere = reisen.filter(x => x !== r && x.wer.includes(p.id) && (x.vielleicht || x.bis >= heute));
-    return `<div class="fam-karte" data-id="${p.id}"><div class="ava" style="background:${p.farbe}">${kuerzel(p.name)}</div><div style="flex:1">
-      <b class="fam-name">${p.name}</b><div class="wo">${flagge(p.land)}&nbsp; ${t(p.id === "du" ? "bist in" : "ist in")} <b style="display:inline;font-size:16px">${p.ort}</b></div>
+    return `<div class="fam-karte" data-id="${p.id}"><div class="ava" style="${kopfStil(p)}">${kopfText(p)}</div><div style="flex:1">
+      <b class="fam-name">${ohneHtml(p.name)}</b><div class="wo">${flagge(p.land)}&nbsp; ${t(p.id === "du" ? "bist in" : "ist in")} <b style="display:inline;font-size:16px">${ohneHtml(p.ort)}</b></div>
       <div class="klein">${t("Dort ist es {z} Uhr", { z: uhrzeit(p.tz) })}${familieMitStandort ? " · " + t("{km} von dir", { km: km(entfernungKm(du.lat, du.lon, p.lat, p.lon)) }) : ""}</div>
-      ${r ? `<div class="naechste"><span class="nr-titel">${t("✈︎ Nächste Reise")}</span><span class="nr-ort">${flagge(r.land)}&nbsp; ${r.ziel}</span><span class="nr-daten">${kurz(r.von)} – ${kurz(r.bis)} · ${naechte} ${t(naechte === 1 ? "Nacht" : "Nächte")}</span></div>` : ""}
-      ${weitere.length ? `<div class="weitere">${weitere.map(x => `${flagge(x.land)} ${x.ziel} · ${x.von ? kurz(x.von) + "–" + kurz(x.bis) : t("vielleicht im {m}", { m: datum(x.monat + "-01").toLocaleDateString(LOC, { month: "long" }) })}`).join("<br>")}</div>` : ""}
+      ${r ? `<div class="naechste"><span class="nr-titel">${t("✈︎ Nächste Reise")}</span><span class="nr-ort">${flagge(r.land)}&nbsp; ${ohneHtml(r.ziel)}</span><span class="nr-daten">${kurz(r.von)} – ${kurz(r.bis)} · ${naechte} ${t(naechte === 1 ? "Nacht" : "Nächte")}</span></div>` : ""}
+      ${weitere.length ? `<div class="weitere">${weitere.map(x => `${flagge(x.land)} ${ohneHtml(x.ziel)} · ${x.von ? kurz(x.von) + "–" + kurz(x.bis) : t("vielleicht im {m}", { m: datum(x.monat + "-01").toLocaleDateString(LOC, { month: "long" }) })}`).join("<br>")}</div>` : ""}
     </div></div>`;
   }).join("");
   document.querySelectorAll(".fam-karte").forEach(k => k.onclick = () => { const p = leute.find(x => x.id === k.dataset.id); map.flyTo({ center: [p.lon, p.lat], zoom: 10, speed: 1.3, essential: true }); });
@@ -1101,11 +1104,17 @@ function familieSetzen(an) {
   seiteZeigen("karte");
   if (an) familieAufbauen();
   pinsSetzen();
-  if (an) { const b = new maplibregl.LngLatBounds(); sichtbareLeute().forEach(p => b.extend([p.lon, p.lat])); map.fitBounds(b, { padding: { top: 120, bottom: Math.min(window.innerHeight * 0.62, document.getElementById("familie-blatt").offsetHeight + 40), left: 60, right: 60 }, maxZoom: 6, duration: 900 }); }
+  const mitOrt = sichtbareLeute().filter(p => p.lat != null);
+  if (an && mitOrt.length) { const b = new maplibregl.LngLatBounds(); mitOrt.forEach(p => b.extend([p.lon, p.lat])); map.fitBounds(b, { padding: { top: 120, bottom: Math.min(window.innerHeight * 0.62, document.getElementById("familie-blatt").offsetHeight + 40), left: 60, right: 60 }, maxZoom: 6, duration: 900 }); }
 }
 document.getElementById("familie-start").onclick = () => familieSetzen(true);
 document.getElementById("familie-ende").onclick = () => familieSetzen(false);
-document.getElementById("familie-standort").onclick = e => { e.currentTarget.classList.toggle("an"); familieMitStandort = e.currentTarget.classList.contains("an"); familieAufbauen(); pinsSetzen(); };
+document.getElementById("familie-standort").onclick = async e => {
+  const k = e.currentTarget, an = !k.classList.contains("an");
+  // Echte App: der eigene Standort bleibt nur auf diesem Gerät und wird nirgends gespeichert
+  if (an && ECHT) { try { const c = await geraetePosition(); Object.assign(BETRACHTER, { lat: c.latitude, lon: c.longitude }); } catch (err) { return hinweis(t("Standort nicht erlaubt")); } }
+  k.classList.toggle("an", an); familieMitStandort = an; familieAufbauen(); pinsSetzen();
+};
 
 // ---------- Sprache ----------
 // Klassisch wie in den Einstellungen einer App: Zeile mit aktuellem Wert, Auswahlliste mit Haken
@@ -1367,7 +1376,33 @@ function einladenWahl() {
   });
   blatt.classList.add("offen");
 }
-function familieEinladen() { hinweis(ECHT ? t("Familie einladen kommt bald") : t("Familien-Link erstellt (Beispiel): sieht nur dich")); }
+async function familieEinladen() {
+  if (!ECHT) return hinweis(t("Familien-Link erstellt (Beispiel): sieht nur dich"));
+  try {
+    const { data, error } = await SB.from("einladung").insert({ von: ECHT_DATEN.uid, art: "familie" }).select("code").single();
+    if (error) throw error;
+    const link = location.origin + location.pathname.replace(/index\.html$/, "") + "?einladung=" + data.code;
+    const text = t("Mit Ahoi siehst du, wo ich gerade bin und wohin ich reise. Dein Link (nur für dich, 14 Tage gültig):");
+    if (navigator.share) { try { await navigator.share({ title: "Ahoi", text, url: link }); } catch (e) {} return; }
+    try { await navigator.clipboard.writeText(text + " " + link); hinweis(t("Link kopiert")); }
+    catch (e) { fragen(link, [[t("Schließen"), () => {}]]); }
+  } catch (e) { hinweis(t("Einladen hat nicht geklappt")); }
+}
+async function familieListeAufbauen() {
+  const box = document.getElementById("familie-liste");
+  const { data, error } = await SB.from("familie_sicht").select("familie, aktiv").eq("nomade", ECHT_DATEN.uid);
+  if (error) { box.innerHTML = ""; return; }
+  const namen = {};
+  if (data.length) { const r = await SB.from("profile").select("id, name").in("id", data.map(x => x.familie)); (r.data || []).forEach(p => namen[p.id] = p.name); }
+  box.innerHTML = data.map(x => `<div class="zeile-einst"><div>${ohneHtml(namen[x.familie] || "?")}<small>${x.aktiv ? t("sieht dich") : t("pausiert")}</small></div><button class="schalter${x.aktiv ? " an" : ""}" data-fam="${x.familie}" aria-label="${t("darf mich sehen")}"></button></div>`).join("");
+  box.querySelectorAll("[data-fam]").forEach(b => b.onclick = async e => {
+    e.stopPropagation();
+    const an = !b.classList.contains("an");
+    const { error } = await SB.from("familie_sicht").update({ aktiv: an }).eq("nomade", ECHT_DATEN.uid).eq("familie", b.dataset.fam);
+    if (error) return hinweis(t("Das hat nicht geklappt"));
+    familieListeAufbauen();
+  });
+}
 ["einladen-zeile", "einladen-unten"].forEach(id => document.getElementById(id).onclick = einladenWahl);
 document.getElementById("familie-einladen").onclick = familieEinladen;
 
@@ -1382,6 +1417,7 @@ async function reisenLaden() {
   }));
   reisen.splice(0, reisen.length, ...neu);
   reisenAufbauen(); trefferAufbauen();
+  if (familieModus) familieAufbauen();
 }
 const nahe = (a, b) => a.lat != null && b.lat != null && entfernungKm(a.lat, a.lon, b.lat, b.lon) < NAH_KM;
 function trefferFinden() {
@@ -1459,6 +1495,25 @@ async function feedbackListeAufbauen() {
   });
 }
 
+// ---------- Neu dabei: kurzer Hinweis, wenn ein Nomade dazugekommen ist ----------
+function neuDabeiPruefen() {
+  if (!ECHT || familieModus) return;
+  const jetzt = (ECHT_DATEN.alle || []).filter(p => p.id !== "du").map(p => p.uid);
+  let bekannt = null; try { bekannt = JSON.parse(localStorage.getItem("ahoi-bekannt") || "null"); } catch (e) {}
+  try { localStorage.setItem("ahoi-bekannt", JSON.stringify(jetzt)); } catch (e) {}
+  if (!Array.isArray(bekannt)) return; // erstes Mal: nur merken
+  const neu = (ECHT_DATEN.alle || []).filter(p => p.id !== "du" && !bekannt.includes(p.uid));
+  if (neu.length) neuBannerZeigen(neu);
+}
+function neuBannerZeigen(neu) {
+  const b = document.getElementById("neu-banner");
+  b.textContent = "👋 " + t("Neu dabei: {namen}", { namen: neu.map(p => p.name).join(", ") });
+  b.hidden = false;
+  b.onclick = () => { b.hidden = true; const p = leute.find(x => x.id === neu[0].id); if (p) { zuPerson(p); infoZeigen([p]); } };
+  clearTimeout(neuBannerZeigen.uhr); neuBannerZeigen.uhr = setTimeout(() => b.hidden = true, 7000);
+}
+if (!ECHT) { let gezeigt = null; try { gezeigt = localStorage.getItem("ahoi-proto-neu"); localStorage.setItem("ahoi-proto-neu", "1"); } catch (e) {} if (!gezeigt) setTimeout(() => neuBannerZeigen([leute.find(p => p.id === "mia")]), 6000); }
+
 // ---------- Echte App: Profil, Ort, Einladen, Verwaltung ----------
 const BALD = {
   chat: ["💬", "Chat", "Der Chat mit deinen Freunden kommt als Nächstes."],
@@ -1482,7 +1537,7 @@ async function echtAktualisieren() {
     if (!neu.some(p => p.id === "du")) return;
     neu.forEach(p => { p.status = statusAusDb(p.statusRoh); });
     leute.splice(0, leute.length, ...neu);
-    pinsSetzen(); listeAufbauen(); meinBildZeigen(); trefferAufbauen();
+    pinsSetzen(); listeAufbauen(); meinBildZeigen(); trefferAufbauen(); neuDabeiPruefen();
   } catch (e) {}
 }
 // Beim Öffnen: Standort still aktualisieren, wenn er erlaubt ist und sich die Stadt geändert hat
@@ -1515,7 +1570,7 @@ async function freundEinladen() {
 // Verwaltung (nur Admin): Freigeben, Ablehnen, Passwort neu, Entfernen
 let mitgliederDaten = [];
 async function verwaltungLaden() {
-  const { data, error } = await SB.from("profile").select("id,name,freigegeben,ist_admin,eingeladen_von,erstellt_am,gratis").order("erstellt_am");
+  const { data, error } = await SB.from("profile").select("id,name,freigegeben,ist_admin,eingeladen_von,erstellt_am,gratis,art").order("erstellt_am");
   if (error) throw error;
   mitgliederDaten = data;
   const offen = await SB.from("feedback").select("id", { count: "exact", head: true }).eq("erledigt", false);
@@ -1535,7 +1590,7 @@ async function verwaltungAufbauen() {
   const wartende = mitgliederDaten.filter(x => !x.freigegeben), mitglieder = mitgliederDaten.filter(x => x.freigegeben);
   const boxW = document.getElementById("wartende"), boxM = document.getElementById("mitglieder");
   boxW.innerHTML = wartende.length ? wartende.map(x => `<div class="mitglied"><div class="zeile"><b>${ohneHtml(x.name || "?")}</b><small>${t("eingeladen von {name}", { name: ohneHtml(nameVon(x.eingeladen_von)) })} · ${tag(x.erstellt_am)}</small></div><button class="knopf-gross" data-frei="${x.id}">${t("Freigeben")}</button><button class="knopf-leise" data-weg="${x.id}" aria-label="${t("Ablehnen")}">✕</button></div>`).join("") : `<p class="hinweis-band" style="margin:4px 0">${t("Niemand wartet gerade")}</p>`;
-  boxM.innerHTML = mitglieder.map(x => `<div class="mitglied"><div class="zeile"><b>${ohneHtml(x.name || "?")}${x.ist_admin ? " · Admin" : ""}${x.gratis ? " · ♾️" : ""}</b><small>${x.eingeladen_von ? t("eingeladen von {name}", { name: ohneHtml(nameVon(x.eingeladen_von)) }) : t("Gründer")}</small></div>${x.id === ECHT_DATEN.uid ? "" : `<button class="knopf-leise" data-pw="${x.id}">${t("Passwort")}</button><button class="knopf-leise" data-weg="${x.id}" aria-label="${t("Entfernen")}">✕</button>`}</div>`).join("");
+  boxM.innerHTML = mitglieder.map(x => `<div class="mitglied"><div class="zeile"><b>${ohneHtml(x.name || "?")}${x.ist_admin ? " · Admin" : ""}${x.gratis ? " · ♾️" : ""}</b><small>${x.art === "familie" ? "🏡 " + t("Familie von {name}", { name: ohneHtml(nameVon(x.eingeladen_von)) }) : x.eingeladen_von ? t("eingeladen von {name}", { name: ohneHtml(nameVon(x.eingeladen_von)) }) : t("Gründer")}</small></div>${x.id === ECHT_DATEN.uid ? "" : `<button class="knopf-leise" data-pw="${x.id}">${t("Passwort")}</button><button class="knopf-leise" data-weg="${x.id}" aria-label="${t("Entfernen")}">✕</button>`}</div>`).join("");
   document.querySelectorAll("[data-frei]").forEach(b => b.onclick = async () => {
     b.disabled = true;
     const { error } = await SB.from("profile").update({ freigegeben: true }).eq("id", b.dataset.frei);
@@ -1560,8 +1615,23 @@ async function verwaltungAufbauen() {
     }, true]]);
   });
 }
+function familieEchtStarten() {
+  // Familien-Konto: schlanke Ansicht mit den Nomaden, die eingeladen haben
+  FAMILIE_SIEHT = leute.filter(x => x.id !== "du").map(x => x.id);
+  Object.assign(BETRACHTER, { name: t("Ich"), lat: null, lon: null, tz: Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC" });
+  document.getElementById("fam-kopf").textContent = t("Ahoi, {name} 👋", { name: ECHT_DATEN.profil.name || "" });
+  const ende = document.getElementById("familie-ende"); ende.textContent = t("Abmelden"); ende.onclick = () => fragen(t("Abmelden?"), [[t("Abmelden"), abmelden, true]]);
+  document.getElementById("familie-sprache").onclick = () => document.getElementById("sprache-zeile").click();
+  document.getElementById("feedback-lasche").hidden = true;
+  familieSetzen(true); reisenLaden();
+  document.addEventListener("visibilitychange", async () => { if (document.visibilityState === "visible") { try { const neu = await leuteLaden(); leute.splice(0, leute.length, ...neu); FAMILIE_SIEHT = leute.filter(x => x.id !== "du").map(x => x.id); familieAufbauen(); pinsSetzen(); reisenLaden(); } catch (e) {} } });
+}
 function echtEinrichten() {
   const p = ECHT_DATEN.profil;
+  if (p.art === "familie") return familieEchtStarten();
+  familieListeAufbauen(); setTimeout(neuDabeiPruefen, 2500);
+  // Vorschau „So sieht sie es“: die Familie sieht nur dich
+  document.getElementById("familie-start").onclick = () => { FAMILIE_SIEHT = ["du"]; document.getElementById("fam-kopf").textContent = t("So sieht deine Familie dich"); document.getElementById("familie-ende").textContent = t("Zurück"); familieSetzen(true); };
   // Bereiche, die noch nicht live sind
   for (const [seite, [symbol, titel, text]] of Object.entries(BALD))
     document.getElementById("seite-" + seite).innerHTML = `<div class="seite-kopf"><h1>${t(titel)}</h1></div><div class="bald"><div style="font-size:44px">${symbol}</div><b>${t("Kommt bald")}</b>${t(text)}<p><a href="prototyp/">${t("Im Prototyp schon ansehen")}</a></p></div>`;

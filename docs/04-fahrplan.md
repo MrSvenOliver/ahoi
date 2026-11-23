@@ -28,11 +28,13 @@ Entschieden am 23.11.2026 (A + C + E, danach geändert): Anmeldung mit E-Mail un
 - [x] Sven registriert, fünf persönliche Einladungen verschickt (23.11.2026)
 - [x] Echte Reisen mit Treffern, echtes Feedback mit Screenshot, Wachhalten, wöchentliche Sicherung (Geheimnis von Sven fehlt noch)
 
+- [x] Familien-Zugang und „Neu dabei“-Hinweis (23.11.2026)
+
 ## Als Nächstes in der echten App
-- Familie einladen (Auswahl ist schon da, Anmeldung und schlanke Familien-Ansicht fehlen noch)
 - Paar, Freundeskreise und Meine Länder in der Datenbank (bisher nur im Prototyp bzw. auf dem Gerät)
 - Chat, Ideen, Rückblicke mit echten Daten
-- „Neu dabei“-Hinweis und Mitteilungen (Push)
+- Mitteilungen (Push)
+- Freundschaften statt „alle sehen alle“, sobald die App wächst (Vorschlag: über Einladungslinks + QR-Code)
 
 ## Später
 - Netzwerk („Kenne ich“)

@@ -105,7 +105,8 @@ function farbeVon(id) {
   return farben[h % farben.length];
 }
 async function profilLaden() {
-  const { data, error } = await SB.from("profile").select("*").eq("id", ECHT_DATEN.uid).maybeSingle();
+  // Eigenes Profil über die geschützte Ansicht (die Tabelle selbst gibt keine Orte heraus)
+  const { data, error } = await SB.from("wer_ist_wo").select("*").eq("id", ECHT_DATEN.uid).maybeSingle();
   if (error) throw error;
   ECHT_DATEN.profil = data;
   return data;
@@ -132,6 +133,13 @@ async function weiter() {
   const p = await profilLaden();
   if (!p) return zeige("kein-zugang");
   if (!p.freigegeben) return zeige("warten");
+  if (p.art === "familie") {
+    // Familie: kein Ort, kein erster Start; sieht nur die Nomaden, die sie eingeladen haben
+    await leuteLaden();
+    if (!ECHT_DATEN.leute.some(x => x.id === "du")) ECHT_DATEN.leute.unshift({ id: "du", uid: p.id, name: t("Du"), echterName: p.name, ort: null, land: null, lat: null, lon: null, tz: Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC", farbe: farbeVon(p.id), statusRoh: null, bild: null });
+    zugang().classList.remove("offen");
+    return appLaden();
+  }
   if (p.lat == null && !p.geist) return ersterStart();
   await leuteLaden();
   if (!ECHT_DATEN.leute.some(x => x.id === "du")) {
@@ -177,10 +185,14 @@ async function registrierungZeigen(code) {
   titel.textContent = t("Willkommen bei Ahoi");
   knopf.disabled = true;
   try {
-    const { data, error } = await SB.rpc("einladung_pruefen", { c: code });
+    const { data: info, error } = await SB.rpc("einladung_info", { c: code });
     if (error) throw error;
+    const data = info && info.name;
     if (!data) { try { localStorage.removeItem("ahoi-einladung"); } catch (e) {} fehlerZeigen("registrieren", t("Der Einladungslink ist ungültig oder abgelaufen. Bitte um einen neuen.")); return; }
-    document.getElementById("reg-unter").textContent = t("{name} lädt dich ein. Leg dein Konto an, danach gibt Sven dich frei.", { name: data });
+    document.getElementById("reg-unter").textContent = info.art === "familie"
+      ? t("{name} möchte dir zeigen, wo {name} gerade ist und wohin die Reise geht. Du brauchst nur Name, E-Mail und ein Passwort.", { name: data })
+      : info.frei ? t("{name} lädt dich ein. Leg dein Konto an, dann bist du sofort dabei.", { name: data })
+      : t("{name} lädt dich ein. Leg dein Konto an, danach gibt Sven dich frei.", { name: data });
     knopf.disabled = false;
   } catch (e) { fehlerZeigen("registrieren", fehlerText(e)); }
 }

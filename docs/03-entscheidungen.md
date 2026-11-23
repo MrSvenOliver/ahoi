@@ -3,6 +3,10 @@
 Jede Entscheidung mit Datum. Neue Einträge kommen oben dazu.
 
 ## 23.11.2026
+- Familien-Zugang (D) in der echten App: Einladen → Familie schickt einen Link; die Person gibt nur Name, E-Mail und Passwort an, braucht keine Freigabe und sieht nur die Nomaden, die sie eingeladen haben (Ort, nächste Reise, weitere Reisen); im Profil unter „Familie“ lässt sich die Sicht pro Person pausieren
+- Schutz der Orte: Orte gibt es nur noch über die geschützte Ansicht „wer_ist_wo“ (Geistermodus gilt dort auch gegenüber der Familie); die Tabelle selbst gibt keine Orte mehr heraus
+- „Neu dabei“ (E): kurzer Hinweis oben auf der Karte, wenn seit dem letzten Öffnen jemand dazugekommen ist; antippen zeigt die Person
+- Registrierung über Svens persönliche Links sagt jetzt „dann bist du sofort dabei“ statt „danach gibt Sven dich frei“
 - Nächstes Paket A + C + E: Datensicherung und Wachhalten, echtes Feedback, echte Reisen mit Treffern
 - Reisen in der echten App: feste Reisen (Ort aus der Suche, Ankunft, Abreise) und Vielleicht-Pläne (Ort, Monat); vergangene Reisen verschwinden; eigene Reisen antippen zum Löschen
 - Treffer: gleiche Zeit am selben Ort (unter 50 km) bei zwei Reisen; jemand reist dorthin, wo du gerade bist; du reist dorthin, wo jemand gerade ist
