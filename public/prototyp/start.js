@@ -65,13 +65,18 @@ async function standortErmitteln() {
   const mitte = await stadtMitte(ort, land, c.latitude, c.longitude);
   return { ort, land, ...mitte };
 }
-async function orteSuchen(text) {
-  const j = await (await fetch(`${PHOTON}/api/?q=${encodeURIComponent(text)}&limit=7&osm_tag=place&lang=${photonSprache()}`)).json();
+// Große Städte mit Sonderstatus (Tokio = Präfektur, Kuala Lumpur = Bundesterritorium) führt OpenStreetMap nicht als „city“,
+// Photon kennzeichnet sie aber mit type „city“. Mit mitLaendern (nur bei Reisen) sind auch ganze Länder wählbar, Ort noch offen.
+const ORT_ARTEN = ["city", "town", "village", "municipality", "hamlet", "suburb", "island"];
+async function orteSuchen(text, mitLaendern) {
+  const j = await (await fetch(`${PHOTON}/api/?q=${encodeURIComponent(text)}&limit=12&osm_tag=place&lang=${photonSprache()}`)).json();
   const gesehen = new Set();
-  return (j.features || []).filter(f => ["city", "town", "village", "municipality", "hamlet", "suburb", "island"].includes(f.properties.osm_value) && f.properties.countrycode).map(f => {
-    const pr = f.properties;
-    return { ort: pr.name, land: pr.countrycode ? pr.countrycode.toUpperCase() : null, lat: +f.geometry.coordinates[1].toFixed(4), lon: +f.geometry.coordinates[0].toFixed(4), zusatz: [pr.state, pr.country].filter(Boolean).join(", ") };
-  }).filter(o => { const k = o.ort + o.land; if (gesehen.has(k)) return false; gesehen.add(k); return true; });
+  return (j.features || []).filter(f => f.properties.countrycode && (ORT_ARTEN.includes(f.properties.osm_value) || f.properties.type === "city" || (mitLaendern && f.properties.osm_value === "country"))).map(f => {
+    const pr = f.properties, land = pr.countrycode.toUpperCase();
+    if (pr.osm_value === "country") return { ort: pr.name, land, lat: null, lon: null, ganzesLand: true, zusatz: t("Ganzes Land · Ort noch offen") };
+    return { ort: pr.name, land, lat: +f.geometry.coordinates[1].toFixed(4), lon: +f.geometry.coordinates[0].toFixed(4), zusatz: [pr.state !== pr.name ? pr.state : null, pr.country].filter(Boolean).join(", ") };
+  }).filter(o => { const k = o.ort + o.land; if (gesehen.has(k)) return false; gesehen.add(k); return true; })
+    .sort((a, b) => (b.ganzesLand ? 1 : 0) - (a.ganzesLand ? 1 : 0)).slice(0, 7);
 }
 async function standortSpeichern(o) {
   const zeitzone = Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
@@ -259,7 +264,7 @@ function ortGewaehlt(o) {
   document.getElementById("es-treffer").innerHTML = ""; document.getElementById("es-suche").value = "";
 }
 // Ortssuche mit Vorschlägen; wird auch im Profil benutzt
-function ortSucheVerbinden(feld, liste, gewaehlt) {
+function ortSucheVerbinden(feld, liste, gewaehlt, mitLaendern) {
   let uhr = null, nr = 0;
   feld.addEventListener("input", () => {
     clearTimeout(uhr);
@@ -268,7 +273,7 @@ function ortSucheVerbinden(feld, liste, gewaehlt) {
     uhr = setTimeout(async () => {
       const meine = ++nr;
       try {
-        const orte = await orteSuchen(text);
+        const orte = await orteSuchen(text, mitLaendern);
         if (meine !== nr) return;
         liste.innerHTML = orte.length ? orte.map((o, i) => `<button type="button" data-i="${i}">${o.land.replace(/./g, c => String.fromCodePoint(127397 + c.charCodeAt()))} <b>${maske(o.ort)}</b><small>${maske(o.zusatz)}</small></button>`).join("") : `<p>${t("Nichts gefunden")}</p>`;
         liste.querySelectorAll("button").forEach(b => b.onclick = async () => { b.disabled = true; try { await gewaehlt(orte[b.dataset.i]); } catch (err) { b.disabled = false; hinweisZugang(fehlerText(err)); } });

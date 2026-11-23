@@ -8,6 +8,7 @@ const leute = ECHT ? ECHT_DATEN.leute : [
   { id: "mia",   name: "Mia",   ort: "Mexiko-Stadt",land: "MX", lat: 19.4326, lon: -99.1332, tz: "America/Mexico_City", farbe: "#a8467a" },
   { id: "jonas", name: "Jonas", ort: "Chiang Mai",  land: "TH", lat: 18.7883, lon: 98.9853,  tz: "Asia/Bangkok",        farbe: "#b98a2e" },
   { id: "ben",   name: "Ben",   ort: "Chiang Mai",  land: "TH", lat: 18.7953, lon: 98.9620,  tz: "Asia/Bangkok",        farbe: "#5a6fa0" },
+  { id: "kim",   name: "Kim",   ort: "Málaga",      land: "ES", lat: 36.7213, lon: -4.4214,  tz: "Europe/Madrid",       farbe: "#8a6fb0" },
 ];
 // Beispieldaten: Status und Anzahl Länder der Freunde
 if (!ECHT) {
@@ -18,6 +19,7 @@ Object.assign(leute.find(p => p.id === "nico"), { laender: 18 });
 Object.assign(leute.find(p => p.id === "mia"), { status: "angekommen", laender: 14 });
 Object.assign(leute.find(p => p.id === "jonas"), { status: "arbeit", laender: 27 });
 Object.assign(leute.find(p => p.id === "ben"), { laender: 12 });
+Object.assign(leute.find(p => p.id === "kim"), { status: "treffen", laender: 16 });
 }
 // Status zum Antippen; „Unterwegs“ gibt es bewusst nicht, das ist bei Nomaden immer so
 const STATUS_VORLAGEN = { treffen: "☕ Lust auf Treffen", angekommen: "🌱 Neu angekommen", unterkunft: "🔍 Suche Unterkunft", mitreisende: "👥 Suche Mitreisende", arbeit: "💻 Arbeitsphase", sport: "🏄 Sport", abenteuer: "🧗 Abenteuer", basis: "🏡 An meiner Basis", ruhe: "🔕 Nicht stören" };
@@ -61,7 +63,7 @@ function entfernungKm(lat1, lon1, lat2, lon2) {
   const dSigma = B * sinSigma * (cos2SigmaM + B / 4 * (cosSigma * (-1 + 2 * cos2SigmaM ** 2) - B / 6 * cos2SigmaM * (-3 + 4 * sinSigma ** 2) * (-3 + 4 * cos2SigmaM ** 2)));
   return b * A * (sigma - dSigma) / 1000;
 }
-const km = d => d < 1 ? t("hier") : d.toLocaleString(LOC, { maximumFractionDigits: d < 10 ? 1 : 0 }) + " km";
+const km = d => d < 1 ? t("Am selben Ort") : d.toLocaleString(LOC, { maximumFractionDigits: d < 10 ? 1 : 0 }) + " km";
 
 // Großkreis-Linie (kürzester Weg auf der Kugel) als Punktfolge
 function grosskreis(lon1, lat1, lon2, lat2, n = 128) {
@@ -274,9 +276,11 @@ function ebenenHinzufuegen() {
     paint: { "line-color": c.grenze, "line-width": ["interpolate", ["linear"], ["zoom"], 0, 0.5, 5, 1.1], "line-opacity": ["interpolate", ["linear"], ["zoom"], 0, 0.85, 5.5, 0.85, 6.5, 0] } }, vorBeschriftung);
 
   if (stil === "mission") ringeZeichnen();
+  gruppenPruefen();
   pinsSetzen();
   dekoSetzen();
   map.once("idle", () => setTimeout(() => document.getElementById("start").classList.add("weg"), 300));
+  if (!nachbarnGefragt) { nachbarnGefragt = true; setTimeout(nachbarnFragen, 2600); }
 }
 
 // ---------- Deko pro Stil ----------
@@ -387,6 +391,46 @@ let marker = [];
 const NAH_KM = 50;
 // Ein Herz gibt es nur, wenn genau zwei Personen zusammen sind UND beide ihr Paar gegenseitig bestätigt haben
 const istPaar = g => g.length === 2 && g[0].paar && g[0].paar === g[1].paar;
+// Reisegruppen: Am selben Ort sein heißt noch nicht zusammen unterwegs. Wer zusammen reist, bestätigt das gegenseitig.
+// Paare in einer Gruppe werden mit ❤️ verbunden. Zieht jemand weiter (über NAH_KM weg), fällt er aus der Gruppe; bleibt nur einer, endet sie.
+let reisegruppen = ECHT ? [] : [{ id: "g-chiangmai", leute: ["jonas", "ben"] }];
+if (!ECHT) try { const g = JSON.parse(localStorage.getItem("ahoi-reisegruppen") || "null"); if (Array.isArray(g)) reisegruppen = g; } catch (e) {}
+const gruppenSpeichern = () => { if (!ECHT) try { localStorage.setItem("ahoi-reisegruppen", JSON.stringify(reisegruppen)); } catch (e) {} };
+const gruppeVon = id => reisegruppen.find(g => g.leute.includes(id));
+function gruppenPruefen() {
+  let geaendert = false;
+  reisegruppen.forEach(g => {
+    const da = g.leute.map(id => leute.find(p => p.id === id)).filter(p => p && p.lat != null);
+    const bleiben = da.filter(p => da.some(q => q !== p && entfernungKm(p.lat, p.lon, q.lat, q.lon) < NAH_KM)).map(p => p.id);
+    if (bleiben.length !== g.leute.length) { g.leute = bleiben; geaendert = true; }
+  });
+  const vorher = reisegruppen.length;
+  reisegruppen = reisegruppen.filter(g => g.leute.length > 1);
+  if (geaendert || vorher !== reisegruppen.length) gruppenSpeichern();
+}
+const rufname = p => p.id === "du" ? t("Du") : p.name;
+// „Alex ❤️ Sam · Lea · Mia“
+function gruppenText(ps) {
+  const fertig = new Set(), teile = [];
+  for (const p of ps) {
+    if (fertig.has(p.id)) continue; fertig.add(p.id);
+    const partner = p.paar && ps.find(q => q.id !== p.id && q.paar === p.paar && !fertig.has(q.id));
+    if (partner) { fertig.add(partner.id); teile.push(`${ohneHtml(rufname(p))} ❤️ ${ohneHtml(rufname(partner))}`); } else teile.push(ohneHtml(rufname(p)));
+  }
+  return teile.join(" · ");
+}
+// Wer am selben Ort ist, zerfällt in Reisegruppen, Paare und Einzelne
+function ortTeilen(g) {
+  const ids = new Set(g.map(p => p.id)), gruppen = [], frei = [];
+  for (const rg of reisegruppen) { const drin = g.filter(p => rg.leute.includes(p.id)); if (drin.length > 1) { gruppen.push(drin); drin.forEach(p => ids.delete(p.id)); } }
+  const rest = g.filter(p => ids.has(p.id));
+  for (const p of rest) {
+    if (frei.includes(p) || gruppen.some(x => x.includes(p))) continue;
+    const partner = p.paar && rest.find(q => q !== p && q.paar === p.paar);
+    if (partner) gruppen.push([p, partner]); else frei.push(p);
+  }
+  return { gruppen, frei: frei.filter(p => !gruppen.some(x => x.includes(p))) };
+}
 // Familien-Zugang: sieht nur die Personen, die ihn freigeschaltet haben; den eigenen Standort nur, wenn selbst gewählt
 // Beispiel: Mama wurde von dir und von Alex eingeladen. Ihr eigener Standort erscheint nur, wenn sie ihn selbst einschaltet.
 let FAMILIE_SIEHT = ["du", "alex"];
@@ -431,9 +475,11 @@ function pinsSetzen() {
     if (ersteDarstellung) innen.style.animationDelay = (0.15 + i * 0.09) + "s"; else innen.style.animation = "none";
     if (leuteHier[0].id === selbstId()) innen.innerHTML = '<div class="puls"></div>';
     leuteHier.slice(0, 3).forEach((p, j) => { const plus = leuteHier.length > 3 && j === 2; innen.innerHTML += `<div class="pin-kopf" style="left:${3 + j * 18}px;${plus ? `background:${p.farbe}` : kopfStil(p)};z-index:${3 - j}">${plus ? "+" + (leuteHier.length - 2) : kopfText(p)}</div>`; });
-    // ❤️ = bestätigtes Paar am selben Ort · 🤝 = Freunde am selben Ort · Zahl = Pins liegen nur auf dem Bildschirm übereinander
-    if (h.gruppen.length === 1 && istPaar(h.gruppen[0])) innen.innerHTML += `<div class="herz" style="left:${breite - 20}px">❤️</div>`;
-    else if (h.gruppen.length === 1 && leuteHier.length > 1) innen.innerHTML += `<div class="herz" style="left:${breite - 20}px">🤝</div>`;
+    // ❤️ = Paar am selben Ort · 👥 = bestätigte Reisegruppe · Zahl = mehrere Personen, nicht zusammen unterwegs
+    const teil = h.gruppen.length === 1 ? ortTeilen(h.gruppen[0]) : null;
+    const eineGruppe = teil && !teil.frei.length && teil.gruppen.length === 1;
+    if (eineGruppe && istPaar(h.gruppen[0])) innen.innerHTML += `<div class="herz" style="left:${breite - 20}px">❤️</div>`;
+    else if (eineGruppe) innen.innerHTML += `<div class="herz" style="left:${breite - 20}px">👥</div>`;
     else if (leuteHier.length > 1) innen.innerHTML += `<div class="pin-zahl" style="left:${breite - 16}px">${leuteHier.length}</div>`;
     innen.innerHTML += `<div class="pin-spitze" style="left:${breite / 2 - 5}px"></div>`;
     innen.innerHTML += `<div class="pin-rufname">${ohneHtml(leuteHier[0].name)}${leuteHier.length > 1 ? " +" + (leuteHier.length - 1) : ""}</div>`;
@@ -487,13 +533,13 @@ function listeAufbauen() {
   const ul = document.getElementById("liste"); ul.innerHTML = "";
   for (const p of andere) {
     let paarText = "";
-    const dabei = leute.filter(q => q.id !== p.id && q.id !== "du" && entfernungKm(p.lat, p.lon, q.lat, q.lon) < NAH_KM);
-    if (dabei.length) paarText = ` · ${t("mit")} ${dabei.map(q => q.name).join(", ")}`;
+    const rg = gruppeVon(p.id), dabei = rg ? rg.leute.filter(id => id !== p.id).map(person).filter(Boolean) : [];
+    if (dabei.length) paarText = ` · ${t("mit")} ${dabei.map(q => q.id === "du" ? t("dir") : ohneHtml(q.name)).join(", ")}`;
     const li = document.createElement("li");
     li.innerHTML = `<div class="ava" style="${kopfStil(p)}">${kopfText(p)}</div>
       <div class="zeile"><b>${ohneHtml(p.name)}</b><span>${flagge(p.land)} ${ohneHtml(p.ort)} · ${uhrzeit(p.tz)}${t(" Uhr")}${paarText}</span>${statusText(p) ? `<small class="status-klein">${ohneHtml(statusText(p))}</small>` : ""}</div>
-      <div class="weite"><b data-km="${p.d}">${km(p.d)}</b><span>${t("von dir")}</span></div>`;
-    li.onclick = () => { zuPerson(p); infoZeigen([p]); };
+      ${p.d < 1 ? `<div class="weite"><b class="gleicher-ort">${t("Am selben Ort")}</b></div>` : `<div class="weite"><b data-km="${p.d}">${km(p.d)}</b><span>${t("von dir")}</span></div>`}`;
+    li.onclick = () => { if (!ECHT && !familieModus) return steckbriefOeffnen(person(p.id)); zuPerson(p); infoZeigen([p]); };
     ul.appendChild(li);
   }
   if (!andere.length) ul.innerHTML = `<li class="leer-hinweis">${t("Noch keine Freunde hier. Lade jemanden ein!")}</li>`;
@@ -503,10 +549,17 @@ function infoZeigen(gruppe) {
   const du = familieModus ? BETRACHTER : ich(), p = gruppe[0], info = document.getElementById("info");
   const name = gruppe.map(x => x.name).join(" & ");
   let text = (gruppe.length === 1 && statusText(p) && !familieModus ? `<span class="status-zeile">${ohneHtml(statusText(p))}</span><br>` : "") + `${flagge(p.land)} <b>${ohneHtml(p.ort)}</b> · ${t("Ortszeit")} <b>${uhrzeit(p.tz)}${t(" Uhr")}</b>`;
-  if (p.id !== du.id && (!familieModus || familieMitStandort)) text += `<br>${t("Entfernung zu dir:")} <b data-km="${entfernungKm(du.lat, du.lon, p.lat, p.lon)}">${km(entfernungKm(du.lat, du.lon, p.lat, p.lon))}</b>`;
-  if (istPaar(gruppe)) text += `<br>${t("❤️ Paar · gerade zusammen unterwegs")}`;
-  else if (gruppe.length > 1) text += `<br>${t("🤝 Zusammen unterwegs")}`;
-  if (gruppe.length === 1 && !familieModus) { const n = p.id === "du" ? besucht.length : p.laender; if (n) text += `<br>🌍 ${anzahl(n, "laender")}`; }
+  const abstand = p.id !== du.id && du.lat != null ? entfernungKm(du.lat, du.lon, p.lat, p.lon) : null;
+  if (abstand != null && (!familieModus || familieMitStandort) && !gruppe.some(x => x.id === du.id)) text += abstand < 1 ? `<br>📍 <b>${t("Am selben Ort")}</b>` : `<br>${t("Entfernung zu dir:")} <b data-km="${abstand}">${km(abstand)}</b>`;
+  if (gruppe.length > 1) {
+    const teil = ortTeilen(gruppe);
+    if (istPaar(gruppe)) text += `<br>${t("❤️ Paar · gerade zusammen unterwegs")}`;
+    else {
+      teil.gruppen.forEach(g => text += `<br>${g.length === 2 && istPaar(g) ? "❤️" : "👥"} ${t("Zusammen unterwegs:")} <b>${gruppenText(g)}</b>`);
+      if (teil.frei.length) text += `<br>📍 ${t("Am selben Ort:")} ${teil.frei.map(x => ohneHtml(rufname(x))).join(", ")}`;
+    }
+  } else if (!familieModus) { const rg = gruppeVon(p.id); if (rg) text += `<br>👥 ${t("Reist mit")} <b>${gruppenText(rg.leute.filter(id => id !== p.id).map(person).filter(Boolean))}</b>`; }
+  if (gruppe.length === 1 && !familieModus) { const n = p.id === "du" ? laenderZahl() : p.laender; if (n) text += `<br>🌍 ${anzahl(n, "laender")}`; }
   info.querySelector("h3").textContent = name;
   info.querySelector("p").innerHTML = text;
   const chatKnopf = document.getElementById("info-chat");
@@ -517,6 +570,10 @@ function infoZeigen(gruppe) {
   tippKnopf.textContent = tippZahl ? t("💡 {n} Tipps zu {ort}", { n: tippZahl, ort: p.ort }) : "";
   tippKnopf.onclick = () => { tippsOrt = p.ort; ideenReiter = "tipps"; seiteZeigen("ideen"); ideenAufbauen(); };
   paarKnopfSetzen(gruppe);
+  gruppeKnopfSetzen(gruppe);
+  const sbBox = document.getElementById("info-steckbriefe");
+  sbBox.innerHTML = ECHT || familieModus ? "" : gruppe.slice(0, 4).map((x, i) => `<button class="knopf-leise" data-sb="${i}">🪪 ${gruppe.length > 1 ? ohneHtml(rufname(x)) : t("Steckbrief")}</button>`).join("");
+  sbBox.querySelectorAll("button").forEach(b => b.onclick = () => steckbriefOeffnen(gruppe[+b.dataset.sb]));
   info.classList.remove("offen"); void info.offsetWidth;
   info.classList.add("offen");
   hochzaehlen(info);
@@ -693,9 +750,9 @@ function reiseArtZeigen() {
 }
 document.getElementById("reise-vielleicht").addEventListener("click", () => setTimeout(reiseArtZeigen));
 ortSucheVerbinden(document.getElementById("reise-ort"), document.getElementById("reise-orte"), async o => {
-  reiseOrt = o; document.getElementById("reise-gewaehlt").textContent = `${flagge(o.land)} ${o.ort}`;
+  reiseOrt = o; document.getElementById("reise-gewaehlt").textContent = `${flagge(o.land)} ${o.ort}${o.ganzesLand ? " · " + t("Ort noch offen") : ""}`;
   document.getElementById("reise-orte").innerHTML = ""; document.getElementById("reise-ort").value = "";
-});
+}, true);
 document.getElementById("reise-neu").addEventListener("click", reiseFormularLeeren);
 document.getElementById("reise-speichern").onclick = async e => {
   if (!ECHT) { hinweis(t("Im Prototyp wird nichts gespeichert")); return seiteZeigen("reisen"); }
@@ -1102,7 +1159,7 @@ function familieAufbauen() {
     const weitere = reisen.filter(x => x !== r && x.wer.includes(p.id) && (x.vielleicht || x.bis >= heute));
     return `<div class="fam-karte" data-id="${p.id}"><div class="ava" style="${kopfStil(p)}">${kopfText(p)}</div><div style="flex:1">
       <b class="fam-name">${ohneHtml(p.name)}</b><div class="wo">${flagge(p.land)}&nbsp; ${t(p.id === "du" ? "bist in" : "ist in")} <b style="display:inline;font-size:16px">${ohneHtml(p.ort)}</b></div>
-      <div class="klein">${t("Dort ist es {z} Uhr", { z: uhrzeit(p.tz) })}${familieMitStandort ? " · " + t("{km} von dir", { km: km(entfernungKm(du.lat, du.lon, p.lat, p.lon)) }) : ""}</div>
+      <div class="klein">${t("Dort ist es {z} Uhr", { z: uhrzeit(p.tz) })}${familieMitStandort ? " · " + (entfernungKm(du.lat, du.lon, p.lat, p.lon) < 1 ? t("Am selben Ort") : t("{km} von dir", { km: km(entfernungKm(du.lat, du.lon, p.lat, p.lon)) })) : ""}</div>
       ${r ? `<div class="naechste"><span class="nr-titel">${t("✈︎ Nächste Reise")}</span><span class="nr-ort">${flagge(r.land)}&nbsp; ${ohneHtml(r.ziel)}</span><span class="nr-daten">${kurz(r.von)} – ${kurz(r.bis)} · ${naechte} ${t(naechte === 1 ? "Nacht" : "Nächte")}</span></div>` : ""}
       ${weitere.length ? `<div class="weitere">${weitere.map(x => `${flagge(x.land)} ${ohneHtml(x.ziel)} · ${x.von ? kurz(x.von) + "–" + kurz(x.bis) : t("vielleicht im {m}", { m: datum(x.monat + "-01").toLocaleDateString(LOC, { month: "long" }) })}`).join("<br>")}</div>` : ""}
     </div></div>`;
@@ -1252,9 +1309,20 @@ function rueckblickVonSelbst() {
 
 // ---------- Länder-Sammlung ----------
 const LAENDER_SCHLUESSEL = ECHT ? "ahoi-echt-laender" : "ahoi-laender";
+// Länder zählen wie bei den Vereinten Nationen: 193 Mitglieder plus Vatikan und Palästina.
+// Überseegebiete (St. Martin, Sint Maarten, Puerto Rico, Grönland …) zählen für ihr Mutterland.
+// Die Antarktis zählt nicht als Land, aber für die 7 Kontinente.
+const STAATEN = new Set("AF AL DZ AD AO AG AR AM AU AT AZ BS BH BD BB BY BE BZ BJ BT BO BA BW BR BN BG BF BI CV KH CM CA CF TD CL CN CO KM CG CD CR CI HR CU CY CZ KP DK DJ DM DO EC EG SV GQ ER EE SZ ET FJ FI FR GA GM GE DE GH GR GD GT GN GW GY HT HN HU IS IN ID IR IQ IE IL IT JM JP JO KZ KE KI KW KG LA LV LB LS LR LY LI LT LU MG MW MY MV ML MT MH MR MU MX FM MD MC MN ME MA MZ MM NA NR NP NL NZ NI NE NG MK NO OM PK PW PA PG PY PE PH PL PT QA KR RO RU RW KN LC VC WS SM ST SA SN RS SC SL SG SK SI SB SO ZA SS ES LK SD SR SE CH SY TJ TZ TH TL TG TO TT TN TR TM TV UG UA AE GB US UY UZ VU VE VN YE ZM ZW VA PS".split(" "));
+const GEBIET_ZU = { AI: "GB", AS: "US", AW: "NL", AX: "FI", BL: "FR", BM: "GB", BQ: "NL", BV: "NO", CC: "AU", CK: "NZ", CW: "NL", CX: "AU", FK: "GB", FO: "DK", GF: "FR", GG: "GB", GI: "GB", GL: "DK", GP: "FR", GS: "GB", GU: "US", HK: "CN", HM: "AU", IM: "GB", IO: "GB", JE: "GB", KY: "GB", MF: "FR", MO: "CN", MP: "US", MQ: "FR", MS: "GB", NC: "FR", NF: "AU", NU: "NZ", PF: "FR", PM: "FR", PN: "GB", PR: "US", RE: "FR", SH: "GB", SJ: "NO", SX: "NL", TC: "GB", TF: "FR", TK: "NZ", UM: "US", VG: "GB", VI: "US", WF: "FR", YT: "FR" };
+const staatVon = cc => !cc ? null : STAATEN.has(cc) || cc === "AQ" ? cc : GEBIET_ZU[cc] || null;
+const laenderZahl = () => besucht.filter(cc => STAATEN.has(cc)).length;
+function besuchtSpeichern() { try { localStorage.setItem(LAENDER_SCHLUESSEL, JSON.stringify(besucht)); } catch (e) {} }
+function landDazu(cc) { const s = staatVon(cc); if (!s || besucht.includes(s)) return false; besucht.push(s); besuchtSpeichern(); return true; }
 let besucht = ECHT ? [] : ["DE", "ES", "PT", "SK", "IT", "FR", "TH", "VN", "ID", "MX", "GR", "HR"];
 try { const g = JSON.parse(localStorage.getItem(LAENDER_SCHLUESSEL) || "null"); if (Array.isArray(g)) besucht = g; } catch (e) {}
-if (ECHT && ich().land && !besucht.includes(ich().land)) { besucht.push(ich().land); try { localStorage.setItem(LAENDER_SCHLUESSEL, JSON.stringify(besucht)); } catch (e) {} }
+// Ältere Einträge (eigene Gebiete) auf die Staaten umstellen
+{ const sauber = [...new Set(besucht.map(staatVon).filter(Boolean))]; if (sauber.length !== besucht.length || sauber.some((c, i) => c !== besucht[i])) { besucht = sauber; besuchtSpeichern(); } }
+if (ECHT && ich().land) landDazu(ich().land);
 const landName = cc => { try { return new Intl.DisplayNames([SPRACHE], { type: "region" }).of(cc); } catch (e) { return cc; } };
 // Meine Länder: im Profil nur eine Zeile, eigene Seite mit Freirubbel-Karte
 const KONTINENTE = { EU: "Europa", AS: "Asien", AF: "Afrika", NA: "Nordamerika", SA: "Südamerika", OC: "Ozeanien", AN: "Antarktis" };
@@ -1266,7 +1334,7 @@ const KONT_FARBEN = {
 };
 let welt = null;
 function stempelAufbauen() {
-  document.getElementById("laender-wert").textContent = besucht.length;
+  document.getElementById("laender-wert").textContent = laenderZahl();
   if (document.getElementById("seite-meine-laender").classList.contains("offen")) meineLaenderAufbauen();
 }
 document.getElementById("laender-zeile").onclick = () => { seiteZeigen("meine-laender"); meineLaenderAufbauen(); };
@@ -1275,7 +1343,7 @@ async function meineLaenderAufbauen() {
   if (!welt) { try { welt = await (await fetch("weltkarte.json")).json(); } catch (e) { welt = []; } }
   const f = KONT_FARBEN[stil], kontVon = Object.fromEntries(welt.map(l => [l.i, l.k]));
   const kont = [...new Set(besucht.map(cc => kontVon[cc]).filter(k => k && k !== "AN"))];
-  document.getElementById("ml-zahl").textContent = anzahl(besucht.length, "laender");
+  document.getElementById("ml-zahl").textContent = anzahl(laenderZahl(), "laender");
   document.getElementById("ml-kont").textContent = t("{n} von 7 Kontinenten", { n: kont.length + (besucht.some(cc => kontVon[cc] === "AN") ? 1 : 0) });
   const pio = PIONIER.filter(cc => besucht.includes(cc));
   document.getElementById("ml-pionier").textContent = pio.length ? t("🚩 {n}× Pionier", { n: pio.length }) : "";
@@ -1283,22 +1351,15 @@ async function meineLaenderAufbauen() {
   document.getElementById("ml-ring").style.strokeDasharray = `${(anteil * umfang).toFixed(1)} ${umfang.toFixed(1)}`;
   document.getElementById("ml-ring-text").textContent = `${Math.round(anteil * 7)}/7`;
   const svg = document.getElementById("rubbelkarte");
-  svg.innerHTML = `<defs><pattern id="kratzer" width="3" height="3" patternUnits="userSpaceOnUse" patternTransform="rotate(35)"><rect width="3" height="3" fill="${f.zu}"/><path d="M0 0v3" stroke="rgba(255,255,255,.35)" stroke-width=".6"/></pattern></defs><rect x="0" y="6" width="360" height="142" fill="${f.meer}"/>` +
-    welt.map(l => { const frei = besucht.includes(l.i); return `<path data-cc="${l.i}" class="${frei ? "frei" : ""}" d="${l.d}" fill="${frei ? (f[l.k] || f.EU) : "url(#kratzer)"}" stroke="${f.rand}"><title>${landName(l.i)}</title></path>`; }).join("");
-  svg.querySelectorAll("path").forEach(pfad => pfad.onclick = () => {
-    const cc = pfad.dataset.cc, i = besucht.indexOf(cc);
-    if (i >= 0) besucht.splice(i, 1); else { besucht.push(cc); hinweis(t("{land} freigerubbelt", { land: landName(cc) })); }
-    try { localStorage.setItem(LAENDER_SCHLUESSEL, JSON.stringify(besucht)); } catch (e) {}
-    stempelAufbauen();
-  });
+  svg.innerHTML = `<rect x="0" y="6" width="360" height="142" fill="${f.meer}"/>` +
+    welt.map(l => { const frei = besucht.includes(l.i); return `<path class="${frei ? "frei" : ""}" d="${l.d}" fill="${frei ? (f[l.k] || f.EU) : f.zu}" stroke="${f.rand}"><title>${landName(l.i)}</title></path>`; }).join("");
   const gruppen = {};
   besucht.forEach(cc => { const k = kontVon[cc] || "EU"; (gruppen[k] = gruppen[k] || []).push(cc); });
   document.getElementById("ml-kontinente").innerHTML = Object.keys(KONTINENTE).filter(k => gruppen[k]).map(k =>
     `<div class="kontinent"><b>${t(KONTINENTE[k])} · ${gruppen[k].length}</b><div class="laender-chips">${gruppen[k].sort((a, b) => landName(a).localeCompare(landName(b), SPRACHE)).map(cc => `<span>${flagge(cc)} ${landName(cc)}${PIONIER.includes(cc) ? " 🚩" : ""}</span>`).join("")}</div></div>`).join("");
 }
 function laenderListe(suche) {
-  if (!laender) return hinweis("Einen Moment, Länder werden geladen …");
-  const alle = [...new Set(laender.features.map(f => f.properties.iso).filter(c => /^[A-Z]{2}$/.test(c)))]
+  const alle = [...STAATEN, "AQ"]
     .map(cc => [cc, landName(cc)]).sort((a, b) => a[1].localeCompare(b[1], SPRACHE))
     .filter(([cc, n]) => !suche || n.toLowerCase().includes(suche.toLowerCase()));
   const box = document.getElementById("land-liste");
@@ -1306,7 +1367,7 @@ function laenderListe(suche) {
   box.querySelectorAll(".land-zeile").forEach(z => z.onclick = () => {
     const cc = z.dataset.cc, i = besucht.indexOf(cc);
     if (i >= 0) besucht.splice(i, 1); else besucht.push(cc);
-    try { localStorage.setItem(LAENDER_SCHLUESSEL, JSON.stringify(besucht)); } catch (e) {}
+    besuchtSpeichern();
     z.classList.toggle("an"); stempelAufbauen(); if (!document.getElementById("seite-laender").classList.contains("offen")) return;
   });
 }
@@ -1372,6 +1433,136 @@ function paarKnopfSetzen(gruppe) {
     }]]);
   };
 }
+// ---------- Steckbrief: eine Person auf einen Blick (zuerst nur im Prototyp) ----------
+// Modern: Farbverlauf, Zahlen zählen hoch · Mission: Personalakte mit Scan · Abenteuer: Reisepass mit Länderstempeln
+const STEMPEL_FARBEN = ["#2f5d8a", "#a8322a", "#2f6b4a", "#6a3f8a", "#8a5a1e"];
+const BEISPIEL_LAENDER = "ES PT FR IT DE GR HR NL GB AT CZ HU TH VN ID MY SG JP KH LA MX US CO PE AR BR MA ZA TR AU NZ IN LK PH CH BE IE SK PL DK SE NO CR CL EG KE TZ GE AL ME".split(" ");
+function laenderVon(p) {
+  if (p.id === "du") return besucht.filter(cc => STAATEN.has(cc) || cc === "AQ");
+  if (ECHT || !p.laender) return null;
+  // Prototyp: feste, aber zufällig wirkende Auswahl passend zur Länderzahl
+  let saat = [...p.id].reduce((a, c) => (a * 31 + c.charCodeAt(0)) >>> 0, 7);
+  const zufall = () => (saat = (saat * 1103515245 + 12345) >>> 0) / 4294967296;
+  const pool = BEISPIEL_LAENDER.filter(c => c !== p.land);
+  for (let i = pool.length - 1; i > 0; i--) { const j = Math.floor(zufall() * (i + 1)); [pool[i], pool[j]] = [pool[j], pool[i]]; }
+  return [p.land, ...pool].slice(0, p.laender);
+}
+function naechsteReise(id) {
+  const heute = new Date().toISOString().slice(0, 10), monat = heute.slice(0, 7);
+  return reisen.filter(r => r.wer.includes(id) && (r.vielleicht ? r.monat >= monat : r.bis >= heute)).sort((a, b) => reiseSchluessel(a).localeCompare(reiseSchluessel(b)))[0];
+}
+async function steckbriefOeffnen(p) {
+  if (!welt) { try { welt = await (await fetch("weltkarte.json")).json(); } catch (e) { welt = []; } }
+  const selbst = p.id === "du", du = ich(), laender = laenderVon(p) || [];
+  const kontVon = Object.fromEntries(welt.map(l => [l.i, l.k]));
+  const kont = new Set(laender.map(cc => kontVon[cc]).filter(Boolean)).size;
+  const zahl = laender.filter(cc => STAATEN.has(cc)).length;
+  const pio = selbst ? PIONIER.filter(cc => besucht.includes(cc)).length : 0;
+  const abstand = !selbst && du.lat != null && p.lat != null ? entfernungKm(du.lat, du.lon, p.lat, p.lon) : null;
+  // Mit wem unterwegs: bestätigte Reisegruppe, sonst der Partner, wenn er am selben Ort ist
+  const rg = gruppeVon(p.id), partner = p.paar && leute.find(q => q.id !== p.id && q.paar === p.paar && q.lat != null && p.lat != null && entfernungKm(p.lat, p.lon, q.lat, q.lon) < NAH_KM);
+  const mit = rg ? rg.leute.filter(id => id !== p.id).map(person).filter(Boolean) : partner ? [partner] : [];
+  const reise = naechsteReise(p.id);
+  const name = selbst ? (p.echterName || t("Du")) : p.name;
+  const akte = "AH-" + String([...p.id].reduce((a, c) => a + c.charCodeAt(0) * 7, 0) % 9000 + 1000);
+  const titel = { modern: "", mission: `${t("Personalakte")} · ${akte} · ${t("Freigegeben")}`, abenteuer: t("Reisepass") }[stil];
+  const f = { modern: { meer: "#e9eef4", land: "#dde2e8", an: "#0a84ff", rand: "#ffffff" }, mission: { meer: "#06101c", land: "#0d1d30", an: "#5fd4ea", rand: "#1d4a5e" }, abenteuer: { meer: "#cfd6c4", land: "#ecdcb6", an: "#c0582f", rand: "#b39a72" } }[stil];
+  let nr = 0;
+  const karte = `<svg viewBox="0 6 360 142" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><rect x="0" y="6" width="360" height="142" fill="${f.meer}"/>` +
+    welt.map(l => laender.includes(l.i) ? `<path class="an" style="--i:${nr++}" d="${l.d}" fill="${f.an}" stroke="${f.rand}" stroke-width=".25"/>` : `<path d="${l.d}" fill="${f.land}" stroke="${f.rand}" stroke-width=".25"/>`).join("") +
+    (p.lat != null ? `<circle class="sb-ring" cx="${(p.lon + 180).toFixed(1)}" cy="${(90 - p.lat).toFixed(1)}" r="2.4" fill="none" stroke="${stil === "mission" ? "#e8a33a" : "#ff375f"}" stroke-width=".8"/><circle cx="${(p.lon + 180).toFixed(1)}" cy="${(90 - p.lat).toFixed(1)}" r="1.8" fill="${stil === "mission" ? "#e8a33a" : "#ff375f"}" stroke="#fff" stroke-width=".5"/>` : "") + `</svg>`;
+  const feld = (label, wert, breit) => `<div class="sb-feld${breit ? " sb-breit" : ""}"><span>${label}</span><b>${wert}</b></div>`;
+  let felder = feld(t("Gerade in"), p.ort ? `${flagge(p.land)} ${ohneHtml(p.ort)}` : "–") + feld(t("Ortszeit"), `${uhrzeit(p.tz)}${t(" Uhr")}`);
+  if (abstand != null) felder += feld(t("Entfernung"), abstand < 1 ? t("Am selben Ort") : km(abstand), true);
+  if (mit.length) felder += feld(t("Reist mit"), (!rg && partner ? "❤️ " : "") + gruppenText(mit), true);
+  if (reise) felder += feld(t("Nächste Reise"), `${reise.land ? flagge(reise.land) : "📍"} ${ohneHtml(reise.ziel)} · ${reise.von ? kurz(reise.von) + " – " + kurz(reise.bis) : t("irgendwann im {m}", { m: datum(reise.monat + "-01").toLocaleDateString(LOC, { month: "long" }) })}`, true);
+  const zahlen = laenderVon(p) ? `<div class="sb-zahlen"><div><b data-zahl="${zahl}">${zahl}</b><span>${t(zahl === 1 ? "Land" : "Länder")}</span></div><div><b>${kont}/7</b><span>${t("Kontinente")}</span></div><div><b>${pio ? pio + "×" : "–"}</b><span>${t("Pionier")}</span></div></div><div class="sb-karte">${karte}</div>` : "";
+  const sortiert = laender.filter(cc => STAATEN.has(cc)).slice(0, 11);
+  const stempel = sortiert.length ? `<div class="sb-stempel">${sortiert.map((cc, i) => `<span class="stempel-ink${i % 3 === 1 ? " eckig" : ""}" style="--i:${i};--r:${((i * 37) % 26) - 13}deg;--sf:${STEMPEL_FARBEN[i % STEMPEL_FARBEN.length]}">${flagge(cc)}<small>${cc}</small></span>`).join("")}${zahl > sortiert.length ? `<span class="stempel-mehr">+${zahl - sortiert.length}</span>` : ""}</div>` : "";
+  const knoepfe = selbst ? "" : `<div class="sb-knoepfe"><button class="knopf-leise" id="sb-karte-zeigen">📍 ${t("Auf der Karte")}</button>${!ECHT ? `<button class="knopf-leise" id="sb-nachricht">💬 ${t("Nachricht")}</button>` : ""}</div>`;
+  const blatt = document.getElementById("sb-blatt");
+  blatt.style.setProperty("--sb-farbe", p.farbe || "#0a84ff");
+  blatt.innerHTML = `<button class="sb-zu" id="sb-zu" aria-label="${t("Schließen")}">✕</button>
+    <div class="sb-kopf"><div class="sb-titelzeile">${titel}</div>
+      <div class="sb-bild" style="${kopfStil(p)}">${kopfText(p)}<span class="sb-scan"></span></div>
+      <h2 class="sb-name">${ohneHtml(name)}</h2><div class="sb-status">${ohneHtml(statusText(p))}</div>
+      <span class="sb-freigabe">${t("Aktiv")}</span></div>
+    <div class="sb-felder">${felder}</div>${zahlen}${stempel}${knoepfe}`;
+  blatt.scrollTop = 0;
+  const sb = document.getElementById("steckbrief");
+  sb.classList.remove("zu"); sb.classList.add("offen");
+  document.getElementById("sb-zu").onclick = steckbriefZu;
+  const zk = document.getElementById("sb-karte-zeigen"); if (zk) zk.onclick = () => { steckbriefZu(); seiteZeigen("karte"); zuPerson(p); };
+  const nk = document.getElementById("sb-nachricht"); if (nk) nk.onclick = () => { steckbriefZu(); einzelChat(p.id); };
+  if (ruhig) return;
+  if (stil === "modern") blatt.querySelectorAll("[data-zahl]").forEach(el => { const ziel = +el.dataset.zahl, start = performance.now(); const schritt = j => { const q = Math.min(1, (j - start - 300) / 900); if (q < 0) return requestAnimationFrame(schritt); el.textContent = Math.round(ziel * (1 - Math.pow(1 - q, 3))); if (q < 1) requestAnimationFrame(schritt); }; el.textContent = "0"; requestAnimationFrame(schritt); });
+  if (stil === "mission") { const n = blatt.querySelector(".sb-name"), voll = n.textContent; n.textContent = ""; n.classList.add("tippt"); let i = 0; const tippen = () => { n.textContent = voll.slice(0, ++i); if (i < voll.length) setTimeout(tippen, 55); else setTimeout(() => n.classList.remove("tippt"), 900); }; setTimeout(tippen, 450); }
+}
+function steckbriefZu() {
+  const sb = document.getElementById("steckbrief");
+  if (!sb.classList.contains("offen")) return;
+  sb.classList.add("zu");
+  setTimeout(() => sb.classList.remove("offen", "zu"), ruhig ? 0 : 240);
+}
+document.getElementById("sb-hinten").onclick = steckbriefZu;
+document.addEventListener("keydown", e => { if (e.key === "Escape") steckbriefZu(); });
+document.getElementById("steckbrief-selbst").onclick = () => steckbriefOeffnen(ich());
+
+// ---------- Reisegruppe: „Reist du zusammen mit …?“ ----------
+let gruppenAnfrage = null;
+function gruppeBeitreten(p, still) {
+  // Prototyp: die andere Person bestätigt nach kurzer Zeit von selbst
+  gruppenAnfrage = p.id; hinweis(t("Anfrage an {name} gesendet", { name: p.name }));
+  setTimeout(() => {
+    if (gruppenAnfrage !== p.id) return; gruppenAnfrage = null;
+    const meine = gruppeVon("du"), seine = gruppeVon(p.id);
+    if (meine && seine && meine !== seine) { meine.leute.push(...seine.leute.filter(id => !meine.leute.includes(id))); reisegruppen = reisegruppen.filter(g => g !== seine); }
+    else if (meine) { if (!meine.leute.includes(p.id)) meine.leute.push(p.id); }
+    else if (seine) seine.leute.push("du");
+    else reisegruppen.push({ id: "g-" + Date.now(), leute: ["du", p.id] });
+    gruppenSpeichern(); pinsSetzen(); listeAufbauen();
+    hinweis(t("{name} hat bestätigt: ihr reist zusammen", { name: p.name }));
+    if (document.getElementById("info").classList.contains("offen")) infoZeigen(infoGruppe);
+  }, 3500);
+}
+function gruppeVerlassen() {
+  const g = gruppeVon("du"); if (!g) return;
+  g.leute = g.leute.filter(id => id !== "du");
+  reisegruppen = reisegruppen.filter(x => x.leute.length > 1);
+  gruppenSpeichern(); pinsSetzen(); listeAufbauen(); hinweis(t("Du reist jetzt allein weiter"));
+  if (document.getElementById("info").classList.contains("offen")) infoZeigen(infoGruppe);
+}
+let infoGruppe = null;
+var nachbarnGefragt = false;
+function gruppeKnopfSetzen(gruppe) {
+  infoGruppe = gruppe;
+  const k = document.getElementById("info-gruppe"), du = ich();
+  const meine = gruppeVon("du");
+  const nahe = gruppe.filter(p => p.id !== "du" && du.lat != null && entfernungKm(du.lat, du.lon, p.lat, p.lon) < NAH_KM);
+  const zeigen = !ECHT && !familieModus && (nahe.length > 0 || (meine && gruppe.some(p => p.id === "du")));
+  k.style.display = zeigen ? "inline-block" : "none";
+  if (!zeigen) return;
+  const offen = nahe.filter(p => !meine || !meine.leute.includes(p.id));
+  if (!offen.length) { k.textContent = t("👥 Gruppe verlassen"); k.onclick = () => fragen(t("Nicht mehr zusammen unterwegs? Die anderen sehen dich dann wieder einzeln."), [[t("Gruppe verlassen"), gruppeVerlassen, true]]); return; }
+  const p = offen[0];
+  k.textContent = gruppenAnfrage === p.id ? t("👥 Anfrage gesendet") : offen.length === 1 ? t("👥 Mit {name} unterwegs", { name: p.name }) : t("👥 Zusammen unterwegs");
+  k.onclick = () => { if (gruppenAnfrage) return; offen.length === 1 ? gruppeBeitreten(p) : fragen(t("Mit wem reist du zusammen?"), offen.map(q => [q.name, () => gruppeBeitreten(q)])); };
+}
+// Beim Öffnen: Ist jemand in deiner Nähe, mit dem du noch nicht als Gruppe unterwegs bist, fragt die App einmal pro Ort nach
+function nachbarnFragen() {
+  if (ECHT || familieModus) return;
+  const du = ich(); if (du.lat == null) return;
+  let gefragt = {}; try { gefragt = JSON.parse(localStorage.getItem("ahoi-gefragt") || "{}"); } catch (e) {}
+  const meine = gruppeVon("du");
+  const p = leute.find(q => q.id !== "du" && q.lat != null && entfernungKm(du.lat, du.lon, q.lat, q.lon) < NAH_KM && !(meine && meine.leute.includes(q.id)) && !gefragt[q.id + "|" + du.ort]);
+  if (!p) return;
+  const merken = () => { gefragt[p.id + "|" + du.ort] = 1; try { localStorage.setItem("ahoi-gefragt", JSON.stringify(gefragt)); } catch (e) {} };
+  const wo = entfernungKm(du.lat, du.lon, p.lat, p.lon) < 1 ? t("ist auch in {ort}", { ort: du.ort }) : t("ist in deiner Nähe ({ort})", { ort: p.ort });
+  fragen(t("{name} {wo}. Reist ihr zusammen?", { name: p.name, wo }), [
+    [t("Ja, wir reisen zusammen"), () => { merken(); gruppeBeitreten(p); setTimeout(nachbarnFragen, 4500); }],
+    [t("Nein, nur am selben Ort"), () => { merken(); setTimeout(nachbarnFragen, 600); }]
+  ]);
+}
 document.getElementById("paar-zeile").onclick = () => meinPartner() ? paarLoesen() : fragen(t("So verknüpfst du dich: Tippe auf der Karte auf deinen Partner und dann auf „❤️ Wir sind ein Paar“."), [[t("Verstanden"), () => {}]]);
 paarWertZeigen();
 
@@ -1430,7 +1621,9 @@ async function reisenLaden() {
   reisenAufbauen(); trefferAufbauen();
   if (familieModus) familieAufbauen();
 }
-const nahe = (a, b) => !!a && !!b && a.lat != null && b.lat != null && entfernungKm(a.lat, a.lon, b.lat, b.lon) < NAH_KM;
+// Reisen in ein ganzes Land (Ort noch offen) haben keine Koordinaten; sie treffen sich über das Land
+const nurLand = x => x.lat == null && !!x.land;
+const nahe = (a, b) => !!a && !!b && (a.lat != null && b.lat != null ? entfernungKm(a.lat, a.lon, b.lat, b.lon) < NAH_KM : (nurLand(a) || nurLand(b)) && a.land === b.land);
 function trefferFinden() {
   const heute = new Date().toISOString().slice(0, 10), du = ich(), treffer = [];
   const fest = reisen.filter(r => r.von), meine = fest.filter(r => r.wer[0] === "du"), andere = fest.filter(r => r.wer[0] !== "du");
@@ -1564,7 +1757,7 @@ async function standortStill() {
 async function neuerOrt(o) {
   await standortSpeichern(o);
   meinOrtZeigen(); hinweis(t("Ort gespeichert"));
-  if (!besucht.includes(o.land)) { besucht.push(o.land); try { localStorage.setItem(LAENDER_SCHLUESSEL, JSON.stringify(besucht)); } catch (e) {} stempelAufbauen(); }
+  if (landDazu(o.land)) stempelAufbauen();
   await echtAktualisieren();
 }
 async function freundEinladen() {

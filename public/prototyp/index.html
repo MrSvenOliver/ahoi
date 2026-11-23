@@ -689,7 +689,7 @@
   .ml-unter { font-size: 14px; color: var(--text-leise); margin-top: 4px; }
   .ml-karte { padding: 8px; overflow: hidden; }
   #rubbelkarte { width: 100%; display: block; border-radius: 10px; }
-  #rubbelkarte path { stroke-width: 0.25; transition: fill 0.5s ease; cursor: pointer; }
+  #rubbelkarte path { stroke-width: 0.25; transition: fill 0.5s ease; }
   #rubbelkarte path.frei { animation: freirubbeln 0.6s ease; }
   @keyframes freirubbeln { 0% { opacity: 0.3; } 100% { opacity: 1; } }
   .ml-zeile { display: flex; align-items: center; justify-content: space-between; margin: 18px 0 0; }
@@ -707,6 +707,96 @@
   .tipp .tipp-fuss .klein-ava { width: 24px; height: 24px; font-size: 10px; margin-right: 6px; display: inline-grid; vertical-align: middle; }
   .daumen { border: 1px solid var(--trenner); background: transparent; color: var(--text); border-radius: 999px; padding: 5px 11px; font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; }
   .daumen.an { background: var(--tinte); color: var(--papier); border-color: var(--tinte); }
+  /* ---------- Steckbrief: eine Person auf einen Blick, je Stil eigene Gestaltung ---------- */
+  .info-steckbriefe { display: contents; }
+  .info-steckbriefe:empty { display: none; }
+  .weite b.gleicher-ort { font-size: 13px; font-weight: 650; white-space: nowrap; }
+  .steckbrief { position: fixed; inset: 0; z-index: 60; display: none; }
+  .steckbrief.offen { display: block; }
+  .sb-hinten { position: absolute; inset: 0; background: rgba(0, 0, 0, 0.38); animation: sbHinten 0.25s ease both; }
+  .sb-blatt { position: absolute; left: 0; right: 0; bottom: 0; max-width: 560px; margin: 0 auto; max-height: calc(100% - env(safe-area-inset-top) - 20px); overflow-y: auto; overscroll-behavior: contain; background: var(--flaeche); color: var(--text); border-radius: 26px 26px 0 0; padding: 22px 18px calc(env(safe-area-inset-bottom) + 22px); animation: sbHoch 0.45s cubic-bezier(0.2, 0.9, 0.3, 1) both; }
+  .steckbrief.zu .sb-blatt { animation: sbRunter 0.25s ease-in both; } .steckbrief.zu .sb-hinten { animation: sbHinten 0.25s ease reverse both; }
+  @keyframes sbHoch { from { transform: translateY(100%); } to { transform: none; } }
+  @keyframes sbRunter { to { transform: translateY(100%); } }
+  @keyframes sbHinten { from { opacity: 0; } }
+  .sb-zu { position: absolute; top: 14px; right: 14px; z-index: 3; width: 34px; height: 34px; border-radius: 50%; border: 0; background: rgba(0, 0, 0, 0.07); color: inherit; font-size: 15px; cursor: pointer; }
+  .sb-kopf { position: relative; text-align: center; }
+  .sb-titelzeile { font-size: 12px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-leise); margin-bottom: 12px; }
+  .sb-titelzeile:empty { display: none; }
+  .sb-bild { position: relative; width: 112px; height: 112px; margin: 0 auto 12px; border-radius: 50%; display: grid; place-items: center; font-size: 38px; font-weight: 700; color: #fff; overflow: hidden; }
+  .sb-scan, .sb-freigabe { display: none; }
+  .sb-name { margin: 0; font-size: 30px; font-weight: 800; letter-spacing: -0.5px; font-family: var(--titel); line-height: 1.1; }
+  .sb-status { margin-top: 6px; color: var(--text-leise); font-size: 15px; }
+  .sb-status:empty { display: none; }
+  .sb-felder { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 18px; }
+  .sb-feld { background: var(--karte-bg); border: 1px solid var(--trenner); border-radius: 16px; padding: 10px 12px; text-align: left; min-width: 0; }
+  .sb-feld span { display: block; font-size: 12px; color: var(--text-leise); margin-bottom: 3px; }
+  .sb-feld b { display: block; font-size: 15px; font-weight: 650; }
+  .sb-breit { grid-column: 1 / -1; }
+  .sb-zahlen { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 8px; }
+  .sb-zahlen > div { background: var(--karte-bg); border: 1px solid var(--trenner); border-radius: 16px; padding: 12px 4px 10px; text-align: center; }
+  .sb-zahlen b { display: block; font-size: 26px; font-weight: 800; line-height: 1.1; font-family: var(--titel); }
+  .sb-zahlen span { font-size: 12px; color: var(--text-leise); }
+  .sb-karte { margin-top: 8px; border-radius: 16px; overflow: hidden; border: 1px solid var(--trenner); }
+  .sb-karte svg { display: block; width: 100%; }
+  .sb-karte path.an { animation: sbLand 0.7s ease both; animation-delay: calc(var(--i) * 35ms + 0.35s); }
+  @keyframes sbLand { from { opacity: 0; } }
+  .sb-ring { transform-box: fill-box; transform-origin: center; animation: sbPuls 1.8s ease-out infinite; }
+  @keyframes sbPuls { from { transform: scale(0.4); opacity: 0.9; } to { transform: scale(2.6); opacity: 0; } }
+  .sb-stempel { display: none; }
+  .sb-knoepfe { display: flex; gap: 8px; margin-top: 14px; }
+  .sb-knoepfe button { flex: 1; }
+  .sb-knoepfe:empty { display: none; }
+  @keyframes sbStempel { 0% { transform: rotate(var(--r, 0deg)) scale(1.9); opacity: 0; } 70% { transform: rotate(var(--r, 0deg)) scale(0.94); opacity: 0.95; } 100% { transform: rotate(var(--r, 0deg)) scale(1); opacity: 0.88; } }
+
+  /* Modern: Kopf im Farbverlauf der Person, Foto springt herein, Zahlen zählen hoch */
+  [data-stil="modern"] .sb-blatt { background: #f5f5f7; padding-top: 0; }
+  [data-stil="modern"] .sb-kopf { margin: 0 -18px; padding: 40px 18px 4px; border-radius: 26px 26px 0 0; background: linear-gradient(180deg, var(--sb-farbe) 0%, color-mix(in srgb, var(--sb-farbe) 30%, #f5f5f7) 55%, #f5f5f7 100%); }
+  [data-stil="modern"] .sb-bild { border: 4px solid #fff; box-shadow: 0 14px 34px rgba(0, 0, 0, 0.2); animation: sbBild 0.65s cubic-bezier(0.2, 1.35, 0.4, 1) 0.12s both; }
+  @keyframes sbBild { from { transform: scale(0.5); opacity: 0; } }
+  [data-stil="modern"] .sb-name { animation: sbAuf 0.5s ease 0.2s both; } [data-stil="modern"] .sb-status { animation: sbAuf 0.5s ease 0.28s both; }
+  @keyframes sbAuf { from { transform: translateY(10px); opacity: 0; } }
+  [data-stil="modern"] .sb-feld, [data-stil="modern"] .sb-zahlen > div, [data-stil="modern"] .sb-karte { background: #fff; border: 0; border-radius: 18px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06); }
+  [data-stil="modern"] .sb-zahlen b { color: #0a84ff; font-variant-numeric: tabular-nums; }
+  [data-stil="modern"] .sb-zu { background: rgba(255, 255, 255, 0.4); color: #fff; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+
+  /* Mission: Personalakte mit Raster, Scan-Strahl über dem Foto, Name wird getippt, Stempel „Freigegeben“ */
+  [data-stil="mission"] .sb-blatt { border-radius: 4px 4px 0 0; border-top: 1px solid var(--tinte); background: linear-gradient(rgba(95, 212, 234, 0.06) 1px, transparent 1px) 0 0 / 18px 18px, linear-gradient(90deg, rgba(95, 212, 234, 0.06) 1px, transparent 1px) 0 0 / 18px 18px, #06101c; }
+  [data-stil="mission"] .sb-kopf { display: grid; grid-template-columns: 104px 1fr; gap: 0 14px; text-align: left; align-items: center; }
+  [data-stil="mission"] .sb-titelzeile { grid-column: 1 / -1; font-family: var(--mono); color: var(--amber); letter-spacing: 2px; font-size: 11px; border-bottom: 1px dashed var(--glas-rand); padding: 0 44px 8px 0; }
+  [data-stil="mission"] .sb-bild { grid-row: span 2; width: 104px; height: 126px; margin: 0; border-radius: 2px; border: 1px solid var(--glas-rand); filter: grayscale(1) contrast(1.1); font-family: var(--schablone); }
+  [data-stil="mission"] .sb-bild::after { content: ""; position: absolute; inset: 3px; background: var(--ecken); }
+  [data-stil="mission"] .sb-scan { display: block; position: absolute; left: 0; right: 0; top: -35%; height: 35%; background: linear-gradient(180deg, transparent, rgba(95, 212, 234, 0.6), transparent); animation: sbScan 1.5s ease-in-out 0.35s 2 both; }
+  @keyframes sbScan { to { top: 100%; } }
+  [data-stil="mission"] .sb-name { align-self: end; font-family: var(--schablone); font-weight: 400; font-size: 30px; letter-spacing: 1px; text-transform: uppercase; color: var(--tinte); min-height: 1.1em; }
+  [data-stil="mission"] .sb-name.tippt::after { content: "▌"; animation: blinken 0.8s steps(1) infinite; }
+  [data-stil="mission"] .sb-status { align-self: start; margin-top: 4px; font-family: var(--mono); font-size: 12px; text-transform: uppercase; color: var(--amber); }
+  [data-stil="mission"] .sb-freigabe { display: block; position: absolute; right: 0; bottom: -6px; --r: -9deg; transform: rotate(var(--r)); border: 2px solid var(--gruen); color: var(--gruen); font-family: var(--schablone); font-size: 13px; letter-spacing: 2px; padding: 2px 8px; animation: sbStempel 0.5s ease 1.1s both; }
+  [data-stil="mission"] .sb-feld, [data-stil="mission"] .sb-zahlen > div, [data-stil="mission"] .sb-karte { background: rgba(95, 212, 234, 0.04); border: 1px solid var(--glas-rand); border-radius: 2px; }
+  [data-stil="mission"] .sb-feld span, [data-stil="mission"] .sb-zahlen span { font-family: var(--mono); font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-leise); }
+  [data-stil="mission"] .sb-feld b { font-family: var(--mono); font-weight: 500; font-size: 13.5px; }
+  [data-stil="mission"] .sb-zahlen b { font-family: var(--schablone); font-weight: 400; color: var(--tinte); }
+  [data-stil="mission"] .sb-karte svg { filter: drop-shadow(0 0 4px rgba(95, 212, 234, 0.35)); }
+  [data-stil="mission"] .sb-zu { border-radius: 2px; background: transparent; border: 1px solid var(--glas-rand); color: var(--tinte); }
+  [data-stil="mission"] .sb-knoepfe button { border-radius: 2px; }
+
+  /* Abenteuer: Reisepass auf Pergament, Foto eingeklebt, Länder kommen als Stempel */
+  [data-stil="abenteuer"] .sb-blatt { color: #3a2414; border-radius: 18px 18px 0 0; background: var(--korn), linear-gradient(180deg, #f3e6c9, #e8d4a8); box-shadow: inset 0 0 0 7px rgba(243, 230, 201, 0.7), inset 0 0 0 8.5px rgba(122, 90, 58, 0.35); }
+  [data-stil="abenteuer"] .sb-titelzeile { font-family: var(--titel); font-size: 26px; font-weight: 700; letter-spacing: 0; text-transform: none; color: #8a6a48; margin-bottom: 6px; }
+  [data-stil="abenteuer"] .sb-bild { width: 104px; height: 128px; border-radius: 3px; border: 6px solid #fbf3e2; box-shadow: 0 8px 16px rgba(60, 38, 16, 0.28); transform: rotate(-3deg); animation: sbFoto 0.6s cubic-bezier(0.2, 1.2, 0.4, 1) 0.1s both; }
+  @keyframes sbFoto { from { transform: rotate(-12deg) translateY(-14px); opacity: 0; } }
+  [data-stil="abenteuer"] .sb-name { font-family: var(--titel); font-weight: 700; font-size: 42px; letter-spacing: 0; }
+  [data-stil="abenteuer"] .sb-status { color: #7a5a3a; }
+  [data-stil="abenteuer"] .sb-feld, [data-stil="abenteuer"] .sb-zahlen > div, [data-stil="abenteuer"] .sb-karte { background: rgba(255, 250, 238, 0.5); border: 1px dashed rgba(122, 90, 58, 0.5); border-radius: 10px; }
+  [data-stil="abenteuer"] .sb-feld span, [data-stil="abenteuer"] .sb-zahlen span { color: #8a6a48; }
+  [data-stil="abenteuer"] .sb-feld b { font-family: var(--titel); font-size: 22px; font-weight: 700; line-height: 1.05; }
+  [data-stil="abenteuer"] .sb-zahlen b { font-family: var(--titel); font-size: 36px; font-weight: 700; color: #c0582f; }
+  [data-stil="abenteuer"] .sb-zu { background: rgba(58, 36, 20, 0.12); color: #3a2414; }
+  [data-stil="abenteuer"] .sb-stempel { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 12px; margin: 16px 0 4px; }
+  .stempel-ink { display: inline-grid; place-content: center; justify-items: center; gap: 2px; width: 64px; height: 64px; border-radius: 50%; border: 2.5px solid var(--sf); color: var(--sf); outline: 1px dashed var(--sf); outline-offset: -8px; font-size: 21px; line-height: 1; transform: rotate(var(--r)); opacity: 0.88; animation: sbStempel 0.45s cubic-bezier(0.3, 1.5, 0.5, 1) both; animation-delay: calc(var(--i) * 85ms + 0.4s); }
+  .stempel-ink.eckig { border-radius: 8px; width: 70px; height: 56px; }
+  .stempel-ink small { font: 800 10px/1 var(--sans); letter-spacing: 1.2px; }
+  .stempel-mehr { align-self: center; font-family: var(--titel); font-size: 22px; color: #7a5a3a; }
   .rueckblick { position: fixed; inset: 0; z-index: 90; display: none; color: #fff; }
   .rueckblick.offen { display: block; }
   .rb-folie { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: flex-start; padding: 80px 30px calc(60px + env(safe-area-inset-bottom)); transition: background 0.5s; }
@@ -922,7 +1012,7 @@
   </div>
 </header>
 
-<div class="info" id="info"><button class="knopf zu" id="info-zu" aria-label="Schließen" style="font-size:17px">✕</button><h3></h3><p></p><div class="info-knoepfe"><button class="knopf-leise" id="info-chat" style="display:none">💬 Nachricht schreiben</button><button class="knopf-leise" id="info-tipps" style="display:none"></button><button class="knopf-leise nur-proto" id="info-paar" style="display:none"></button></div></div>
+<div class="info" id="info"><button class="knopf zu" id="info-zu" aria-label="Schließen" style="font-size:17px">✕</button><h3></h3><p></p><div class="info-knoepfe"><button class="knopf-leise" id="info-chat" style="display:none">💬 Nachricht schreiben</button><button class="knopf-leise" id="info-tipps" style="display:none"></button><button class="knopf-leise nur-proto" id="info-paar" style="display:none"></button><button class="knopf-leise nur-proto" id="info-gruppe" style="display:none"></button><span class="info-steckbriefe nur-proto" id="info-steckbriefe"></span></div></div>
 
 <section class="blatt" id="blatt">
   <div class="blatt-kopf" id="blatt-kopf" role="button" tabindex="0" aria-expanded="false" aria-controls="liste">
@@ -1044,7 +1134,7 @@
     <div><b class="ml-zahl" id="ml-zahl"></b><div class="ml-unter" id="ml-kont"></div><div class="ml-unter" id="ml-pionier"></div></div>
   </div>
   <div class="kasten ml-karte"><svg id="rubbelkarte" viewBox="0 6 360 142" role="img" aria-label="Weltkarte mit deinen Ländern"></svg>
-    <p class="hinweis-band" style="margin:8px 0 0">Tippe auf ein Land, um es freizurubbeln oder wieder abzudecken.</p></div>
+    <p class="hinweis-band" style="margin:8px 0 0">Es zählen die 195 Staaten der Welt. Überseegebiete zählen für ihr Mutterland. Ändern über „Bearbeiten“.</p></div>
   <div class="ml-zeile"><h2>Nach Kontinenten</h2><button class="knopf-leise" id="ml-bearbeiten">Bearbeiten</button></div>
   <div id="ml-kontinente"></div>
 </section>
@@ -1058,6 +1148,7 @@
   </div>
   <button class="knopf-gross" style="width:100%" id="tipp-speichern">Teilen</button>
 </section>
+<div class="steckbrief" id="steckbrief" role="dialog" aria-modal="true" aria-label="Steckbrief"><div class="sb-hinten" id="sb-hinten"></div><div class="sb-blatt" id="sb-blatt"></div></div>
 <div class="rueckblick" id="rueckblick" aria-modal="true" role="dialog">
   <svg class="rb-karte" id="rb-karte" viewBox="0 6 360 142" preserveAspectRatio="xMidYMid slice" aria-hidden="true"></svg>
   <div class="rb-schleier" id="rb-schleier"></div>
@@ -1080,6 +1171,7 @@
       <label class="profil-bild-wahl"><div class="profil-bild" id="profil-bild">DU<span class="kamera">📷</span></div><input type="file" id="profil-foto" accept="image/*" hidden></label>
       <h3 id="profil-name">Du</h3>
       <p id="mein-status-anzeige"></p>
+      <button class="knopf-leise nur-proto" id="steckbrief-selbst" style="margin-top:8px">🪪 So sehen dich andere</button>
     </div>
   </div>
   <h2>Status</h2>

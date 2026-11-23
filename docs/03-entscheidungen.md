@@ -3,6 +3,13 @@
 Jede Entscheidung mit Datum. Neue Einträge kommen oben dazu.
 
 ## 23.11.2026
+- Am selben Ort heißt nicht zusammen unterwegs (A): kein automatisches 🤝 und kein „Zusammen unterwegs“ mehr; die Karte zeigt bei mehreren Personen am selben Ort nur die Zahl
+- Reisegruppen (B): wer zusammen reist, bestätigt das gegenseitig; ist jemand in deiner Nähe (unter 50 km), fragt die App einmal pro Ort „Reist ihr zusammen?“; Paare in der Gruppe stehen mit ❤️ zusammen (Beispiel „Alex ❤️ Sam · Lea · Mia“); zieht jemand weiter, fällt er aus der Gruppe, bleibt nur einer, endet sie; zuerst im Prototyp, in der echten App nach Svens Blick darauf (braucht eine neue Tabelle)
+- Länder (D): es zählen nur die 195 Staaten (193 UN-Mitglieder plus Vatikan und Palästina); Überseegebiete wie St. Martin, Sint Maarten, Puerto Rico oder Grönland zählen für ihr Mutterland; Kosovo und Taiwan zählen nicht; die Antarktis zählt nur für die 7 Kontinente
+- Meine Länder: kein Freirubbeln mehr auf der Karte, sie zeigt nur an; Länder ändert man nur über die Liste „Bearbeiten“
+- Wer am selben Ort ist, steht in „Wer ist wo?“ mit „Am selben Ort“ statt „hier · von dir“ (F)
+- Steckbrief (I): über den Pin, über jeden Namen in „Wer ist wo?“ und für sich selbst über Profil → „So sehen dich andere“; Inhalt: Foto, Name, Status, Ort, Ortszeit, Entfernung, mit wem unterwegs, nächste Reise, Länder, Kontinente, Pionier, Weltkarte der Länder; Modern mit Farbverlauf und hochzählenden Zahlen, Mission als Personalakte mit Scan-Strahl, Abenteuer als Reisepass mit Länderstempeln; zuerst im Prototyp
+- Ortssuche: große Städte mit Sonderstatus (Tokio, Kuala Lumpur, Singapur, Hongkong …) werden gefunden; bei Reisen auch ganze Länder als Ziel, „Ort noch offen“ (L); Treffer dann über das Land
 - Familien-Zugang (D) in der echten App: Einladen → Familie schickt einen Link; die Person gibt nur Name, E-Mail und Passwort an, braucht keine Freigabe und sieht nur die Nomaden, die sie eingeladen haben (Ort, nächste Reise, weitere Reisen); im Profil unter „Familie“ lässt sich die Sicht pro Person pausieren
 - Schutz der Orte: Orte gibt es nur noch über die geschützte Ansicht „wer_ist_wo“ (Geistermodus gilt dort auch gegenüber der Familie); die Tabelle selbst gibt keine Orte mehr heraus
 - „Neu dabei“ (E): kurzer Hinweis oben auf der Karte, wenn seit dem letzten Öffnen jemand dazugekommen ist; antippen zeigt die Person
