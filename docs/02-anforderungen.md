@@ -7,7 +7,7 @@ Gesammelte Wünsche und Entscheidungen von Sven. Gebaut wird erst, wenn die Anfo
 - Skalierbarkeit im Hinterkopf: später evtl. App Store und weitere Sprachen
 - Sprachen schon in der Beta: die komplette App auf Deutsch, Englisch oder Slowakisch; automatisch nach Handysprache (Deutsch → Deutsch, Slowakisch → Slowakisch, alles andere → Englisch); kleine Flagge am Profilknopf zeigt die Sprache, im Profil unter „Darstellung“ als klassische Einstellungszeile (Sprache › aktueller Wert), Auswahlliste mit Haken; Ortsnamen auf der Karte und Chat-Übersetzung folgen der Sprache; Texte der App stehen in einer eigenen Datei (texte.js), Nachrichten der Freunde bleiben im Original
 - Fast alle nutzen iPhone, mindestens eine Person Android; zusätzlich normale Website für Desktop
-- Interner Arbeitsname: Ahoi
+- Interner Arbeitsname: Ahoi; der Prototyp heißt auf dem Home-Bildschirm „Ahoi Test“ und hat ein blaues Symbol
 - Logo: A Kompassrose mit zwei Pins (Schatzkarten-Stil, ohne Text); Entwürfe heißen ahoi_logo_a-kompass_01.png usw., Endstand ahoi_logo_master.png
 - Offizieller Name: später; soll "Nomad" enthalten und wie ein Name klingen ("Nomadi", "Nomadia", "Nomado" bereits vergeben)
 - Supabase-Keepalive: wöchentlicher automatischer Aufruf über GitHub Actions
@@ -24,7 +24,7 @@ Gesammelte Wünsche und Entscheidungen von Sven. Gebaut wird erst, wenn die Anfo
 ## Aufbau der App
 - Überschrift der Liste: „Wer ist wo?“ (mit Fragezeichen in allen Sprachen)
 - Leiste unten: Karte · Reisen · Chat · Ideen
-- Profil als rundes Foto oben rechts; Reihenfolge im Profil: Darstellung (Sprache, Stil) · Freunde (Freund einladen, Freundeskreise, Paar verknüpfen als Einstellungszeilen mit farbigen Symbolen) · Familie · Mitteilungen · Privatsphäre · Über mich (Foto, Name, Status zum Antippen) · Meine Länder und Dein Nomadenjahr (zwei Zeilen) · Mehr (Feedback)
+- Profil als rundes Foto oben rechts; Reihenfolge im Profil: oben Foto, Name und Status · Status-Auswahl · Darstellung (Sprache, Stil als drei kleine Farbverläufe) · Freunde (Freund einladen, Freundeskreise, Paar) · Länder und Rückblicke · Familie · Privatsphäre · Mitteilungen · Konto · Mehr (Feedback)
 
 ## Kartengenauigkeit (feste Regel, kein Spielraum)
 - Echte Kartendaten aus OpenStreetMap für Küsten, Grenzen und Städte; alle drei Stile entstehen nur über Farben, Linien und Schrift
@@ -92,7 +92,7 @@ Gesammelte Wünsche und Entscheidungen von Sven. Gebaut wird erst, wenn die Anfo
 - „Freund einladen“ auch unten in „Wer ist wo?“
 - Feedback in der Beta: kleine Lasche „Feedback“ am rechten Rand auf jedem Bildschirm
 - Countdown zum Treffen
-- Status zum Antippen: ☕ Lust auf ein Treffen · 🌱 Gerade angekommen, Tipps willkommen · 🔍 Suche Unterkunft · 👥 Suche Mitreisende · 💻 Arbeitsphase · 🏄 Sport und Abenteuer · 🏡 An meiner Basis · 🔕 Bitte nicht stören · ✏️ Eigener Text. Nochmal antippen entfernt ihn. Sichtbar in der Info-Karte und in „Wer ist wo?“ unter dem Namen
+- Status zum Antippen (kurz, damit er in „Wer ist wo?“ lesbar bleibt): ☕ Lust auf Treffen · 🌱 Neu angekommen · 🔍 Suche Unterkunft · 👥 Suche Mitreisende · 💻 Arbeitsphase · 🏄 Sport · 🧗 Abenteuer · 🏡 An meiner Basis · 🔕 Nicht stören · ✏️ Eigener Text (höchstens 24 Zeichen). Nochmal antippen entfernt ihn. Sichtbar in der Info-Karte und in „Wer ist wo?“ unter dem Namen
 
 ## Familien-Zugang (nur zuschauen)
 - Für Eltern, Geschwister u. a., die keine Nomaden sind (wie ein AirTag auf dem Bildschirm)
@@ -103,6 +103,7 @@ Gesammelte Wünsche und Entscheidungen von Sven. Gebaut wird erst, wenn die Anfo
 - Optional: eigenen Standort nur für sich einschalten, um die Entfernung zu sehen
 
 ## Netzwerk und Einladungen
+- Persönliche Einladungen von Sven: vorab freigegeben, 30 Tage gültig, optional „lebenslang kostenlos“
 - Einladungen per Link: ein Mitglied tippt „Freund einladen“ und schickt den Link über den Teilen-Knopf (WhatsApp o. Ä.); die neue Person registriert sich mit E-Mail, Passwort und Name und sieht „Wartet auf Freigabe“; Sven bekommt eine Mitteilung und gibt frei oder lehnt ab; jeder Link gilt einmal und 14 Tage; ohne Link keine Registrierung
 - "Kenne ich"-Verbindungen (gegenseitig bestätigt) und gemeinsame Kontakte im Profil
 - Ziel: Nomaden-Netzwerk kann wachsen

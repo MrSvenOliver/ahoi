@@ -1,6 +1,6 @@
 {
-  "name": "Ahoi",
-  "short_name": "Ahoi",
+  "name": "Ahoi Test",
+  "short_name": "Ahoi Test",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
@@ -8,17 +8,17 @@
   "theme_color": "#bcc7bd",
   "icons": [
     {
-      "src": "../icons/icon-192.png",
+      "src": "../icons/proto-icon-192.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "../icons/icon-512.png",
+      "src": "../icons/proto-icon-512.png",
       "sizes": "512x512",
       "type": "image/png"
     },
     {
-      "src": "../icons/icon-maskable-512.png",
+      "src": "../icons/proto-icon-maskable-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"

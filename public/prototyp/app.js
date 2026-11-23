@@ -20,7 +20,7 @@ Object.assign(leute.find(p => p.id === "jonas"), { status: "arbeit", laender: 27
 Object.assign(leute.find(p => p.id === "ben"), { laender: 12 });
 }
 // Status zum Antippen; „Unterwegs“ gibt es bewusst nicht, das ist bei Nomaden immer so
-const STATUS_VORLAGEN = { treffen: "☕ Lust auf ein Treffen", angekommen: "🌱 Gerade angekommen, Tipps willkommen", unterkunft: "🔍 Suche Unterkunft", mitreisende: "👥 Suche Mitreisende", arbeit: "💻 Arbeitsphase", sport: "🏄 Sport und Abenteuer", basis: "🏡 An meiner Basis", ruhe: "🔕 Bitte nicht stören" };
+const STATUS_VORLAGEN = { treffen: "☕ Lust auf Treffen", angekommen: "🌱 Neu angekommen", unterkunft: "🔍 Suche Unterkunft", mitreisende: "👥 Suche Mitreisende", arbeit: "💻 Arbeitsphase", sport: "🏄 Sport", abenteuer: "🧗 Abenteuer", basis: "🏡 An meiner Basis", ruhe: "🔕 Nicht stören" };
 const statusAusDb = v => !v ? null : STATUS_VORLAGEN[v] ? v : { text: v };
 if (ECHT) leute.forEach(p => p.status = statusAusDb(p.statusRoh));
 else try { const g = localStorage.getItem("ahoi-status"); leute[0].status = g === null ? "sport" : JSON.parse(g); } catch (e) { leute[0].status = "sport"; }
@@ -138,7 +138,7 @@ const SYMBOLE = {
   abenteuer: {
     karte: '<path d="M6 4h12v14a2 2 0 0 1-2 2H6"/><path d="M6 4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2 2 2 0 0 0 2-2V6"/><path d="M12 9l3 3M15 9l-3 3"/><path d="M10.5 16.5c1.5-1.2 3.2-1.2 5 0" stroke-dasharray="1.4 1.8"/>',
     reisen: '<path d="M12 3v13M12 4l6.5 10H12M12 6.5 7 14h5"/><path d="M3 17h18l-2.5 3.5h-13Z"/>',
-    chat: '<path d="M10 3h4v3l1.5 2.5V19a2 2 0 0 1-2 2h-3a2 2 0 0 1-2-2V8.5L10 6Z"/><path d="M10.5 11.5h3M10.5 14h3M10.5 16.5h2"/>',
+    chat: '<path d="M4.5 7c0-1.6 1.2-2.8 2.8-2.8h9.4c1.6 0 2.8 1.2 2.8 2.8v6c0 1.6-1.2 2.8-2.8 2.8H11.2L7 19.6v-3.8h0c-1.4 0-2.5-1.2-2.5-2.7Z"/><path d="M8 8.6c1-.7 2-.7 3 0s2 .7 3 0 2-.7 2.6 0M8 12h5"/>',
     ideen: '<path d="M2.5 20h19M5 20l7-15 7 15M12 5v15M9.5 20 12 15l2.5 5"/>',
     welt: '<circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5Z"/>',
     ich: '<circle cx="12" cy="5.5" r="2"/><path d="M12 7.5V21M8.5 11h7M5 14.5a7 7 0 0 0 14 0M3.5 15.5 5 14l1.5 1.5M17.5 15.5 19 14l1.5 1.5"/>'
@@ -575,9 +575,9 @@ aufNeueVersionPruefen();
 
 // ---------- Stil-Auswahl ----------
 const STIL_VORSCHAU = {
-  modern: '<span class="vorschau" style="background:#c3dbee"><i style="left:-10%;top:20%;width:70%;height:55%;background:#f2f2ef;border-radius:45%"></i><i style="left:38%;top:34%;width:14px;height:14px;border-radius:50%;background:#0071e3;border:2px solid #fff"></i><i style="left:12%;right:12%;bottom:6%;height:9px;border-radius:9px;background:rgba(255,255,255,.9)"></i></span>',
-  mission: '<span class="vorschau" style="background:#06101c;background-image:linear-gradient(rgba(95,212,234,.15) 1px,transparent 1px),linear-gradient(90deg,rgba(95,212,234,.15) 1px,transparent 1px);background-size:9px 9px"><i style="left:-10%;top:20%;width:70%;height:55%;border:1px solid #2f8aa6;border-radius:45%"></i><i style="left:38%;top:34%;width:13px;height:13px;border-radius:4px;border:1.5px solid #e8a33a"></i><i style="left:6%;right:6%;bottom:6%;height:1px;background:#5fd4ea"></i></span>',
-  abenteuer: '<span class="vorschau" style="background:#bcc7bd"><i style="left:-10%;top:20%;width:70%;height:55%;background:#efe0c0;border:1.5px solid #8a6a48;border-radius:45%"></i><i style="left:38%;top:34%;width:14px;height:14px;border-radius:50%;background:#c0582f;border:2px solid #b8913f"></i><i style="right:8%;top:10%;width:14px;height:14px;border-radius:50%;border:1px solid #7a5a3a"></i></span>'
+  modern: '<span class="vorschau" style="background:linear-gradient(120deg,#e9f2fb 0%,#9cc7ee 55%,#0a84ff 100%)"></span>',
+  mission: '<span class="vorschau" style="background:linear-gradient(120deg,#06101c 0%,#0f2c44 55%,#5fd4ea 100%)"></span>',
+  abenteuer: '<span class="vorschau" style="background:linear-gradient(120deg,#f3e6c9 0%,#d9b77e 55%,#c0582f 100%)"></span>'
 };
 function stilWahlAufbauen() {
   const box = document.getElementById("stil-wahl");
@@ -1214,7 +1214,7 @@ async function freundEinladen() {
 // Verwaltung (nur Admin): Freigeben, Ablehnen, Passwort neu, Entfernen
 let mitgliederDaten = [];
 async function verwaltungLaden() {
-  const { data, error } = await SB.from("profile").select("id,name,freigegeben,ist_admin,eingeladen_von,erstellt_am").order("erstellt_am");
+  const { data, error } = await SB.from("profile").select("id,name,freigegeben,ist_admin,eingeladen_von,erstellt_am,gratis").order("erstellt_am");
   if (error) throw error;
   mitgliederDaten = data;
   const zahl = data.filter(x => !x.freigegeben).length;
@@ -1232,7 +1232,7 @@ async function verwaltungAufbauen() {
   const wartende = mitgliederDaten.filter(x => !x.freigegeben), mitglieder = mitgliederDaten.filter(x => x.freigegeben);
   const boxW = document.getElementById("wartende"), boxM = document.getElementById("mitglieder");
   boxW.innerHTML = wartende.length ? wartende.map(x => `<div class="mitglied"><div class="zeile"><b>${ohneHtml(x.name || "?")}</b><small>${t("eingeladen von {name}", { name: ohneHtml(nameVon(x.eingeladen_von)) })} · ${tag(x.erstellt_am)}</small></div><button class="knopf-gross" data-frei="${x.id}">${t("Freigeben")}</button><button class="knopf-leise" data-weg="${x.id}" aria-label="${t("Ablehnen")}">✕</button></div>`).join("") : `<p class="hinweis-band" style="margin:4px 0">${t("Niemand wartet gerade")}</p>`;
-  boxM.innerHTML = mitglieder.map(x => `<div class="mitglied"><div class="zeile"><b>${ohneHtml(x.name || "?")}${x.ist_admin ? " · Admin" : ""}</b><small>${x.eingeladen_von ? t("eingeladen von {name}", { name: ohneHtml(nameVon(x.eingeladen_von)) }) : t("Gründer")}</small></div>${x.id === ECHT_DATEN.uid ? "" : `<button class="knopf-leise" data-pw="${x.id}">${t("Passwort")}</button><button class="knopf-leise" data-weg="${x.id}" aria-label="${t("Entfernen")}">✕</button>`}</div>`).join("");
+  boxM.innerHTML = mitglieder.map(x => `<div class="mitglied"><div class="zeile"><b>${ohneHtml(x.name || "?")}${x.ist_admin ? " · Admin" : ""}${x.gratis ? " · ♾️" : ""}</b><small>${x.eingeladen_von ? t("eingeladen von {name}", { name: ohneHtml(nameVon(x.eingeladen_von)) }) : t("Gründer")}</small></div>${x.id === ECHT_DATEN.uid ? "" : `<button class="knopf-leise" data-pw="${x.id}">${t("Passwort")}</button><button class="knopf-leise" data-weg="${x.id}" aria-label="${t("Entfernen")}">✕</button>`}</div>`).join("");
   document.querySelectorAll("[data-frei]").forEach(b => b.onclick = async () => {
     b.disabled = true;
     const { error } = await SB.from("profile").update({ freigegeben: true }).eq("id", b.dataset.frei);

@@ -3,6 +3,12 @@
 Jede Entscheidung mit Datum. Neue Einträge kommen oben dazu.
 
 ## 23.11.2026
+- Persönliche Einladungen von Sven: Sven nennt Name und E-Mail, Claude legt einen Link an; gilt einmal und 30 Tage, egal mit welcher E-Mail man sich registriert, sofort freigegeben; „lebenslang kostenlos“ wird mitgegeben (♾️ in der Verwaltung); Sven selbst ist ebenfalls gratis
+- Mitgliederliste als privates Projekt-Dokument (claude/ahoi-mitglieder.md) und auf dem Mac unter privat/03-mitglieder, nie im öffentlichen Repository; gepflegt in diesem Chat, kein eigener Members-Chat
+- Prototyp heißt auf dem Home-Bildschirm „Ahoi Test“ und hat ein blaues (umgekehrtes) Symbol; die echte App heißt „Ahoi“ mit dem Original-Symbol
+- Status kürzer, Sport und Abenteuer getrennt: ☕ Lust auf Treffen · 🌱 Neu angekommen · 🔍 Suche Unterkunft · 👥 Suche Mitreisende · 💻 Arbeitsphase · 🏄 Sport · 🧗 Abenteuer · 🏡 An meiner Basis · 🔕 Nicht stören · ✏️ Eigener (höchstens 24 Zeichen)
+- Profil: oben Foto, Name und Status; danach Darstellung, Freunde, Länder und Rückblicke, Familie, Privatsphäre, Mitteilungen; Stil-Auswahl als drei kleine Farbverläufe
+- Abenteuer: Chat-Symbol als gezeichnete Sprechblase statt Flaschenpost
 - Echte App unter mrsvenoliver.github.io/ahoi/, der Prototyp mit Beispieldaten bleibt unter …/ahoi/prototyp/ (A); beide nutzen denselben Code, die echte App erkennt sich an der Adresse
 - In der echten App zeigen Reisen, Chat und Ideen vorerst „Kommt bald“ mit Link zum Prototyp (keine Beispieldaten neben echten Freunden); Familie, Freundeskreise, Paare, Mitteilungen, Nomadenjahr und die Feedback-Lasche sind dort ausgeblendet, bis sie funktionieren
 - Meine Länder werden in der echten App vorerst nur auf dem Gerät gespeichert; das Land des aktuellen Orts kommt automatisch dazu

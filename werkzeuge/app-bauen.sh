@@ -8,6 +8,7 @@ for f in index.html basis.js start.js app.js texte.js supabase.js sw.js manifest
   cp "prototyp/$f" "$f"
 done
 # Symbole liegen von hier aus in icons/ statt ../icons/
-sed -i.bak 's#\.\./icons/#icons/#g' index.html sw.js manifest.webmanifest && rm -f index.html.bak sw.js.bak manifest.webmanifest.bak
+# Der Prototyp hat ein eigenes (blaues) Symbol und heißt „Ahoi Test“; die echte App bekommt das Original
+sed -i.bak -e 's#\.\./icons/proto-#icons/#g' -e 's#\.\./icons/#icons/#g' -e 's#Ahoi Test#Ahoi#g' index.html sw.js manifest.webmanifest && rm -f index.html.bak sw.js.bak manifest.webmanifest.bak
 [ -f prototyp/version.json ] && cp prototyp/version.json version.json || true
 echo "Echte App gebaut: public/index.html"

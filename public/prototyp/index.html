@@ -3,22 +3,22 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
-<title>Ahoi</title>
+<title>Ahoi Test</title>
 <meta name="description" content="Ahoi – sieh, wo deine Nomaden-Freunde gerade sind, und trefft euch unterwegs.">
 <meta name="theme-color" content="#bcc7bd" id="theme-farbe">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Ahoi">
+<meta name="apple-mobile-web-app-title" content="Ahoi Test">
 <script>
   // Installierte App erkennen, bevor die Seite aufgebaut wird
   if (navigator.standalone || window.matchMedia("(display-mode: standalone)").matches) document.documentElement.classList.add("standalone");
   // Oberfläche: Modern (Standard), Mission oder Abenteuer – vor dem ersten Bild setzen
   (function () { var s = "modern"; try { s = localStorage.getItem("ahoi-oberflaeche") || s; } catch (e) {} document.documentElement.dataset.stil = ["modern", "mission", "abenteuer"].indexOf(s) >= 0 ? s : "modern"; })();
 </script>
-<link rel="manifest" href="manifest.webmanifest?v=4">
-<link rel="apple-touch-icon" href="../icons/apple-touch-icon.png?v=2">
-<link rel="icon" href="../icons/favicon-32.png" sizes="32x32">
+<link rel="manifest" href="manifest.webmanifest?v=5">
+<link rel="apple-touch-icon" href="../icons/proto-apple-touch-icon.png?v=3">
+<link rel="icon" href="../icons/proto-favicon-32.png" sizes="32x32">
 <link rel="preconnect" href="https://tiles.openfreemap.org" crossorigin>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -378,9 +378,9 @@
   .meer { pointer-events: none; transition: filter 0.4s; }
   .meer.weg, .meer.verdeckt { filter: opacity(0); }
   .stil-wahl { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-  .stil-wahl button { border: 1px solid var(--trenner); background: transparent; color: var(--text); border-radius: 14px; padding: 8px 6px 9px; font: inherit; font-size: 13px; font-weight: 700; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 7px; }
+  .stil-wahl button { border: 1px solid var(--trenner); background: transparent; color: var(--text); border-radius: 12px; padding: 5px 5px 7px; font: inherit; font-size: 12.5px; font-weight: 700; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 5px; }
   .stil-wahl button.aktiv { border-color: var(--tinte); box-shadow: 0 0 0 1.5px var(--tinte) inset; }
-  .stil-wahl .vorschau { width: 100%; aspect-ratio: 4 / 3; border-radius: 9px; position: relative; overflow: hidden; }
+  .stil-wahl .vorschau { width: 100%; height: 30px; border-radius: 8px; position: relative; overflow: hidden; box-shadow: inset 0 0 0 0.5px rgba(0, 0, 0, 0.12); }
   .stil-wahl .vorschau i { position: absolute; display: block; }
 
   /* ---------- MODERN ---------- */
@@ -798,6 +798,11 @@
   .liste .leer-hinweis { display: block; padding: 18px 6px; color: var(--text-leise); font-size: 14px; text-align: center; }
   .profil-bild-wahl { display: block; cursor: pointer; }
   #konto-email { max-width: 46%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  /* Profil-Kopf */
+  .profil-kopf { margin: -4px 0 6px; }
+  .profil-kopf .profil-oben { padding: 0 0 4px; }
+  .profil-kopf h3 { font-family: var(--titel); }
 </style>
 </head>
 <body>
@@ -973,17 +978,41 @@
 <!-- Profil -->
 <section class="seite" id="seite-profil">
   <div class="seite-kopf"><h1>Profil</h1><button class="knopf-leise" data-zurueck="karte">Fertig</button></div>
+  <div class="profil-kopf">
+    <div class="profil-oben">
+      <label class="profil-bild-wahl"><div class="profil-bild" id="profil-bild">DU<span class="kamera">📷</span></div><input type="file" id="profil-foto" accept="image/*" hidden></label>
+      <h3 id="profil-name">Du</h3>
+      <p id="mein-status-anzeige"></p>
+    </div>
+  </div>
+  <h2>Status</h2>
+  <div class="kasten">
+    <div class="status-chips" id="status-chips"></div>
+    <div class="status-eigen" id="status-eigen"><input id="status-text" maxlength="24" placeholder="Was machst du gerade?" autocomplete="off"><button class="knopf-gross" id="status-ok">Fertig</button></div>
+    <p class="hinweis-band" style="margin:10px 0 0;text-align:left">Freunde sehen deinen Status, wenn sie dich antippen, und in „Wer ist wo?“. Nochmal antippen entfernt ihn.</p>
+    <div class="nur-echt">
+      <span class="einst-unter" style="margin-top:16px">Dein Ort</span>
+      <div class="zeile-einst" style="border:0;padding-top:4px"><div id="mein-ort"></div><button class="knopf-leise" id="ort-gps">📍 Aktualisieren</button></div>
+      <input class="ort-suche" id="ort-suche" placeholder="Andere Stadt suchen" autocomplete="off">
+      <div class="ort-treffer" id="ort-treffer"></div>
+    </div>
+  </div>
   <h2>Darstellung</h2>
   <div class="kasten einst-gruppe">
     <button class="einst-zeile" id="sprache-zeile"><span class="einst-symbol sym-lila"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.6 2.8 2.6 14.2 0 17M12 3.5c-2.6 2.8-2.6 14.2 0 17"/></svg></span><span class="einst-name">Sprache</span><span class="einst-wert" id="sprache-wert"></span><span class="einst-pfeil">›</span></button>
     <div class="stil-block"><span class="einst-unter">Stil</span><div class="stil-wahl" id="stil-wahl" role="radiogroup" aria-label="Stil"></div>
-      <p class="hinweis-band" style="margin:10px 0 2px;text-align:left">Wechselt die ganze Oberfläche. Inhalt und Funktionen bleiben gleich.</p></div>
+</div>
   </div>
   <h2>Freunde</h2>
   <div class="kasten einst-gruppe">
     <button class="einst-zeile" id="einladen-zeile" data-hinweis="Freunde vorschlagen: Sven gibt die Einladung frei"><span class="einst-symbol sym-gruen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="8" r="3.5"/><path d="M3.5 19.5c.8-3.6 3.4-5.5 6.5-5.5s5.7 1.9 6.5 5.5M18.5 8v6M15.5 11h6"/></svg></span><span class="einst-name">Freund einladen</span><span class="einst-pfeil">›</span></button>
     <button class="einst-zeile nur-proto" data-hinweis="Freundeskreise anlegen, z. B. Lieblingsleute"><span class="einst-symbol sym-blau"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="9" r="3"/><circle cx="16.5" cy="10" r="2.5"/><path d="M3.5 19c.6-3 2.8-4.6 5.5-4.6s4.9 1.6 5.5 4.6M14.5 15.2c.6-.3 1.3-.4 2-.4 2.2 0 3.8 1.3 4.3 3.7"/></svg></span><span class="einst-name">Freundeskreise</span><span class="einst-wert">2</span><span class="einst-pfeil">›</span></button>
     <button class="einst-zeile nur-proto" data-hinweis="Anfrage an deinen Partner – er oder sie bestätigt"><span class="einst-symbol sym-rosa"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19.5s-7.5-4.3-7.5-9.6A4.2 4.2 0 0 1 12 7.6a4.2 4.2 0 0 1 7.5 2.3c0 5.3-7.5 9.6-7.5 9.6Z"/></svg></span><span class="einst-name">Paar verknüpfen</span><span class="einst-wert">Nicht verknüpft</span><span class="einst-pfeil">›</span></button>
+  </div>
+  <h2>Länder und Rückblicke</h2>
+  <div class="kasten einst-gruppe">
+    <button class="einst-zeile" id="laender-zeile"><span class="einst-symbol sym-gruen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M5 8.5c2 .8 3 2.6 2.4 4.6-.4 1.4.6 2.6 2 2.4M15 4.4c-.8 1.6-.2 3 1.4 3.4 1.6.4 2.4 1.8 1.6 3.4M13.5 20.4c.2-1.8 1.4-2.8 3-3"/></svg></span><span class="einst-name">Meine Länder</span><span class="einst-wert" id="laender-wert"></span><span class="einst-pfeil">›</span></button>
+    <button class="einst-zeile nur-proto" id="jahr-zeile"><span class="einst-symbol sym-lila"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5l1.8 4.9 4.9 1.8-4.9 1.8L12 16.9l-1.8-4.9-4.9-1.8 4.9-1.8z"/><path d="M18.5 15.5l.8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2-2.2-.8 2.2-.8z"/></svg></span><span class="einst-name" id="jahr-name">Dein Nomadenjahr</span><span class="einst-pfeil">›</span></button>
   </div>
   <h2 class="nur-proto">Familie</h2>
   <div class="kasten nur-proto">
@@ -993,8 +1022,6 @@
     <div class="zeile-einst"><div>Familienmitglied einladen<small>Link per WhatsApp, SMS oder E-Mail</small></div><button class="knopf-leise" data-hinweis="Einladungslink – kommt mit Phase 2">＋ Einladen</button></div>
     <div class="zeile-einst"><div>So sieht es deine Familie<small>Beispiel ausprobieren</small></div><button class="knopf-leise" id="familie-start">Ansehen</button></div>
   </div>
-  <h2 class="nur-proto">Mitteilungen</h2>
-  <div class="kasten nur-proto" id="mitteilungen"></div>
   <h2>Privatsphäre</h2>
   <div class="kasten">
     <div class="zeile-einst nur-proto"><div>Was andere sehen<small>Standort-Genauigkeit</small></div><div class="segmente klein" style="width:100%"><button>Land</button><button class="aktiv">Stadt</button><button>Genau</button></div></div>
@@ -1002,28 +1029,8 @@
     <div class="zeile-einst"><div>Geistermodus<small>Standort vorübergehend verbergen</small></div><button class="schalter" id="geist-schalter" aria-label="Geistermodus"></button></div>
     <p class="hinweis-band nur-echt" style="margin:8px 0 0;text-align:left">Freunde sehen nur deine Stadt, nie den genauen Ort.</p>
   </div>
-  <h2>Über mich</h2>
-  <div class="kasten">
-    <div class="profil-oben">
-      <label class="profil-bild-wahl"><div class="profil-bild" id="profil-bild">DU<span class="kamera">📷</span></div><input type="file" id="profil-foto" accept="image/*" hidden></label>
-      <h3 id="profil-name">Du</h3>
-      <p id="mein-status-anzeige"></p>
-    </div>
-    <span class="einst-unter" style="margin-top:14px">Status</span>
-    <div class="status-chips" id="status-chips"></div>
-    <div class="status-eigen" id="status-eigen"><input id="status-text" maxlength="40" placeholder="Was machst du gerade?" autocomplete="off"><button class="knopf-gross" id="status-ok">Fertig</button></div>
-    <p class="hinweis-band" style="margin:10px 0 0;text-align:left">Freunde sehen deinen Status, wenn sie dich antippen, und in „Wer ist wo?“. Nochmal antippen entfernt ihn.</p>
-    <div class="nur-echt">
-      <span class="einst-unter" style="margin-top:16px">Dein Ort</span>
-      <div class="zeile-einst" style="border:0;padding-top:4px"><div id="mein-ort"></div><button class="knopf-leise" id="ort-gps">📍 Aktualisieren</button></div>
-      <input class="ort-suche" id="ort-suche" placeholder="Andere Stadt suchen" autocomplete="off">
-      <div class="ort-treffer" id="ort-treffer"></div>
-    </div>
-  </div>
-  <div class="kasten einst-gruppe">
-    <button class="einst-zeile" id="laender-zeile"><span class="einst-symbol sym-gruen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M5 8.5c2 .8 3 2.6 2.4 4.6-.4 1.4.6 2.6 2 2.4M15 4.4c-.8 1.6-.2 3 1.4 3.4 1.6.4 2.4 1.8 1.6 3.4M13.5 20.4c.2-1.8 1.4-2.8 3-3"/></svg></span><span class="einst-name">Meine Länder</span><span class="einst-wert" id="laender-wert"></span><span class="einst-pfeil">›</span></button>
-    <button class="einst-zeile nur-proto" id="jahr-zeile"><span class="einst-symbol sym-lila"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5l1.8 4.9 4.9 1.8-4.9 1.8L12 16.9l-1.8-4.9-4.9-1.8 4.9-1.8z"/><path d="M18.5 15.5l.8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2-2.2-.8 2.2-.8z"/></svg></span><span class="einst-name" id="jahr-name">Dein Nomadenjahr</span><span class="einst-pfeil">›</span></button>
-  </div>
+  <h2 class="nur-proto">Mitteilungen</h2>
+  <div class="kasten nur-proto" id="mitteilungen"></div>
   <h2 class="nur-echt" id="verwaltung-titel" hidden>Verwaltung</h2>
   <div class="kasten einst-gruppe nur-echt" id="verwaltung-kasten" hidden>
     <button class="einst-zeile" id="verwaltung-zeile"><span class="einst-symbol sym-blau"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5 5 6.5v5c0 4.3 3 7.6 7 9 4-1.4 7-4.7 7-9v-5l-7-3Z"/><path d="m9 12 2 2 4-4"/></svg></span><span class="einst-name">Freigaben und Mitglieder</span><span class="einst-wert"><span class="zaehler" id="wartende-zahl"></span></span><span class="einst-pfeil">›</span></button>
