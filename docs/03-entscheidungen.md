@@ -3,6 +3,9 @@
 Jede Entscheidung mit Datum. Neue Einträge kommen oben dazu.
 
 ## 23.11.2026
+- Echte App und Prototyp merken sich die Sprache getrennt; die echte App startet in der Handysprache, auf dem Anmeldebildschirm oben rechts wählbar
+- Abenteuer: Wal, Seedrache und Krake erscheinen bei jedem Öffnen in drei verschiedenen Meeren, die Boote auf wechselnden Routen; alle Stellen und Routen sind gegen die Landflächen geprüft (nur winzige Inseln, die in der Weltansicht ein Punkt sind, zählen nicht)
+- Rückblicke: Hintergrund ist die Weltkarte im gewählten Stil, besuchte Länder leuchten, die Karte schwenkt pro Seite; Jahresrückblick öffnet sich einmal von selbst zwischen 15. Dezember und 15. Januar, dazu „Dein erstes Halbjahr“ einmal im Juli (B); in der echten App erst mit echten Reisedaten
 - Persönliche Einladungen von Sven: Sven nennt Name und E-Mail, Claude legt einen Link an; gilt einmal und 30 Tage, egal mit welcher E-Mail man sich registriert, sofort freigegeben; „lebenslang kostenlos“ wird mitgegeben (♾️ in der Verwaltung); Sven selbst ist ebenfalls gratis
 - Mitgliederliste als privates Projekt-Dokument (claude/ahoi-mitglieder.md) und auf dem Mac unter privat/03-mitglieder, nie im öffentlichen Repository; gepflegt in diesem Chat, kein eigener Members-Chat
 - Prototyp heißt auf dem Home-Bildschirm „Ahoi Test“ und hat ein blaues (umgekehrtes) Symbol; die echte App heißt „Ahoi“ mit dem Original-Symbol

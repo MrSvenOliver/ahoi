@@ -437,4 +437,9 @@ const TEXTE = {
   "Passwort vergessen? Neues Startpasswort setzen und der Person sagen. Sie kann es danach im Profil ändern.": ["Forgot password? Set a new starting password and tell the person. They can change it in their profile afterwards.", "Zabudnuté heslo? Nastav nové štartovacie heslo a povedz ho danej osobe. Potom si ho môže zmeniť v profile."],
   "Neues Passwort": ["New password", "Nové heslo"],
   "Länder und Rückblicke": ["Countries and recaps", "Krajiny a prehľady"],
+  "Januar bis Juni": ["January to June", "Január až jún"],
+  "Dein erstes Halbjahr {jahr}": ["Your first half of {jahr}", "Tvoj prvý polrok {jahr}"],
+  "Dein erstes Halbjahr": ["Your first half-year", "Tvoj prvý polrok"],
+  "Halbzeit. Das ist {x}-mal um die Erde.": ["Halftime. That's {x} times around the Earth.", "Polčas. To je {x}-krát okolo Zeme."],
+  "Auf ein starkes zweites Halbjahr!": ["Here's to a great second half!", "Na skvelý druhý polrok!"],
 };

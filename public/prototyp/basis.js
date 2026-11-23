@@ -4,8 +4,10 @@ const ECHT = !/\/prototyp\//.test(location.pathname);
 document.documentElement.classList.toggle("echt", ECHT);
 // App-Sprachen: Deutsch, Englisch, Slowakisch. Standard ist die iPhone-Sprache, im Profil änderbar.
 const SPRACHEN = { de: "Deutsch", en: "English", sk: "Slovenčina" };
+// Echte App und Prototyp merken sich die Sprache getrennt (sie liegen unter derselben Adresse)
+const SPRACH_SCHLUESSEL = ECHT ? "ahoi-echt-sprache" : "ahoi-sprache";
 const SPRACHE = (() => {
-  try { const g = localStorage.getItem("ahoi-sprache"); if (SPRACHEN[g]) return g; } catch (e) {}
+  try { const g = localStorage.getItem(SPRACH_SCHLUESSEL); if (SPRACHEN[g]) return g; } catch (e) {}
   const n = (navigator.language || "de").toLowerCase();
   return n.startsWith("de") ? "de" : n.startsWith("sk") ? "sk" : "en";
 })();

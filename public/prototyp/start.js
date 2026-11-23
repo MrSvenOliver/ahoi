@@ -270,5 +270,14 @@ async function abmelden() {
   location.replace(location.pathname);
 }
 
+// Sprachwahl schon vor der Anmeldung (kleines Symbol oben rechts)
+function zugangSpracheVerbinden() {
+  const FLAGGE = { de: "🇩🇪", en: "🇬🇧", sk: "🇸🇰" };
+  const knopf = document.getElementById("zugang-sprache"), liste = document.getElementById("zugang-sprachen");
+  knopf.textContent = `${FLAGGE[SPRACHE]} ${SPRACHE.toUpperCase()}`;
+  liste.innerHTML = Object.keys(SPRACHEN).map(k => `<button type="button" data-s="${k}">${FLAGGE[k]} ${SPRACHEN[k]}${k === SPRACHE ? " ✓" : ""}</button>`).join("");
+  knopf.onclick = () => { liste.hidden = !liste.hidden; };
+  liste.querySelectorAll("button").forEach(b => b.onclick = () => { try { localStorage.setItem(SPRACH_SCHLUESSEL, b.dataset.s); } catch (e) {} location.reload(); });
+}
 if (!ECHT) appLaden();
-else { formulareVerbinden(); echtStarten(); }
+else { zugangSpracheVerbinden(); formulareVerbinden(); echtStarten(); }

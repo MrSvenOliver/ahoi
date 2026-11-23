@@ -280,11 +280,30 @@ const FIGUREN = {
   krake: '<svg viewBox="0 0 62 46"><path d="M0 38.6c4-2.4 7-2.4 11 0s7 2.4 11 0 7-2.4 11 0 7 2.4 11 0 7-2.4 11 0 4 1.6 7 .8" fill="none" stroke="#5d7a86" stroke-width="1.2" stroke-linecap="round" opacity=".75"/><g class="arm l2"><path class="arm " d="M21 38.4c-4.6.9-9.4.7-13.2-1.6-2-1.2-1.9-3.6.1-3.5-.2 1.2.6 2.1 2 2.6 3.4 1.1 7.4 1 11.1.3z" fill="url(#krakenhaut)" stroke="#4a1a26" stroke-width="1.1" stroke-linejoin="round"/></g><g class="arm r2"><path class="arm " d="M41 38.4c4.6.9 9.4.7 13.2-1.6 2-1.2 1.9-3.6-.1-3.5.2 1.2-.6 2.1-2 2.6-3.4 1.1-7.4 1-11.1.3z" fill="url(#krakenhaut)" stroke="#4a1a26" stroke-width="1.1" stroke-linejoin="round"/></g><g class="arm l"><path class="arm " d="M23 38C16 36 9.5 31 8.2 24.5 7 18.6 10.6 14.4 14.8 15.6c2.2.6 2.6 3.4.6 4-1.4.4-2.4-.6-2-1.6-1.6.9-2.4 3.2-1.4 6.2 1.6 4.6 6 7.8 11.6 9.2z" fill="url(#krakenhaut)" stroke="#4a1a26" stroke-width="1.1" stroke-linejoin="round"/></g><g class="arm r"><path class="arm " d="M39 38c7-2 13.5-7 14.8-13.5 1.2-5.9-2.4-10.1-6.6-8.9-2.2.6-2.6 3.4-.6 4 1.4.4 2.4-.6 2-1.6 1.6.9 2.4 3.2 1.4 6.2-1.6 4.6-6 7.8-11.6 9.2z" fill="url(#krakenhaut)" stroke="#4a1a26" stroke-width="1.1" stroke-linejoin="round"/></g><circle cx="12.2" cy="21.6" r="0.75" fill="#f6cbd3" opacity=".9"/><circle cx="12.6" cy="25.4" r="0.9" fill="#f6cbd3" opacity=".9"/><circle cx="14.6" cy="29.2" r="1" fill="#f6cbd3" opacity=".9"/><circle cx="18" cy="32.2" r="1" fill="#f6cbd3" opacity=".9"/><circle cx="49.8" cy="21.6" r="0.75" fill="#f6cbd3" opacity=".9"/><circle cx="49.4" cy="25.4" r="0.9" fill="#f6cbd3" opacity=".9"/><circle cx="47.4" cy="29.2" r="1" fill="#f6cbd3" opacity=".9"/><circle cx="44" cy="32.2" r="1" fill="#f6cbd3" opacity=".9"/><circle cx="10.5" cy="35.6" r="0.7" fill="#f6cbd3" opacity=".9"/><circle cx="14.2" cy="36.4" r="0.75" fill="#f6cbd3" opacity=".9"/><circle cx="51.5" cy="35.6" r="0.7" fill="#f6cbd3" opacity=".9"/><circle cx="47.8" cy="36.4" r="0.75" fill="#f6cbd3" opacity=".9"/><path d="M22.4 38c-2.8-9.4-1.6-20 4.2-25.4 4.6-4.2 11.6-2.6 13.6 3.4 2 6 .4 14-1.8 22z" fill="url(#krakenhaut)" stroke="#4a1a26" stroke-width="1.3" stroke-linejoin="round"/><path d="M27.6 15.4c1.6-2 4.4-2.8 6.6-1.8" fill="none" stroke="#e9a3ae" stroke-width="1.3" stroke-linecap="round" opacity=".8"/><circle cx="34.6" cy="20" r="1" fill="#e9a3ae" opacity=".7"/><circle cx="29.4" cy="22.4" r=".8" fill="#e9a3ae" opacity=".7"/><circle cx="36.8" cy="24.6" r=".7" fill="#e9a3ae" opacity=".7"/><path d="M23.2 27.2c1.4-1.6 3.6-1.8 5-.4M33.4 26.8c1.4-1.4 3.6-1.2 4.8.4" fill="none" stroke="#4a1a26" stroke-width="1" stroke-linecap="round"/><ellipse cx="26" cy="30" rx="2.6" ry="2.3" fill="#f6ead0" stroke="#4a1a26" stroke-width=".7"/><ellipse cx="35.8" cy="30" rx="2.6" ry="2.3" fill="#f6ead0" stroke="#4a1a26" stroke-width=".7"/><rect x="24.5" y="29.4" width="3" height="1.2" rx=".6" fill="#1b1b1b"/><rect x="34.3" y="29.4" width="3" height="1.2" rx=".6" fill="#1b1b1b"/><g class="arm vorne"><path class="arm " d="M29.5 37.5c-.4 2.8-2 5-4.6 5.6-2 .5-3.2-1.2-2-2.2.5.8 1.4 1 2.3.6 1.5-.6 2.4-2.2 2.6-4.4z" fill="url(#krakenhaut)" stroke="#4a1a26" stroke-width="1.1" stroke-linejoin="round"/></g></svg>',
   welle: '<svg viewBox="0 0 34 12"><path d="M1 8c3-4 6-4 8 0s5 4 8 0 5-4 8 0 5 4 8 0" fill="none" stroke="#5d7a86" stroke-width="1.3" stroke-linecap="round"/></svg>'
 };
-// Zwei verschiedene Boote; auf dem Bildschirm ist immer höchstens eines zu sehen
-const SCHIFFE = [{ typ: "schiff", a: [-46, 26], b: [-26, 16], dauer: 80 }, { typ: "dschunke", a: [58, -9], b: [82, -17], dauer: 95 }];
-// Jedes Tier und Fabelwesen genau einmal: Wal im Nordatlantik, Seedrache im Nordpazifik, Krake im Südpazifik
-const TIERE = [{ typ: "wal", klasse: "meer-wal", pos: [-38, 47] }, { typ: "drache", klasse: "meer-drache", pos: [-152, 27] }, { typ: "krake", klasse: "meer-krake", pos: [-118, -33] }];
-const WELLEN = [[-30, 2], [-18, -30], [90, -32], [-170, 6], [-100, -48]];
+// Meeresfiguren: bei jedem Öffnen in anderen Meeren. Alle Stellen und Routen sind gegen die Landflächen geprüft
+// (in der Weltansicht liegt die ganze Figur auf Wasser; nur winzige Inseln, die dort ein Punkt sind, zählen nicht).
+const TIER_MEERE = { nordatlantik: [-40, 32], nordostatlantik: [-25, 48], suedatlantik: [-18, -28], nordpazifik: [-155, 28], westpazifik: [150, 18], ostpazifik: [-112, 8], suedpazifik: [-115, -35], indik: [78, -22], suedlicher: [0, -52] };
+const BOOT_ROUTEN = {
+  schiff: { nordatlantik: [[-44.2, 28], [-56.3, 33.1]], nordostatlantik: [[-20.8, 45.2], [-36.5, 43.2]], suedatlantik: [[-23.2, -31.9], [-18.5, -20.5]], nordpazifik: [[-149.7, 31.1], [-144.9, 22.9]], ostpazifik: [[-105.9, 3.9], [-121.2, -2.7]], suedpazifik: [[-114.9, -38.2], [-129.4, -36.9]], suedlicher: [[-4.5, -57], [8, -60.6]] },
+  dschunke: { westpazifik: [[147, 19.3], [144.6, 7.9]], tasmansee: [[164.2, -36.8], [165.6, -27.7]], indik: [[72.8, -22.4], [91.7, -19.5]], arabisches: [[66.2, 12.7], [65.7, 0.9]] }
+};
+const WELLEN_ORTE = [[-30, 2], [-18, -30], [90, -32], [-170, 6], [-100, -48], [-40, 20], [-130, -15], [70, -35], [-150, 40], [120, -45]];
+const mischen = l => l.map(x => [Math.random(), x]).sort((a, b) => a[0] - b[0]).map(x => x[1]);
+const MEER_AUSWAHL = (() => {
+  // Drei Tiere in drei verschiedenen, weit auseinanderliegenden Meeren
+  const genommen = [];
+  for (const name of mischen(Object.keys(TIER_MEERE))) {
+    const p = TIER_MEERE[name];
+    if (genommen.every(([, q]) => Math.hypot(p[0] - q[0], p[1] - q[1]) > 40)) genommen.push([name, p]);
+    if (genommen.length === 3) break;
+  }
+  const belegt = genommen.map(([n]) => n);
+  const boot = typ => { const frei = Object.keys(BOOT_ROUTEN[typ]).filter(n => !belegt.includes(n)); const n = mischen(frei)[0]; belegt.push(n); return BOOT_ROUTEN[typ][n]; };
+  const tiere = mischen(["wal", "drache", "krake"]).map((typ, i) => ({ typ, klasse: "meer-" + typ, pos: genommen[i][1] }));
+  const s = boot("schiff"), d = boot("dschunke");
+  return { tiere, schiffe: [{ typ: "schiff", a: s[0], b: s[1], dauer: 80 }, { typ: "dschunke", a: d[0], b: d[1], dauer: 95 }], wellen: mischen(WELLEN_ORTE).slice(0, 5) };
+})();
+const SCHIFFE = MEER_AUSWAHL.schiffe, TIERE = MEER_AUSWAHL.tiere, WELLEN = MEER_AUSWAHL.wellen;
 function meerFigur(html, klasse, pos) {
   const el = document.createElement("div"); el.className = "meer"; el.innerHTML = `<div class="${klasse}">${html}</div>`;
   const m = new maplibregl.Marker({ element: el, anchor: "center" }).setLngLat(pos).addTo(map);
@@ -1024,7 +1043,7 @@ document.getElementById("sprache-zeile").onclick = () => {
     <p class="sprach-hinweis">${t("Standard ist die Sprache deines Handys.")}</p>`;
   document.querySelectorAll(".sprach-option").forEach(b => b.onclick = () => {
     if (b.dataset.s === SPRACHE) return blatt.classList.remove("offen");
-    try { localStorage.setItem("ahoi-sprache", b.dataset.s); } catch (e) {}
+    try { localStorage.setItem(SPRACH_SCHLUESSEL, b.dataset.s); } catch (e) {}
     location.reload();
   });
   blatt.classList.add("offen");
@@ -1056,14 +1075,36 @@ statusAufbauen();
 // ---------- Dein Nomadenjahr (Rückblick zum Durchtippen) ----------
 const JAHR = new Date().getFullYear();
 document.getElementById("jahr-name").textContent = t("Dein Nomadenjahr {jahr}", { jahr: JAHR });
-const RB_FARBEN = {
-  modern: ["linear-gradient(160deg,#0a84ff,#5e5ce6)", "linear-gradient(160deg,#ff9f0a,#ff375f)", "linear-gradient(160deg,#30d158,#0a84ff)", "linear-gradient(160deg,#bf5af2,#ff375f)", "linear-gradient(160deg,#ff375f,#ff9f0a)", "linear-gradient(160deg,#5e5ce6,#bf5af2)", "linear-gradient(160deg,#0071e3,#30d158)"],
-  mission: Array(7).fill("radial-gradient(ellipse at 30% 20%,#0d2238,#06101c 70%)"),
-  abenteuer: ["#efe0c0", "#e9d6ad", "#efe0c0", "#e6d0a3", "#efe0c0", "#e9d6ad", "#efe0c0"]
+// Hintergrund: die Weltkarte im gewählten Stil, besuchte Länder leuchten; pro Seite schwenkt die Karte woandershin
+const RB_KARTE = {
+  modern: { meer: "#dce9f5", land: "#f7f7f4", rand: "#c9d3dc", besucht: "#0a84ff", schleier: "linear-gradient(180deg,rgba(255,255,255,.78) 0%,rgba(255,255,255,.35) 45%,rgba(255,255,255,.85) 100%)" },
+  mission: { meer: "#06101c", land: "#0d1d30", rand: "#2f8aa6", besucht: "#5fd4ea", schleier: "linear-gradient(180deg,rgba(6,16,28,.85) 0%,rgba(6,16,28,.35) 45%,rgba(6,16,28,.9) 100%)" },
+  abenteuer: { meer: "#bcc7bd", land: "#efe0c0", rand: "#8a6a48", besucht: "#c0582f", schleier: "linear-gradient(180deg,rgba(239,224,192,.85) 0%,rgba(239,224,192,.3) 45%,rgba(239,224,192,.9) 100%)" }
 };
+// Kartenausschnitt je Seite: [Mitte x, Mitte y im Kartenbild 0–360 / 6–148, Vergrößerung]
+const RB_BLICK = [[180, 70, 1.15], [200, 60, 1.6], [180, 75, 1.05], [215, 55, 2.1], [176, 52, 3.2], [241, 60, 1.6], [180, 70, 1.15]];
+const RB_BLICK_HALB = [[180, 70, 1.15], [265, 80, 1.8], [180, 75, 1.05], [190, 50, 2.4], [278, 72, 3], [180, 70, 1.15]];
+async function rbKarteZeichnen() {
+  if (!welt) { try { welt = await (await fetch("weltkarte.json")).json(); } catch (e) { welt = []; } }
+  const f = RB_KARTE[stil], svg = document.getElementById("rb-karte");
+  svg.innerHTML = `<rect x="0" y="6" width="360" height="142" fill="${f.meer}"/>` + welt.map(l => `<path d="${l.d}" fill="${besucht.includes(l.i) ? f.besucht : f.land}" fill-opacity="${besucht.includes(l.i) ? 0.85 : 1}" stroke="${f.rand}" stroke-width=".2"/>`).join("");
+  document.getElementById("rb-schleier").style.background = f.schleier;
+}
+let rbArt = "jahr";
 function rueckblickFolien() {
-  const neu = ["VN", "HR", "GR", "MX", "TH"].filter(cc => besucht.includes(cc)), km = 41230, um = (km / 40075).toLocaleString(LOC, { maximumFractionDigits: 2 });
   const pio = PIONIER.filter(cc => besucht.includes(cc));
+  if (rbArt === "halbjahr") {
+    const neu = ["VN", "TH", "ID"].filter(cc => besucht.includes(cc)), km = 18420;
+    return [
+      `<p class="rb-klein">Ahoi · ${t("Januar bis Juni")}</p><p class="rb-mittel">${t("Dein erstes Halbjahr {jahr}", { jahr: JAHR })}</p><p class="rb-text">${t("Tippe rechts zum Weiterblättern, links zurück.")}</p>`,
+      `<p class="rb-klein">${t("Neue Länder")}</p><p class="rb-gross">${neu.length}</p><div class="rb-flaggen">${neu.map(flagge).join("")}</div>`,
+      `<p class="rb-klein">${t("Zurückgelegt")}</p><p class="rb-gross">${km.toLocaleString(LOC)}<span style="font-size:.4em"> km</span></p><p class="rb-text">${t("Halbzeit. Das ist {x}-mal um die Erde.", { x: (km / 40075).toLocaleString(LOC, { maximumFractionDigits: 2 }) })}</p>`,
+      `<p class="rb-klein">${t("Treffen mit Freunden")}</p><p class="rb-gross">6</p><p class="rb-text">${t("Am häufigsten mit {name}: {n}-mal.", { name: "Jonas", n: 3 })}</p>`,
+      `<p class="rb-klein">${t("Am längsten warst du in")}</p><p class="rb-mittel">${flagge("TH")} Chiang Mai</p><p class="rb-text">${t("{n} Nächte", { n: 34 })}</p>`,
+      `<p class="rb-mittel">${t("Auf ein starkes zweites Halbjahr!")}</p><p class="rb-text">${t("Wohin geht es als Nächstes?")}</p><button class="rb-ende" id="rb-ende">${t("Schließen")}</button>`
+    ];
+  }
+  const neu = ["VN", "HR", "GR", "MX", "TH"].filter(cc => besucht.includes(cc)), km = 41230, um = (km / 40075).toLocaleString(LOC, { maximumFractionDigits: 2 });
   return [
     `<p class="rb-klein">Ahoi · ${JAHR}</p><p class="rb-mittel">${t("Dein Nomadenjahr {jahr}", { jahr: JAHR })}</p><p class="rb-text">${t("Tippe rechts zum Weiterblättern, links zurück.")}</p>`,
     `<p class="rb-klein">${t("Neue Länder")}</p><p class="rb-gross">${neu.length}</p><div class="rb-flaggen">${neu.map(flagge).join("")}</div>`,
@@ -1077,20 +1118,40 @@ function rueckblickFolien() {
 let rbStand = 0, rbUhr = null;
 function rueckblickZeigen(n) {
   const folien = rueckblickFolien(); rbStand = Math.max(0, Math.min(n, folien.length - 1));
+  const blick = (rbArt === "halbjahr" ? RB_BLICK_HALB : RB_BLICK)[rbStand] || RB_BLICK[0];
+  // Karte so verschieben, dass der Blickpunkt in der Bildmitte liegt (Kartenbild 360 × 142 Einheiten)
+  document.getElementById("rb-karte").style.transform = `translate(-50%, -50%) scale(${blick[2]}) translate(${(180 - blick[0]) / 360 * 100}%, ${(77 - blick[1]) / 142 * 100}%)`;
   const folie = document.getElementById("rb-folie");
-  folie.style.background = RB_FARBEN[stil][rbStand % 7];
-  if (stil === "abenteuer") folie.style.backgroundImage = "var(--korn)";
   folie.innerHTML = `<div class="rb-folie-ein">${folien[rbStand]}</div>`;
   document.getElementById("rb-balken").innerHTML = folien.map((_, i) => `<span class="${i < rbStand ? "fertig" : i === rbStand ? "laeuft" : ""}"><i></i></span>`).join("");
   const ende = document.getElementById("rb-ende"); if (ende) ende.onclick = rueckblickSchliessen;
   clearTimeout(rbUhr);
   if (rbStand < folien.length - 1) rbUhr = setTimeout(() => rueckblickZeigen(rbStand + 1), 6000);
 }
+async function rueckblickOeffnen(art) {
+  rbArt = art;
+  await rbKarteZeichnen();
+  document.getElementById("rueckblick").classList.add("offen");
+  rueckblickZeigen(0);
+}
 function rueckblickSchliessen() { clearTimeout(rbUhr); document.getElementById("rueckblick").classList.remove("offen"); }
-document.getElementById("jahr-zeile").onclick = () => { document.getElementById("rueckblick").classList.add("offen"); rueckblickZeigen(0); };
+document.getElementById("jahr-zeile").onclick = () => rueckblickOeffnen("jahr");
+document.getElementById("halbjahr-zeile").onclick = () => rueckblickOeffnen("halbjahr");
+document.getElementById("halbjahr-name").textContent = t("Dein erstes Halbjahr {jahr}", { jahr: JAHR });
 document.getElementById("rb-rechts").onclick = () => rueckblickZeigen(rbStand + 1);
 document.getElementById("rb-links").onclick = () => rueckblickZeigen(rbStand - 1);
 document.getElementById("rb-zu").onclick = rueckblickSchliessen;
+// Von selbst: der Jahresrückblick einmal zwischen 15. Dezember und 15. Januar, das Halbjahr einmal im Juli
+function rueckblickVonSelbst() {
+  if (ECHT) return; // in der echten App erst, wenn echte Reisedaten da sind
+  const d = new Date(), m = d.getMonth(), tag = d.getDate();
+  let art = null, schluessel = null;
+  if ((m === 11 && tag >= 15) || (m === 0 && tag <= 15)) { art = "jahr"; schluessel = "ahoi-rb-jahr-" + (m === 0 ? JAHR - 1 : JAHR); }
+  else if (m === 6) { art = "halbjahr"; schluessel = "ahoi-rb-halbjahr-" + JAHR; }
+  if (!art) return;
+  try { if (localStorage.getItem(schluessel)) return; localStorage.setItem(schluessel, "1"); } catch (e) { return; }
+  setTimeout(() => rueckblickOeffnen(art), 5200);
+}
 
 // ---------- Länder-Sammlung ----------
 const LAENDER_SCHLUESSEL = ECHT ? "ahoi-echt-laender" : "ahoi-laender";
@@ -1322,4 +1383,5 @@ blattSetzen(false);
 document.fonts && document.fonts.ready.then(() => blattSetzen(blattOffen));
 stilLaden().catch(() => hinweis("Karte konnte nicht geladen werden"));
 setTimeout(() => document.getElementById("start").classList.add("weg"), 4500);
+rueckblickVonSelbst();
 setInterval(listeAufbauen, 60000);
