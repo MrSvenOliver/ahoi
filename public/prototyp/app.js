@@ -345,7 +345,9 @@ map.on("move", () => { if (stil === "mission") hudSchreiben(); else if (stil ===
 setInterval(() => { if (stil === "mission") hudSchreiben(); }, 30000);
 function dekoSetzen() {
   let schleier = document.querySelector(".karten-schleier");
-  if (!schleier) { schleier = document.createElement("div"); schleier.className = "karten-schleier"; const leinwand = map.getCanvas(); leinwand.parentNode.insertBefore(schleier, leinwand.nextSibling); }
+  if (!schleier) { schleier = document.createElement("div"); schleier.className = "karten-schleier"; const leinwand = map.getCanvas(); leinwand.parentNode.insertBefore(schleier, leinwand.nextSibling);
+    // Mission: Radarstrahl · Abenteuer: Wolkenschatten (nur sichtbar im jeweiligen Stil)
+    ["radar-strahl", "wolken"].forEach(k => { const d = document.createElement("div"); d.className = k; d.setAttribute("aria-hidden", "true"); schleier.after(d); }); }
   if (stil === "abenteuer") { meerSetzen(); kompassDrehen(); } else meerAufraeumen();
   if (stil === "mission") hudSchreiben();
 }
@@ -377,7 +379,13 @@ const istPaar = g => g.length === 2 && g[0].paar && g[0].paar === g[1].paar;
 const FAMILIE_SIEHT = ["du", "alex"];
 const BETRACHTER = { id: "betrachter", name: t("Ich"), ort: t("Köln"), land: "DE", lat: 50.9375, lon: 6.9603, tz: "Europe/Berlin", farbe: "#8a8478" };
 let familieModus = false, familieMitStandort = false;
-const sichtbareLeute = () => familieModus ? [...leute.filter(p => FAMILIE_SIEHT.includes(p.id)), ...(familieMitStandort ? [BETRACHTER] : [])] : leute;
+const sichtbareLeute = () => familieModus ? [...leute.filter(p => FAMILIE_SIEHT.includes(p.id)), ...(familieMitStandort ? [BETRACHTER] : [])] : imKreis(leute);
+// Freundeskreise sind nur ein Filter für einen selbst; wer einen sehen kann, ändert sich dadurch nicht
+const KREIS_SYMBOLE = ["⭐", "🏄", "🍻", "🏔️", "💼", "❤️", "🌴", "🎒"];
+let kreise = ECHT ? [] : [{ id: "lieblinge", name: t("Lieblingsleute"), symbol: "⭐", leute: ["lea", "nico", "alex"] }, { id: "surf", name: t("Surf-Crew"), symbol: "🏄", leute: ["lea", "nico", "mia"] }];
+if (!ECHT) try { const g = JSON.parse(localStorage.getItem("ahoi-kreise") || "null"); if (Array.isArray(g)) kreise = g; } catch (e) {}
+let kreisFilter = "alle";
+const imKreis = liste => { const k = kreise.find(x => x.id === kreisFilter); return k ? liste.filter(p => p.id === "du" || k.leute.includes(p.id)) : liste; };
 const selbstId = () => familieModus ? "betrachter" : "du";
 function gruppenBilden() {
   const gruppen = [];
@@ -422,6 +430,7 @@ function pinsSetzen() {
     el.addEventListener("keydown", e => { if (e.key === "Enter") el.click(); });
     el.addEventListener("click", e => {
       e.stopPropagation();
+      if (stil === "mission") zielErfassen(innen);
       if (h.gruppen.length === 1) return infoZeigen(h.gruppen[0]);
       // Mehrere Orte übereinander: so weit hineinzoomen, dass sie sich trennen
       const b = new maplibregl.LngLatBounds();
@@ -437,10 +446,29 @@ function pinsSetzen() {
 let letzterPinZoom = null;
 map.on("zoomend", () => { if (letzterPinZoom === null || Math.abs(map.getZoom() - letzterPinZoom) > 0.2) { letzterPinZoom = map.getZoom(); pinsSetzen(); } });
 
+// Mission: Zielrahmen, der sich auf die angetippte Person zusammenzieht
+function zielErfassen(innen) {
+  if (ruhig) return;
+  innen.querySelectorAll(".ziel").forEach(z => z.remove());
+  const z = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  z.setAttribute("class", "ziel"); z.setAttribute("viewBox", "0 0 60 60");
+  z.innerHTML = '<path d="M2 16V2h14M44 2h14v14M58 44v14H44M16 58H2V44" fill="none" stroke="currentColor" stroke-width="2.5"/>';
+  innen.appendChild(z); setTimeout(() => z.remove(), 2600);
+}
+// Modern: Entfernungen zählen beim Öffnen hoch
+function hochzaehlen(wurzel) {
+  if (stil !== "modern" || ruhig || !wurzel) return;
+  wurzel.querySelectorAll("[data-km]").forEach(el => {
+    const ziel = +el.dataset.km; if (!(ziel >= 2)) return;
+    const start = performance.now(), dauer = 750;
+    const schritt = jetzt => { const f = Math.min(1, (jetzt - start) / dauer), e = 1 - Math.pow(1 - f, 3); el.textContent = km(Math.max(1, ziel * e)); if (f < 1) requestAnimationFrame(schritt); };
+    requestAnimationFrame(schritt);
+  });
+}
 // ---------- Liste und Infokarte ----------
 function listeAufbauen() {
   const du = ich();
-  const andere = leute.filter(p => p.id !== "du").map(p => ({ ...p, d: entfernungKm(du.lat, du.lon, p.lat, p.lon) })).sort((x, y) => x.d - y.d);
+  const andere = sichtbareLeute().filter(p => p.id !== "du").map(p => ({ ...p, d: entfernungKm(du.lat, du.lon, p.lat, p.lon) })).sort((x, y) => x.d - y.d);
   const laenderZahl = new Set(andere.map(p => p.land)).size;
   document.getElementById("zusammenfassung").textContent = `${t("{n} Freunde", { n: andere.length })} · ${t("{n} Länder", { n: laenderZahl })} · ${versionText(VERSION)}`;
   const ul = document.getElementById("liste"); ul.innerHTML = "";
@@ -451,7 +479,7 @@ function listeAufbauen() {
     const li = document.createElement("li");
     li.innerHTML = `<div class="ava" style="${kopfStil(p)}">${kopfText(p)}</div>
       <div class="zeile"><b>${ohneHtml(p.name)}</b><span>${flagge(p.land)} ${ohneHtml(p.ort)} · ${uhrzeit(p.tz)}${t(" Uhr")}${paarText}</span>${statusText(p) ? `<small class="status-klein">${ohneHtml(statusText(p))}</small>` : ""}</div>
-      <div class="weite"><b>${km(p.d)}</b><span>${t("von dir")}</span></div>`;
+      <div class="weite"><b data-km="${p.d}">${km(p.d)}</b><span>${t("von dir")}</span></div>`;
     li.onclick = () => { zuPerson(p); infoZeigen([p]); };
     ul.appendChild(li);
   }
@@ -462,7 +490,7 @@ function infoZeigen(gruppe) {
   const du = familieModus ? BETRACHTER : ich(), p = gruppe[0], info = document.getElementById("info");
   const name = gruppe.map(x => x.name).join(" & ");
   let text = (gruppe.length === 1 && statusText(p) && !familieModus ? `<span class="status-zeile">${ohneHtml(statusText(p))}</span><br>` : "") + `${flagge(p.land)} <b>${ohneHtml(p.ort)}</b> · ${t("Ortszeit")} <b>${uhrzeit(p.tz)}${t(" Uhr")}</b>`;
-  if (p.id !== du.id && (!familieModus || familieMitStandort)) text += `<br>${t("Entfernung zu dir:")} <b>${km(entfernungKm(du.lat, du.lon, p.lat, p.lon))}</b>`;
+  if (p.id !== du.id && (!familieModus || familieMitStandort)) text += `<br>${t("Entfernung zu dir:")} <b data-km="${entfernungKm(du.lat, du.lon, p.lat, p.lon)}">${km(entfernungKm(du.lat, du.lon, p.lat, p.lon))}</b>`;
   if (istPaar(gruppe)) text += `<br>${t("❤️ Paar · gerade zusammen unterwegs")}`;
   else if (gruppe.length > 1) text += `<br>${t("🤝 Zusammen unterwegs")}`;
   if (gruppe.length === 1 && !familieModus) { const n = p.id === "du" ? besucht.length : p.laender; if (n) text += `<br>${t("🌍 {n} Länder", { n })}`; }
@@ -475,7 +503,10 @@ function infoZeigen(gruppe) {
   tippKnopf.style.display = tippZahl ? "inline-block" : "none";
   tippKnopf.textContent = tippZahl ? t("💡 {n} Tipps zu {ort}", { n: tippZahl, ort: p.ort }) : "";
   tippKnopf.onclick = () => { tippsOrt = p.ort; ideenReiter = "tipps"; seiteZeigen("ideen"); ideenAufbauen(); };
+  paarKnopfSetzen(gruppe);
+  info.classList.remove("offen"); void info.offsetWidth;
   info.classList.add("offen");
+  hochzaehlen(info);
   blattSetzen(false);
 }
 document.getElementById("info-zu").onclick = () => document.getElementById("info").classList.remove("offen");
@@ -496,6 +527,7 @@ function blattPos(y) {
   blatt.style.transform = `translateY(${y}px)`;
 }
 function blattSetzen(offen) {
+  if (offen && !blattOffen) hochzaehlen(document.getElementById("liste"));
   blattOffen = offen && true;
   blatt.classList.toggle("offen", blattOffen);
   blattKopf.setAttribute("aria-expanded", blattOffen);
@@ -611,7 +643,7 @@ function stilWechseln(neu) {
   stilLaden();
 }
 // ---------- Bereiche wechseln ----------
-const seiten = ["reisen", "reise-neu", "chat", "unterhaltung", "gruppe-neu", "ideen", "idee-neu", "tipp-neu", "profil", "meine-laender", "laender", "feedback", "verwaltung", "konto"];
+const seiten = ["reisen", "reise-neu", "chat", "unterhaltung", "gruppe-neu", "ideen", "idee-neu", "tipp-neu", "profil", "meine-laender", "laender", "feedback", "verwaltung", "konto", "kreise"];
 const TAB_VON = { "reise-neu": "reisen", "idee-neu": "ideen", "tipp-neu": "ideen", "unterhaltung": "chat", "gruppe-neu": "chat" };
 function seiteZeigen(name) {
   for (const s of seiten) document.getElementById("seite-" + s).classList.toggle("offen", s === name);
@@ -987,12 +1019,11 @@ function vorschauZeigen() {
 let plaetze = 8;
 document.getElementById("pl-minus").onclick = () => { plaetze = Math.max(2, plaetze - 1); document.getElementById("pl-zahl").textContent = plaetze; };
 document.getElementById("pl-plus").onclick = () => { plaetze = Math.min(8, plaetze + 1); document.getElementById("pl-zahl").textContent = plaetze; };
-const kreise = { "Lieblingsleute": ["alex", "sam", "lea", "nico"], "Bali-Crew": ["lea", "nico", "jonas"] };
 document.querySelectorAll("#sicht-wahl button").forEach(b => b.onclick = () => {
   document.querySelectorAll("#sicht-wahl button").forEach(x => x.classList.toggle("aktiv", x === b));
   const d = document.getElementById("sicht-detail"), art = b.dataset.s;
   d.style.display = art === "alle" ? "none" : "block";
-  if (art === "kreis") d.innerHTML = Object.entries(kreise).map(([n, ids], i) => `<div class="zeile-einst"><div>${n}<small>${ids.map(id => person(id).name).join(", ")}</small></div><button class="schalter${i ? "" : " an"}"></button></div>`).join("") + `<button class="knopf-leise" style="margin-top:8px">${t("+ Neuer Kreis")}</button>`;
+  if (art === "kreis") d.innerHTML = kreise.map((k, i) => `<div class="zeile-einst"><div>${k.symbol} ${ohneHtml(k.name)}<small>${k.leute.map(person).filter(Boolean).map(p => p.name).join(", ")}</small></div><button class="schalter${i ? "" : " an"}"></button></div>`).join("") + `<button class="knopf-leise" style="margin-top:8px">${t("+ Neuer Kreis")}</button>`;
   if (art === "einzeln") d.innerHTML = `<div class="chips" style="flex-wrap:wrap;margin:0;padding:0">${leute.filter(p => p.id !== "du").map(p => `<button>${p.name}</button>`).join("")}</div>`;
   d.querySelectorAll(".schalter").forEach(x => x.onclick = () => x.classList.toggle("an"));
   d.querySelectorAll(".chips button").forEach(x => x.onclick = () => x.classList.toggle("aktiv"));
@@ -1218,6 +1249,82 @@ stempelAufbauen();
 if (!ECHT) { reisenAufbauen(); chatListeAufbauen(); ideenAufbauen(); }
 
 
+// ---------- Freundeskreise: Filter-Chips und Verwaltung ----------
+function kreisChipsAufbauen() {
+  const box = document.getElementById("kreis-chips");
+  box.innerHTML = kreise.length ? [`<button data-k="alle" class="${kreisFilter === "alle" ? "aktiv" : ""}">${t("Alle|Filter")}</button>`, ...kreise.map(k => `<button data-k="${k.id}" class="${kreisFilter === k.id ? "aktiv" : ""}">${k.symbol} ${ohneHtml(k.name)}</button>`)].join("") : "";
+  box.querySelectorAll("button").forEach(b => b.onclick = e => { e.stopPropagation(); kreisFilter = b.dataset.k; kreisChipsAufbauen(); pinsSetzen(); listeAufbauen(); });
+  document.getElementById("kreise-wert").textContent = kreise.length || "";
+}
+document.getElementById("kreis-chips").addEventListener("pointerdown", e => e.stopPropagation());
+function kreiseSpeichern() { if (!ECHT) try { localStorage.setItem("ahoi-kreise", JSON.stringify(kreise)); } catch (e) {} kreisChipsAufbauen(); }
+let neuerKreis = null;
+function kreiseSeiteAufbauen() {
+  document.getElementById("kreis-liste").innerHTML = kreise.map(k => `<div class="kasten kreis"><div class="kreis-symbol">${k.symbol}</div><div class="zeile"><b>${ohneHtml(k.name)}</b><div class="gesichter">${k.leute.map(person).filter(Boolean).map(p => ava(p)).join("")}</div></div><button class="knopf-leise" data-weg="${k.id}" aria-label="${t("Entfernen")}">✕</button></div>`).join("") || `<p class="hinweis-band">${t("Noch keine Kreise")}</p>`;
+  document.querySelectorAll("#kreis-liste [data-weg]").forEach(b => b.onclick = () => { kreise = kreise.filter(k => k.id !== b.dataset.weg); if (kreisFilter === b.dataset.weg) kreisFilter = "alle"; kreiseSpeichern(); kreiseSeiteAufbauen(); pinsSetzen(); listeAufbauen(); });
+  const form = document.getElementById("kreis-neu");
+  form.hidden = !neuerKreis; document.getElementById("kreis-plus").hidden = !!neuerKreis;
+  if (!neuerKreis) return;
+  document.getElementById("kreis-symbole").innerHTML = KREIS_SYMBOLE.map(z => `<button data-z="${z}" class="${neuerKreis.symbol === z ? "aktiv" : ""}">${z}</button>`).join("");
+  document.querySelectorAll("#kreis-symbole button").forEach(b => b.onclick = () => { neuerKreis.symbol = b.dataset.z; kreiseSeiteAufbauen(); });
+  document.getElementById("kreis-leute").innerHTML = leute.filter(p => p.id !== "du").map(p => `<button data-p="${p.id}" class="${neuerKreis.leute.includes(p.id) ? "aktiv" : ""}">${ohneHtml(p.name)}</button>`).join("");
+  document.querySelectorAll("#kreis-leute button").forEach(b => b.onclick = () => { const i = neuerKreis.leute.indexOf(b.dataset.p); if (i >= 0) neuerKreis.leute.splice(i, 1); else neuerKreis.leute.push(b.dataset.p); kreiseSeiteAufbauen(); });
+}
+document.getElementById("kreis-name").addEventListener("input", e => { if (neuerKreis) neuerKreis.name = e.target.value; });
+document.getElementById("kreis-plus").onclick = () => { neuerKreis = { id: "k" + Date.now(), name: "", symbol: "⭐", leute: [] }; document.getElementById("kreis-name").value = ""; kreiseSeiteAufbauen(); document.getElementById("kreis-name").focus(); };
+document.getElementById("kreis-speichern").onclick = () => {
+  if (!neuerKreis.name.trim()) return hinweis(t("Bitte einen Namen eingeben"));
+  if (!neuerKreis.leute.length) return hinweis(t("Bitte mindestens eine Person wählen"));
+  neuerKreis.name = neuerKreis.name.trim(); kreise.push(neuerKreis); neuerKreis = null; kreiseSpeichern(); kreiseSeiteAufbauen(); hinweis(t("Kreis gespeichert"));
+};
+document.getElementById("kreise-zeile").onclick = () => { neuerKreis = null; seiteZeigen("kreise"); kreiseSeiteAufbauen(); };
+kreisChipsAufbauen();
+
+// ---------- Paar: in der Info-Karte „Wir sind ein Paar“, die andere Person bestätigt ----------
+let paarAnfrage = null;
+const meinPartner = () => ich().paar ? leute.find(p => p.id !== "du" && p.paar === ich().paar) : null;
+function paarWertZeigen() { const p = meinPartner(); document.getElementById("paar-wert").textContent = p ? "❤️ " + p.name : paarAnfrage ? t("Anfrage gesendet") : t("Nicht verknüpft"); }
+function paarLoesen() {
+  const p = meinPartner(); if (!p) return;
+  fragen(t("Verknüpfung mit {name} lösen?", { name: p.name }), [[t("Lösen"), () => { delete p.paar; delete ich().paar; paarWertZeigen(); pinsSetzen(); hinweis(t("Verknüpfung gelöst")); }, true]]);
+}
+function paarKnopfSetzen(gruppe) {
+  const k = document.getElementById("info-paar"), p = gruppe[0];
+  const zeigen = !ECHT && !familieModus && gruppe.length === 1 && p.id !== "du" && (!p.paar || p.paar === ich().paar);
+  k.style.display = zeigen ? "inline-block" : "none";
+  if (!zeigen) return;
+  const istPartner = ich().paar && p.paar === ich().paar;
+  k.textContent = istPartner ? t("❤️ Ihr seid ein Paar") : paarAnfrage === p.id ? t("❤️ Anfrage gesendet") : t("❤️ Wir sind ein Paar");
+  k.onclick = () => {
+    if (istPartner) return paarLoesen();
+    if (paarAnfrage === p.id) return;
+    if (meinPartner()) return hinweis(t("Du bist schon mit {name} verknüpft", { name: meinPartner().name }));
+    fragen(t("Mit {name} als Paar verknüpfen? {name} bestätigt. Danach zeigt die Karte ❤️, wenn ihr am selben Ort seid.", { name: p.name }), [[t("Anfrage senden"), () => {
+      paarAnfrage = p.id; paarWertZeigen(); paarKnopfSetzen(gruppe); hinweis(t("Anfrage an {name} gesendet", { name: p.name }));
+      // Prototyp: die Bestätigung kommt nach kurzer Zeit von selbst
+      setTimeout(() => { if (paarAnfrage !== p.id) return; paarAnfrage = null; ich().paar = p.paar = "p-du"; paarWertZeigen(); pinsSetzen(); hinweis(t("{name} hat bestätigt ❤️", { name: p.name })); if (document.getElementById("info").classList.contains("offen")) paarKnopfSetzen(gruppe); }, 3500);
+    }]]);
+  };
+}
+document.getElementById("paar-zeile").onclick = () => meinPartner() ? paarLoesen() : fragen(t("So verknüpfst du dich: Tippe auf der Karte auf deinen Partner und dann auf „❤️ Wir sind ein Paar“."), [[t("Verstanden"), () => {}]]);
+paarWertZeigen();
+
+// ---------- Einladen: zuerst fragen, wen ----------
+function einladenWahl() {
+  const blatt = document.getElementById("aktion-blatt");
+  document.getElementById("aktion-titel").textContent = t("Wen lädst du ein?");
+  const box = document.getElementById("aktion-knoepfe"); box.innerHTML = "";
+  [[t("🧭 Nomaden-Freund"), t("Sieht alle Freunde auf der Karte. Sven gibt frei."), () => ECHT ? freundEinladen() : hinweis(t("Einladungslink erstellt (Beispiel)"))],
+   [t("🏡 Familie"), t("Sieht nur dich: wo du bist und wohin du reist. Ohne Freigabe."), familieEinladen]].forEach(([titel, text, f]) => {
+    const b = document.createElement("button"); b.className = "knopf-leise wahl-knopf"; b.innerHTML = `<b>${titel}</b><small>${text}</small>`;
+    b.onclick = () => { blatt.classList.remove("offen"); f(); }; box.appendChild(b);
+  });
+  blatt.classList.add("offen");
+}
+function familieEinladen() { hinweis(ECHT ? t("Familie einladen kommt bald") : t("Familien-Link erstellt (Beispiel): sieht nur dich")); }
+["einladen-zeile", "einladen-unten"].forEach(id => document.getElementById(id).onclick = einladenWahl);
+document.getElementById("familie-einladen").onclick = familieEinladen;
+
 // ---------- Echte App: Profil, Ort, Einladen, Verwaltung ----------
 const BALD = {
   reisen: ["✈️", "Reisen", "Hier trägst du bald deine Reisen ein und siehst, wann ihr euch über den Weg lauft."],
@@ -1351,7 +1458,7 @@ function echtEinrichten() {
     beschaeftigt(e.target, false);
   };
   ortSucheVerbinden(document.getElementById("ort-suche"), document.getElementById("ort-treffer"), async o => { await neuerOrt(o); document.getElementById("ort-treffer").innerHTML = ""; document.getElementById("ort-suche").value = ""; });
-  ["einladen-zeile", "einladen-unten"].forEach(id => document.getElementById(id).onclick = freundEinladen);
+
   document.getElementById("passwort-zeile").onclick = () => seiteZeigen("konto");
   document.getElementById("abmelden-zeile").onclick = () => fragen(t("Abmelden?"), [[t("Abmelden"), abmelden, true]]);
   document.getElementById("form-passwort").addEventListener("submit", async e => {
