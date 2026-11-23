@@ -10,26 +10,23 @@ Gesammelte Wünsche und Entscheidungen von Sven. Gebaut wird erst, wenn die Anfo
 - Interner Arbeitsname: Ahoi
 - Logo: A Kompassrose mit zwei Pins (Schatzkarten-Stil, ohne Text); Entwürfe heißen ahoi_logo_a-kompass_01.png usw., Endstand ahoi_logo_master.png
 - Offizieller Name: später; soll "Nomad" enthalten und wie ein Name klingen ("Nomadi", "Nomadia", "Nomado" bereits vergeben)
-- Kartenstil: A Schatzkarte (Pergament, Sepia, handgezeichnete Küsten, Kompassrose), modern und schön integriert, wenige Knöpfe, übersichtlich
 - Supabase-Keepalive: wöchentlicher automatischer Aufruf über GitHub Actions
 
-## Design
-- Schatzkarte nur in Farben und Logo: Pergament, Sepia, Terrakotta, Ozeanblau, Gold, Kompass-Logo
-- Alles andere modern: klare Fenster, moderne Schrift, keine Papier-Textur, keine Zierwellen
-- Schrift der App: Plus Jakarta Sans; Schriftzug "Ahoi" in Fraunces
-- Kartenstil wählt jeder selbst: A Pergament, B Atlas modern, C Nacht-Gold; Standard: A; kein automatischer Wechsel
-- Logo oben links rund in der runden Leiste
-- Karte füllt immer den ganzen Bildschirm, keine leeren Ränder
-- Dunkle Ansicht nur über Kartenstil C (Nachtblau mit Gold), kein automatischer Dunkelmodus
-- Animationen lebendig: Pins ploppen auf, Reiselinien zeichnen sich, Kompass dreht sich beim Laden
-- Darf nicht ruckeln: Vektorkarte über den Grafikchip, nur flüssige Animationsarten; Prüfung über den Karten-Prototyp
+## Design: drei Oberflächen
+- Drei komplett eigenständige Oberflächen mit gleichem Inhalt und gleichen Funktionen: Kartenfarben, Schrift, Knöpfe, Symbole, Fensterformen, Leiste unten und Animationen sind je Stil eigen
+- Wahl im Profil unter „Stil“ (mit kleinen Vorschaubildern); gemerkt auf dem Gerät; Standard für neue Nutzer: Modern
+- **Modern (Standard):** klar und hell nach Apples Gestaltung in iOS 26: helle Karte mit hellblauem Meer, Apple-Schrift, ein Akzentblau, schwebende Glas-Leiste unten, runde Knöpfe, Pins mit weißem Rand, Chat-Blasen wie bei iMessage
+- **Mission:** Navy-Lagezentrum im Stil der Bond-Filme: dunkles Marineblau, Cyan und Bernstein, feines Raster über der Karte, Koordinaten- und UTC-Anzeige, Schriften Rajdhani (Titel) und JetBrains Mono (Daten), eckige Formen mit Eckmarken, Radar als Startbild
+- **Abenteuer:** verspielte Schatzkarte: Pergament mit Papierkorn, Handschrift (Caveat) für Überschriften, Kompass, der sich beim Verschieben dreht, Schiffe, Wale und Wellen auf dem Meer (nur in der Weltansicht), Knöpfe mit Tiefe
+- Logo oben links in allen Stilen; Karte füllt immer den ganzen Bildschirm
+- Darf nicht ruckeln: Vektorkarte über den Grafikchip, nur flüssige Animationsarten; bei „Bewegung reduzieren“ keine Animationen
 
 ## Aufbau der App
 - Leiste unten: Karte · Reisen · Chat · Ideen
-- Profil als rundes Foto oben rechts; dort Kacheln (Freund einladen, Freundeskreise, Paar verknüpfen), Länder-Sammlung, Kartenstil, Familie, Mitteilungen, Privatsphäre
+- Profil als rundes Foto oben rechts; dort Kacheln (Freund einladen, Freundeskreise, Paar verknüpfen), Länder-Sammlung, Stil, Familie, Mitteilungen, Privatsphäre
 
 ## Kartengenauigkeit (feste Regel, kein Spielraum)
-- Echte Kartendaten aus OpenStreetMap für Küsten, Grenzen und Städte; der Schatzkarten-Look entsteht nur über Farben, Linien und Schrift
+- Echte Kartendaten aus OpenStreetMap für Küsten, Grenzen und Städte; alle drei Stile entstehen nur über Farben, Linien und Schrift
 - Nichts wird von Hand nachgezeichnet oder verschoben
 - Länderfarben und Grenzlinien aus demselben Datensatz, damit sie deckungsgleich sind
 - Entfernungen geodätisch auf dem Erdellipsoid berechnet (auf wenige Meter genau)

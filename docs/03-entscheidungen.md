@@ -2,6 +2,10 @@
 
 Jede Entscheidung mit Datum. Neue Einträge kommen oben dazu.
 
+## 23.11.2026
+- Drei eigenständige Oberflächen mit gleichem Inhalt: Modern (Standard), Mission (Navy-Lagezentrum, Cyan + Bernstein), Abenteuer (Handschrift, Papiergefühl, Schiffe und Wale auf dem Meer); Wahl im Profil
+- Ersetzt die bisherigen Kartenstile Pergament, Atlas modern und Nacht-Gold sowie die Regel „Schatzkarte nur in Farben und Logo“
+
 ## 22.11.2026
 - Komplette App schon in der Beta auf Deutsch, Englisch, Slowakisch (Texte in texte.js); Sprachwahl im Profil kleiner und dezenter
 - Infokarte und „Wer ist wo“ zeigen nur die angetippte Person, keine Hinweise auf den Partner

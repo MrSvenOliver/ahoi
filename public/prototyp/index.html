@@ -13,6 +13,8 @@
 <script>
   // Installierte App erkennen, bevor die Seite aufgebaut wird
   if (navigator.standalone || window.matchMedia("(display-mode: standalone)").matches) document.documentElement.classList.add("standalone");
+  // Oberfläche: Modern (Standard), Mission oder Abenteuer – vor dem ersten Bild setzen
+  (function () { var s = "modern"; try { s = localStorage.getItem("ahoi-oberflaeche") || s; } catch (e) {} document.documentElement.dataset.stil = ["modern", "mission", "abenteuer"].indexOf(s) >= 0 ? s : "modern"; })();
 </script>
 <link rel="manifest" href="manifest.webmanifest?v=4">
 <link rel="apple-touch-icon" href="../icons/apple-touch-icon.png?v=2">
@@ -20,7 +22,7 @@
 <link rel="preconnect" href="https://tiles.openfreemap.org" crossorigin>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@700&family=DM+Serif+Display&family=Fraunces:opsz,wght@9..144,600&family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl.css">
 <script src="https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl.js"></script>
 <style>
@@ -42,19 +44,6 @@
     --marke: var(--hand);
     --marke-gewicht: 700;
     --marke-groesse: 27px;
-  }
-  :root[data-theme="dunkel"] {
-    --papier: #1e2a36;
-    --papier-tief: #16212b;
-    --tinte: #e3c47f;
-    --tinte-weich: #c4a66a;
-    --gold: #d6b26a;
-    --karte-hinten: #16212b;
-    --glas: rgba(22, 32, 42, 0.86);
-    --glas-rand: rgba(227, 196, 127, 0.2);
-    --schatten: 0 10px 30px rgba(0, 0, 0, 0.45);
-    --text: #efe6d2;
-    --text-leise: #a9b2b8;
   }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   button, .leiste, .kopf, .blatt-kopf, .pin, .chips, .segmente, .profil-bild, .stempel { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
@@ -142,13 +131,12 @@
   .segmente button b { display: block; font-size: 15px; }
   .segmente button.aktiv { background: var(--tinte); color: var(--papier); border-color: var(--tinte); }
   /* ---------- Leiste unten ---------- */
-  :root { --leiste-h: calc(62px + env(safe-area-inset-bottom)); --flaeche: #f8f3ea; --karte-bg: #fffdf8; --trenner: rgba(90, 64, 40, 0.12); }
-  :root[data-theme="dunkel"] { --flaeche: #131c25; --karte-bg: #1c2733; --trenner: rgba(227, 196, 127, 0.12); }
+  :root { --leiste-h: calc(62px + env(safe-area-inset-bottom)); --flaeche: #f8f3ea; --karte-bg: #fffdf8; --trenner: rgba(90, 64, 40, 0.12); --rot: #c0582f; --gruen: #4f8a5b; --titel: var(--sans); --mono: ui-monospace, "SF Mono", Menlo, monospace; }
   .leiste { position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; height: var(--leiste-h); padding-bottom: env(safe-area-inset-bottom); display: grid; grid-template-columns: repeat(4, 1fr); background: var(--glas); border-top: 1px solid var(--glas-rand); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
   .leiste button { border: 0; background: transparent; color: var(--text-leise); font: inherit; font-size: 11px; font-weight: 600; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; cursor: pointer; position: relative; }
   .leiste button svg { width: 25px; height: 25px; }
   .leiste button.aktiv { color: var(--tinte); }
-  .leiste .punkt { position: absolute; top: 7px; left: calc(50% + 8px); min-width: 17px; height: 17px; border-radius: 9px; background: #c0582f; color: #fff; font-size: 10px; display: grid; place-items: center; padding: 0 4px; }
+  .leiste .punkt { position: absolute; top: 7px; left: calc(50% + 8px); min-width: 17px; height: 17px; border-radius: 9px; background: var(--rot); color: #fff; font-size: 10px; display: grid; place-items: center; padding: 0 4px; }
   .profil-knopf { position: relative; }
   .sprach-marke { position: absolute; right: -5px; bottom: -4px; width: 21px; height: 21px; border-radius: 50%; background: var(--karte-bg); border: 1.5px solid var(--gold); display: grid; place-items: center; font-size: 12px; line-height: 1; }
   .sprach-flaggen { display: flex; gap: 6px; margin: -6px 0 12px; }
@@ -209,7 +197,7 @@
   .chat-zeile .mitte { flex: 1; min-width: 0; }
   .chat-zeile .mitte b { display: flex; gap: 6px; align-items: center; font-size: 16px; }
   .chat-zeile .mitte span { display: block; font-size: 14px; color: var(--text-leise); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
-  .chat-zeile .ungelesen { min-width: 21px; height: 21px; border-radius: 11px; background: #c0582f; color: #fff; font-size: 11px; font-weight: 700; display: grid; place-items: center; padding: 0 6px; }
+  .chat-zeile .ungelesen { min-width: 21px; height: 21px; border-radius: 11px; background: var(--rot); color: #fff; font-size: 11px; font-weight: 700; display: grid; place-items: center; padding: 0 6px; }
   .marke-klein { font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 8px; border: 1px solid var(--gold); color: var(--text-leise); }
   .gespraech-kopf { display: flex; align-items: center; gap: 8px; padding-bottom: 10px; border-bottom: 1px solid var(--trenner); }
   .gespraech-kopf .zurueck { border: 0; background: transparent; font-size: 34px; color: var(--text); cursor: pointer; padding: 0 6px 4px 0; line-height: 1; font-family: inherit; }
@@ -245,7 +233,7 @@
   .ortkarte { display: flex; gap: 10px; align-items: center; }
   .ortkarte .ikon { width: 40px; height: 40px; border-radius: 10px; background: var(--trenner); display: grid; place-items: center; font-size: 18px; }
   .eingabe { display: flex; gap: 8px; align-items: center; padding: 10px 0 12px; border-top: 1px solid var(--trenner); background: var(--flaeche); }
-  .eingabe input { flex: 1; border: 1px solid var(--trenner); background: var(--karte-bg); color: var(--text); border-radius: 22px; padding: 11px 16px; font: inherit; font-size: 16px; outline: none; }
+  .eingabe input { flex: 1; min-width: 0; border: 1px solid var(--trenner); background: var(--karte-bg); color: var(--text); border-radius: 22px; padding: 11px 16px; font: inherit; font-size: 16px; outline: none; }
   .runder { width: 42px; height: 42px; border-radius: 50%; border: 0; background: var(--trenner); color: var(--tinte); font-size: 20px; display: grid; place-items: center; cursor: pointer; flex: none; }
   .runder.senden { background: var(--tinte); color: var(--papier); }
 
@@ -272,7 +260,7 @@
   .dabei-gesichter .klein-ava { width: 30px; height: 30px; font-size: 10px; margin-right: -8px; box-shadow: 0 0 0 2px var(--karte-bg); }
   .idee .aktionen .knopf-gross { flex: 1; font-size: 14px; padding: 10px 12px; }
   .idee .aktionen .knopf-gross[disabled] { opacity: 0.45; }
-  .ist-dabei { background: #4f8a5b !important; }
+  .ist-dabei { background: var(--gruen) !important; }
   .schritte div { display: flex; align-items: center; gap: 10px; padding: 6px 0; font-size: 15px; }
   .schritte span { width: 26px; height: 26px; border-radius: 50%; background: var(--tinte); color: var(--papier); display: grid; place-items: center; font-size: 13px; font-weight: 700; flex: none; }
   .knopf-riesig { width: 100%; border: 0; border-radius: 18px; padding: 20px; margin-bottom: 10px; background: #e0565b; color: #fff; font: inherit; font-size: 18px; font-weight: 800; cursor: pointer; box-shadow: 0 8px 20px rgba(224, 86, 91, 0.3); }
@@ -306,7 +294,7 @@
   .land-zeile { display: flex; align-items: center; justify-content: space-between; padding: 11px 0; border-bottom: 1px solid var(--trenner); font-size: 16px; cursor: pointer; }
   .land-zeile:last-child { border-bottom: 0; }
   .land-zeile .haken { width: 26px; height: 26px; border-radius: 50%; border: 2px solid var(--trenner); display: grid; place-items: center; font-size: 14px; color: transparent; }
-  .land-zeile.an .haken { background: #4f8a5b; border-color: #4f8a5b; color: #fff; }
+  .land-zeile.an .haken { background: var(--gruen); border-color: var(--gruen); color: #fff; }
   .abzeichen { display: flex; gap: 8px; flex-wrap: wrap; }
   .abzeichen span { font-size: 13px; font-weight: 600; padding: 6px 10px; border-radius: 12px; background: var(--trenner); }
   .zeile-einst { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 0; flex-wrap: wrap; border-bottom: 1px solid var(--trenner); font-size: 15px; }
@@ -314,7 +302,7 @@
   .zeile-einst small { display: block; color: var(--text-leise); font-size: 12px; }
   .schalter { width: 50px; height: 30px; border-radius: 15px; background: var(--trenner); position: relative; border: 0; cursor: pointer; flex: none; transition: background 0.2s; }
   .schalter::after { content: ""; position: absolute; left: 3px; top: 3px; width: 24px; height: 24px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.25); transition: transform 0.2s; }
-  .schalter.an { background: #4f8a5b; }
+  .schalter.an { background: var(--gruen); }
   .schalter.an::after { transform: translateX(20px); }
   .segmente.klein { grid-template-columns: repeat(3, 1fr); }
 
@@ -352,11 +340,234 @@
     .info { left: auto; right: 16px; width: 360px; bottom: 16px !important; margin: 0; }
     .maplibregl-ctrl-bottom-right { bottom: 0; }
   }
+
+  /* =====================================================================
+     Drei Oberflächen: gleicher Inhalt, eigenes Aussehen
+     modern = Standard (klar, hell, Apple-nah) · mission = Navy-Lagezentrum · abenteuer = verspielte Schatzkarte
+     ===================================================================== */
+  .karten-schleier { position: absolute; inset: 0; pointer-events: none; z-index: 1; }
+  .deko-ecke { position: fixed; left: 14px; bottom: calc(var(--blatt-sichtbar, 96px) + 12px); z-index: 9; pointer-events: none; display: none; transition: bottom 0.38s cubic-bezier(0.2, 0.9, 0.3, 1); }
+  html.familie .deko-ecke { bottom: calc(62vh + 12px); }
+  .start .start-modern, .start .radar { display: none; }
+  .meer { pointer-events: none; transition: opacity 0.4s; }
+  .meer.weg { opacity: 0; }
+  .stil-wahl { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .stil-wahl button { border: 1px solid var(--trenner); background: transparent; color: var(--text); border-radius: 14px; padding: 8px 6px 9px; font: inherit; font-size: 13px; font-weight: 700; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 7px; }
+  .stil-wahl button.aktiv { border-color: var(--tinte); box-shadow: 0 0 0 1.5px var(--tinte) inset; }
+  .stil-wahl .vorschau { width: 100%; aspect-ratio: 4 / 3; border-radius: 9px; position: relative; overflow: hidden; }
+  .stil-wahl .vorschau i { position: absolute; display: block; }
+
+  /* ---------- MODERN ---------- */
+  :root[data-stil="modern"] {
+    --sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", "Segoe UI", Roboto, sans-serif;
+    --titel: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", sans-serif;
+    --marke: var(--titel); --marke-gewicht: 700; --marke-groesse: 21px;
+    --papier: #ffffff; --papier-tief: #f5f5f7; --tinte: #0071e3; --tinte-weich: #3a8ef0; --gold: #d2d2d7;
+    --glas: rgba(255, 255, 255, 0.76); --glas-rand: rgba(0, 0, 0, 0.07); --schatten: 0 8px 28px rgba(0, 0, 0, 0.12);
+    --text: #1d1d1f; --text-leise: #6e6e73; --flaeche: #f5f5f7; --karte-bg: #ffffff; --trenner: rgba(0, 0, 0, 0.08);
+    --rot: #ff3b30; --gruen: #34c759;
+    --leiste-h: calc(80px + env(safe-area-inset-bottom));
+  }
+  [data-stil="modern"] .marke { padding: 5px 15px 5px 5px; gap: 7px; }
+  [data-stil="modern"] .marke img { width: 30px; height: 30px; border-radius: 9px; }
+  [data-stil="modern"] .marke span { letter-spacing: -0.4px; color: var(--text); }
+  [data-stil="modern"] .knopf { color: var(--text); }
+  [data-stil="modern"] .pin-kopf, [data-stil="modern"] .ava, [data-stil="modern"] .klein-ava, [data-stil="modern"] .profil-knopf, [data-stil="modern"] .profil-bild, [data-stil="modern"] .bildchen.person { border-color: #fff; }
+  [data-stil="modern"] .pin-kopf { border-width: 3px; box-shadow: 0 4px 14px rgba(0, 0, 0, 0.22); font-weight: 600; }
+  [data-stil="modern"] .pin-spitze { background: #fff; box-shadow: none; width: 9px; height: 9px; left: 18.5px; top: 37px; }
+  [data-stil="modern"] .pin-du .pin-kopf { border-color: #fff; box-shadow: 0 0 0 3px var(--tinte), 0 4px 14px rgba(0, 0, 0, 0.22); }
+  [data-stil="modern"] .pin-du .puls { border-color: var(--tinte); }
+  [data-stil="modern"] .herz, [data-stil="modern"] .pin-zahl { border: 0; background: #fff; color: var(--text); box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2); }
+  [data-stil="modern"] .info { border-radius: 26px; }
+  [data-stil="modern"] .blatt-kopf h2, [data-stil="modern"] .seite-kopf h1, [data-stil="modern"] .info h3 { font-family: var(--titel); letter-spacing: -0.6px; }
+  [data-stil="modern"] .seite-kopf h1 { font-size: 34px; font-weight: 700; }
+  [data-stil="modern"] .seite h2 { text-transform: none; letter-spacing: 0; font-size: 15px; font-weight: 600; color: var(--text); margin: 24px 4px 8px; }
+  [data-stil="modern"] .griff { background: #c7c7cc; opacity: 1; width: 36px; }
+  [data-stil="modern"] .liste li:active { background: rgba(0, 0, 0, 0.05); }
+  [data-stil="modern"] .weite b { color: var(--text); font-weight: 600; }
+  [data-stil="modern"] .einladen-zeile { border: 0; background: rgba(0, 113, 227, 0.08); color: var(--tinte); border-radius: 14px; font-weight: 600; }
+  @media (max-width: 899px) {
+    [data-stil="modern"] .blatt { bottom: 0 !important; padding-bottom: var(--leiste-h) !important; border-radius: 30px 30px 0 0; border-top: 1px solid var(--glas-rand); box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.1); }
+  }
+  [data-stil="modern"] .leiste { left: 14px; right: 14px; bottom: calc(env(safe-area-inset-bottom) + 8px); height: 64px; padding: 6px; border-radius: 32px; border: 1px solid var(--glas-rand); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.14); max-width: 520px; margin: 0 auto; }
+  [data-stil="modern"] .leiste button { border-radius: 26px; font-size: 10.5px; font-weight: 600; color: var(--text); gap: 2px; }
+  [data-stil="modern"] .leiste button svg { width: 24px; height: 24px; }
+  [data-stil="modern"] .leiste button.aktiv { background: rgba(0, 0, 0, 0.06); color: var(--tinte); }
+  [data-stil="modern"] .leiste .punkt { top: 3px; }
+  [data-stil="modern"] .seite { bottom: 0; padding-bottom: calc(var(--leiste-h) + 16px); }
+  [data-stil="modern"] #seite-unterhaltung { bottom: 0; padding-bottom: var(--leiste-h); }
+  html.tippt[data-stil="modern"] #seite-unterhaltung { padding-bottom: 0; }
+  [data-stil="modern"] .kasten { border: 0; border-radius: 20px; }
+  [data-stil="modern"] .knopf-gross { border-radius: 999px; font-weight: 600; padding: 11px 18px; }
+  [data-stil="modern"] .knopf-leise { border: 0; background: rgba(0, 0, 0, 0.05); border-radius: 999px; padding: 8px 14px; }
+  [data-stil="modern"] .uebersetzen-knopf.an { background: var(--tinte); color: #fff; }
+  [data-stil="modern"] .segmente { background: rgba(118, 118, 128, 0.12); padding: 2px; border-radius: 11px; gap: 2px; }
+  [data-stil="modern"] .segmente button { border: 0; border-radius: 9px; }
+  [data-stil="modern"] .segmente button.aktiv { background: #fff; color: var(--text); box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12); }
+  [data-stil="modern"] .chips button { border: 0; border-radius: 999px; background: #fff; }
+  [data-stil="modern"] .chips button.aktiv { background: var(--text); color: #fff; }
+  [data-stil="modern"] .treffer { background: linear-gradient(135deg, #0071e3, #5e5ce6); }
+  [data-stil="modern"] .reise.vielleicht { border: 1.5px dashed #c7c7cc; }
+  [data-stil="modern"] .reise.vielleicht .art { border-color: #c7c7cc; }
+  [data-stil="modern"] .reise .art .vielleicht-text, [data-stil="modern"] .etikett { color: var(--text-leise); border-color: #c7c7cc; }
+  [data-stil="modern"] .blase { border: 0; background: #e9e9eb; border-radius: 20px 20px 20px 6px; }
+  [data-stil="modern"] .msg.ich .blase { background: var(--tinte); color: #fff; border-radius: 20px 20px 6px 20px; }
+  [data-stil="modern"] .erwaehnung { color: var(--tinte); }
+  [data-stil="modern"] .msg.ich .erwaehnung { color: #fff; text-decoration: underline; }
+  [data-stil="modern"] .marke-klein { border-color: #c7c7cc; }
+  [data-stil="modern"] .stempel div { border: 0; background: #fff; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1); transform: none !important; }
+  [data-stil="modern"] .stempel .plus { background: rgba(0, 0, 0, 0.05); box-shadow: none; }
+  [data-stil="modern"] .knopf-riesig { background: #ff385c; border-radius: 16px; box-shadow: 0 8px 20px rgba(255, 56, 92, 0.28); }
+  [data-stil="modern"] .schritte span { background: var(--text); color: #fff; }
+  [data-stil="modern"] .kacheln button { border: 0; border-radius: 18px; font-weight: 600; }
+  [data-stil="modern"] .profil-oben h3 { font-family: var(--titel); font-weight: 700; letter-spacing: -0.4px; }
+  [data-stil="modern"] .start .start-modern { display: flex; flex-direction: column; align-items: center; gap: 14px; animation: auftauchen 0.7s cubic-bezier(0.2, 0.9, 0.3, 1) both; }
+  [data-stil="modern"] .start .start-modern img { width: 84px; height: 84px; border-radius: 20px; box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18); }
+  [data-stil="modern"] .start .start-modern b { font-family: var(--titel); font-size: 30px; letter-spacing: -0.8px; color: var(--text); }
+  [data-stil="modern"] .start > svg, [data-stil="modern"] .start > p { display: none; }
+  @keyframes auftauchen { from { opacity: 0; transform: scale(0.92); } to { opacity: 1; transform: none; } }
+  [data-stil="modern"] .hinweis { background: rgba(29, 29, 31, 0.92); color: #fff; }
+  [data-stil="modern"] .feedback-lasche { background: var(--text); color: #fff; }
+
+  /* ---------- MISSION ---------- */
+  :root[data-stil="mission"] {
+    --sans: "Inter", -apple-system, "Segoe UI", sans-serif;
+    --titel: "Rajdhani", "Inter", sans-serif;
+    --mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+    --marke: "Rajdhani", sans-serif; --marke-gewicht: 700; --marke-groesse: 23px;
+    --papier: #06101c; --papier-tief: #091828; --tinte: #5fd4ea; --tinte-weich: #3aa9c2; --gold: #2b6f8a; --amber: #e8a33a;
+    --glas: rgba(6, 16, 28, 0.9); --glas-rand: rgba(95, 212, 234, 0.3); --schatten: 0 12px 30px rgba(0, 0, 0, 0.55);
+    --text: #d7eef5; --text-leise: #6f97ab; --flaeche: #06101c; --karte-bg: #0a1a2c; --trenner: rgba(95, 212, 234, 0.14);
+    --rot: #ff5a5f; --gruen: #3ddc97;
+    --ecken: linear-gradient(var(--tinte), var(--tinte)) left top / 10px 1.5px no-repeat, linear-gradient(var(--tinte), var(--tinte)) left top / 1.5px 10px no-repeat,
+      linear-gradient(var(--tinte), var(--tinte)) right top / 10px 1.5px no-repeat, linear-gradient(var(--tinte), var(--tinte)) right top / 1.5px 10px no-repeat,
+      linear-gradient(var(--tinte), var(--tinte)) left bottom / 10px 1.5px no-repeat, linear-gradient(var(--tinte), var(--tinte)) left bottom / 1.5px 10px no-repeat,
+      linear-gradient(var(--tinte), var(--tinte)) right bottom / 10px 1.5px no-repeat, linear-gradient(var(--tinte), var(--tinte)) right bottom / 1.5px 10px no-repeat;
+  }
+  [data-stil="mission"] .marke, [data-stil="mission"] .knoepfe { border-radius: 4px; box-shadow: none; }
+  [data-stil="mission"] .marke img { width: 30px; height: 30px; border-radius: 3px; filter: grayscale(1) contrast(1.15) brightness(1.1); border: 1px solid var(--glas-rand); }
+  [data-stil="mission"] .marke span { text-transform: uppercase; letter-spacing: 3px; color: var(--tinte); }
+  [data-stil="mission"] .knopf { border-radius: 3px; color: var(--tinte); }
+  [data-stil="mission"] .profil-knopf, [data-stil="mission"] .ava, [data-stil="mission"] .klein-ava, [data-stil="mission"] .bildchen.person { border-radius: 10px; border: 1.5px solid var(--tinte); }
+  [data-stil="mission"] .profil-bild { border-radius: 24px; border: 1.5px solid var(--tinte); }
+  [data-stil="mission"] .pin-kopf { border-radius: 11px; border: 1.5px solid var(--tinte); box-shadow: 0 0 0 3px rgba(6, 16, 28, 0.85), 0 0 14px rgba(95, 212, 234, 0.45); font-family: var(--mono); font-size: 13px; }
+  [data-stil="mission"] .pin-spitze { transform: none; width: 2px; height: 14px; left: 22px; top: 40px; background: var(--tinte); box-shadow: 0 0 6px var(--tinte); border-radius: 0; }
+  [data-stil="mission"] .pin-du .pin-kopf { border-color: var(--amber); box-shadow: 0 0 0 3px rgba(6, 16, 28, 0.85), 0 0 16px rgba(232, 163, 58, 0.55); }
+  [data-stil="mission"] .pin-du .pin-spitze { background: var(--amber); box-shadow: 0 0 6px var(--amber); }
+  [data-stil="mission"] .pin-du .puls { border-radius: 50%; border: 1.5px solid var(--amber); animation: radar 2.6s ease-out infinite; left: -7px; top: -10px; width: 60px; height: 60px; }
+  @keyframes radar { from { transform: scale(0.5); opacity: 0.9; } to { transform: scale(1.9); opacity: 0; } }
+  [data-stil="mission"] .herz, [data-stil="mission"] .pin-zahl { border-radius: 4px; background: var(--papier); border: 1px solid var(--tinte); color: var(--tinte); font-family: var(--mono); }
+  [data-stil="mission"] .info, [data-stil="mission"] .kasten { border-radius: 3px; border: 1px solid var(--glas-rand); background: var(--ecken), var(--karte-bg); }
+  [data-stil="mission"] .info { background: var(--ecken), var(--glas); }
+  [data-stil="mission"] .info h3, [data-stil="mission"] .blatt-kopf h2, [data-stil="mission"] .seite-kopf h1, [data-stil="mission"] .profil-oben h3, [data-stil="mission"] .fam-name { font-family: var(--titel); text-transform: uppercase; letter-spacing: 2px; font-weight: 700; }
+  [data-stil="mission"] .seite-kopf h1 { font-size: 30px; color: var(--tinte); }
+  [data-stil="mission"] .seite h2, [data-stil="mission"] .blatt-kopf small, [data-stil="mission"] .fam-kopf, [data-stil="mission"] .hinweis-band, [data-stil="mission"] .system, [data-stil="mission"] .marke-klein { font-family: var(--mono); text-transform: uppercase; letter-spacing: 1px; font-size: 11px; }
+  [data-stil="mission"] .seite h2 { color: var(--amber); }
+  [data-stil="mission"] .weite b, [data-stil="mission"] .zahlen b, [data-stil="mission"] .reise .art b, [data-stil="mission"] .info p b, [data-stil="mission"] .pin-zahl, [data-stil="mission"] .zeile span, [data-stil="mission"] .reise .wann, [data-stil="mission"] .nr-daten { font-family: var(--mono); }
+  [data-stil="mission"] .zeile span { font-size: 12px; letter-spacing: -0.2px; }
+  [data-stil="mission"] .weite b { color: var(--amber); font-weight: 600; font-size: 14px; }
+  [data-stil="mission"] .blatt { border-radius: 6px 6px 0 0; border-top: 1px solid var(--tinte); box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.5); }
+  [data-stil="mission"] .griff { width: 34px; height: 2px; border-radius: 0; background: var(--tinte); opacity: 0.8; }
+  [data-stil="mission"] .liste li { border-radius: 3px; }
+  [data-stil="mission"] .liste li:active { background: rgba(95, 212, 234, 0.1); }
+  [data-stil="mission"] .einladen-zeile { border: 1px dashed var(--tinte); border-radius: 3px; color: var(--tinte); font-family: var(--mono); text-transform: uppercase; font-size: 12px; letter-spacing: 1px; }
+  [data-stil="mission"] .leiste { border-top: 1px solid var(--glas-rand); background: rgba(5, 13, 23, 0.94); }
+  [data-stil="mission"] .leiste button { font-family: var(--mono); font-size: 9.5px; text-transform: uppercase; letter-spacing: 1.2px; font-weight: 600; color: #4f7488; }
+  [data-stil="mission"] .leiste button.aktiv { color: var(--tinte); }
+  [data-stil="mission"] .leiste button.aktiv::before { content: ""; position: absolute; top: -1px; left: 28%; right: 28%; height: 2px; background: var(--amber); box-shadow: 0 0 8px var(--amber); }
+  [data-stil="mission"] .leiste .punkt { border-radius: 3px; background: var(--amber); color: #06101c; font-family: var(--mono); font-weight: 700; }
+  [data-stil="mission"] .knopf-gross { border-radius: 0; clip-path: polygon(9px 0, 100% 0, 100% calc(100% - 9px), calc(100% - 9px) 100%, 0 100%, 0 9px); background: var(--tinte); color: #06101c; font-family: var(--titel); text-transform: uppercase; letter-spacing: 1.5px; font-size: 16px; }
+  [data-stil="mission"] .knopf-leise { border-radius: 2px; border-color: var(--glas-rand); color: var(--tinte); font-family: var(--mono); font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.8px; }
+  [data-stil="mission"] .segmente button { border-radius: 2px; font-family: var(--mono); font-size: 11.5px; text-transform: uppercase; }
+  [data-stil="mission"] .segmente button.aktiv, [data-stil="mission"] .chips button.aktiv, [data-stil="mission"] .uebersetzen-knopf.an { background: var(--tinte); color: #06101c; border-color: var(--tinte); }
+  [data-stil="mission"] .chips button { border-radius: 2px; font-family: var(--mono); font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.5px; }
+  [data-stil="mission"] .schalter { border-radius: 3px; background: #10263a; }
+  [data-stil="mission"] .schalter::after { border-radius: 2px; background: #6f97ab; box-shadow: none; }
+  [data-stil="mission"] .schalter.an { background: rgba(95, 212, 234, 0.25); box-shadow: inset 0 0 0 1px var(--tinte); }
+  [data-stil="mission"] .schalter.an::after { background: var(--tinte); }
+  [data-stil="mission"] .treffer { background: rgba(232, 163, 58, 0.08); border: 1px solid var(--amber); color: var(--amber); }
+  [data-stil="mission"] .reise.vielleicht, [data-stil="mission"] .reise.vielleicht .art, [data-stil="mission"] .etikett, [data-stil="mission"] .stempel div { border-color: var(--gold); }
+  [data-stil="mission"] .reise .art { border-radius: 2px; }
+  [data-stil="mission"] .reise .art .vielleicht-text { color: var(--amber); font-family: var(--mono); font-size: 10px; text-transform: uppercase; }
+  [data-stil="mission"] .zahlen div { border-radius: 2px; }
+  [data-stil="mission"] .blase { border-radius: 2px; border: 0; border-left: 2px solid var(--tinte); background: var(--karte-bg); }
+  [data-stil="mission"] .msg.ich .blase { border-radius: 2px; border: 1px solid var(--tinte); background: rgba(95, 212, 234, 0.12); color: var(--text); }
+  [data-stil="mission"] .blase small { font-family: var(--mono); text-transform: uppercase; letter-spacing: 1px; color: var(--tinte); font-size: 10.5px; }
+  [data-stil="mission"] .erwaehnung, [data-stil="mission"] .msg.ich .erwaehnung { color: var(--amber); }
+  [data-stil="mission"] .eingabe input { border-radius: 2px; font-family: var(--mono); font-size: 15px; }
+  [data-stil="mission"] .runder { border-radius: 3px; background: transparent; border: 1px solid var(--glas-rand); color: var(--tinte); }
+  [data-stil="mission"] .runder.senden { background: var(--tinte); color: #06101c; }
+  [data-stil="mission"] .kacheln button { border-radius: 3px; border-color: var(--glas-rand); font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; }
+  [data-stil="mission"] .knopf-riesig { border-radius: 0; clip-path: polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px); box-shadow: none; font-family: var(--titel); letter-spacing: 1px; text-transform: uppercase; }
+  [data-stil="mission"] .schritte span { border-radius: 2px; background: transparent; border: 1px solid var(--tinte); color: var(--tinte); font-family: var(--mono); }
+  [data-stil="mission"] .idee .bild { filter: saturate(0.55) hue-rotate(-10deg) brightness(0.8); }
+  [data-stil="mission"] .hinweis { border-radius: 2px; background: var(--papier); color: var(--tinte); border: 1px solid var(--tinte); font-family: var(--mono); text-transform: uppercase; font-size: 11.5px; letter-spacing: 0.8px; }
+  [data-stil="mission"] .feedback-lasche { border-radius: 3px 3px 0 0; background: var(--amber); color: #06101c; font-family: var(--mono); text-transform: uppercase; letter-spacing: 1px; }
+  [data-stil="mission"] .sprach-flaggen button, [data-stil="mission"] .stil-wahl button { border-radius: 3px; }
+  [data-stil="mission"] .aktion-blatt .innen, [data-stil="mission"] .familie-blatt { border-radius: 6px 6px 0 0; border-top: 1px solid var(--tinte); }
+  [data-stil="mission"] .deko-ecke.hud { display: block; font-family: var(--mono); font-size: 10px; letter-spacing: 1px; color: var(--tinte); text-shadow: 0 0 6px rgba(95, 212, 234, 0.6); line-height: 1.6; text-transform: uppercase; }
+  [data-stil="mission"] .deko-ecke.hud b { color: var(--amber); font-weight: 600; }
+  [data-stil="mission"] .karten-schleier { background:
+      repeating-linear-gradient(0deg, rgba(95, 212, 234, 0.06) 0 1px, transparent 1px 56px),
+      repeating-linear-gradient(90deg, rgba(95, 212, 234, 0.06) 0 1px, transparent 1px 56px),
+      radial-gradient(ellipse at center, transparent 55%, rgba(2, 8, 15, 0.55) 100%); }
+  [data-stil="mission"] .start > svg { display: none; }
+  [data-stil="mission"] .start .radar { display: block; width: 160px; height: 160px; border-radius: 50%; border: 1px solid var(--glas-rand); position: relative;
+    background: repeating-radial-gradient(circle, transparent 0 26px, rgba(95, 212, 234, 0.25) 26px 27px), conic-gradient(from 0deg, rgba(95, 212, 234, 0.55), rgba(95, 212, 234, 0) 25%, transparent);
+    animation: kreisen 2.2s linear infinite; }
+  [data-stil="mission"] .start > p { display: block; font-family: var(--titel); text-transform: uppercase; letter-spacing: 8px; font-size: 24px; color: var(--tinte); bottom: 30%; }
+  @keyframes kreisen { to { transform: rotate(360deg); } }
+  [data-stil="mission"] .maplibregl-ctrl-attrib a, [data-stil="mission"] .maplibregl-ctrl-attrib { color: #3b6a80 !important; }
+
+  /* ---------- ABENTEUER ---------- */
+  :root[data-stil="abenteuer"] {
+    --sans: "Plus Jakarta Sans", -apple-system, sans-serif;
+    --titel: "Caveat", "Bradley Hand", cursive;
+    --marke: "Caveat", "Bradley Hand", cursive; --marke-gewicht: 700; --marke-groesse: 31px;
+    --korn: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .32 0 0 0 0 .22 0 0 0 0 .1 0 0 0 .11 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  [data-stil="abenteuer"] .marke, [data-stil="abenteuer"] .knoepfe, [data-stil="abenteuer"] .blatt, [data-stil="abenteuer"] .leiste, [data-stil="abenteuer"] .info, [data-stil="abenteuer"] .kasten, [data-stil="abenteuer"] .seite, [data-stil="abenteuer"] .familie-blatt, [data-stil="abenteuer"] .aktion-blatt .innen, [data-stil="abenteuer"] .start { background-image: var(--korn); }
+  [data-stil="abenteuer"] .marke, [data-stil="abenteuer"] .knoepfe { border: 1.5px solid rgba(122, 90, 58, 0.45); }
+  [data-stil="abenteuer"] .marke span { line-height: 0.9; }
+  [data-stil="abenteuer"] .blatt-kopf h2, [data-stil="abenteuer"] .seite-kopf h1, [data-stil="abenteuer"] .info h3, [data-stil="abenteuer"] .profil-oben h3, [data-stil="abenteuer"] .fam-name, [data-stil="abenteuer"] .treffer b { font-family: var(--titel); font-weight: 700; letter-spacing: 0; }
+  [data-stil="abenteuer"] .blatt-kopf h2 { font-size: 31px; line-height: 1; }
+  [data-stil="abenteuer"] .seite-kopf h1 { font-size: 42px; line-height: 1; }
+  [data-stil="abenteuer"] .info h3 { font-size: 28px; }
+  [data-stil="abenteuer"] .profil-oben h3 { font-size: 34px; }
+  [data-stil="abenteuer"] .treffer b { font-size: 24px; }
+  [data-stil="abenteuer"] .seite h2 { font-family: var(--titel); text-transform: none; letter-spacing: 0; font-size: 24px; color: var(--tinte-weich); margin: 20px 4px 4px; }
+  [data-stil="abenteuer"] .kasten { border: 1.5px solid rgba(122, 90, 58, 0.35); box-shadow: inset 0 0 0 3px var(--karte-bg), inset 0 0 0 4px rgba(122, 90, 58, 0.16); }
+  [data-stil="abenteuer"] .treffer { background-image: var(--korn), linear-gradient(135deg, #c0582f, #b8913f); box-shadow: inset 0 0 0 3px rgba(255, 248, 234, 0.25); border: 1.5px solid #8a4a26; }
+  [data-stil="abenteuer"] .fam-name { font-size: 28px; line-height: 1; }
+  [data-stil="abenteuer"] .blatt { border-top: 1.5px solid rgba(122, 90, 58, 0.45); }
+  [data-stil="abenteuer"] .leiste { border-top: 1.5px solid rgba(122, 90, 58, 0.45); }
+  [data-stil="abenteuer"] .leiste button { font-family: var(--titel); font-size: 17px; font-weight: 700; gap: 0; }
+  [data-stil="abenteuer"] .leiste button svg { width: 26px; height: 26px; }
+  [data-stil="abenteuer"] .leiste button.aktiv svg { animation: wippen 0.5s ease; }
+  @keyframes wippen { 30% { transform: rotate(-12deg) scale(1.1); } 60% { transform: rotate(8deg); } }
+  [data-stil="abenteuer"] .knopf-gross { box-shadow: 0 3px 0 rgba(48, 30, 16, 0.45); transition: transform 0.08s, box-shadow 0.08s; }
+  [data-stil="abenteuer"] .knopf-gross:active { transform: translateY(2px); box-shadow: 0 1px 0 rgba(48, 30, 16, 0.45); }
+  [data-stil="abenteuer"] .pin-innen:hover, [data-stil="abenteuer"] .pin:focus-visible .pin-innen { animation: wippen 0.6s ease; }
+  [data-stil="abenteuer"] .deko-ecke.kompass { display: block; width: 62px; height: 62px; opacity: 0.85; transition: bottom 0.38s cubic-bezier(0.2, 0.9, 0.3, 1), transform 0.6s cubic-bezier(0.2, 1.3, 0.4, 1); }
+  [data-stil="abenteuer"] .karten-schleier { background: var(--korn), radial-gradient(ellipse at center, transparent 50%, rgba(110, 70, 25, 0.28) 100%); }
+  [data-stil="abenteuer"] .start .radar, [data-stil="abenteuer"] .start .start-modern { display: none; }
+  .meer-figur { width: 40px; height: 34px; animation: schaukeln 3.4s ease-in-out infinite; transform-origin: 50% 80%; }
+  .meer-figur svg { width: 100%; height: 100%; display: block; }
+  .meer-figur.links svg { transform: scaleX(-1); }
+  .meer-wal { width: 50px; height: 30px; position: relative; animation: auftauchen-wal 9s ease-in-out infinite; }
+  .meer-wal .fontaene { position: absolute; left: 9px; top: -14px; width: 14px; height: 16px; animation: spritzen 9s ease-in-out infinite; }
+  .meer-welle { width: 30px; height: 10px; animation: welle 4s ease-in-out infinite; opacity: 0.7; }
+  @keyframes schaukeln { 0%, 100% { transform: rotate(-5deg) translateY(0); } 50% { transform: rotate(5deg) translateY(-3px); } }
+  @keyframes auftauchen-wal { 0%, 18%, 100% { opacity: 0; transform: translateY(8px); } 30%, 80% { opacity: 1; transform: translateY(0); } }
+  @keyframes spritzen { 0%, 34% { opacity: 0; transform: scaleY(0.2); transform-origin: bottom; } 40%, 52% { opacity: 1; transform: scaleY(1); } 60%, 100% { opacity: 0; } }
+  @keyframes welle { 0%, 100% { transform: translateX(0); opacity: 0.35; } 50% { transform: translateX(5px); opacity: 0.8; } }
 </style>
 </head>
 <body>
 <noscript><p style="padding:24px;font-family:sans-serif">Ahoi braucht JavaScript. Bitte in den Einstellungen aktivieren.</p></noscript>
 <div id="map"></div>
+<div class="deko-ecke hud" id="hud" aria-hidden="true"></div>
+<div class="deko-ecke kompass" id="kompass-deko" aria-hidden="true"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="44" fill="rgba(243,230,201,.85)" stroke="#7a5a3a" stroke-width="2"/><circle cx="50" cy="50" r="36" fill="none" stroke="#7a5a3a" stroke-width="0.8" stroke-dasharray="1.5 3"/><polygon points="50,8 57,44 50,50 43,44" fill="#c0582f"/><polygon points="50,92 43,56 50,50 57,56" fill="#7a5a3a"/><polygon points="8,50 44,43 50,50 44,57" fill="#7a5a3a"/><polygon points="92,50 56,57 50,50 56,43" fill="#7a5a3a"/><circle cx="50" cy="50" r="3.5" fill="#b8913f"/><text x="50" y="7" text-anchor="middle" font-family="Caveat,cursive" font-size="13" font-weight="700" fill="#4a3220" dy="-1">N</text></svg></div>
 
 <header class="kopf">
   <div class="marke"><img src="../icons/icon-192.png" alt=""><span>Ahoi</span></div>
@@ -495,8 +706,9 @@
   <h2 id="laender-titel">Länder-Sammlung</h2>
   <div class="kasten"><div class="stempel" id="stempel"></div>
     <p class="hinweis-band" style="margin-top:12px;text-align:left">Länder aus deinen Reisen kommen automatisch dazu. Frühere Länder trägst du über ＋ nach.</p></div>
-  <h2>Kartenstil</h2>
-  <div class="kasten"><div class="segmente" data-art="karte"></div></div>
+  <h2>Stil</h2>
+  <div class="kasten"><div class="stil-wahl" id="stil-wahl" role="radiogroup" aria-label="Stil"></div>
+    <p class="hinweis-band" style="margin-top:10px;text-align:left">Wechselt die ganze Oberfläche. Inhalt und Funktionen bleiben gleich.</p></div>
   <h2>Familie</h2>
   <div class="kasten">
     <p style="margin:0 0 2px;font-size:13px;color:var(--text-leise);line-height:1.4">Du lädst deine eigene Familie ein. Sie sieht nur dich: wo du bist, deine nächste Reise, alle geplanten Reisen und Vielleicht-Pläne. Sie teilt selbst nichts.</p>
@@ -517,7 +729,7 @@
   <div class="kasten">
     <div class="zeile-einst"><div>Feedback an Sven<small>Fehler oder Idee, gern mit Screenshot</small></div><button class="knopf-leise" onclick="feedbackOeffnen()">Schreiben</button></div>
   </div>
-  <p class="hinweis-band">Beispieldaten · Einstellungen werden ab Phase 2 gespeichert (Kartenstil schon jetzt)</p>
+  <p class="hinweis-band">Beispieldaten · Einstellungen werden ab Phase 2 gespeichert (Stil und Sprache schon jetzt)</p>
 </section>
 
 <section class="familie-blatt" id="familie-blatt">
@@ -539,6 +751,8 @@
 <div class="hinweis" id="hinweis"></div>
 
 <div class="start" id="start">
+  <div class="start-modern"><img src="../icons/icon-192.png" alt=""><b>Ahoi</b></div>
+  <div class="radar"></div>
   <svg viewBox="0 0 100 100" aria-hidden="true">
     <circle cx="50" cy="50" r="44" fill="none" stroke="var(--tinte)" stroke-width="1.5"/>
     <circle cx="50" cy="50" r="36" fill="none" stroke="var(--tinte)" stroke-width="0.8" stroke-dasharray="1.5 3"/>
@@ -658,46 +872,71 @@ const kuerzel = n => n === t("Du") ? t("DU") : n.slice(0, 2).toUpperCase();
 // ---------- Farben der Karte (hell / dunkel) ----------
 const dunkel = window.matchMedia("(prefers-color-scheme: dark)");
 const PALETTEN = {
-  // A: Pergament – klassische Schatzkarten-Farben, hell
-  A: {
-    thema: "hell", papier: "#efe0c0", wasser: "#bcc7bd", wasserTinte: "#5d7a86", wald: "#d3c896", wiese: "#dfd3a5", sand: "#ead7a6", eis: "#f6f0e2",
+  // Modern: helles, ruhiges Kartenbild wie Apple Karten
+  modern: {
+    papier: "#f2f2ef", wasser: "#c3dbee", wasserTinte: "#4f7fa6", wald: "#d7e9cf", wiese: "#e2eedb", sand: "#f1ead8", eis: "#ffffff",
+    stadt: "#eaeae6", haus: "#e1e1dc", hausRand: "#d2d2cc", strasseGross: "#f3c35f", strasseMittel: "#ffffff", strasseKlein: "#ffffff",
+    tinte: "#1d1d1f", tinteLeise: "#6e6e73", grenze: "#b3b3bb", halo: "#f7f7f5", relief: 0.05, landDeckkraft: 0.34, versal: false
+  },
+  // Mission: Navy-Lagezentrum mit Cyan und Bernstein
+  mission: {
+    papier: "#0d1d30", wasser: "#06101c", wasserTinte: "#3f8fa8", wald: "#0f2236", wiese: "#0f2236", sand: "#10243a", eis: "#132a40",
+    stadt: "#11263d", haus: "#163150", hausRand: "#1f4466", strasseGross: "#e8a33a", strasseMittel: "#2b6f8a", strasseKlein: "#1b3a55",
+    tinte: "#8fe0f0", tinteLeise: "#4f8fa6", grenze: "#2f8aa6", halo: "#06101c", relief: 0.05, landDeckkraft: 0.26, versal: true
+  },
+  // Abenteuer: Schatzkarte in Pergament und Sepia
+  abenteuer: {
+    papier: "#efe0c0", wasser: "#bcc7bd", wasserTinte: "#5d7a86", wald: "#d3c896", wiese: "#dfd3a5", sand: "#ead7a6", eis: "#f6f0e2",
     stadt: "#e6d3ab", haus: "#d9c5a0", hausRand: "#bea47c", strasseGross: "#b07a45", strasseMittel: "#c49c70", strasseKlein: "#d1bb94",
-    tinte: "#4a3220", tinteLeise: "#7a5a3a", grenze: "#8a6a48", halo: "#f3e6c9", relief: 0.14
-  },
-  // B: Atlas modern – helles Creme-Land, ruhiges Blaugrün, feine Linien
-  B: {
-    thema: "hell", papier: "#f5f0e6", wasser: "#cfe1e2", wasserTinte: "#5f8790", wald: "#e3e7d0", wiese: "#eaecd9", sand: "#f0e8d2", eis: "#ffffff",
-    stadt: "#eee7d9", haus: "#e5ddcc", hausRand: "#d6ccb8", strasseGross: "#e2b17a", strasseMittel: "#eccfa6", strasseKlein: "#ddd3c1",
-    tinte: "#3b3128", tinteLeise: "#8a7864", grenze: "#b8a184", halo: "#f5f0e6", relief: 0.07
-  },
-  // C: Nacht-Gold – dunkles Nachtblau mit goldenen Linien
-  C: {
-    thema: "dunkel", papier: "#1e2a36", wasser: "#101b25", wasserTinte: "#7397ab", wald: "#22302b", wiese: "#233029", sand: "#29313a", eis: "#2c3a46",
-    stadt: "#243240", haus: "#2a3947", hausRand: "#34465a", strasseGross: "#c9a45c", strasseMittel: "#8f7a54", strasseKlein: "#3a4958",
-    tinte: "#e6cf98", tinteLeise: "#bba57d", grenze: "#c9a45c", halo: "#101b25", relief: 0.1
+    tinte: "#4a3220", tinteLeise: "#7a5a3a", grenze: "#8a6a48", halo: "#f3e6c9", relief: 0.14, landDeckkraft: 0.42, versal: false
   }
 };
-// Auswahl im Prototyp (wird auf diesem Gerät gemerkt)
-const WAHL = {
-  karte: { A: ["A", t("Pergament")], B: ["B", t("Atlas modern")], C: ["C", t("Nacht-Gold")] },
-  schrift: { D: ["D", "iPhone-Schrift", 'var(--system)'], E: ["E", "Inter", '"Inter", var(--system)'], F: ["F", "Jakarta", '"Plus Jakarta Sans", var(--system)'] },
-  marke: { G: ["G", "wie Schrift", null, 800, "24px"], H: ["H", "Fraunces", '"Fraunces", Georgia, serif', 600, "25px"], I: ["I", "DM Serif", '"DM Serif Display", Georgia, serif', 400, "27px"], J: ["J", "Handschrift", 'var(--hand)', 700, "28px"] }
-};
-let auswahl = { karte: "A", schrift: "F", marke: "H" };
-try { const gemerkt = JSON.parse(localStorage.getItem("ahoi-stil") || "{}"); if (WAHL.karte[gemerkt.karte]) auswahl.karte = gemerkt.karte; } catch (e) {}
-const kartenStil = () => auswahl.karte;
-const P = () => PALETTEN[kartenStil()];
+const STILE = ["modern", "mission", "abenteuer"];
+let stil = document.documentElement.dataset.stil || "modern";
+const kartenStil = () => stil;
+const P = () => PALETTEN[stil];
 function oberflaecheAnwenden() {
   const c = P(), r = document.documentElement;
-  r.dataset.theme = c.thema;
+  r.dataset.stil = stil;
   // Streifen oben (Statusleiste) in der Farbe des Meeres auf der Karte
   document.getElementById("theme-farbe").setAttribute("content", c.wasser);
   r.style.setProperty("--karte-hinten", c.wasser);
-  r.style.setProperty("--sans", WAHL.schrift[auswahl.schrift][2]);
-  const m = WAHL.marke[auswahl.marke];
-  r.style.setProperty("--marke", m[2] || "var(--sans)");
-  r.style.setProperty("--marke-gewicht", m[3]);
-  r.style.setProperty("--marke-groesse", m[4]);
+  symboleSetzen();
+}
+// Symbole pro Stil (Leiste unten und Knöpfe oben)
+const SYMBOLE = {
+  modern: {
+    karte: '<path d="M9 4 3 6.5v13.5l6-2.5 6 2.5 6-2.5V4l-6 2.5L9 4Z"/><path d="M9 4v13.5M15 6.5V20"/>',
+    reisen: '<path d="M10.5 13.5 3 11l1.5-1.5 7.5 1 4-4.5a2 2 0 0 1 3 3l-4.5 4 1 7.5-1.5 1.5-2.5-7.5-3 3v2.5L7 22l-1-3-3-1 1.5-1.5H7l3.5-3Z"/>',
+    chat: '<path d="M4 6.5A2.5 2.5 0 0 1 6.5 4h11A2.5 2.5 0 0 1 20 6.5v7a2.5 2.5 0 0 1-2.5 2.5H10l-4.5 3.5V16h0A2 2 0 0 1 4 14Z"/>',
+    ideen: '<path d="M3 11 12 4l9 7v9h-6v-6H9v6H3v-9Z"/>',
+    welt: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.8 3 2.8 15 0 18M12 3c-2.8 3-2.8 15 0 18"/>',
+    ich: '<path d="M20 4 4 11.2l7.2 1.6L12.8 20Z"/>'
+  },
+  mission: {
+    karte: '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><path d="M12 12 18.4 5.6"/><circle cx="12" cy="12" r="1" fill="currentColor"/>',
+    reisen: '<circle cx="6" cy="18" r="2"/><circle cx="18" cy="6" r="2"/><path d="M8 18h5a3 3 0 0 0 0-6h-2a3 3 0 0 1 0-6h5"/>',
+    chat: '<circle cx="12" cy="10" r="2"/><path d="M12 12v9M8.5 6.5a5 5 0 0 0 0 7M15.5 6.5a5 5 0 0 1 0 7M5.5 3.5a9 9 0 0 0 0 13M18.5 3.5a9 9 0 0 1 0 13"/>',
+    ideen: '<path d="M4 20V9.5L12 4l8 5.5V20Z"/><circle cx="12" cy="13.5" r="3"/><path d="M12 9v1.5M12 16.5V18M7.5 13.5H9M15 13.5h1.5"/>',
+    welt: '<circle cx="12" cy="12" r="7.5"/><path d="M12 2.5v5M12 16.5v5M2.5 12h5M16.5 12h5"/>',
+    ich: '<circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2.2" fill="currentColor"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/>'
+  },
+  abenteuer: {
+    karte: '<path d="M6 4h12v14a2 2 0 0 1-2 2H6"/><path d="M6 4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2 2 2 0 0 0 2-2V6"/><path d="M12 9l3 3M15 9l-3 3"/><path d="M10.5 16.5c1.5-1.2 3.2-1.2 5 0" stroke-dasharray="1.4 1.8"/>',
+    reisen: '<path d="M12 3v13M12 4l6.5 10H12M12 6.5 7 14h5"/><path d="M3 17h18l-2.5 3.5h-13Z"/>',
+    chat: '<path d="M10 3h4v3l1.5 2.5V19a2 2 0 0 1-2 2h-3a2 2 0 0 1-2-2V8.5L10 6Z"/><path d="M10.5 11.5h3M10.5 14h3M10.5 16.5h2"/>',
+    ideen: '<path d="M2.5 20h19M5 20l7-15 7 15M12 5v15M9.5 20 12 15l2.5 5"/>',
+    welt: '<circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5Z"/>',
+    ich: '<circle cx="12" cy="5.5" r="2"/><path d="M12 7.5V21M8.5 11h7M5 14.5a7 7 0 0 0 14 0M3.5 15.5 5 14l1.5 1.5M17.5 15.5 19 14l1.5 1.5"/>'
+  }
+};
+function symbolSvg(innen, dicke) { return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${dicke}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${innen}</svg>`; }
+function symboleSetzen() {
+  const s = SYMBOLE[stil], dicke = stil === "mission" ? 1.5 : stil === "abenteuer" ? 1.7 : 1.8;
+  document.querySelectorAll("#leiste button").forEach(b => { const alt = b.querySelector("svg"); if (alt && s[b.dataset.seite]) alt.outerHTML = symbolSvg(s[b.dataset.seite], dicke); });
+  const w = document.querySelector("#knopf-welt svg"), i = document.querySelector("#knopf-ich svg");
+  if (w) w.outerHTML = symbolSvg(s.welt, dicke);
+  if (i) i.outerHTML = symbolSvg(s.ich, dicke);
 }
 function stilAnpassen(stil) {
   const c = P();
@@ -738,7 +977,9 @@ function stilAnpassen(stil) {
       l.paint["text-halo-color"] = c.halo;
       l.paint["text-halo-width"] = 1.4;
       l.paint["text-halo-blur"] = 0.5;
-      if (/country/.test(id)) { l.layout["text-letter-spacing"] = 0.04; l.layout["text-transform"] = "none"; }
+      if (/country/.test(id)) { l.layout["text-letter-spacing"] = c.versal ? 0.18 : 0.04; l.layout["text-transform"] = c.versal ? "uppercase" : "none"; }
+      else if (c.versal && /place/.test(id)) { l.layout["text-transform"] = "uppercase"; l.layout["text-letter-spacing"] = 0.1; }
+      if (stil === "abenteuer" && /water_name|waterway/.test(id)) l.layout["text-font"] = ["Noto Sans Italic"];
       if (/water_name/.test(id)) { l.layout["text-letter-spacing"] = 0.08; l.minzoom = Math.max(l.minzoom || 0, 2); }
     }
   }
@@ -803,12 +1044,66 @@ function ebenenHinzufuegen() {
   const vorBeschriftung = "waterway_line_label";
   map.addLayer({ id: "laender-farbe", type: "fill", source: "laender", maxzoom: 7,
     filter: ["in", ["get", "iso"], ["literal", laenderMitLeuten]],
-    paint: { "fill-color": zuordnung, "fill-opacity": ["interpolate", ["linear"], ["zoom"], 0, 0.42, 4.5, 0.32, 6.5, 0] } }, vorBeschriftung);
+    paint: { "fill-color": zuordnung, "fill-opacity": ["interpolate", ["linear"], ["zoom"], 0, c.landDeckkraft, 4.5, c.landDeckkraft * 0.76, 6.5, 0] } }, vorBeschriftung);
   map.addLayer({ id: "laender-linie", type: "line", source: "laender", maxzoom: 7,
     paint: { "line-color": c.grenze, "line-width": ["interpolate", ["linear"], ["zoom"], 0, 0.5, 5, 1.1], "line-opacity": ["interpolate", ["linear"], ["zoom"], 0, 0.85, 5.5, 0.85, 6.5, 0] } }, vorBeschriftung);
 
   pinsSetzen();
+  dekoSetzen();
   map.once("idle", () => setTimeout(() => document.getElementById("start").classList.add("weg"), 300));
+}
+
+// ---------- Deko pro Stil ----------
+// Nur Schmuck: Raster und Anzeige bei Mission, Kompass und Figuren auf dem Meer bei Abenteuer. Karte und Inhalt bleiben gleich.
+const ruhig = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+let meerMarker = [], meerUhr = null;
+const FIGUREN = {
+  schiff: '<svg viewBox="0 0 40 34"><path d="M20 3v20M20 4l11 15H20M20 7.5l-9 11.5h9" fill="#f6ead0" stroke="#5a3d22" stroke-width="1.6" stroke-linejoin="round"/><path d="M4 23h32l-5 7H9Z" fill="#8a5a33" stroke="#5a3d22" stroke-width="1.6" stroke-linejoin="round"/><path d="M20 3l6 2.2-6 2.2" fill="#c0582f" stroke="#5a3d22" stroke-width="1"/></svg>',
+  wal: '<svg viewBox="0 0 50 30"><path d="M4 19c0-6 8-9 18-9 9 0 15 4 18 8l6-4-1.5 7 1.5 6-6-3c-3 3-9 4-17 4C11 28 4 25 4 19Z" fill="#7d97a2" stroke="#3f5560" stroke-width="1.4" stroke-linejoin="round"/><circle cx="12" cy="17" r="1.4" fill="#2b3a42"/><path d="M8 22.5c4 1.6 9 2 14 1.5" stroke="#3f5560" stroke-width="1" fill="none"/></svg><svg class="fontaene" viewBox="0 0 14 16"><path d="M7 16V7M7 7C5 4 3 3 1 3M7 7c2-3 4-4 6-4M7 9C6 5 7 2 7 0" stroke="#5d7a86" stroke-width="1.3" fill="none" stroke-linecap="round"/></svg>',
+  welle: '<svg viewBox="0 0 30 10"><path d="M1 6q3.5-4 7 0t7 0 7 0 7 0" fill="none" stroke="#5d7a86" stroke-width="1.4" stroke-linecap="round"/></svg>'
+};
+const SCHIFFE = [[[-50, 33], [-24, 22], 70], [[60, -11], [86, -21], 85], [[-152, 16], [-124, 4], 95]];
+const WALE = [[-28, -40], [-140, -26], [165, 38]];
+const WELLEN = [[-40, 9], [-14, -16], [74, -36], [-160, 33], [150, -30], [-102, -44], [6, -50], [42, -56], [-60, 45], [100, 10]];
+function meerFigur(html, klasse, pos) {
+  const el = document.createElement("div"); el.className = "meer"; el.innerHTML = `<div class="${klasse}">${html}</div>`;
+  const m = new maplibregl.Marker({ element: el, anchor: "center" }).setLngLat(pos).addTo(map);
+  meerMarker.push(m); return m;
+}
+function meerAufraeumen() { meerMarker.forEach(m => m.remove()); meerMarker = []; clearInterval(meerUhr); meerUhr = null; }
+function meerSetzen() {
+  meerAufraeumen();
+  WELLEN.forEach((p, i) => { const m = meerFigur(FIGUREN.welle, "meer-welle", p); m.getElement().firstChild.style.animationDelay = (i * 0.37) + "s"; });
+  WALE.forEach((p, i) => { const m = meerFigur(FIGUREN.wal, "meer-wal", p); m.getElement().firstChild.style.animationDelay = (i * 2.8) + "s"; m.getElement().querySelector(".fontaene").style.animationDelay = (i * 2.8) + "s"; });
+  const schiffe = SCHIFFE.map(([a, b, dauer], i) => ({ a, b, dauer, m: meerFigur(FIGUREN.schiff, "meer-figur", a), start: i * 23 }));
+  const fahren = () => {
+    const jetzt = Date.now() / 1000;
+    for (const s of schiffe) {
+      const phase = ((jetzt + s.start) % (2 * s.dauer)) / s.dauer, hin = phase < 1, f = hin ? phase : 2 - phase;
+      const w = (1 - Math.cos(f * Math.PI)) / 2;
+      s.m.setLngLat([s.a[0] + (s.b[0] - s.a[0]) * w, s.a[1] + (s.b[1] - s.a[1]) * w]);
+      s.m.getElement().firstChild.classList.toggle("links", (s.b[0] > s.a[0]) !== hin);
+    }
+  };
+  fahren();
+  if (!ruhig) meerUhr = setInterval(fahren, 120);
+  meerSichtbarkeit();
+}
+function meerSichtbarkeit() { const weit = map.getZoom() < 5.5; meerMarker.forEach(m => m.getElement().classList.toggle("weg", !weit)); }
+map.on("zoomend", () => { if (meerMarker.length) meerSichtbarkeit(); });
+function hudSchreiben() {
+  const c = map.getCenter(), z = new Date();
+  const k = (v, p, n) => Math.abs(v).toFixed(2) + "°" + (v >= 0 ? p : n);
+  document.getElementById("hud").innerHTML = `${k(c.lat, "N", "S")} · ${k(c.lng, "E", "W")}<br>ZOOM ${map.getZoom().toFixed(1)} · <b>${String(z.getUTCHours()).padStart(2, "0")}:${String(z.getUTCMinutes()).padStart(2, "0")}Z</b>`;
+}
+function kompassDrehen() { document.getElementById("kompass-deko").style.transform = `rotate(${(map.getCenter().lng * 0.6).toFixed(1)}deg)`; }
+map.on("move", () => { if (stil === "mission") hudSchreiben(); else if (stil === "abenteuer") kompassDrehen(); });
+setInterval(() => { if (stil === "mission") hudSchreiben(); }, 30000);
+function dekoSetzen() {
+  let schleier = document.querySelector(".karten-schleier");
+  if (!schleier) { schleier = document.createElement("div"); schleier.className = "karten-schleier"; const leinwand = map.getCanvas(); leinwand.parentNode.insertBefore(schleier, leinwand.nextSibling); }
+  if (stil === "abenteuer") { meerSetzen(); kompassDrehen(); } else meerAufraeumen();
+  if (stil === "mission") hudSchreiben();
 }
 
 // ---------- Pins ----------
@@ -937,8 +1232,10 @@ function blattSetzen(offen) {
   blatt.classList.toggle("offen", blattOffen);
   blattKopf.setAttribute("aria-expanded", blattOffen);
   blattPos(blattOffen ? 0 : blattZuY());
-  document.documentElement.style.setProperty("--blatt-sichtbar", (blatt.offsetHeight - blattZuY() + document.getElementById("leiste").offsetHeight) + "px");
+  document.documentElement.style.setProperty("--blatt-sichtbar", (blatt.offsetHeight - blattZuY() + (parseFloat(getComputedStyle(blatt).bottom) || 0)) + "px");
 }
+// Höhe neu messen, wenn sich der Kopf ändert (Schrift geladen, Stil oder Sprache gewechselt)
+if (window.ResizeObserver) new ResizeObserver(() => blattSetzen(blattOffen)).observe(blattKopf);
 let zug = null;
 blattKopf.addEventListener("pointerdown", e => {
   if (breit()) return;
@@ -978,6 +1275,7 @@ document.getElementById("knopf-welt").onclick = () => {
   map.flyTo({ center: START_MITTE, zoom: startZoom(), speed: 1.2, essential: true });
 };
 
+function leisteRaum() { const l = document.getElementById("leiste"); return l.offsetParent === null ? 0 : Math.max(0, window.innerHeight - l.getBoundingClientRect().top); }
 function hinweis(t) {
   const h = document.getElementById("hinweis"); h.textContent = hatText(t) ? window.t(t) : t; h.classList.add("zeigen");
   clearTimeout(hinweis.t); hinweis.t = setTimeout(() => h.classList.remove("zeigen"), 2600);
@@ -1027,25 +1325,22 @@ document.addEventListener("visibilitychange", () => { if (document.visibilitySta
 aufNeueVersionPruefen();
 
 // ---------- Stil-Auswahl ----------
-function stilwahlAufbauen() {
-  document.querySelectorAll(".segmente[data-art]").forEach(box => {
-    const art = box.dataset.art; box.innerHTML = "";
-    for (const [schluessel, werte] of Object.entries(WAHL[art])) {
-      const b = document.createElement("button");
-      b.innerHTML = `<b>${werte[0]}</b>${werte[1]}`;
-      if (art === "schrift") b.style.fontFamily = werte[2];
-      if (art === "marke") { b.querySelector("b").style.fontFamily = werte[2] || "var(--sans)"; b.querySelector("b").textContent = werte[0] + " Ahoi"; }
-      b.classList.toggle("aktiv", auswahl[art] === schluessel);
-      b.onclick = () => {
-        const vorher = kartenStil();
-        auswahl[art] = schluessel;
-        try { localStorage.setItem("ahoi-stil", JSON.stringify(auswahl)); } catch (e) {}
-        oberflaecheAnwenden(); stilwahlAufbauen(); blattSetzen(blattOffen);
-        if (kartenStil() !== vorher) stilLaden();
-      };
-      box.appendChild(b);
-    }
-  });
+const STIL_VORSCHAU = {
+  modern: '<span class="vorschau" style="background:#c3dbee"><i style="left:-10%;top:20%;width:70%;height:55%;background:#f2f2ef;border-radius:45%"></i><i style="left:38%;top:34%;width:14px;height:14px;border-radius:50%;background:#0071e3;border:2px solid #fff"></i><i style="left:12%;right:12%;bottom:6%;height:9px;border-radius:9px;background:rgba(255,255,255,.9)"></i></span>',
+  mission: '<span class="vorschau" style="background:#06101c;background-image:linear-gradient(rgba(95,212,234,.15) 1px,transparent 1px),linear-gradient(90deg,rgba(95,212,234,.15) 1px,transparent 1px);background-size:9px 9px"><i style="left:-10%;top:20%;width:70%;height:55%;border:1px solid #2f8aa6;border-radius:45%"></i><i style="left:38%;top:34%;width:13px;height:13px;border-radius:4px;border:1.5px solid #e8a33a"></i><i style="left:6%;right:6%;bottom:6%;height:1px;background:#5fd4ea"></i></span>',
+  abenteuer: '<span class="vorschau" style="background:#bcc7bd"><i style="left:-10%;top:20%;width:70%;height:55%;background:#efe0c0;border:1.5px solid #8a6a48;border-radius:45%"></i><i style="left:38%;top:34%;width:14px;height:14px;border-radius:50%;background:#c0582f;border:2px solid #b8913f"></i><i style="right:8%;top:10%;width:14px;height:14px;border-radius:50%;border:1px solid #7a5a3a"></i></span>'
+};
+function stilWahlAufbauen() {
+  const box = document.getElementById("stil-wahl");
+  box.innerHTML = STILE.map(k => `<button data-stil="${k}" role="radio" aria-checked="${k === stil}" class="${k === stil ? "aktiv" : ""}">${STIL_VORSCHAU[k]}${t({ modern: "Modern", mission: "Mission", abenteuer: "Abenteuer" }[k])}</button>`).join("");
+  box.querySelectorAll("button").forEach(b => b.onclick = () => stilWechseln(b.dataset.stil));
+}
+function stilWechseln(neu) {
+  if (neu === stil) return;
+  stil = neu;
+  try { localStorage.setItem("ahoi-oberflaeche", stil); } catch (e) {}
+  oberflaecheAnwenden(); stilWahlAufbauen(); blattSetzen(blattOffen);
+  stilLaden();
 }
 // ---------- Bereiche wechseln ----------
 const seiten = ["reisen", "reise-neu", "chat", "unterhaltung", "gruppe-neu", "ideen", "idee-neu", "profil", "laender", "feedback"];
@@ -1401,7 +1696,7 @@ function familieAufbauen() {
     const naechte = r ? Math.round((datum(r.bis) - datum(r.von)) / 864e5) : 0;
     const weitere = reisen.filter(x => x !== r && x.wer.includes(p.id) && (x.vielleicht || x.bis >= heute));
     return `<div class="fam-karte" data-id="${p.id}"><div class="ava" style="background:${p.farbe}">${kuerzel(p.name)}</div><div style="flex:1">
-      <b>${p.name}</b><div class="wo">${flagge(p.land)}&nbsp; ${t(p.id === "du" ? "bist in" : "ist in")} <b style="display:inline;font-size:16px">${p.ort}</b></div>
+      <b class="fam-name">${p.name}</b><div class="wo">${flagge(p.land)}&nbsp; ${t(p.id === "du" ? "bist in" : "ist in")} <b style="display:inline;font-size:16px">${p.ort}</b></div>
       <div class="klein">${t("Dort ist es {z} Uhr", { z: uhrzeit(p.tz) })}${familieMitStandort ? " · " + t("{km} von dir", { km: km(entfernungKm(du.lat, du.lon, p.lat, p.lon)) }) : ""}</div>
       ${r ? `<div class="naechste"><span class="nr-titel">${t("✈︎ Nächste Reise")}</span><span class="nr-ort">${flagge(r.land)}&nbsp; ${r.ziel}</span><span class="nr-daten">${kurz(r.von)} – ${kurz(r.bis)} · ${naechte} ${t(naechte === 1 ? "Nacht" : "Nächte")}</span></div>` : ""}
       ${weitere.length ? `<div class="weitere">${weitere.map(x => `${flagge(x.land)} ${x.ziel} · ${x.von ? kurz(x.von) + "–" + kurz(x.bis) : t("vielleicht im {m}", { m: datum(x.monat + "-01").toLocaleDateString(LOC, { month: "long" }) })}`).join("<br>")}</div>` : ""}
@@ -1460,7 +1755,7 @@ reisenAufbauen(); chatListeAufbauen(); ideenAufbauen();
 
 // ---------- Start ----------
 oberflaecheAnwenden();
-stilwahlAufbauen();
+stilWahlAufbauen();
 listeAufbauen();
 blattSetzen(false);
 document.fonts && document.fonts.ready.then(() => blattSetzen(blattOffen));
