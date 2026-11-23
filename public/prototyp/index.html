@@ -667,6 +667,85 @@
       repeating-linear-gradient(90deg, rgba(95, 212, 234, 0.06) 0 1px, transparent 1px 56px),
       radial-gradient(ellipse at center, transparent 55%, rgba(2, 8, 15, 0.6) 100%); }
   [data-stil="mission"] .marke span::after { content: ""; display: inline-block; width: 6px; height: 6px; margin-left: 8px; vertical-align: 3px; background: var(--amber); box-shadow: 0 0 8px var(--amber); }
+
+  /* Status, Meine Länder, Rückblick, Tipps */
+  .status-zeile { display: inline-block; font-size: 13.5px; font-weight: 600; color: var(--text); background: var(--trenner); border-radius: 999px; padding: 3px 10px; margin: 2px 0 6px; }
+  .zeile .status-klein { display: block; font-size: 12.5px; color: var(--text-leise); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .status-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .status-chips button { border: 1px solid var(--trenner); background: var(--karte-bg); color: var(--text); border-radius: 999px; padding: 7px 12px; font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; }
+  .status-chips button.aktiv { background: var(--tinte); border-color: var(--tinte); color: var(--papier); }
+  .status-eigen { display: none; gap: 8px; margin-top: 10px; }
+  .status-eigen.offen { display: flex; }
+  .status-eigen input { flex: 1; min-width: 0; border: 1px solid var(--trenner); background: var(--flaeche); color: var(--text); border-radius: 12px; padding: 10px 12px; font: inherit; font-size: 16px; }
+  .info-knoepfe { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+  .info-knoepfe .knopf-leise:empty { display: none !important; }
+  .ml-kopf { display: flex; align-items: center; gap: 16px; }
+  .ml-ring { width: 84px; height: 84px; flex: none; transform: rotate(-90deg); }
+  .ml-ring circle { fill: none; stroke-width: 6; }
+  .ml-ring-hinten { stroke: var(--trenner); }
+  .ml-ring-vorne { stroke: var(--tinte); stroke-linecap: round; transition: stroke-dasharray 0.8s cubic-bezier(0.2, 0.9, 0.3, 1); }
+  .ml-ring text { transform: rotate(90deg); transform-origin: 32px 32px; font: 700 15px var(--sans); fill: var(--text); }
+  .ml-zahl { font-size: 30px; line-height: 1; font-family: var(--titel); }
+  .ml-unter { font-size: 14px; color: var(--text-leise); margin-top: 4px; }
+  .ml-karte { padding: 8px; overflow: hidden; }
+  #rubbelkarte { width: 100%; display: block; border-radius: 10px; }
+  #rubbelkarte path { stroke-width: 0.25; transition: fill 0.5s ease; cursor: pointer; }
+  #rubbelkarte path.frei { animation: freirubbeln 0.6s ease; }
+  @keyframes freirubbeln { 0% { opacity: 0.3; } 100% { opacity: 1; } }
+  .ml-zeile { display: flex; align-items: center; justify-content: space-between; margin: 18px 0 0; }
+  .ml-zeile h2 { margin: 0 !important; }
+  .kontinent { margin-top: 10px; }
+  .kontinent b { display: block; font-size: 14px; margin: 0 2px 6px; color: var(--text-leise); }
+  .kontinent .laender-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .kontinent .laender-chips span { background: var(--karte-bg); border: 1px solid var(--trenner); border-radius: 999px; padding: 5px 10px; font-size: 13px; }
+  .reiter { margin: 0 0 12px; }
+  .tipp { padding: 14px 16px; margin-bottom: 10px; }
+  .tipp .tipp-kopf { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 13px; color: var(--text-leise); }
+  .tipp .tipp-art { font-weight: 700; color: var(--text); }
+  .tipp p { margin: 8px 0 10px; font-size: 15px; line-height: 1.45; }
+  .tipp .tipp-fuss { display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: var(--text-leise); }
+  .tipp .tipp-fuss .klein-ava { width: 24px; height: 24px; font-size: 10px; margin-right: 6px; display: inline-grid; vertical-align: middle; }
+  .daumen { border: 1px solid var(--trenner); background: transparent; color: var(--text); border-radius: 999px; padding: 5px 11px; font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; }
+  .daumen.an { background: var(--tinte); color: var(--papier); border-color: var(--tinte); }
+  .rueckblick { position: fixed; inset: 0; z-index: 90; display: none; color: #fff; }
+  .rueckblick.offen { display: block; }
+  .rb-folie { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: flex-start; padding: 80px 30px calc(60px + env(safe-area-inset-bottom)); transition: background 0.5s; }
+  .rb-folie .rb-klein { font-size: 18px; font-weight: 600; opacity: 0.85; margin: 0 0 10px; }
+  .rb-folie .rb-gross { font-size: 76px; line-height: 0.95; font-weight: 800; letter-spacing: -2px; margin: 0; font-family: var(--titel); }
+  .rb-folie .rb-mittel { font-size: 38px; line-height: 1.05; font-weight: 800; letter-spacing: -0.8px; margin: 0; font-family: var(--titel); }
+  .rb-folie .rb-text { font-size: 19px; line-height: 1.4; margin: 14px 0 0; opacity: 0.92; max-width: 320px; }
+  .rb-folie .rb-flaggen { font-size: 34px; letter-spacing: 6px; margin-top: 18px; }
+  .rb-folie .rb-folie-ein { animation: folieEin 0.55s cubic-bezier(0.2, 0.9, 0.3, 1) both; }
+  @keyframes folieEin { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+  .rb-balken { position: absolute; top: calc(env(safe-area-inset-top) + 12px); left: 14px; right: 14px; display: flex; gap: 4px; z-index: 2; }
+  .rb-balken span { flex: 1; height: 3px; border-radius: 2px; background: rgba(255, 255, 255, 0.35); overflow: hidden; }
+  .rb-balken span i { display: block; height: 100%; width: 0; background: #fff; }
+  .rb-balken span.fertig i { width: 100%; }
+  .rb-balken span.laeuft i { animation: balken 6s linear forwards; }
+  @keyframes balken { to { width: 100%; } }
+  .rb-zu { position: absolute; top: calc(env(safe-area-inset-top) + 24px); right: 12px; z-index: 3; width: 40px; height: 40px; border-radius: 50%; border: 0; background: rgba(0, 0, 0, 0.25); color: #fff; font-size: 18px; cursor: pointer; }
+  .rb-links, .rb-rechts { position: absolute; top: 70px; bottom: 0; z-index: 1; }
+  .rb-links { left: 0; width: 30%; } .rb-rechts { right: 0; width: 70%; }
+  .rb-ende { margin-top: 26px; z-index: 4; position: relative; background: #fff; color: #111; border: 0; border-radius: 999px; padding: 12px 22px; font: inherit; font-weight: 700; font-size: 16px; cursor: pointer; }
+  [data-stil="mission"] .rueckblick { color: var(--text); }
+  [data-stil="mission"] .rb-folie .rb-gross, [data-stil="mission"] .rb-folie .rb-mittel { font-family: var(--schablone); letter-spacing: 1px; color: var(--tinte); font-weight: 400; }
+  [data-stil="mission"] .rb-folie .rb-klein { font-family: var(--mono); text-transform: uppercase; letter-spacing: 2px; font-size: 13px; color: var(--amber); }
+  [data-stil="mission"] .rb-balken span i { background: var(--tinte); }
+  [data-stil="mission"] .rb-ende { background: var(--tinte); color: #06101c; border-radius: 2px; font-family: var(--titel); text-transform: uppercase; letter-spacing: 1.5px; }
+  [data-stil="abenteuer"] .rueckblick { color: #3a2414; }
+  [data-stil="abenteuer"] .rb-folie { background-image: var(--korn); }
+  [data-stil="abenteuer"] .rb-folie .rb-gross, [data-stil="abenteuer"] .rb-folie .rb-mittel { font-weight: 700; letter-spacing: 0; }
+  [data-stil="abenteuer"] .rb-folie .rb-gross { font-size: 92px; }
+  [data-stil="abenteuer"] .rb-balken span { background: rgba(58, 36, 20, 0.2); } [data-stil="abenteuer"] .rb-balken span i { background: #3a2414; }
+  [data-stil="abenteuer"] .rb-zu { background: rgba(58, 36, 20, 0.15); color: #3a2414; }
+  [data-stil="abenteuer"] .rb-ende { background: #3a2414; color: #f3e6c9; box-shadow: 0 3px 0 rgba(48, 30, 16, 0.45); }
+  [data-stil="mission"] .status-chips button, [data-stil="mission"] .daumen, [data-stil="mission"] .kontinent .laender-chips span { border-radius: 2px; }
+  [data-stil="mission"] .status-chips button.aktiv { background: var(--tinte); color: #06101c; }
+  [data-stil="mission"] .status-zeile { border-radius: 2px; background: rgba(232, 163, 58, 0.12); color: var(--amber); }
+  [data-stil="mission"] .ml-ring-vorne { stroke: var(--tinte); filter: drop-shadow(0 0 4px rgba(95, 212, 234, 0.6)); }
+  [data-stil="modern"] .status-chips button, [data-stil="modern"] .daumen, [data-stil="modern"] .kontinent .laender-chips span { border: 0; background: linear-gradient(180deg, #fff, rgba(255, 255, 255, 0.75)); box-shadow: inset 0 1px 0 #fff, 0 0 0 0.5px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.06); }
+  [data-stil="modern"] .status-chips button.aktiv, [data-stil="modern"] .daumen.an { background: linear-gradient(180deg, #389bff, #0071e3); color: #fff; box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45), 0 4px 12px rgba(0, 113, 227, 0.3); }
+  [data-stil="abenteuer"] .status-chips button.aktiv { box-shadow: 0 2px 0 rgba(48, 30, 16, 0.4); }
 </style>
 </head>
 <body>
@@ -697,7 +776,7 @@
   </div>
 </header>
 
-<div class="info" id="info"><button class="knopf zu" id="info-zu" aria-label="Schließen" style="font-size:17px">✕</button><h3></h3><p></p><button class="knopf-leise" id="info-chat" style="margin-top:10px;display:none">💬 Nachricht schreiben</button></div>
+<div class="info" id="info"><button class="knopf zu" id="info-zu" aria-label="Schließen" style="font-size:17px">✕</button><h3></h3><p></p><div class="info-knoepfe"><button class="knopf-leise" id="info-chat" style="display:none">💬 Nachricht schreiben</button><button class="knopf-leise" id="info-tipps" style="display:none"></button></div></div>
 
 <section class="blatt" id="blatt">
   <div class="blatt-kopf" id="blatt-kopf" role="button" tabindex="0" aria-expanded="false" aria-controls="liste">
@@ -767,9 +846,17 @@
 <!-- Ideen -->
 <section class="seite" id="seite-ideen">
   <div class="seite-kopf"><h1>Ideen</h1><button class="knopf-gross" id="idee-neu">+ Teilen</button></div>
-  <div class="chips" id="ideen-filter"></div>
-  <div id="ideen-liste"></div>
-  <p class="hinweis-band">Ideen mit Zeitraum verschwinden nach dem Abreisetag von selbst</p>
+  <div class="segmente reiter" id="ideen-reiter"><button class="aktiv" data-r="unterkunft">Unterkünfte</button><button data-r="tipps">Tipps</button></div>
+  <div id="bereich-unterkunft">
+    <div class="chips" id="ideen-filter"></div>
+    <div id="ideen-liste"></div>
+    <p class="hinweis-band">Ideen mit Zeitraum verschwinden nach dem Abreisetag von selbst</p>
+  </div>
+  <div id="bereich-tipps" style="display:none">
+    <div class="chips" id="tipps-filter"></div>
+    <div id="tipps-liste"></div>
+    <p class="hinweis-band">Tipps von Freunden für Freunde · Daumen hoch zeigt, was sich bewährt hat</p>
+  </div>
 </section>
 
 <!-- Idee teilen -->
@@ -798,6 +885,33 @@
 </section>
 
 <!-- Länder nachtragen -->
+<section class="seite" id="seite-meine-laender">
+  <div class="seite-kopf"><h1>Meine Länder</h1><button class="knopf-leise" data-zurueck="profil">Fertig</button></div>
+  <div class="kasten ml-kopf">
+    <svg class="ml-ring" viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="27" class="ml-ring-hinten"/><circle cx="32" cy="32" r="27" class="ml-ring-vorne" id="ml-ring"/><text x="32" y="37" text-anchor="middle" id="ml-ring-text"></text></svg>
+    <div><b class="ml-zahl" id="ml-zahl"></b><div class="ml-unter" id="ml-kont"></div><div class="ml-unter" id="ml-pionier"></div></div>
+  </div>
+  <div class="kasten ml-karte"><svg id="rubbelkarte" viewBox="0 6 360 142" role="img" aria-label="Weltkarte mit deinen Ländern"></svg>
+    <p class="hinweis-band" style="margin:8px 0 0">Tippe auf ein Land, um es freizurubbeln oder wieder abzudecken.</p></div>
+  <div class="ml-zeile"><h2>Nach Kontinenten</h2><button class="knopf-leise" id="ml-bearbeiten">Bearbeiten</button></div>
+  <div id="ml-kontinente"></div>
+</section>
+<section class="seite" id="seite-tipp-neu">
+  <div class="seite-kopf"><h1>Tipp teilen</h1><button class="knopf-leise" data-zurueck="ideen">Abbrechen</button></div>
+  <div class="kasten formular">
+    <label>Ort<input id="tipp-ort" placeholder="z. B. Lissabon" autocomplete="off"></label>
+    <div style="font-size:13px;font-weight:600;color:var(--text-leise);margin-bottom:8px">Art</div>
+    <div class="chips" id="tipp-arten" style="flex-wrap:wrap;margin:0 0 14px;padding:0"></div>
+    <label>Dein Tipp<textarea id="tipp-text" rows="4" style="display:block;width:100%;margin-top:6px;border:1px solid var(--trenner);background:var(--flaeche);color:var(--text);border-radius:12px;padding:12px;font:inherit;font-size:16px" placeholder="Kurz und konkret, z. B. wo, wann, worauf achten"></textarea></label>
+  </div>
+  <button class="knopf-gross" style="width:100%" id="tipp-speichern">Teilen</button>
+</section>
+<div class="rueckblick" id="rueckblick" aria-modal="true" role="dialog">
+  <div class="rb-balken" id="rb-balken"></div>
+  <button class="rb-zu" id="rb-zu" aria-label="Schließen">✕</button>
+  <div class="rb-folie" id="rb-folie"></div>
+  <div class="rb-links" id="rb-links"></div><div class="rb-rechts" id="rb-rechts"></div>
+</div>
 <section class="seite" id="seite-laender">
   <div class="seite-kopf"><h1>Länder</h1><button class="knopf-leise" data-zurueck="profil">Fertig</button></div>
   <div class="kasten formular"><label>Land suchen<input id="land-suche" placeholder="z. B. Japan" autocomplete="off"></label></div>
@@ -840,12 +954,17 @@
     <div class="profil-oben">
       <div class="profil-bild">DU<span class="kamera">📷</span></div>
       <h3>Du</h3>
-      <p>„Surfen in Ericeira 🏄“ · Stadt sichtbar</p>
+      <p id="mein-status-anzeige"></p>
     </div>
+    <span class="einst-unter" style="margin-top:14px">Status</span>
+    <div class="status-chips" id="status-chips"></div>
+    <div class="status-eigen" id="status-eigen"><input id="status-text" maxlength="40" placeholder="Was machst du gerade?" autocomplete="off"><button class="knopf-gross" id="status-ok">Fertig</button></div>
+    <p class="hinweis-band" style="margin:10px 0 0;text-align:left">Freunde sehen deinen Status, wenn sie dich antippen, und in „Wer ist wo?“. Nochmal antippen entfernt ihn.</p>
   </div>
-  <h2 id="laender-titel">Länder-Sammlung</h2>
-  <div class="kasten"><div class="stempel" id="stempel"></div>
-    <p class="hinweis-band" style="margin-top:12px;text-align:left">Länder aus deinen Reisen kommen automatisch dazu. Frühere Länder trägst du über ＋ nach.</p></div>
+  <div class="kasten einst-gruppe">
+    <button class="einst-zeile" id="laender-zeile"><span class="einst-symbol sym-gruen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M5 8.5c2 .8 3 2.6 2.4 4.6-.4 1.4.6 2.6 2 2.4M15 4.4c-.8 1.6-.2 3 1.4 3.4 1.6.4 2.4 1.8 1.6 3.4M13.5 20.4c.2-1.8 1.4-2.8 3-3"/></svg></span><span class="einst-name">Meine Länder</span><span class="einst-wert" id="laender-wert"></span><span class="einst-pfeil">›</span></button>
+    <button class="einst-zeile" id="jahr-zeile"><span class="einst-symbol sym-lila"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5l1.8 4.9 4.9 1.8-4.9 1.8L12 16.9l-1.8-4.9-4.9-1.8 4.9-1.8z"/><path d="M18.5 15.5l.8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2-2.2-.8 2.2-.8z"/></svg></span><span class="einst-name" id="jahr-name">Dein Nomadenjahr</span><span class="einst-pfeil">›</span></button>
+  </div>
   <h2>Mehr</h2>
   <div class="kasten">
     <div class="zeile-einst"><div>Feedback an Sven<small>Fehler oder Idee, gern mit Screenshot</small></div><button class="knopf-leise" onclick="feedbackOeffnen()">Schreiben</button></div>
@@ -936,6 +1055,18 @@ const leute = [
   { id: "jonas", name: "Jonas", ort: "Chiang Mai",  land: "TH", lat: 18.7883, lon: 98.9853,  tz: "Asia/Bangkok",        farbe: "#b98a2e" },
   { id: "ben",   name: "Ben",   ort: "Chiang Mai",  land: "TH", lat: 18.7953, lon: 98.9620,  tz: "Asia/Bangkok",        farbe: "#5a6fa0" },
 ];
+// Beispieldaten: Status und Anzahl Länder der Freunde
+Object.assign(leute.find(p => p.id === "alex"), { status: "treffen", laender: 23 });
+Object.assign(leute.find(p => p.id === "sam"), { status: "basis", laender: 9 });
+Object.assign(leute.find(p => p.id === "lea"), { status: "sport", laender: 31 });
+Object.assign(leute.find(p => p.id === "nico"), { laender: 18 });
+Object.assign(leute.find(p => p.id === "mia"), { status: "angekommen", laender: 14 });
+Object.assign(leute.find(p => p.id === "jonas"), { status: "arbeit", laender: 27 });
+Object.assign(leute.find(p => p.id === "ben"), { laender: 12 });
+// Status zum Antippen; „Unterwegs“ gibt es bewusst nicht, das ist bei Nomaden immer so
+const STATUS_VORLAGEN = { treffen: "☕ Lust auf ein Treffen", angekommen: "🌱 Gerade angekommen, Tipps willkommen", unterkunft: "🔍 Suche Unterkunft", mitreisende: "👥 Suche Mitreisende", arbeit: "💻 Arbeitsphase", sport: "🏄 Sport und Abenteuer", basis: "🏡 An meiner Basis", ruhe: "🔕 Bitte nicht stören" };
+try { const g = localStorage.getItem("ahoi-status"); leute[0].status = g === null ? "sport" : JSON.parse(g); } catch (e) { leute[0].status = "sport"; }
+const statusText = p => !p.status ? "" : STATUS_VORLAGEN[p.status] ? t(STATUS_VORLAGEN[p.status]) : (p.status.text || "");
 const ich = () => leute.find(p => p.id === "du");
 leute.forEach(p => p.ort = t(p.ort)); ich().name = t("Du");
 
@@ -1338,7 +1469,7 @@ function listeAufbauen() {
     if (dabei.length) paarText = ` · ${t("mit")} ${dabei.map(q => q.name).join(", ")}`;
     const li = document.createElement("li");
     li.innerHTML = `<div class="ava" style="background:${p.farbe}">${kuerzel(p.name)}</div>
-      <div class="zeile"><b>${p.name}</b><span>${flagge(p.land)} ${p.ort} · ${uhrzeit(p.tz)}${t(" Uhr")}${paarText}</span></div>
+      <div class="zeile"><b>${p.name}</b><span>${flagge(p.land)} ${p.ort} · ${uhrzeit(p.tz)}${t(" Uhr")}${paarText}</span>${statusText(p) ? `<small class="status-klein">${ohneHtml(statusText(p))}</small>` : ""}</div>
       <div class="weite"><b>${km(p.d)}</b><span>${t("von dir")}</span></div>`;
     li.onclick = () => { zuPerson(p); infoZeigen([p]); };
     ul.appendChild(li);
@@ -1348,15 +1479,20 @@ function listeAufbauen() {
 function infoZeigen(gruppe) {
   const du = familieModus ? BETRACHTER : ich(), p = gruppe[0], info = document.getElementById("info");
   const name = gruppe.map(x => x.name).join(" & ");
-  let text = `${flagge(p.land)} <b>${p.ort}</b> · ${t("Ortszeit")} <b>${uhrzeit(p.tz)}${t(" Uhr")}</b>`;
+  let text = (gruppe.length === 1 && statusText(p) && !familieModus ? `<span class="status-zeile">${ohneHtml(statusText(p))}</span><br>` : "") + `${flagge(p.land)} <b>${p.ort}</b> · ${t("Ortszeit")} <b>${uhrzeit(p.tz)}${t(" Uhr")}</b>`;
   if (p.id !== du.id && (!familieModus || familieMitStandort)) text += `<br>${t("Entfernung zu dir:")} <b>${km(entfernungKm(du.lat, du.lon, p.lat, p.lon))}</b>`;
   if (istPaar(gruppe)) text += `<br>${t("❤️ Paar · gerade zusammen unterwegs")}`;
   else if (gruppe.length > 1) text += `<br>${t("🤝 Zusammen unterwegs")}`;
+  if (gruppe.length === 1 && !familieModus) { const n = p.id === "du" ? besucht.length : p.laender; if (n) text += `<br>${t("🌍 {n} Länder", { n })}`; }
   info.querySelector("h3").textContent = name;
   info.querySelector("p").innerHTML = text;
   const chatKnopf = document.getElementById("info-chat");
   chatKnopf.style.display = !familieModus && gruppe.length === 1 && p.id !== "du" ? "inline-block" : "none";
   chatKnopf.onclick = () => einzelChat(p.id);
+  const tippKnopf = document.getElementById("info-tipps"), tippZahl = familieModus ? 0 : tipps.filter(x => x.ort === p.ort).length;
+  tippKnopf.style.display = tippZahl ? "inline-block" : "none";
+  tippKnopf.textContent = tippZahl ? t("💡 {n} Tipps zu {ort}", { n: tippZahl, ort: p.ort }) : "";
+  tippKnopf.onclick = () => { tippsOrt = p.ort; ideenReiter = "tipps"; seiteZeigen("ideen"); ideenAufbauen(); };
   info.classList.add("offen");
   blattSetzen(false);
 }
@@ -1493,8 +1629,8 @@ function stilWechseln(neu) {
   stilLaden();
 }
 // ---------- Bereiche wechseln ----------
-const seiten = ["reisen", "reise-neu", "chat", "unterhaltung", "gruppe-neu", "ideen", "idee-neu", "profil", "laender", "feedback"];
-const TAB_VON = { "reise-neu": "reisen", "idee-neu": "ideen", "unterhaltung": "chat", "gruppe-neu": "chat" };
+const seiten = ["reisen", "reise-neu", "chat", "unterhaltung", "gruppe-neu", "ideen", "idee-neu", "tipp-neu", "profil", "meine-laender", "laender", "feedback"];
+const TAB_VON = { "reise-neu": "reisen", "idee-neu": "ideen", "tipp-neu": "ideen", "unterhaltung": "chat", "gruppe-neu": "chat" };
 function seiteZeigen(name) {
   for (const s of seiten) document.getElementById("seite-" + s).classList.toggle("offen", s === name);
   document.querySelectorAll("#leiste button").forEach(b => b.setAttribute("aria-current", b.dataset.seite === name ? "page" : "false"));
@@ -1567,6 +1703,7 @@ const chats = [
     { von: "lea", ort: "Lissabon · Alfama", text: "Hier haben wir unser Airbnb", lang: "de", ue: { en: "This is where our Airbnb is", sk: "Tu máme naše Airbnb" } },
     { system: "🧭 Treffer: <b>Du</b>, <b>Lea</b> & <b>Nico</b> seid vom 10. bis 15.1. in Lissabon" },
     { von: "nico", text: "@Du perfekt, dann gehen wir zusammen surfen 🏄", lang: "de", ue: { en: "@You perfect, then we'll go surfing together 🏄", sk: "@Ty super, tak pôjdeme spolu surfovať 🏄" }, reaktion: "❤️ 3" },
+    { system: "🚩 Neues Pionier-Land: <b>Mia</b> war vor allen anderen in Kolumbien" },
     { von: "jonas", text: "Anyone around Chiang Mai in February? We found a great coworking space 🙌", lang: "en", ue: { de: "Ist im Februar jemand in der Nähe von Chiang Mai? Wir haben einen tollen Coworking-Space gefunden 🙌", sk: "Je niekto vo februári v okolí Chiang Mai? Našli sme skvelý coworking 🙌" } },
     { von: "mia", sprache: "0:14" },
   ] },
@@ -1731,7 +1868,19 @@ const ideen = [
   { id: "chiangmai", von: "ben", art: "Gästehaus", ort: "Chiang Mai", land: "TH", bewertung: "", zimmer: "1 Schlafzimmer", gaeste: 3, notiz: "Günstig für länger", zeitraum: "flexibel", preis: null, plaetze: 3, dabei: [], sicht: "👤 3 Personen", herzen: 1, kommentare: 0, quelle: "booking.com", farbe: "linear-gradient(135deg,#f0dca8,#b98a2e)" },
 ];
 ideen.forEach(i => { i.art = t(i.art); i.ort = t(i.ort); if (i.zeitraum) i.zeitraum = t(i.zeitraum); i.sicht = t(i.sicht); });
-let ideenFilter = "alle";
+let ideenFilter = "alle", ideenReiter = "unterkunft", tippsFilter = "alle", tippsOrt = null;
+// Ortstipps von Freunden (Beispieldaten); Text bleibt in der Sprache der Person, die ihn geschrieben hat
+const TIPP_ARTEN = { cafe: "☕ Café", essen: "🍽️ Essen", erleben: "🏄 Erleben", arbeiten: "💻 Arbeiten", praktisch: "🧭 Praktisches" };
+const tipps = [
+  { von: "lea", ort: "Lissabon", land: "PT", art: "cafe", text: "Kleines Café am Aussichtspunkt in Graça: morgens fast leer, mit Blick über die ganze Stadt.", daumen: ["alex", "nico"] },
+  { von: "alex", ort: "Lissabon", land: "PT", art: "arbeiten", text: "Coworking in Cais do Sodré mit schnellem WLAN, Tagespass möglich.", daumen: ["lea"] },
+  { von: "nico", ort: "Lissabon", land: "PT", art: "erleben", text: "Surfstunden in Carcavelos, mit dem Zug in etwa 20 Minuten erreichbar.", daumen: [] },
+  { von: "jonas", ort: "Chiang Mai", land: "TH", art: "essen", text: "Khao Soi auf dem Sonntags-Nachtmarkt, unbedingt probieren.", daumen: ["ben", "mia"] },
+  { von: "ben", ort: "Chiang Mai", land: "TH", art: "praktisch", text: "SIM-Karte direkt am Flughafen holen, im Zentrum ist es umständlicher.", daumen: ["jonas"] },
+  { von: "lea", ort: "Canggu, Bali", land: "ID", art: "erleben", text: "Sonnenuntergang am Echo Beach, früh da sein für einen guten Platz.", daumen: ["nico", "alex", "jonas"] },
+  { von: "mia", ort: "Oaxaca", land: "MX", art: "essen", text: "Kochkurs für Mole auf dem Markt, sehr zu empfehlen.", daumen: [] }
+];
+tipps.forEach(x => x.ort = t(x.ort));
 // „Preis ansehen“: öffnet die Unterkunft mit Zeitraum und Personenzahl; aktueller Preis und Verfügbarkeit kommen immer von der Seite selbst.
 // Im Prototyp gibt es keine echten Inserat-Links, deshalb die Suche am Ort.
 function ansehenLink(i) {
@@ -1757,7 +1906,26 @@ function gebuchtMelden(i) {
   ideenAufbauen();
   hinweis(t("In Reisen eingetragen für {wer}", { wer: wer.map(id => id === "du" ? t("dich") : person(id).name).join(", ") }));
 }
+function tippsAufbauen() {
+  const laender = ["alle", ...new Set(tipps.map(x => x.land))];
+  document.getElementById("tipps-filter").innerHTML = (tippsOrt ? `<button class="aktiv" data-ort="1">📍 ${ohneHtml(tippsOrt)} ✕</button>` : "") +
+    laender.map(l => `<button data-l="${l}" class="${!tippsOrt && l === tippsFilter ? "aktiv" : ""}">${l === "alle" ? t("Alle|Filter") : flagge(l) + " " + landName(l)}</button>`).join("");
+  document.querySelectorAll("#tipps-filter button").forEach(b => b.onclick = () => { if (b.dataset.ort) tippsOrt = null; else { tippsOrt = null; tippsFilter = b.dataset.l; } tippsAufbauen(); });
+  const sichtbar = tipps.filter(x => tippsOrt ? x.ort === tippsOrt : tippsFilter === "alle" || x.land === tippsFilter).sort((a, b) => b.daumen.length - a.daumen.length);
+  document.getElementById("tipps-liste").innerHTML = sichtbar.map(x => {
+    const p = person(x.von), an = x.daumen.includes("du");
+    return `<div class="kasten tipp"><div class="tipp-kopf"><span class="tipp-art">${t(TIPP_ARTEN[x.art])}</span><span>${flagge(x.land)} ${ohneHtml(x.ort)}</span></div>
+      <p>${ohneHtml(x.text)}</p>
+      <div class="tipp-fuss"><span><span class="klein-ava" style="background:${p.farbe}">${kuerzel(p.name)}</span>${p.name}</span><button class="daumen${an ? " an" : ""}" data-i="${tipps.indexOf(x)}">👍 ${x.daumen.length}</button></div></div>`;
+  }).join("");
+  document.querySelectorAll("#tipps-liste .daumen").forEach(b => b.onclick = () => { const x = tipps[b.dataset.i], k = x.daumen.indexOf("du"); if (k >= 0) x.daumen.splice(k, 1); else x.daumen.push("du"); tippsAufbauen(); });
+}
 function ideenAufbauen() {
+  document.querySelectorAll("#ideen-reiter button").forEach(b => b.classList.toggle("aktiv", b.dataset.r === ideenReiter));
+  document.getElementById("bereich-unterkunft").style.display = ideenReiter === "unterkunft" ? "" : "none";
+  document.getElementById("bereich-tipps").style.display = ideenReiter === "tipps" ? "" : "none";
+  document.getElementById("idee-neu").textContent = t(ideenReiter === "tipps" ? "+ Tipp" : "+ Teilen");
+  if (ideenReiter === "tipps") tippsAufbauen();
   const laender = ["alle", ...new Set(ideen.map(i => i.land))];
   document.getElementById("ideen-filter").innerHTML = laender.map(l => `<button data-l="${l}" class="${l === ideenFilter ? "aktiv" : ""}">${l === "alle" ? t("Alle|Filter") : flagge(l) + " " + new Intl.DisplayNames([SPRACHE], { type: "region" }).of(l)}</button>`).join("");
   document.querySelectorAll("#ideen-filter button").forEach(b => b.onclick = () => { ideenFilter = b.dataset.l; ideenAufbauen(); });
@@ -1805,7 +1973,21 @@ document.getElementById("mitteilungen").innerHTML = [["Neue Chat-Nachricht", "Be
   .map(([a, u], i) => `<div class="zeile-einst"><div>${t(a)}${u ? `<small>${t(u)}</small>` : ""}</div><button class="schalter${i < 2 ? " an" : ""}"></button></div>`).join("");
 document.querySelectorAll("#mitteilungen .schalter").forEach(b => b.onclick = () => b.classList.toggle("an"));
 
-document.getElementById("idee-neu").onclick = () => seiteZeigen("idee-neu");
+document.getElementById("idee-neu").onclick = () => {
+  if (ideenReiter !== "tipps") return seiteZeigen("idee-neu");
+  document.getElementById("tipp-ort").value = tippsOrt || ich().ort; document.getElementById("tipp-text").value = "";
+  document.getElementById("tipp-arten").innerHTML = Object.keys(TIPP_ARTEN).map((k, i) => `<button data-a="${k}" class="${i === 0 ? "aktiv" : ""}">${t(TIPP_ARTEN[k])}</button>`).join("");
+  document.querySelectorAll("#tipp-arten button").forEach(b => b.onclick = () => document.querySelectorAll("#tipp-arten button").forEach(x => x.classList.toggle("aktiv", x === b)));
+  seiteZeigen("tipp-neu");
+};
+document.querySelectorAll("#ideen-reiter button").forEach(b => b.onclick = () => { ideenReiter = b.dataset.r; ideenAufbauen(); });
+document.getElementById("tipp-speichern").onclick = () => {
+  const ort = document.getElementById("tipp-ort").value.trim(), text = document.getElementById("tipp-text").value.trim();
+  if (!ort || !text) return hinweis(t("Bitte Ort und Tipp ausfüllen"));
+  const bekannt = [...leute, ...tipps].find(x => x.ort.toLowerCase() === ort.toLowerCase());
+  tipps.unshift({ von: "du", ort, land: bekannt ? bekannt.land : ich().land, art: document.querySelector("#tipp-arten .aktiv").dataset.a, text, daumen: [] });
+  tippsOrt = null; tippsFilter = "alle"; seiteZeigen("ideen"); ideenAufbauen(); hinweis(t("Tipp geteilt"));
+};
 document.getElementById("einfuegen").onclick = async () => {
   try { document.getElementById("idee-link").value = await navigator.clipboard.readText(); vorschauZeigen(); }
   catch (e) { document.querySelector(".mehr-optionen").open = true; hinweis("Link bitte ins Feld einfügen"); document.getElementById("idee-link").focus(); }
@@ -1885,14 +2067,110 @@ document.getElementById("sprache-zeile").onclick = () => {
   blatt.classList.add("offen");
 };
 
+// ---------- Status ----------
+function statusAufbauen() {
+  const du = ich(), eigen = du.status && !STATUS_VORLAGEN[du.status];
+  document.getElementById("mein-status-anzeige").textContent = statusText(du) || t("Kein Status");
+  document.getElementById("status-chips").innerHTML = Object.keys(STATUS_VORLAGEN).map(k => `<button data-k="${k}" class="${du.status === k ? "aktiv" : ""}">${t(STATUS_VORLAGEN[k])}</button>`).join("") +
+    `<button data-k="__eigen" class="${eigen ? "aktiv" : ""}">${eigen ? "✏️ " + ohneHtml(du.status.text) : t("✏️ Eigener")}</button>`;
+  document.querySelectorAll("#status-chips button").forEach(b => b.onclick = () => {
+    const k = b.dataset.k;
+    if (k === "__eigen") { const box = document.getElementById("status-eigen"); box.classList.toggle("offen"); document.getElementById("status-text").value = eigen ? du.status.text : ""; if (box.classList.contains("offen")) document.getElementById("status-text").focus(); return; }
+    statusSetzen(du.status === k ? null : k);
+  });
+}
+function statusSetzen(wert) {
+  ich().status = wert;
+  try { localStorage.setItem("ahoi-status", JSON.stringify(wert)); } catch (e) {}
+  document.getElementById("status-eigen").classList.remove("offen");
+  statusAufbauen(); listeAufbauen();
+}
+document.getElementById("status-ok").onclick = () => { const v = document.getElementById("status-text").value.trim(); statusSetzen(v ? { text: v } : null); };
+document.getElementById("status-text").addEventListener("keydown", e => { if (e.key === "Enter") document.getElementById("status-ok").click(); });
+statusAufbauen();
+
+// ---------- Dein Nomadenjahr (Rückblick zum Durchtippen) ----------
+const JAHR = new Date().getFullYear();
+document.getElementById("jahr-name").textContent = t("Dein Nomadenjahr {jahr}", { jahr: JAHR });
+const RB_FARBEN = {
+  modern: ["linear-gradient(160deg,#0a84ff,#5e5ce6)", "linear-gradient(160deg,#ff9f0a,#ff375f)", "linear-gradient(160deg,#30d158,#0a84ff)", "linear-gradient(160deg,#bf5af2,#ff375f)", "linear-gradient(160deg,#ff375f,#ff9f0a)", "linear-gradient(160deg,#5e5ce6,#bf5af2)", "linear-gradient(160deg,#0071e3,#30d158)"],
+  mission: Array(7).fill("radial-gradient(ellipse at 30% 20%,#0d2238,#06101c 70%)"),
+  abenteuer: ["#efe0c0", "#e9d6ad", "#efe0c0", "#e6d0a3", "#efe0c0", "#e9d6ad", "#efe0c0"]
+};
+function rueckblickFolien() {
+  const neu = ["VN", "HR", "GR", "MX", "TH"].filter(cc => besucht.includes(cc)), km = 41230, um = (km / 40075).toLocaleString(LOC, { maximumFractionDigits: 2 });
+  const pio = PIONIER.filter(cc => besucht.includes(cc));
+  return [
+    `<p class="rb-klein">Ahoi · ${JAHR}</p><p class="rb-mittel">${t("Dein Nomadenjahr {jahr}", { jahr: JAHR })}</p><p class="rb-text">${t("Tippe rechts zum Weiterblättern, links zurück.")}</p>`,
+    `<p class="rb-klein">${t("Neue Länder")}</p><p class="rb-gross">${neu.length}</p><div class="rb-flaggen">${neu.map(flagge).join("")}</div>`,
+    `<p class="rb-klein">${t("Zurückgelegt")}</p><p class="rb-gross">${km.toLocaleString(LOC)}<span style="font-size:.4em"> km</span></p><p class="rb-text">${t("Das ist {x}-mal um die Erde.", { x: um })}</p>`,
+    `<p class="rb-klein">${t("Treffen mit Freunden")}</p><p class="rb-gross">14</p><p class="rb-text">${t("Am häufigsten mit {name}: {n}-mal.", { name: "Lea", n: 5 })}</p>`,
+    `<p class="rb-klein">${t("Am längsten warst du in")}</p><p class="rb-mittel">${flagge("ES")} Málaga</p><p class="rb-text">${t("{n} Nächte", { n: 62 })}</p>`,
+    `<p class="rb-klein">🚩 ${t("Pionier")}</p><p class="rb-gross">${pio.length}×</p><p class="rb-text">${t("Hier warst du vor allen anderen aus dem Freundeskreis:")} ${pio.map(cc => flagge(cc) + " " + landName(cc)).join(", ")}</p>`,
+    `<p class="rb-mittel">${t("Ahoi bis nächstes Jahr!")}</p><p class="rb-text">${t("Wohin geht es als Nächstes?")}</p><button class="rb-ende" id="rb-ende">${t("Schließen")}</button>`
+  ];
+}
+let rbStand = 0, rbUhr = null;
+function rueckblickZeigen(n) {
+  const folien = rueckblickFolien(); rbStand = Math.max(0, Math.min(n, folien.length - 1));
+  const folie = document.getElementById("rb-folie");
+  folie.style.background = RB_FARBEN[stil][rbStand % 7];
+  if (stil === "abenteuer") folie.style.backgroundImage = "var(--korn)";
+  folie.innerHTML = `<div class="rb-folie-ein">${folien[rbStand]}</div>`;
+  document.getElementById("rb-balken").innerHTML = folien.map((_, i) => `<span class="${i < rbStand ? "fertig" : i === rbStand ? "laeuft" : ""}"><i></i></span>`).join("");
+  const ende = document.getElementById("rb-ende"); if (ende) ende.onclick = rueckblickSchliessen;
+  clearTimeout(rbUhr);
+  if (rbStand < folien.length - 1) rbUhr = setTimeout(() => rueckblickZeigen(rbStand + 1), 6000);
+}
+function rueckblickSchliessen() { clearTimeout(rbUhr); document.getElementById("rueckblick").classList.remove("offen"); }
+document.getElementById("jahr-zeile").onclick = () => { document.getElementById("rueckblick").classList.add("offen"); rueckblickZeigen(0); };
+document.getElementById("rb-rechts").onclick = () => rueckblickZeigen(rbStand + 1);
+document.getElementById("rb-links").onclick = () => rueckblickZeigen(rbStand - 1);
+document.getElementById("rb-zu").onclick = rueckblickSchliessen;
+
 // ---------- Länder-Sammlung ----------
 let besucht = ["DE", "ES", "PT", "SK", "IT", "FR", "TH", "VN", "ID", "MX", "GR", "HR"];
 try { const g = JSON.parse(localStorage.getItem("ahoi-laender") || "null"); if (Array.isArray(g)) besucht = g; } catch (e) {}
 const landName = cc => { try { return new Intl.DisplayNames([SPRACHE], { type: "region" }).of(cc); } catch (e) { return cc; } };
+// Meine Länder: im Profil nur eine Zeile, eigene Seite mit Freirubbel-Karte
+const KONTINENTE = { EU: "Europa", AS: "Asien", AF: "Afrika", NA: "Nordamerika", SA: "Südamerika", OC: "Ozeanien", AN: "Antarktis" };
+const PIONIER = ["VN", "HR"];
+const KONT_FARBEN = {
+  modern: { EU: "#0a84ff", AS: "#ff9f0a", AF: "#ff375f", NA: "#30d158", SA: "#bf5af2", OC: "#40c8e0", AN: "#8e8e93", zu: "#d5d8de", meer: "#eef2f6", rand: "#ffffff" },
+  mission: { EU: "#5fd4ea", AS: "#5fd4ea", AF: "#5fd4ea", NA: "#5fd4ea", SA: "#5fd4ea", OC: "#5fd4ea", AN: "#5fd4ea", zu: "#11263a", meer: "#06101c", rand: "#2b6f8a" },
+  abenteuer: { EU: "#c0582f", AS: "#b8913f", AF: "#8a5a33", NA: "#6b7f3e", SA: "#b0503a", OC: "#4f6f86", AN: "#8a8478", zu: "#d6c7a2", meer: "#c9d3c7", rand: "#8a6a48" }
+};
+let welt = null;
 function stempelAufbauen() {
-  document.getElementById("laender-titel").textContent = `${t("Länder-Sammlung")} · ${besucht.length}`;
-  document.getElementById("stempel").innerHTML = besucht.map(cc => `<div title="${landName(cc)}">${flagge(cc)}</div>`).join("") + '<div class="plus" id="land-plus" role="button" aria-label="' + t("Land hinzufügen") + '">＋</div>';
-  document.getElementById("land-plus").onclick = () => { seiteZeigen("laender"); laenderListe(""); };
+  document.getElementById("laender-wert").textContent = besucht.length;
+  if (document.getElementById("seite-meine-laender").classList.contains("offen")) meineLaenderAufbauen();
+}
+document.getElementById("laender-zeile").onclick = () => { seiteZeigen("meine-laender"); meineLaenderAufbauen(); };
+document.getElementById("ml-bearbeiten").onclick = () => { seiteZeigen("laender"); laenderListe(""); };
+async function meineLaenderAufbauen() {
+  if (!welt) { try { welt = await (await fetch("weltkarte.json")).json(); } catch (e) { welt = []; } }
+  const f = KONT_FARBEN[stil], kontVon = Object.fromEntries(welt.map(l => [l.i, l.k]));
+  const kont = [...new Set(besucht.map(cc => kontVon[cc]).filter(k => k && k !== "AN"))];
+  document.getElementById("ml-zahl").textContent = t("{n} Länder", { n: besucht.length });
+  document.getElementById("ml-kont").textContent = t("{n} von 7 Kontinenten", { n: kont.length + (besucht.some(cc => kontVon[cc] === "AN") ? 1 : 0) });
+  const pio = PIONIER.filter(cc => besucht.includes(cc));
+  document.getElementById("ml-pionier").textContent = pio.length ? t("🚩 {n}× Pionier", { n: pio.length }) : "";
+  const anteil = Math.min(1, (kont.length + (besucht.some(cc => kontVon[cc] === "AN") ? 1 : 0)) / 7), umfang = 2 * Math.PI * 27;
+  document.getElementById("ml-ring").style.strokeDasharray = `${(anteil * umfang).toFixed(1)} ${umfang.toFixed(1)}`;
+  document.getElementById("ml-ring-text").textContent = `${Math.round(anteil * 7)}/7`;
+  const svg = document.getElementById("rubbelkarte");
+  svg.innerHTML = `<defs><pattern id="kratzer" width="3" height="3" patternUnits="userSpaceOnUse" patternTransform="rotate(35)"><rect width="3" height="3" fill="${f.zu}"/><path d="M0 0v3" stroke="rgba(255,255,255,.35)" stroke-width=".6"/></pattern></defs><rect x="0" y="6" width="360" height="142" fill="${f.meer}"/>` +
+    welt.map(l => { const frei = besucht.includes(l.i); return `<path data-cc="${l.i}" class="${frei ? "frei" : ""}" d="${l.d}" fill="${frei ? (f[l.k] || f.EU) : "url(#kratzer)"}" stroke="${f.rand}"><title>${landName(l.i)}</title></path>`; }).join("");
+  svg.querySelectorAll("path").forEach(pfad => pfad.onclick = () => {
+    const cc = pfad.dataset.cc, i = besucht.indexOf(cc);
+    if (i >= 0) besucht.splice(i, 1); else { besucht.push(cc); hinweis(t("{land} freigerubbelt", { land: landName(cc) })); }
+    try { localStorage.setItem("ahoi-laender", JSON.stringify(besucht)); } catch (e) {}
+    stempelAufbauen();
+  });
+  const gruppen = {};
+  besucht.forEach(cc => { const k = kontVon[cc] || "EU"; (gruppen[k] = gruppen[k] || []).push(cc); });
+  document.getElementById("ml-kontinente").innerHTML = Object.keys(KONTINENTE).filter(k => gruppen[k]).map(k =>
+    `<div class="kontinent"><b>${t(KONTINENTE[k])} · ${gruppen[k].length}</b><div class="laender-chips">${gruppen[k].sort((a, b) => landName(a).localeCompare(landName(b), SPRACHE)).map(cc => `<span>${flagge(cc)} ${landName(cc)}${PIONIER.includes(cc) ? " 🚩" : ""}</span>`).join("")}</div></div>`).join("");
 }
 function laenderListe(suche) {
   if (!laender) return hinweis("Einen Moment, Länder werden geladen …");
@@ -1905,7 +2183,7 @@ function laenderListe(suche) {
     const cc = z.dataset.cc, i = besucht.indexOf(cc);
     if (i >= 0) besucht.splice(i, 1); else besucht.push(cc);
     try { localStorage.setItem("ahoi-laender", JSON.stringify(besucht)); } catch (e) {}
-    z.classList.toggle("an"); stempelAufbauen();
+    z.classList.toggle("an"); stempelAufbauen(); if (!document.getElementById("seite-laender").classList.contains("offen")) return;
   });
 }
 document.getElementById("land-suche").addEventListener("input", e => laenderListe(e.target.value));

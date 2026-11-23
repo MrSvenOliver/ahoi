@@ -1,4 +1,4 @@
-# Nomad App – Anforderungen (Stand 22.11.2026)
+# Nomad App – Anforderungen (Stand 23.11.2026)
 
 Gesammelte Wünsche und Entscheidungen von Sven. Gebaut wird erst, wenn die Anforderungen vollständig geklärt sind.
 
@@ -24,7 +24,7 @@ Gesammelte Wünsche und Entscheidungen von Sven. Gebaut wird erst, wenn die Anfo
 ## Aufbau der App
 - Überschrift der Liste: „Wer ist wo?“ (mit Fragezeichen in allen Sprachen)
 - Leiste unten: Karte · Reisen · Chat · Ideen
-- Profil als rundes Foto oben rechts; Reihenfolge im Profil: Darstellung (Sprache, Stil) · Freunde (Freund einladen, Freundeskreise, Paar verknüpfen als Einstellungszeilen mit farbigen Symbolen) · Familie · Mitteilungen · Privatsphäre · Über mich (Foto, Name, Status-Satz) · Länder-Sammlung · Mehr (Feedback)
+- Profil als rundes Foto oben rechts; Reihenfolge im Profil: Darstellung (Sprache, Stil) · Freunde (Freund einladen, Freundeskreise, Paar verknüpfen als Einstellungszeilen mit farbigen Symbolen) · Familie · Mitteilungen · Privatsphäre · Über mich (Foto, Name, Status zum Antippen) · Meine Länder und Dein Nomadenjahr (zwei Zeilen) · Mehr (Feedback)
 
 ## Kartengenauigkeit (feste Regel, kein Spielraum)
 - Echte Kartendaten aus OpenStreetMap für Küsten, Grenzen und Städte; alle drei Stile entstehen nur über Farben, Linien und Schrift
@@ -69,6 +69,11 @@ Gesammelte Wünsche und Entscheidungen von Sven. Gebaut wird erst, wenn die Anfo
 - Nach dem Abreisetag verschwindet die Idee von selbst
 - Kommentare, Herz, Filter nach Ländern
 
+## Ortstipps
+- Zweiter Reiter in „Ideen“: Unterkünfte | Tipps
+- Tipp: Ort, Art (Café, Essen, Erleben, Arbeiten, Praktisches), kurzer Text; Daumen hoch von Freunden, sortiert nach Daumen
+- Filter nach Ländern; in der Info-Karte einer Person „💡 3 Tipps zu Lissabon“, führt direkt zu den Tipps dieses Ortes
+
 ## KI
 - Zum Start weglassen (zu kompliziert am Anfang); später gewünscht: Screenshots/Tickets auslesen, Treffpunkt vorschlagen, Reise- und Wohntipps, Chat-Zusammenfassung
 - Ohne KI: Screenshot/Ticketfoto wird an den Reiseplan angehängt, Ort und Datum trägt man selbst ein
@@ -78,13 +83,16 @@ Gesammelte Wünsche und Entscheidungen von Sven. Gebaut wird erst, wenn die Anfo
 - Öffentliches Repository, Hosting kostenlos über GitHub Pages
 
 ## Gadgets
-- Länder-Sammlung (Stempel): Länder aus eingetragenen Reisen kommen automatisch dazu, frühere Länder trägt man über ＋ nach (Suchliste)
+- Meine Länder: im Profil eine Zeile „Meine Länder · 12 ›“; eigene Seite mit Freirubbel-Weltkarte (besuchte Länder farbig nach Kontinent, Rest abgedeckt; Antippen rubbelt frei oder deckt ab), Fortschrittsring „x von 7 Kontinenten“, Liste nach Kontinenten, Bearbeiten über die Suchliste. Länder aus Reisen kommen automatisch dazu
+- Freunde sehen in der Info-Karte „🌍 23 Länder“
+- Pionier 🚩: wer als Erster aus dem Freundeskreis in einem Land war, bekommt eine Fahne in der Länderliste; kurze Meldung im Chat „Alle“. Keine Abzeichen-Sammlung
+- Dein Nomadenjahr: Jahresrückblick zum Durchtippen (wie Spotify Wrapped), im Dezember automatisch, jederzeit über das Profil: neue Länder, Kilometer, Treffen mit Freunden, längster Aufenthalt, Pionier-Länder
 - Keine Abzeichen
 - Ortszeit der Freunde
 - „Freund einladen“ auch unten in „Wer ist wo?“
 - Feedback in der Beta: kleine Lasche „Feedback“ am rechten Rand auf jedem Bildschirm
 - Countdown zum Treffen
-- Status-Satz
+- Status zum Antippen: ☕ Lust auf ein Treffen · 🌱 Gerade angekommen, Tipps willkommen · 🔍 Suche Unterkunft · 👥 Suche Mitreisende · 💻 Arbeitsphase · 🏄 Sport und Abenteuer · 🏡 An meiner Basis · 🔕 Bitte nicht stören · ✏️ Eigener Text. Nochmal antippen entfernt ihn. Sichtbar in der Info-Karte und in „Wer ist wo?“ unter dem Namen
 
 ## Familien-Zugang (nur zuschauen)
 - Für Eltern, Geschwister u. a., die keine Nomaden sind (wie ein AirTag auf dem Bildschirm)
