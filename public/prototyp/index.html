@@ -65,7 +65,7 @@
   .kopf { position: fixed; top: calc(env(safe-area-inset-top) + 10px); left: 12px; right: 12px; display: flex; justify-content: space-between; align-items: center; z-index: 10; pointer-events: none; }
   .marke, .knoepfe { pointer-events: auto; display: flex; align-items: center; gap: 8px; background: var(--glas); border: 1px solid var(--glas-rand); box-shadow: var(--schatten); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-radius: 999px; }
   .marke { padding: 5px 16px 5px 5px; }
-  .marke img { width: 34px; height: 34px; border-radius: 50%; }
+  .marke img { width: 34px; height: 34px; border-radius: 50%; object-fit: cover; flex: none; }
   .marke span { font-family: var(--marke); font-weight: var(--marke-gewicht); font-size: var(--marke-groesse); color: var(--tinte); line-height: 1; letter-spacing: -0.2px; }
   .knoepfe { padding: 4px; }
   .knopf { width: 44px; height: 44px; border: 0; border-radius: 999px; background: transparent; color: var(--tinte); font-size: 19px; display: grid; place-items: center; cursor: pointer; }
@@ -395,7 +395,7 @@
     --leiste-h: calc(80px + env(safe-area-inset-bottom));
   }
   [data-stil="modern"] .marke { padding: 5px 15px 5px 5px; gap: 7px; }
-  [data-stil="modern"] .marke img { width: 30px; height: 30px; border-radius: 9px; }
+  [data-stil="modern"] .marke img { width: 32px; height: 32px; border-radius: 50%; }
   [data-stil="modern"] .marke span { letter-spacing: -0.4px; color: var(--text); }
   [data-stil="modern"] .knopf { color: var(--text); }
   [data-stil="modern"] .pin-kopf, [data-stil="modern"] .ava, [data-stil="modern"] .klein-ava, [data-stil="modern"] .profil-knopf, [data-stil="modern"] .profil-bild, [data-stil="modern"] .bildchen.person { border-color: #fff; }
@@ -471,7 +471,7 @@
       linear-gradient(var(--tinte), var(--tinte)) right bottom / 10px 1.5px no-repeat, linear-gradient(var(--tinte), var(--tinte)) right bottom / 1.5px 10px no-repeat;
   }
   [data-stil="mission"] .marke, [data-stil="mission"] .knoepfe { border-radius: 4px; box-shadow: none; }
-  [data-stil="mission"] .marke img { width: 30px; height: 30px; border-radius: 3px; filter: grayscale(1) contrast(1.15) brightness(1.1); border: 1px solid var(--glas-rand); }
+  [data-stil="mission"] .marke img { width: 32px; height: 32px; border-radius: 50%; filter: grayscale(1) contrast(1.15) brightness(1.1); box-shadow: 0 0 0 1px var(--glas-rand); }
   [data-stil="mission"] .marke span { text-transform: uppercase; letter-spacing: 3px; color: var(--tinte); }
   [data-stil="mission"] .knopf { border-radius: 3px; color: var(--tinte); }
   [data-stil="mission"] .profil-knopf, [data-stil="mission"] .ava, [data-stil="mission"] .klein-ava, [data-stil="mission"] .bildchen.person { border-radius: 10px; border: 1.5px solid var(--tinte); }
