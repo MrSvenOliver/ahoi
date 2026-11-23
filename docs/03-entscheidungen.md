@@ -3,6 +3,8 @@
 Jede Entscheidung mit Datum. Neue Einträge kommen oben dazu.
 
 ## 23.11.2026
+- Paare, Reisegruppen und Meine Länder sind in der echten App (SQL 06): Anfragen kommen beim Öffnen der App als Frage („Lea möchte euch als Paar verknüpfen“, „Lea sagt, ihr reist gerade zusammen“); jeder hat höchstens einen Partner und ist in höchstens einer Gruppe; wer über 50 km von allen anderen der Gruppe weg ist, fällt beim nächsten Standort heraus; die besuchten Länder liegen im Profil, damit Freunde sie im Steckbrief sehen; Steckbrief auch in der echten App
+- „Neu in Ahoi“: nach jedem App-Update einmal eine kurze Übersicht mit den Neuerungen beim Öffnen der App; jedes Update bekommt dafür einen Eintrag (echte Push-Mitteilungen kommen mit dem Punkt Mitteilungen)
 - Alte Orte: Ein Ort ist so aktuell wie das letzte Öffnen der App. Ist er älter als einen Tag, steht „🕓 vor X Tagen“ dabei, und die App fragt dann nicht „Reist ihr zusammen?“
 - Zeitunterschied: in „Wer ist wo?“ unter der Entfernung („🕐 +6 Std.“), in der Info-Karte neben der Ortszeit, im Steckbrief und in der Familien-Ansicht als „6 Std. später als bei dir“; gerechnet ab der Uhr des Geräts, auf dem man gerade schaut
 - Am selben Ort heißt nicht zusammen unterwegs (A): kein automatisches 🤝 und kein „Zusammen unterwegs“ mehr; die Karte zeigt bei mehreren Personen am selben Ort nur die Zahl

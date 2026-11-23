@@ -17,6 +17,7 @@
 - `03-vorab-einladungen.sql`: persönliche Einladungen von Sven (sofort frei, 30 Tage, lebenslang kostenlos)
 - `04-reisen-feedback.sql`: Reisen (fest oder vielleicht) und Feedback mit Screenshots
 - `05-familie.sql`: Familien-Zugang, Orte nur noch über die geschützte Ansicht
+- `06-paare-gruppen-laender.sql`: Paare, Reisegruppen („Reist ihr zusammen?“) und besuchte Länder im Profil
 
 ## Betrieb
 - Wachhalten: `.github/workflows/wachhalten.yml` (Montag und Donnerstag)

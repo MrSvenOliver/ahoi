@@ -83,6 +83,8 @@ async function standortSpeichern(o) {
   const { error } = await SB.from("profile").update({ ort: o.ort, land: o.land, lat: o.lat, lon: o.lon, zeitzone, standort_am: new Date().toISOString() }).eq("id", ECHT_DATEN.uid);
   if (error) throw error;
   Object.assign(ECHT_DATEN.profil, { ort: o.ort, land: o.land, lat: o.lat, lon: o.lon, zeitzone });
+  // Weitergezogen? Dann fällt man aus der Reisegruppe (über 50 km von allen anderen)
+  try { await SB.rpc("gruppe_pruefen"); } catch (e) {}
 }
 
 // ---------- Profilfoto: quadratisch zuschneiden, verkleinern, hochladen ----------

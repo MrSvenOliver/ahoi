@@ -292,7 +292,7 @@ function ebenenHinzufuegen() {
   pinsSetzen();
   dekoSetzen();
   map.once("idle", () => setTimeout(() => document.getElementById("start").classList.add("weg"), 300));
-  if (!nachbarnGefragt) { nachbarnGefragt = true; setTimeout(nachbarnFragen, 2600); }
+  if (!ECHT && !nachbarnGefragt) { nachbarnGefragt = true; setTimeout(nachbarnFragen, 2600); }
 }
 
 // ---------- Deko pro Stil ----------
@@ -551,7 +551,7 @@ function listeAufbauen() {
     li.innerHTML = `<div class="ava" style="${kopfStil(p)}">${kopfText(p)}</div>
       <div class="zeile"><b>${ohneHtml(p.name)}</b><span>${flagge(p.land)} ${ohneHtml(p.ort)} · ${ortAktuell(p) ? uhrzeit(p.tz) + t(" Uhr") : `<i class="ort-alt">${ortAlterText(p)}</i>`}${paarText}</span>${statusText(p) ? `<small class="status-klein">${ohneHtml(statusText(p))}</small>` : ""}</div>
       ${p.d < 1 ? `<div class="weite"><b class="gleicher-ort">${t("Am selben Ort")}</b>${zeitDiffKurz(p.tz) ? `<span class="zeit-diff">${zeitDiffKurz(p.tz)}</span>` : ""}</div>` : `<div class="weite"><b data-km="${p.d}">${km(p.d)}</b><span>${t("von dir")}</span>${zeitDiffKurz(p.tz) ? `<span class="zeit-diff">🕐 ${zeitDiffKurz(p.tz)}</span>` : ""}</div>`}`;
-    li.onclick = () => { if (!ECHT && !familieModus) return steckbriefOeffnen(person(p.id)); zuPerson(p); infoZeigen([p]); };
+    li.onclick = () => { if (!familieModus) return steckbriefOeffnen(person(p.id)); zuPerson(p); infoZeigen([p]); };
     ul.appendChild(li);
   }
   if (!andere.length) ul.innerHTML = `<li class="leer-hinweis">${t("Noch keine Freunde hier. Lade jemanden ein!")}</li>`;
@@ -584,7 +584,7 @@ function infoZeigen(gruppe) {
   paarKnopfSetzen(gruppe);
   gruppeKnopfSetzen(gruppe);
   const sbBox = document.getElementById("info-steckbriefe");
-  sbBox.innerHTML = ECHT || familieModus ? "" : gruppe.slice(0, 4).map((x, i) => `<button class="knopf-leise" data-sb="${i}">🪪 ${gruppe.length > 1 ? ohneHtml(rufname(x)) : t("Steckbrief")}</button>`).join("");
+  sbBox.innerHTML = familieModus ? "" : gruppe.slice(0, 4).map((x, i) => `<button class="knopf-leise" data-sb="${i}">🪪 ${gruppe.length > 1 ? ohneHtml(rufname(x)) : t("Steckbrief")}</button>`).join("");
   sbBox.querySelectorAll("button").forEach(b => b.onclick = () => steckbriefOeffnen(gruppe[+b.dataset.sb]));
   info.classList.remove("offen"); void info.offsetWidth;
   info.classList.add("offen");
@@ -1328,7 +1328,12 @@ const STAATEN = new Set("AF AL DZ AD AO AG AR AM AU AT AZ BS BH BD BB BY BE BZ B
 const GEBIET_ZU = { AI: "GB", AS: "US", AW: "NL", AX: "FI", BL: "FR", BM: "GB", BQ: "NL", BV: "NO", CC: "AU", CK: "NZ", CW: "NL", CX: "AU", FK: "GB", FO: "DK", GF: "FR", GG: "GB", GI: "GB", GL: "DK", GP: "FR", GS: "GB", GU: "US", HK: "CN", HM: "AU", IM: "GB", IO: "GB", JE: "GB", KY: "GB", MF: "FR", MO: "CN", MP: "US", MQ: "FR", MS: "GB", NC: "FR", NF: "AU", NU: "NZ", PF: "FR", PM: "FR", PN: "GB", PR: "US", RE: "FR", SH: "GB", SJ: "NO", SX: "NL", TC: "GB", TF: "FR", TK: "NZ", UM: "US", VG: "GB", VI: "US", WF: "FR", YT: "FR" };
 const staatVon = cc => !cc ? null : STAATEN.has(cc) || cc === "AQ" ? cc : GEBIET_ZU[cc] || null;
 const laenderZahl = () => besucht.filter(cc => STAATEN.has(cc)).length;
-function besuchtSpeichern() { try { localStorage.setItem(LAENDER_SCHLUESSEL, JSON.stringify(besucht)); } catch (e) {} }
+let laenderUhr = null;
+function besuchtSpeichern() {
+  try { localStorage.setItem(LAENDER_SCHLUESSEL, JSON.stringify(besucht)); } catch (e) {}
+  // Echte App: kurz sammeln, dann ins Profil schreiben, damit Freunde sie im Steckbrief sehen
+  if (ECHT && ECHT_DATEN.uid && !familieModus) { clearTimeout(laenderUhr); laenderUhr = setTimeout(() => SB.from("profile").update({ laender: besucht.filter(cc => STAATEN.has(cc) || cc === "AQ") }).eq("id", ECHT_DATEN.uid).then(x => { if (x.error) hinweis(t("Speichern hat nicht geklappt")); }), 800); }
+}
 function landDazu(cc) { const s = staatVon(cc); if (!s || besucht.includes(s)) return false; besucht.push(s); besuchtSpeichern(); return true; }
 let besucht = ECHT ? [] : ["DE", "ES", "PT", "SK", "IT", "FR", "TH", "VN", "ID", "MX", "GR", "HR"];
 try { const g = JSON.parse(localStorage.getItem(LAENDER_SCHLUESSEL) || "null"); if (Array.isArray(g)) besucht = g; } catch (e) {}
@@ -1425,11 +1430,14 @@ const meinPartner = () => ich().paar ? leute.find(p => p.id !== "du" && p.paar =
 function paarWertZeigen() { const p = meinPartner(); document.getElementById("paar-wert").textContent = p ? "❤️ " + p.name : paarAnfrage ? t("Anfrage gesendet") : t("Nicht verknüpft"); }
 function paarLoesen() {
   const p = meinPartner(); if (!p) return;
-  fragen(t("Verknüpfung mit {name} lösen?", { name: p.name }), [[t("Lösen"), () => { delete p.paar; delete ich().paar; paarWertZeigen(); pinsSetzen(); hinweis(t("Verknüpfung gelöst")); }, true]]);
+  fragen(t("Verknüpfung mit {name} lösen?", { name: p.name }), [[t("Lösen"), async () => {
+    if (ECHT) { const { error } = await SB.rpc("paar_loesen"); if (error) return hinweis(t("Das hat nicht geklappt")); }
+    delete p.paar; delete ich().paar; paarWertZeigen(); pinsSetzen(); listeAufbauen(); hinweis(t("Verknüpfung gelöst"));
+  }, true]]);
 }
 function paarKnopfSetzen(gruppe) {
   const k = document.getElementById("info-paar"), p = gruppe[0];
-  const zeigen = !ECHT && !familieModus && gruppe.length === 1 && p.id !== "du" && (!p.paar || p.paar === ich().paar);
+  const zeigen = !familieModus && gruppe.length === 1 && p.id !== "du" && (!p.paar || p.paar === ich().paar);
   k.style.display = zeigen ? "inline-block" : "none";
   if (!zeigen) return;
   const istPartner = ich().paar && p.paar === ich().paar;
@@ -1439,6 +1447,7 @@ function paarKnopfSetzen(gruppe) {
     if (paarAnfrage === p.id) return;
     if (meinPartner()) return hinweis(t("Du bist schon mit {name} verknüpft", { name: meinPartner().name }));
     fragen(t("Mit {name} als Paar verknüpfen? {name} bestätigt. Danach zeigt die Karte ❤️, wenn ihr am selben Ort seid.", { name: p.name }), [[t("Anfrage senden"), () => {
+      if (ECHT) return paarEchtAnfragen(p, gruppe);
       paarAnfrage = p.id; paarWertZeigen(); paarKnopfSetzen(gruppe); hinweis(t("Anfrage an {name} gesendet", { name: p.name }));
       // Prototyp: die Bestätigung kommt nach kurzer Zeit von selbst
       setTimeout(() => { if (paarAnfrage !== p.id) return; paarAnfrage = null; ich().paar = p.paar = "p-du"; paarWertZeigen(); pinsSetzen(); hinweis(t("{name} hat bestätigt ❤️", { name: p.name })); if (document.getElementById("info").classList.contains("offen")) paarKnopfSetzen(gruppe); }, 3500);
@@ -1451,7 +1460,8 @@ const STEMPEL_FARBEN = ["#2f5d8a", "#a8322a", "#2f6b4a", "#6a3f8a", "#8a5a1e"];
 const BEISPIEL_LAENDER = "ES PT FR IT DE GR HR NL GB AT CZ HU TH VN ID MY SG JP KH LA MX US CO PE AR BR MA ZA TR AU NZ IN LK PH CH BE IE SK PL DK SE NO CR CL EG KE TZ GE AL ME".split(" ");
 function laenderVon(p) {
   if (p.id === "du") return besucht.filter(cc => STAATEN.has(cc) || cc === "AQ");
-  if (ECHT || !p.laender) return null;
+  if (ECHT) return p.laenderListe && p.laenderListe.length ? p.laenderListe : null;
+  if (!p.laender) return null;
   // Prototyp: feste, aber zufällig wirkende Auswahl passend zur Länderzahl
   let saat = [...p.id].reduce((a, c) => (a * 31 + c.charCodeAt(0)) >>> 0, 7);
   const zufall = () => (saat = (saat * 1103515245 + 12345) >>> 0) / 4294967296;
@@ -1487,7 +1497,7 @@ async function steckbriefOeffnen(p) {
   let felder = feld(ortAktuell(p) ? t("Gerade in") : t("Zuletzt in"), p.ort ? `${flagge(p.land)} ${ohneHtml(p.ort)}${ortAktuell(p) ? "" : `<small class="ort-alt sb-klein">${ortAlterText(p)}</small>`}` : "–") +
     feld(t("Ortszeit"), `${uhrzeit(p.tz)}${t(" Uhr")}${selbst ? "" : `<small class="sb-klein">${zeitDiffLang(p.tz)}</small>`}`);
   if (abstand != null) felder += feld(t("Entfernung"), abstand < 1 ? t("Am selben Ort") : km(abstand), true);
-  if (mit.length) felder += feld(t("Reist mit"), (!rg && partner ? "❤️ " : "") + gruppenText(mit), true);
+  if (mit.length) felder += feld(t("Reist mit"), ((!rg && partner) || (mit.length === 1 && mit[0].paar && mit[0].paar === p.paar) ? "❤️ " : "") + gruppenText(mit), true);
   if (reise) felder += feld(t("Nächste Reise"), `${reise.land ? flagge(reise.land) : "📍"} ${ohneHtml(reise.ziel)} · ${reise.von ? kurz(reise.von) + " – " + kurz(reise.bis) : t("irgendwann im {m}", { m: datum(reise.monat + "-01").toLocaleDateString(LOC, { month: "long" }) })}`, true);
   const zahlen = laenderVon(p) ? `<div class="sb-zahlen"><div><b data-zahl="${zahl}">${zahl}</b><span>${t(zahl === 1 ? "Land" : "Länder")}</span></div><div><b>${kont}/7</b><span>${t("Kontinente")}</span></div><div><b>${pio ? pio + "×" : "–"}</b><span>${t("Pionier")}</span></div></div><div class="sb-karte">${karte}</div>` : "";
   const sortiert = laender.filter(cc => STAATEN.has(cc)).slice(0, 11);
@@ -1524,6 +1534,7 @@ document.getElementById("steckbrief-selbst").onclick = () => steckbriefOeffnen(i
 // ---------- Reisegruppe: „Reist du zusammen mit …?“ ----------
 let gruppenAnfrage = null;
 function gruppeBeitreten(p, still) {
+  if (ECHT) return gruppeEchtAnfragen(p);
   // Prototyp: die andere Person bestätigt nach kurzer Zeit von selbst
   gruppenAnfrage = p.id; hinweis(t("Anfrage an {name} gesendet", { name: p.name }));
   setTimeout(() => {
@@ -1538,8 +1549,9 @@ function gruppeBeitreten(p, still) {
     if (document.getElementById("info").classList.contains("offen")) infoZeigen(infoGruppe);
   }, 3500);
 }
-function gruppeVerlassen() {
+async function gruppeVerlassen() {
   const g = gruppeVon("du"); if (!g) return;
+  if (ECHT) { const { error } = await SB.rpc("gruppe_verlassen"); if (error) return hinweis(t("Das hat nicht geklappt")); }
   g.leute = g.leute.filter(id => id !== "du");
   reisegruppen = reisegruppen.filter(x => x.leute.length > 1);
   gruppenSpeichern(); pinsSetzen(); listeAufbauen(); hinweis(t("Du reist jetzt allein weiter"));
@@ -1552,23 +1564,27 @@ function gruppeKnopfSetzen(gruppe) {
   const k = document.getElementById("info-gruppe"), du = ich();
   const meine = gruppeVon("du");
   const nahe = gruppe.filter(p => p.id !== "du" && du.lat != null && entfernungKm(du.lat, du.lon, p.lat, p.lon) < NAH_KM);
-  const zeigen = !ECHT && !familieModus && (nahe.length > 0 || (meine && gruppe.some(p => p.id === "du")));
+  const zeigen = !familieModus && (nahe.length > 0 || (meine && gruppe.some(p => p.id === "du")));
   k.style.display = zeigen ? "inline-block" : "none";
   if (!zeigen) return;
   const offen = nahe.filter(p => !meine || !meine.leute.includes(p.id));
   if (!offen.length) { k.textContent = t("👥 Gruppe verlassen"); k.onclick = () => fragen(t("Nicht mehr zusammen unterwegs? Die anderen sehen dich dann wieder einzeln."), [[t("Gruppe verlassen"), gruppeVerlassen, true]]); return; }
   const p = offen[0];
-  k.textContent = gruppenAnfrage === p.id ? t("👥 Anfrage gesendet") : offen.length === 1 ? t("👥 Mit {name} unterwegs", { name: p.name }) : t("👥 Zusammen unterwegs");
-  k.onclick = () => { if (gruppenAnfrage) return; offen.length === 1 ? gruppeBeitreten(p) : fragen(t("Mit wem reist du zusammen?"), offen.map(q => [q.name, () => gruppeBeitreten(q)])); };
+  k.textContent = gruppenAnfrage === p.id || (ECHT && ANFRAGEN.mitreiseRaus.includes(p.id)) ? t("👥 Anfrage gesendet") : offen.length === 1 ? t("👥 Mit {name} unterwegs", { name: p.name }) : t("👥 Zusammen unterwegs");
+  k.onclick = () => { if (gruppenAnfrage === p.id || (ECHT && ANFRAGEN.mitreiseRaus.includes(p.id))) return; offen.length === 1 ? gruppeBeitreten(p) : fragen(t("Mit wem reist du zusammen?"), offen.map(q => [q.name, () => gruppeBeitreten(q)])); };
 }
+const nachbarnDieseSitzung = new Set(); // „Abbrechen“ fragt erst beim nächsten Start wieder
 // Beim Öffnen: Ist jemand in deiner Nähe, mit dem du noch nicht als Gruppe unterwegs bist, fragt die App einmal pro Ort nach
 function nachbarnFragen() {
-  if (ECHT || familieModus) return;
+  if (familieModus) return;
+  if (document.getElementById("aktion-blatt").classList.contains("offen")) return setTimeout(nachbarnFragen, 1500);
   const du = ich(); if (du.lat == null) return;
   let gefragt = {}; try { gefragt = JSON.parse(localStorage.getItem("ahoi-gefragt") || "{}"); } catch (e) {}
   const meine = gruppeVon("du");
-  const p = leute.find(q => q.id !== "du" && q.lat != null && ortAktuell(q) && entfernungKm(du.lat, du.lon, q.lat, q.lon) < NAH_KM && !(meine && meine.leute.includes(q.id)) && !gefragt[q.id + "|" + du.ort]);
+  const offen = ECHT ? [...ANFRAGEN.mitreiseRaus, ...ANFRAGEN.mitreiseRein] : [];
+  const p = leute.find(q => q.id !== "du" && q.lat != null && ortAktuell(q) && entfernungKm(du.lat, du.lon, q.lat, q.lon) < NAH_KM && !(meine && meine.leute.includes(q.id)) && !offen.includes(q.id) && !gefragt[q.id + "|" + du.ort] && !nachbarnDieseSitzung.has(q.id + "|" + du.ort));
   if (!p) return;
+  nachbarnDieseSitzung.add(p.id + "|" + du.ort);
   const merken = () => { gefragt[p.id + "|" + du.ort] = 1; try { localStorage.setItem("ahoi-gefragt", JSON.stringify(gefragt)); } catch (e) {} };
   const wo = entfernungKm(du.lat, du.lon, p.lat, p.lon) < 1 ? t("ist auch in {ort}", { ort: du.ort }) : t("ist in deiner Nähe ({ort})", { ort: p.ort });
   fragen(t("{name} {wo}. Reist ihr zusammen?", { name: p.name, wo }), [
@@ -1738,6 +1754,7 @@ const BALD = {
 };
 function fragen(titel, knoepfe) {
   const blatt = document.getElementById("aktion-blatt");
+  document.getElementById("aktion-abbrechen").style.display = "";
   document.getElementById("aktion-titel").textContent = titel;
   const box = document.getElementById("aktion-knoepfe"); box.innerHTML = "";
   knoepfe.forEach(([text, f, gefahr]) => { const b = document.createElement("button"); b.className = "knopf-leise" + (gefahr ? " gefahr" : ""); b.textContent = text; b.onclick = () => { blatt.classList.remove("offen"); f(); }; box.appendChild(b); });
@@ -1748,6 +1765,125 @@ function meinBildZeigen() {
   [bild, knopf].forEach(el => { el.classList.toggle("mit-bild", !!du.bild); el.style.backgroundImage = du.bild ? `url('${du.bild}')` : ""; });
 }
 function meinOrtZeigen() { const p = ECHT_DATEN.profil; document.getElementById("mein-ort").textContent = p.ort ? `${flagge(p.land)} ${p.ort}` : t("Noch kein Ort"); }
+// ---------- Neu in Ahoi: nach jedem App-Update einmal eine kurze Übersicht ----------
+// Bei jedem Update oben einen Eintrag ergänzen (neueste zuerst). Wer neu dabei ist, sieht nur den neuesten.
+const NEUIGKEITEN = [
+  { id: "2026-11-23-gruppen", punkte: [
+    "👥 Reist ihr zusammen? Sind Freunde in deiner Nähe, fragt Ahoi kurz nach. Paare stehen mit ❤️ zusammen.",
+    "🪪 Steckbrief: Tipp in „Wer ist wo?“ auf einen Namen und sieh Länder, nächste Reise und Ortszeit.",
+    "🕐 Der Zeitunterschied zu jedem Freund steht jetzt direkt dabei.",
+    "🌍 Länder zählen wie bei der UN: 195 Staaten, Überseegebiete gehören zum Mutterland.",
+    "✈️ Reiseziele: auch Tokio, Kuala Lumpur und ganze Länder wie „Malaysia“."
+  ] }
+];
+function neuigkeitenZeigen() {
+  if (familieModus) return;
+  const blatt = document.getElementById("aktion-blatt");
+  if (blatt.classList.contains("offen")) return setTimeout(neuigkeitenZeigen, 1500);
+  let gesehen = null; try { gesehen = localStorage.getItem("ahoi-neuigkeiten"); } catch (e) {}
+  const bis = NEUIGKEITEN.findIndex(n => n.id === gesehen);
+  const neu = bis === -1 ? NEUIGKEITEN.slice(0, 1) : NEUIGKEITEN.slice(0, bis);
+  if (!neu.length) return;
+  const merken = () => { try { localStorage.setItem("ahoi-neuigkeiten", NEUIGKEITEN[0].id); } catch (e) {} };
+  document.getElementById("aktion-titel").textContent = t("✨ Neu in Ahoi");
+  const box = document.getElementById("aktion-knoepfe");
+  box.innerHTML = `<ul class="neu-liste">${neu.flatMap(n => n.punkte).slice(0, 6).map(x => `<li>${t(x)}</li>`).join("")}</ul>`;
+  const los = document.createElement("button"); los.className = "knopf-gross"; los.textContent = t("Los geht's");
+  los.onclick = () => { merken(); blatt.classList.remove("offen"); };
+  box.appendChild(los);
+  document.getElementById("aktion-abbrechen").style.display = "none";
+  blatt.classList.add("offen");
+  merken();
+}
+setTimeout(neuigkeitenZeigen, ECHT ? 2200 : 2000);
+
+// ---------- Echte App: Paare, Reisegruppen, Länder und offene Anfragen aus der Datenbank ----------
+const ANFRAGEN = { paarRein: [], mitreiseRein: [], mitreiseRaus: [] };
+const idVon = uid => uid === ECHT_DATEN.uid ? "du" : uid;
+let ersteVerbindungen = true;
+async function verbindungenLaden() {
+  if (!ECHT || familieModus || ECHT_DATEN.profil.art === "familie") return;
+  const uid = ECHT_DATEN.uid;
+  const [lae, paare, mitgl, anfr] = await Promise.all([
+    SB.from("profile").select("id, laender"), SB.from("paar").select("von, an, bestaetigt"),
+    SB.from("reisegruppe_mitglied").select("person, gruppe"), SB.from("mitreise_anfrage").select("von, an")
+  ]);
+  // Länder: eigene Liste aus der Datenbank; ist sie dort noch leer, die vom Gerät hochladen
+  if (!lae.error) {
+    const proId = Object.fromEntries(lae.data.map(x => [x.id, (x.laender || []).map(staatVon).filter(Boolean)]));
+    [...leute, ...(ECHT_DATEN.alle || [])].forEach(p => { const l = proId[p.uid]; if (l && p.id !== "du") { p.laenderListe = l; p.laender = l.filter(cc => STAATEN.has(cc)).length; } });
+    const meine = proId[uid] || [];
+    if (!meine.length && besucht.length) besuchtSpeichern();
+    else if (meine.length) { besucht = [...new Set(meine)]; try { localStorage.setItem(LAENDER_SCHLUESSEL, JSON.stringify(besucht)); } catch (e) {} if (ich().land && landDazu(ich().land)) {} stempelAufbauen(); }
+  }
+  // Paare: bestätigte bekommen eine gemeinsame Kennung, offene Anfragen an mich werden gefragt
+  if (!paare.error) {
+    leute.forEach(p => delete p.paar); paarAnfrage = null; ANFRAGEN.paarRein = [];
+    for (const x of paare.data) {
+      const a = person(idVon(x.von)), b = person(idVon(x.an));
+      if (x.bestaetigt) { const k = "p-" + [x.von, x.an].sort().join("-"); if (a) a.paar = k; if (b) b.paar = k; }
+      else if (x.von === uid) paarAnfrage = idVon(x.an);
+      else if (x.an === uid) ANFRAGEN.paarRein.push(idVon(x.von));
+    }
+    paarWertZeigen();
+  }
+  // Reisegruppen
+  if (!mitgl.error) {
+    const nachGruppe = {};
+    mitgl.data.forEach(x => (nachGruppe[x.gruppe] = nachGruppe[x.gruppe] || []).push(idVon(x.person)));
+    reisegruppen = Object.entries(nachGruppe).map(([id, ids]) => ({ id, leute: ids })).filter(g => g.leute.length > 1);
+  }
+  if (!anfr.error) {
+    ANFRAGEN.mitreiseRaus = anfr.data.filter(x => x.von === uid).map(x => idVon(x.an));
+    ANFRAGEN.mitreiseRein = anfr.data.filter(x => x.an === uid).map(x => idVon(x.von));
+  }
+  pinsSetzen(); listeAufbauen();
+  if (ersteVerbindungen) { ersteVerbindungen = false; setTimeout(anfragenBeantworten, 2800); }
+  else anfragenBeantworten();
+}
+// Offene Anfragen an mich: der Reihe nach fragen (je Sitzung einmal)
+const schonGefragt = new Set();
+function anfragenBeantworten() {
+  if (document.getElementById("aktion-blatt").classList.contains("offen")) return setTimeout(anfragenBeantworten, 1500);
+  const pid = ANFRAGEN.paarRein.find(id => !schonGefragt.has("p" + id) && person(id));
+  if (pid) {
+    const p = person(pid); schonGefragt.add("p" + pid);
+    return fragen(t("{name} möchte euch als Paar verknüpfen. Seid ihr ein Paar?", { name: p.name }), [
+      [t("Ja, wir sind ein Paar ❤️"), () => anfrageAntworten("paar_antworten", pid, true)],
+      [t("Nein"), () => anfrageAntworten("paar_antworten", pid, false)]]);
+  }
+  const mid = ANFRAGEN.mitreiseRein.find(id => !schonGefragt.has("m" + id) && person(id));
+  if (mid) {
+    const p = person(mid); schonGefragt.add("m" + mid);
+    return fragen(t("{name} sagt, ihr reist gerade zusammen. Stimmt das?", { name: p.name }), [
+      [t("Ja, wir reisen zusammen"), () => anfrageAntworten("mitreisen_antworten", mid, true)],
+      [t("Nein, nur am selben Ort"), () => anfrageAntworten("mitreisen_antworten", mid, false)]]);
+  }
+  nachbarnFragen();
+}
+async function anfrageAntworten(fn, id, ja) {
+  const { data, error } = await SB.rpc(fn, { ziel: person(id).uid, ja });
+  if (error) return hinweis(t("Das hat nicht geklappt"));
+  if (ja && data === "vergeben") hinweis(t("Einer von euch ist schon mit jemandem verknüpft"));
+  else if (ja && fn === "paar_antworten") hinweis(t("{name} und du seid jetzt ein Paar ❤️", { name: person(id).name }));
+  else if (ja) hinweis(t("Ihr reist jetzt zusammen 👥"));
+  await verbindungenLaden();
+}
+async function paarEchtAnfragen(p, gruppe) {
+  const { data, error } = await SB.rpc("paar_anfragen", { ziel: p.uid });
+  if (error) return hinweis(t("Das hat nicht geklappt"));
+  if (data === "vergeben") return hinweis(t("{name} ist schon mit jemandem verknüpft", { name: p.name }));
+  if (data === "bestaetigt") hinweis(t("{name} und du seid jetzt ein Paar ❤️", { name: p.name }));
+  else hinweis(t("Anfrage an {name} gesendet. {name} bestätigt in der App.", { name: p.name }));
+  await verbindungenLaden(); paarKnopfSetzen(gruppe);
+}
+async function gruppeEchtAnfragen(p) {
+  const { data, error } = await SB.rpc("mitreisen_anfragen", { ziel: p.uid });
+  if (error) return hinweis(t("Das hat nicht geklappt"));
+  hinweis(data === "zusammen" ? t("{name} hat bestätigt: ihr reist zusammen", { name: p.name }) : data === "schon" ? t("Ihr reist schon zusammen") : t("Anfrage an {name} gesendet. {name} bestätigt in der App.", { name: p.name }));
+  await verbindungenLaden();
+  if (document.getElementById("info").classList.contains("offen") && infoGruppe) infoZeigen(infoGruppe);
+}
 async function echtAktualisieren() {
   try {
     const neu = await leuteLaden();
@@ -1755,6 +1891,7 @@ async function echtAktualisieren() {
     neu.forEach(p => { p.status = statusAusDb(p.statusRoh); });
     leute.splice(0, leute.length, ...neu);
     pinsSetzen(); listeAufbauen(); meinBildZeigen(); trefferAufbauen(); neuDabeiPruefen();
+    await verbindungenLaden();
   } catch (e) {}
 }
 // Beim Öffnen: Standort still aktualisieren, wenn er erlaubt ist und sich die Stadt geändert hat
@@ -1847,6 +1984,7 @@ function echtEinrichten() {
   const p = ECHT_DATEN.profil;
   if (p.art === "familie") return familieEchtStarten();
   familieListeAufbauen(); setTimeout(neuDabeiPruefen, 2500);
+  verbindungenLaden().catch(() => {});
   // Vorschau „So sieht sie es“: die Familie sieht nur dich
   document.getElementById("familie-start").onclick = () => { FAMILIE_SIEHT = ["du"]; document.getElementById("fam-kopf").textContent = t("So sieht deine Familie dich"); document.getElementById("familie-ende").textContent = t("Zurück"); familieSetzen(true); };
   // Bereiche, die noch nicht live sind
