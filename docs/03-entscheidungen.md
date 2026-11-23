@@ -3,6 +3,7 @@
 Jede Entscheidung mit Datum. Neue Einträge kommen oben dazu.
 
 ## 23.11.2026
+- Abenteuer: Figuren kleiner; jedes Tier und Fabelwesen genau einmal (Wal, Seedrache, Krake); zwei Bootstypen (Segelschiff, Dschunke), nie zwei Boote gleichzeitig auf dem Bildschirm
 - Modern: mehr Glas (Liquid-Glass-Nachbau) bei Symbolen, Knöpfen, Leiste und Fenstern
 - Mission: militärischer (Kennungsleiste, Entfernungsringe, Rufnamen, Schablonen-Titel), Fließtext normal statt Terminal-Schrift
 - Abenteuer: weniger, schönere Figuren (2 Schiffe, 2 Wale, 4 Wellen)
