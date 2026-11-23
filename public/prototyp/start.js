@@ -36,6 +36,16 @@ function beschaeftigt(knopf, an) { knopf.disabled = an; knopf.classList.toggle("
 // ---------- Standort: Stadt ermitteln (Photon, Daten aus OpenStreetMap) ----------
 const PHOTON = "https://photon.komoot.io";
 const photonSprache = () => ({ de: "de", en: "en" }[SPRACHE] || "default");
+// Ortsnamen: lieber der Name vor Ort (Prešov statt „Eperies“, Košice statt „Kaschau“), solange er in lateinischer Schrift ist.
+// Nur wenn man selbst den übersetzten Namen tippt („Lissabon“) oder der Ortsname nicht lateinisch ist („東京都“), gilt die Übersetzung.
+const ohneZeichen = x => (x || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+const lateinisch = x => !!x && /^[\p{Script=Latin}\p{N}\p{P}\p{Zs}]+$/u.test(x);
+function ortsName(lokal, uebersetzt, suche) {
+  if (!lateinisch(lokal)) return uebersetzt || lokal;
+  if (suche && uebersetzt && ohneZeichen(uebersetzt).startsWith(ohneZeichen(suche)) && !ohneZeichen(lokal).startsWith(ohneZeichen(suche))) return uebersetzt;
+  return lokal;
+}
+const photonSchluessel = f => `${f.properties.osm_type}${f.properties.osm_id}`;
 function ortAusMerkmalen(pr) {
   const ort = pr.city || (["city", "town", "village"].includes(pr.osm_value) ? pr.name : "") || pr.town || pr.village || pr.district || pr.county || pr.name || "";
   return { ort, land: pr.countrycode ? pr.countrycode.toUpperCase() : null };
@@ -58,9 +68,11 @@ function geraetePosition() {
 }
 async function standortErmitteln() {
   const c = await geraetePosition();
-  const j = await (await fetch(`${PHOTON}/reverse?lat=${c.latitude}&lon=${c.longitude}&lang=${photonSprache()}`)).json();
+  const [j, jl] = await Promise.all([`lang=${photonSprache()}`, "lang=default"].map(l => fetch(`${PHOTON}/reverse?lat=${c.latitude}&lon=${c.longitude}&${l}`).then(x => x.json()).catch(() => ({}))));
   const pr = (j.features && j.features[0] && j.features[0].properties) || {};
-  const { ort, land } = ortAusMerkmalen(pr);
+  const prl = (jl.features && jl.features[0] && jl.features[0].properties) || {};
+  const { land } = ortAusMerkmalen(pr.countrycode ? pr : prl);
+  const ort = ortsName(ortAusMerkmalen(prl).ort, ortAusMerkmalen(pr).ort);
   if (!ort || !/^[A-Z]{2}$/.test(land)) throw new Error("Ort unbekannt");
   const mitte = await stadtMitte(ort, land, c.latitude, c.longitude);
   return { ort, land, ...mitte };
@@ -69,12 +81,14 @@ async function standortErmitteln() {
 // Photon kennzeichnet sie aber mit type „city“. Mit mitLaendern (nur bei Reisen) sind auch ganze Länder wählbar, Ort noch offen.
 const ORT_ARTEN = ["city", "town", "village", "municipality", "hamlet", "suburb", "island"];
 async function orteSuchen(text, mitLaendern) {
-  const j = await (await fetch(`${PHOTON}/api/?q=${encodeURIComponent(text)}&limit=12&osm_tag=place&lang=${photonSprache()}`)).json();
+  const url = l => `${PHOTON}/api/?q=${encodeURIComponent(text)}&limit=12&osm_tag=place&lang=${l}`;
+  const [j, jl] = await Promise.all([fetch(url(photonSprache())).then(x => x.json()), fetch(url("default")).then(x => x.json()).catch(() => ({ features: [] }))]);
+  const lokal = Object.fromEntries((jl.features || []).map(f => [photonSchluessel(f), f.properties.name]));
   const gesehen = new Set();
   return (j.features || []).filter(f => f.properties.countrycode && (ORT_ARTEN.includes(f.properties.osm_value) || f.properties.type === "city" || (mitLaendern && f.properties.osm_value === "country"))).map(f => {
     const pr = f.properties, land = pr.countrycode.toUpperCase();
     if (pr.osm_value === "country") return { ort: pr.name, land, lat: null, lon: null, ganzesLand: true, zusatz: t("Ganzes Land · Ort noch offen") };
-    return { ort: pr.name, land, lat: +f.geometry.coordinates[1].toFixed(4), lon: +f.geometry.coordinates[0].toFixed(4), zusatz: [pr.state !== pr.name ? pr.state : null, pr.country].filter(Boolean).join(", ") };
+    return { ort: ortsName(lokal[photonSchluessel(f)], pr.name, text), land, lat: +f.geometry.coordinates[1].toFixed(4), lon: +f.geometry.coordinates[0].toFixed(4), zusatz: [pr.state !== pr.name ? pr.state : null, pr.country].filter(Boolean).join(", ") };
   }).filter(o => { const k = o.ort + o.land; if (gesehen.has(k)) return false; gesehen.add(k); return true; })
     .sort((a, b) => (b.ganzesLand ? 1 : 0) - (a.ganzesLand ? 1 : 0)).slice(0, 7);
 }

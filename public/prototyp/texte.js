@@ -577,4 +577,13 @@ const TEXTE = {
   "💬 Der Chat ist da: ein gemeinsamer Chat für alle, eigene Gruppen und Einzelchats. Nachrichten kommen sofort an.": ["💬 Chat is here: one chat for everyone, your own groups and one-to-one chats. Messages arrive instantly.", "💬 Chat je tu: spoločný chat pre všetkých, vlastné skupiny a súkromné chaty. Správy prídu hneď."],
   "🪪 Im Steckbrief und auf der Karte: „Nachricht“ öffnet direkt den Chat mit der Person.": ["🪪 On the profile card and the map: “Message” opens the chat with that person.", "🪪 V profile a na mape: „Správa“ otvorí chat s danou osobou."],
   "🚩 Pionier: Ab jetzt merkt sich Ahoi, wer aus dem Freundeskreis als Erster in einem Land war.": ["🚩 Pioneer: from now on Ahoi remembers who in your circle was first in a country.", "🚩 Priekopník: Ahoi si odteraz pamätá, kto z priateľov bol v krajine prvý."],
+  "{namen} in der Nähe": ["{namen} nearby", "{namen} v blízkosti"],
+  "Vom {zeit} bist du in {ort}, {namen} in {ort2} ({km} entfernt).": ["From {zeit} you're in {ort}, {namen} in {ort2} ({km} away).", "Od {zeit} si v {ort}, {namen} v {ort2} ({km} ďaleko)."],
+  "Beide in {land}": ["Both in {land}", "Obaja v {land}"],
+  "Du und {namen} seid vom {zeit} gleichzeitig in {land}. Wo genau, ist noch offen.": ["You and {namen} are both in {land} from {zeit}. Exactly where is still open.", "Ty a {namen} ste od {zeit} súčasne v {land}. Kde presne, je ešte otvorené."],
+  "{namen} kommt in deine Nähe": ["{namen} is coming near you", "{namen} príde do tvojej blízkosti"],
+  "{km} von {ort}": ["{km} from {ort}", "{km} od {ort}"],
+  "🧭 Treffer stimmen genauer: „gleichzeitig dort“ heißt jetzt dieselbe Stadt. Ist jemand nur in der Nähe, steht sein Ort mit Entfernung dabei.": ["🧭 More accurate matches: “there at the same time” now means the same city. If someone is only nearby, their place and distance are shown.", "🧭 Presnejšie zhody: „súčasne tam“ teraz znamená to isté mesto. Ak je niekto len v blízkosti, uvidíš jeho miesto a vzdialenosť."],
+  "🏙️ Ortsnamen wie vor Ort: Prešov statt „Eperies“, Košice statt „Kaschau“.": ["🏙️ Local place names: Prešov instead of “Eperies”, Košice instead of “Kaschau”.", "🏙️ Miestne názvy: Prešov namiesto „Eperies“, Košice namiesto „Kaschau“."],
+  "📡 Mission: Der Radar dreht sich immer um deinen Ort, auch beim Verschieben der Karte.": ["📡 Mission: the radar always sweeps around your location, even when you move the map.", "📡 Misia: radar sa vždy točí okolo tvojej polohy, aj keď posúvaš mapu."],
 };

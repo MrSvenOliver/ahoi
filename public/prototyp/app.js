@@ -380,9 +380,18 @@ function dekoSetzen() {
 }
 
 // Entfernungsringe um den eigenen Standort (nur Mission): echte Kreise auf der Erdkugel, 1000 / 2500 / 5000 km
+// Mission: der Radarstrahl dreht sich immer um deinen Ort, auch beim Verschieben und Zoomen der Karte
+function radarAusrichten() {
+  const el = document.querySelector(".radar-strahl"), du = ich();
+  if (!el || stil !== "mission" || !du || du.lat == null) return;
+  const p = map.project([du.lon, du.lat]);
+  el.style.setProperty("--rx", p.x.toFixed(1) + "px"); el.style.setProperty("--ry", p.y.toFixed(1) + "px");
+}
+map.on("move", radarAusrichten); map.on("resize", radarAusrichten);
 function ringeZeichnen() {
   const du = ich(), R = 6371.0088, rad = Math.PI / 180, ringe = [1000, 2500, 5000];
   if (du.lat == null) return;
+  radarAusrichten();
   const ohneOrt = du.lat == null; // Familien-Konto ohne eigenen Ort: keine Ringe
   const kreis = km => { if (ohneOrt) return []; const d = km / R, la = du.lat * rad, lo = du.lon * rad, pkt = [];
     for (let i = 0; i <= 180; i++) { const b = (i / 180) * 2 * Math.PI;
@@ -1663,34 +1672,57 @@ async function reisenLaden() {
 // Reisen in ein ganzes Land (Ort noch offen) haben keine Koordinaten; sie treffen sich über das Land
 const nurLand = x => x.lat == null && !!x.land;
 const nahe = (a, b) => !!a && !!b && (a.lat != null && b.lat != null ? entfernungKm(a.lat, a.lon, b.lat, b.lon) < NAH_KM : (nurLand(a) || nurLand(b)) && a.land === b.land);
+// Treffer: Nur was stimmt. Gleicher Ort heißt dieselbe Stadt (unter GLEICH_KM); bis NAH_KM ist es „in der Nähe“ mit beiden Orten.
+// Reisen in ein ganzes Land treffen sich als „beide in Vietnam“. „Vielleicht“-Reisen zählen nicht.
+const GLEICH_KM = 15;
+const abstandOrte = (a, b) => a && b && a.lat != null && b.lat != null ? entfernungKm(a.lat, a.lon, b.lat, b.lon) : null;
+function naeheArt(a, b) {
+  const d = abstandOrte(a, b);
+  if (d != null) return d < GLEICH_KM ? "gleich" : d < NAH_KM ? "nah" : null;
+  return (nurLand(a) || nurLand(b)) && a.land && a.land === b.land ? "land" : null;
+}
 function trefferFinden() {
   const heute = new Date().toISOString().slice(0, 10), du = ich(), treffer = [];
-  const fest = reisen.filter(r => r.von), meine = fest.filter(r => r.wer[0] === "du"), andere = fest.filter(r => r.wer[0] !== "du");
-  const dazu = (art, ort, land, wer, von, bis) => {
-    const alt = treffer.find(x => x.art === art && x.ort === ort && x.von === von && x.bis === bis);
-    if (alt) { if (!alt.wer.includes(wer)) alt.wer.push(wer); } else treffer.push({ art, ort, land, wer: [wer], von, bis });
+  const bald = n => new Date(Date.now() + n * 864e5).toISOString().slice(0, 10);
+  const fest = reisen.filter(r => r.von), meine = fest.filter(r => r.wer[0] === "du" && r.bis >= heute), andere = fest.filter(r => r.wer[0] !== "du" && r.bis >= heute);
+  const dazu = (art, x) => {
+    const alt = treffer.find(y => y.art === art && y.ort === x.ort && y.ort2 === x.ort2 && y.von === x.von && y.bis === x.bis);
+    if (alt) { if (!alt.wer.includes(x.wer)) alt.wer.push(x.wer); } else treffer.push({ art, ...x, wer: [x.wer] });
   };
-  // Beide reisen zur selben Zeit an denselben Ort
+  // Beide reisen zur selben Zeit an denselben Ort (oder in die Nähe, oder ins selbe Land)
   for (const m of meine) for (const a of andere) {
     const von = m.von > a.von ? m.von : a.von, bis = m.bis < a.bis ? m.bis : a.bis;
-    if (von <= bis && nahe(m, a)) dazu("reise", m.ziel, m.land, a.wer[0], von, bis);
+    if (von > bis) continue;
+    const art = naeheArt(m, a);
+    if (art === "gleich") dazu("reise", { ort: m.ziel, land: m.land, wer: a.wer[0], von, bis });
+    else if (art === "nah") dazu("nah", { ort: m.ziel, ort2: a.ziel, land: m.land, km: abstandOrte(m, a), wer: a.wer[0], von, bis });
+    else if (art === "land") dazu("land", { ort: landName(m.land), land: m.land, wer: a.wer[0], von, bis });
   }
-  // Jemand reist dorthin, wo du gerade bist (solange du keine eigene Reise woandershin hast)
+  // Jemand reist dorthin, wo du gerade bist (in den nächsten 60 Tagen und solange du keine Reise woandershin hast)
   for (const a of andere) {
-    const wegDann = meine.some(m => m.von <= a.bis && m.bis >= a.von && !nahe(m, a));
-    if (!wegDann && nahe(du, a)) dazu("kommt", a.ziel, a.land, a.wer[0], a.von < heute ? heute : a.von, a.bis);
+    if (a.von > bald(60) || !ortAktuell(du)) continue;
+    const wegDann = meine.some(m => m.von <= a.bis && m.bis >= a.von && !naeheArt(m, a));
+    const art = naeheArt(du, a);
+    if (!wegDann && art === "gleich") dazu("kommt", { ort: a.ziel, land: a.land, wer: a.wer[0], von: a.von < heute ? heute : a.von, bis: a.bis });
+    else if (!wegDann && art === "nah") dazu("kommt-nah", { ort: a.ziel, ort2: du.ort, land: a.land, km: abstandOrte(du, a), wer: a.wer[0], von: a.von < heute ? heute : a.von, bis: a.bis });
   }
-  // Du reist dorthin, wo jemand gerade ist
-  for (const m of meine) for (const p of leute) if (p.id !== "du" && nahe(m, p)) dazu("dort", m.ziel, m.land, p.id, m.von, m.bis);
+  // Du reist bald dorthin, wo jemand gerade ist (nur Reisen in den nächsten 14 Tagen und nur bei aktuellem Ort)
+  for (const m of meine) {
+    if (m.von > bald(14)) continue;
+    for (const p of leute) if (p.id !== "du" && ortAktuell(p) && naeheArt(m, p) === "gleich") dazu("dort", { ort: m.ziel, land: m.land, wer: p.id, von: m.von, bis: m.bis });
+  }
   return treffer.sort((a, b) => a.von.localeCompare(b.von));
 }
 function trefferAufbauen() {
   const namen = ids => ids.map(person).filter(Boolean).map(p => p.name).join(" & ");
   document.getElementById("treffer-liste").innerHTML = trefferFinden().map(x => {
-    const zeit = `${kurz(x.von)} – ${kurz(x.bis)}`;
-    if (x.art === "reise") return `<div class="kasten treffer"><b>🧭 ${t("Treffer: {ort}", { ort: ohneHtml(x.ort) })}</b><span>${t("Du und {namen} seid vom {zeit} gleichzeitig dort.", { namen: ohneHtml(namen(x.wer)), zeit })}</span></div>`;
-    if (x.art === "kommt") return `<div class="kasten treffer"><b>🧭 ${t("{namen} kommt zu dir", { namen: ohneHtml(namen(x.wer)) })}</b><span>${flagge(x.land)} ${ohneHtml(x.ort)} · ${zeit}</span></div>`;
-    return `<div class="kasten treffer"><b>🧭 ${t("{namen} ist gerade in {ort}", { namen: ohneHtml(namen(x.wer)), ort: ohneHtml(x.ort) })}</b><span>${t("Du bist dort vom {zeit}", { zeit })}</span></div>`;
+    const zeit = `${kurz(x.von)} – ${kurz(x.bis)}`, wer = ohneHtml(namen(x.wer));
+    if (x.art === "reise") return `<div class="kasten treffer"><b>🧭 ${t("Treffer: {ort}", { ort: ohneHtml(x.ort) })}</b><span>${t("Du und {namen} seid vom {zeit} gleichzeitig dort.", { namen: wer, zeit })}</span></div>`;
+    if (x.art === "nah") return `<div class="kasten treffer leise"><b>📍 ${t("{namen} in der Nähe", { namen: wer })}</b><span>${t("Vom {zeit} bist du in {ort}, {namen} in {ort2} ({km} entfernt).", { zeit, ort: ohneHtml(x.ort), namen: wer, ort2: ohneHtml(x.ort2), km: km(x.km) })}</span></div>`;
+    if (x.art === "land") return `<div class="kasten treffer leise"><b>${flagge(x.land)} ${t("Beide in {land}", { land: ohneHtml(x.ort) })}</b><span>${t("Du und {namen} seid vom {zeit} gleichzeitig in {land}. Wo genau, ist noch offen.", { namen: wer, zeit, land: ohneHtml(x.ort) })}</span></div>`;
+    if (x.art === "kommt") return `<div class="kasten treffer"><b>🧭 ${t("{namen} kommt zu dir", { namen: wer })}</b><span>${flagge(x.land)} ${ohneHtml(x.ort)} · ${zeit}</span></div>`;
+    if (x.art === "kommt-nah") return `<div class="kasten treffer leise"><b>📍 ${t("{namen} kommt in deine Nähe", { namen: wer })}</b><span>${flagge(x.land)} ${ohneHtml(x.ort)} · ${zeit} · ${t("{km} von {ort}", { km: km(x.km), ort: ohneHtml(x.ort2) })}</span></div>`;
+    return `<div class="kasten treffer"><b>🧭 ${t("{namen} ist gerade in {ort}", { namen: wer, ort: ohneHtml(x.ort) })}</b><span>${t("Du bist dort vom {zeit}", { zeit })}</span></div>`;
   }).join("");
 }
 
@@ -1865,6 +1897,11 @@ async function chatVerlassenEcht(c) {
 // ---------- Neu in Ahoi: nach jedem App-Update einmal eine kurze Übersicht ----------
 // Bei jedem Update oben einen Eintrag ergänzen (neueste zuerst). Wer neu dabei ist, sieht nur den neuesten.
 const NEUIGKEITEN = [
+  { id: "2026-11-23-treffer", punkte: [
+    "🧭 Treffer stimmen genauer: „gleichzeitig dort“ heißt jetzt dieselbe Stadt. Ist jemand nur in der Nähe, steht sein Ort mit Entfernung dabei.",
+    "🏙️ Ortsnamen wie vor Ort: Prešov statt „Eperies“, Košice statt „Kaschau“.",
+    "📡 Mission: Der Radar dreht sich immer um deinen Ort, auch beim Verschieben der Karte."
+  ] },
   { id: "2026-11-23-chat", punkte: [
     "💬 Der Chat ist da: ein gemeinsamer Chat für alle, eigene Gruppen und Einzelchats. Nachrichten kommen sofort an.",
     "🪪 Im Steckbrief und auf der Karte: „Nachricht“ öffnet direkt den Chat mit der Person.",

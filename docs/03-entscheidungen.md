@@ -3,6 +3,9 @@
 Jede Entscheidung mit Datum. Neue Einträge kommen oben dazu.
 
 ## 23.11.2026
+- Treffer: „gleichzeitig dort“ nur bei derselben Stadt (unter 15 km); bis 50 km „in der Nähe“ mit beiden Orten und Entfernung (Hoi An / Đà Nẵng); ganze Länder als „beide in Vietnam“; „kommt zu dir“ nur für Reisen in den nächsten 60 Tagen, „ist gerade dort“ nur für eigene Reisen in den nächsten 14 Tagen und bei aktuellem Ort
+- Ortsnamen: der Name vor Ort in lateinischer Schrift (Prešov statt „Eperies“); die Übersetzung nur, wenn man sie selbst tippt (Lissabon) oder der Ortsname nicht lateinisch ist (Tokio)
+- Mission: Der Radarstrahl dreht sich immer um den eigenen Ort und wandert beim Verschieben und Zoomen mit
 - Orte-Verlauf (E, SQL 07): jeder neue Ort wird mit Datum festgehalten, den eigenen Verlauf sieht nur man selbst; daraus „Pionier“ (wer aus dem Freundeskreis als Erster in einem Land war, ohne Orte im Geistermodus) und später die Rückblicke
 - Chat (A, SQL 08): „Alle“ (Beta), eigene Gruppen und Einzelchats, Nachrichten kommen sofort über Supabase Realtime; „Nachricht“ im Steckbrief und auf der Karte öffnet den Einzelchat; Übersetzung, Fotos, Orte und Sprachnachrichten kommen später; die Familie hat keinen Chat
 - Beim Senden bleibt die Tastatur offen, damit der Tipp auf den Sende-Knopf nicht ins Leere geht
