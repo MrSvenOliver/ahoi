@@ -3,6 +3,9 @@
 Jede Entscheidung mit Datum. Neue Einträge kommen oben dazu.
 
 ## 23.11.2026
+- Orte-Verlauf (E, SQL 07): jeder neue Ort wird mit Datum festgehalten, den eigenen Verlauf sieht nur man selbst; daraus „Pionier“ (wer aus dem Freundeskreis als Erster in einem Land war, ohne Orte im Geistermodus) und später die Rückblicke
+- Chat (A, SQL 08): „Alle“ (Beta), eigene Gruppen und Einzelchats, Nachrichten kommen sofort über Supabase Realtime; „Nachricht“ im Steckbrief und auf der Karte öffnet den Einzelchat; Übersetzung, Fotos, Orte und Sprachnachrichten kommen später; die Familie hat keinen Chat
+- Beim Senden bleibt die Tastatur offen, damit der Tipp auf den Sende-Knopf nicht ins Leere geht
 - Paare, Reisegruppen und Meine Länder sind in der echten App (SQL 06): Anfragen kommen beim Öffnen der App als Frage („Lea möchte euch als Paar verknüpfen“, „Lea sagt, ihr reist gerade zusammen“); jeder hat höchstens einen Partner und ist in höchstens einer Gruppe; wer über 50 km von allen anderen der Gruppe weg ist, fällt beim nächsten Standort heraus; die besuchten Länder liegen im Profil, damit Freunde sie im Steckbrief sehen; Steckbrief auch in der echten App
 - „Neu in Ahoi“: nach jedem App-Update einmal eine kurze Übersicht mit den Neuerungen beim Öffnen der App; jedes Update bekommt dafür einen Eintrag (echte Push-Mitteilungen kommen mit dem Punkt Mitteilungen)
 - Alte Orte: Ein Ort ist so aktuell wie das letzte Öffnen der App. Ist er älter als einen Tag, steht „🕓 vor X Tagen“ dabei, und die App fragt dann nicht „Reist ihr zusammen?“

@@ -18,6 +18,8 @@
 - `04-reisen-feedback.sql`: Reisen (fest oder vielleicht) und Feedback mit Screenshots
 - `05-familie.sql`: Familien-Zugang, Orte nur noch über die geschützte Ansicht
 - `06-paare-gruppen-laender.sql`: Paare, Reisegruppen („Reist ihr zusammen?“) und besuchte Länder im Profil
+- `07-orte-verlauf.sql`: Orte-Verlauf (für Rückblicke) und „Pionier“
+- `08-chat.sql`: Chat (Alle, Gruppen, Einzelchats) mit Realtime
 
 ## Betrieb
 - Wachhalten: `.github/workflows/wachhalten.yml` (Montag und Donnerstag)

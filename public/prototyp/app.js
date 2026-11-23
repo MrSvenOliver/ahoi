@@ -575,7 +575,7 @@ function infoZeigen(gruppe) {
   info.querySelector("h3").textContent = name;
   info.querySelector("p").innerHTML = text;
   const chatKnopf = document.getElementById("info-chat");
-  chatKnopf.style.display = !ECHT && !familieModus && gruppe.length === 1 && p.id !== "du" ? "inline-block" : "none";
+  chatKnopf.style.display = !familieModus && gruppe.length === 1 && p.id !== "du" ? "inline-block" : "none";
   chatKnopf.onclick = () => einzelChat(p.id);
   const tippKnopf = document.getElementById("info-tipps"), tippZahl = familieModus || ECHT ? 0 : tipps.filter(x => x.ort === p.ort).length;
   tippKnopf.style.display = tippZahl ? "inline-block" : "none";
@@ -732,7 +732,7 @@ function seiteZeigen(name) {
   document.querySelectorAll("#leiste button").forEach(b => b.setAttribute("aria-current", b.dataset.seite === name ? "page" : "false"));
   document.querySelectorAll("#leiste button").forEach(b => b.classList.toggle("aktiv", b.dataset.seite === (TAB_VON[name] || name)));
   document.getElementById("info").classList.remove("offen");
-  if (name === "chat" && !ECHT) chatListeAufbauen();
+  if (name === "chat") chatListeAufbauen();
   if (name === "karte") { blattSetzen(false); map.resize(); }
 }
 document.querySelectorAll("#leiste button").forEach(b => b.onclick = () => seiteZeigen(b.dataset.seite));
@@ -837,7 +837,7 @@ function reisenAufbauen() {
 // ---------- Chat ----------
 // Chatliste: „Alle“ (nur in der Beta), Reisegruppen (selbst erstellt oder automatisch aus Treffer/Idee), Einzelchats.
 // Fremdsprachige Nachrichten tragen ihre Übersetzung mit (später DeepL über Supabase, je Sprache einmal gespeichert).
-const chats = [
+const chats = ECHT ? [] : [
   { id: "alle", art: "alle", name: "Alle", ungelesen: 1, nachrichten: [
     { system: "<b>Lea</b> hat eine Reise eingetragen: Lissabon, 8.–20.1." },
     { von: "lea", text: "Wer ist im Januar noch in Portugal? 🇵🇹", lang: "de", ue: { en: "Who else is in Portugal in January? 🇵🇹", sk: "Kto ešte bude v januári v Portugalsku? 🇵🇹" }, reaktion: "👍 2" },
@@ -877,13 +877,15 @@ const uebersetzt = {};
 const ohneHtml = t => String(t).replace(/[&<>"']/g, z => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[z]);
 function textMitErwaehnung(t) { return ohneHtml(t).replace(/@(\p{L}+)/gu, '<span class="erwaehnung">@$1</span>'); }
 const spracheName = code => new Intl.DisplayNames([SPRACHE], { type: "language" }).of(code);
-const chatName = c => c.art === "einzel" ? person(c.mit).name : c.name;
+const UNBEKANNT = { id: "?", name: "?", farbe: "#9a9a9a", ort: "", land: "", tz: "UTC" };
+const personOder = id => person(id) || UNBEKANNT;
+const chatName = c => c.art === "einzel" ? personOder(c.mit).name : c.name;
 const istFremd = n => n.lang && n.lang !== SPRACHE && n.ue && n.ue[SPRACHE];
 function vorschau(c) {
   const n = c.nachrichten[c.nachrichten.length - 1];
   if (!n) return t("Noch keine Nachricht");
   if (n.system) return n.system.replace(/<[^>]+>/g, "");
-  const wer = c.art !== "einzel" ? (n.von === "du" ? t("Du") : person(n.von).name) + ": " : n.von === "du" ? t("Du") + ": " : "";
+  const wer = c.art !== "einzel" ? (n.von === "du" ? t("Du") : personOder(n.von).name) + ": " : n.von === "du" ? t("Du") + ": " : "";
   if (n.sprache) return wer + t("🎤 Sprachnachricht");
   if (n.ort) return wer + "📍 " + n.ort;
   return wer + (istFremd(n) && uebersetzt[c.id] ? n.ue[SPRACHE] : n.text);
@@ -899,7 +901,7 @@ function chatListeAufbauen() {
   const reihe = [...chats.filter(c => c.art === "alle"), ...chats.filter(c => c.art !== "alle")];
   document.getElementById("chat-liste").innerHTML = reihe.map(c => {
     let bild;
-    if (c.art === "einzel") { const p = person(c.mit); bild = `<div class="bildchen person" style="background:${p.farbe}">${kuerzel(p.name)}</div>`; }
+    if (c.art === "einzel") { const p = personOder(c.mit); bild = `<div class="bildchen person" style="background:${p.farbe}">${kuerzel(p.name)}</div>`; }
     else bild = `<div class="bildchen">${c.art === "alle" ? "🌍" : c.herkunft === "Idee" ? "🏠" : c.herkunft === "Treffer" ? "🧭" : "👥"}</div>`;
     const marke = c.art === "alle" ? '<span class="marke-klein">Beta</span>' : c.herkunft ? `<span class="marke-klein">${t("aus " + c.herkunft)}</span>` : "";
     return `<li class="chat-zeile" data-id="${c.id}">${bild}<div class="mitte"><b>${ohneHtml(chatName(c))} ${marke}${c.stumm ? " 🔕" : ""}</b><span>${ohneHtml(vorschau(c))}</span></div>${c.ungelesen ? `<div class="ungelesen">${c.ungelesen}</div>` : ""}</li>`;
@@ -919,7 +921,7 @@ function chatAktionen(c) {
   document.getElementById("aktion-titel").textContent = chatName(c);
   const knoepfe = c.art === "alle" ? [[t(c.stumm ? "🔔 Wieder einschalten" : "🔕 Stummschalten"), () => { c.stumm = !c.stumm; }]]
     : c.art === "gruppe" ? [[t("🔕 Stummschalten"), () => { c.stumm = !c.stumm; }], [t("Gruppe verlassen"), () => gruppeVerlassen(c), true]]
-    : [[t("Chat löschen (nur bei dir)"), () => { chats.splice(chats.indexOf(c), 1); hinweis(t("Nur bei dir gelöscht – {name} sieht den Chat weiter", { name: person(c.mit).name })); }, true]];
+    : [[t("Chat löschen (nur bei dir)"), () => { chats.splice(chats.indexOf(c), 1); if (ECHT) chatAusblenden(c); hinweis(t("Nur bei dir gelöscht – {name} sieht den Chat weiter", { name: person(c.mit).name })); }, true]];
   const box = document.getElementById("aktion-knoepfe"); box.innerHTML = "";
   knoepfe.forEach(([t, f, gefahr]) => { const b = document.createElement("button"); b.className = "knopf-leise" + (gefahr ? " gefahr" : ""); b.textContent = t; b.onclick = () => { blatt.classList.remove("offen"); f(); chatListeAufbauen(); }; box.appendChild(b); });
   blatt.classList.add("offen");
@@ -927,6 +929,7 @@ function chatAktionen(c) {
 document.getElementById("aktion-abbrechen").onclick = () => document.getElementById("aktion-blatt").classList.remove("offen");
 document.getElementById("aktion-blatt").onclick = e => { if (e.target.id === "aktion-blatt") e.target.classList.remove("offen"); };
 function gruppeVerlassen(c) {
+  if (ECHT) return chatVerlassenEcht(c);
   c.nachrichten.push({ system: t("<b>Du</b> hast die Gruppe verlassen") });
   chats.splice(chats.indexOf(c), 1);
   hinweis("Die anderen sehen: „Du hast die Gruppe verlassen“");
@@ -934,13 +937,15 @@ function gruppeVerlassen(c) {
 function gespraechOeffnen(c) {
   aktuellerChat = c; c.ungelesen = 0;
   document.getElementById("gespraech-name").textContent = chatName(c);
-  const p = c.art === "einzel" && person(c.mit);
-  document.getElementById("gespraech-unter").textContent = c.art === "alle" ? t("Alle Mitglieder · nur in der Beta") : c.art === "gruppe" ? c.mitglieder.map(id => person(id).name).join(", ") : `${flagge(p.land)} ${p.ort} · ${uhrzeit(p.tz)}${t(" Uhr")}`;
+  const p = c.art === "einzel" && personOder(c.mit);
+  document.getElementById("gespraech-unter").textContent = c.art === "alle" ? t("Alle Mitglieder · nur in der Beta") : c.art === "gruppe" ? c.mitglieder.map(id => id === "du" ? t("Du") : personOder(id).name).join(", ") : p.ort ? `${flagge(p.land)} ${p.ort} · ${uhrzeit(p.tz)}${t(" Uhr")}` : "";
+  if (ECHT) chatGelesen(c);
   document.getElementById("uebersetzen").style.display = c.nachrichten.some(istFremd) ? "" : "none";
   seiteZeigen("unterhaltung");
   chatAufbauen(); chatPunkt();
 }
 function einzelChat(id) {
+  if (ECHT) return einzelChatEcht(id);
   let c = chats.find(x => x.art === "einzel" && x.mit === id);
   if (!c) { c = { id: "e-" + id, art: "einzel", mit: id, nachrichten: [] }; chats.splice(1, 0, c); }
   gespraechOeffnen(c);
@@ -951,7 +956,7 @@ function chatAufbauen() {
   knopf.classList.toggle("an", an); knopf.setAttribute("aria-pressed", an); knopf.textContent = t(an ? "🌐 Original" : "🌐 Übersetzen");
   v.innerHTML = (an ? `<div class="ue-band">${t("Nachrichten in anderen Sprachen werden auf {s} angezeigt", { s: spracheName(SPRACHE) })}</div>` : "") + c.nachrichten.map((n, k) => {
     if (n.system) return `<div class="system">${n.system}</div>`;
-    const p = person(n.von), ich = n.von === "du";
+    const p = personOder(n.von), ich = n.von === "du";
     const zeigUe = istFremd(n) && an && !n.original;
     let inhalt = n.text ? textMitErwaehnung(zeigUe ? n.ue[SPRACHE] : n.text) : "";
     if (istFremd(n) && an) inhalt += `<span class="ue-hinweis">${t(zeigUe ? "Übersetzt aus {s}" : "Original auf {s}", { s: spracheName(n.lang) })} · <button data-k="${k}">${t(zeigUe ? "Original anzeigen" : "Übersetzung anzeigen")}</button></span>`;
@@ -968,10 +973,14 @@ document.getElementById("gespraech-zurueck").onclick = () => seiteZeigen("chat")
 function senden() {
   const feld = document.getElementById("chat-text"), t = feld.value.trim();
   if (!t || !aktuellerChat) return;
+  if (ECHT) return chatSendenEcht(feld, t);
   aktuellerChat.nachrichten.push({ von: "du", text: t }); feld.value = "";
   chatAufbauen();
 }
 document.getElementById("chat-senden").onclick = senden;
+// Tastatur bleibt beim Senden offen: sonst verschiebt sich die Leiste zwischen Drücken und Loslassen und der Tipp geht ins Leere
+document.getElementById("chat-senden").addEventListener("pointerdown", e => e.preventDefault());
+document.getElementById("chat-senden").addEventListener("mousedown", e => e.preventDefault());
 document.getElementById("chat-mikro").onclick = () => hinweis("Gedrückt halten zum Aufnehmen – kommt mit dem echten Chat");
 document.getElementById("chat-text").addEventListener("keydown", e => { if (e.key === "Enter") senden(); });
 document.getElementById("chat-text").addEventListener("focus", () => document.documentElement.classList.add("tippt"));
@@ -987,6 +996,7 @@ document.getElementById("gruppe-neu-knopf").onclick = () => {
 document.getElementById("gruppe-erstellen").onclick = () => {
   if (!gruppeAuswahl.size) return hinweis("Bitte mindestens eine Person auswählen");
   const name = document.getElementById("gruppe-name").value.trim() || [...gruppeAuswahl].map(id => person(id).name).join(", ");
+  if (ECHT) return gruppeErstellenEcht(name, [...gruppeAuswahl]);
   const c = { id: "g-" + Date.now(), art: "gruppe", name, mitglieder: ["du", ...gruppeAuswahl], nachrichten: [{ system: t("<b>Du</b> hast die Gruppe erstellt") }] };
   chats.splice(1, 0, c); gespraechOeffnen(c);
 };
@@ -1343,7 +1353,7 @@ if (ECHT && ich().land) landDazu(ich().land);
 const landName = cc => { try { return new Intl.DisplayNames([SPRACHE], { type: "region" }).of(cc); } catch (e) { return cc; } };
 // Meine Länder: im Profil nur eine Zeile, eigene Seite mit Freirubbel-Karte
 const KONTINENTE = { EU: "Europa", AS: "Asien", AF: "Afrika", NA: "Nordamerika", SA: "Südamerika", OC: "Ozeanien", AN: "Antarktis" };
-const PIONIER = ECHT ? [] : ["VN", "HR"];
+let PIONIER = ECHT ? [] : ["VN", "HR"], PIONIERE_ALLE = {}; // Land → Person, die als Erste dort war (echte App: aus dem Orte-Verlauf)
 const KONT_FARBEN = {
   modern: { EU: "#0a84ff", AS: "#ff9f0a", AF: "#ff375f", NA: "#30d158", SA: "#bf5af2", OC: "#40c8e0", AN: "#8e8e93", zu: "#d5d8de", meer: "#eef2f6", rand: "#ffffff" },
   mission: { EU: "#5fd4ea", AS: "#5fd4ea", AF: "#5fd4ea", NA: "#5fd4ea", SA: "#5fd4ea", OC: "#5fd4ea", AN: "#5fd4ea", zu: "#11263a", meer: "#06101c", rand: "#2b6f8a" },
@@ -1469,7 +1479,7 @@ function laenderVon(p) {
   for (let i = pool.length - 1; i > 0; i--) { const j = Math.floor(zufall() * (i + 1)); [pool[i], pool[j]] = [pool[j], pool[i]]; }
   return [p.land, ...pool].slice(0, p.laender);
 }
-function naechsteReise(id) {
+function naechsteReiseSteckbrief(id) {
   const heute = new Date().toISOString().slice(0, 10), monat = heute.slice(0, 7);
   return reisen.filter(r => r.wer.includes(id) && (r.vielleicht ? r.monat >= monat : r.bis >= heute)).sort((a, b) => reiseSchluessel(a).localeCompare(reiseSchluessel(b)))[0];
 }
@@ -1479,12 +1489,12 @@ async function steckbriefOeffnen(p) {
   const kontVon = Object.fromEntries(welt.map(l => [l.i, l.k]));
   const kont = new Set(laender.map(cc => kontVon[cc]).filter(Boolean)).size;
   const zahl = laender.filter(cc => STAATEN.has(cc)).length;
-  const pio = selbst ? PIONIER.filter(cc => besucht.includes(cc)).length : 0;
+  const pio = selbst ? PIONIER.filter(cc => besucht.includes(cc)).length : Object.values(PIONIERE_ALLE).filter(u => u === p.uid).length;
   const abstand = !selbst && du.lat != null && p.lat != null ? entfernungKm(du.lat, du.lon, p.lat, p.lon) : null;
   // Mit wem unterwegs: bestätigte Reisegruppe, sonst der Partner, wenn er am selben Ort ist
   const rg = gruppeVon(p.id), partner = p.paar && leute.find(q => q.id !== p.id && q.paar === p.paar && q.lat != null && p.lat != null && entfernungKm(p.lat, p.lon, q.lat, q.lon) < NAH_KM);
   const mit = rg ? rg.leute.filter(id => id !== p.id).map(person).filter(Boolean) : partner ? [partner] : [];
-  const reise = naechsteReise(p.id);
+  const reise = naechsteReiseSteckbrief(p.id);
   const name = selbst ? (p.echterName || t("Du")) : p.name;
   const akte = "AH-" + String([...p.id].reduce((a, c) => a + c.charCodeAt(0) * 7, 0) % 9000 + 1000);
   const titel = { modern: "", mission: `${t("Personalakte")} · ${akte} · ${t("Freigegeben")}`, abenteuer: t("Reisepass") }[stil];
@@ -1502,7 +1512,7 @@ async function steckbriefOeffnen(p) {
   const zahlen = laenderVon(p) ? `<div class="sb-zahlen"><div><b data-zahl="${zahl}">${zahl}</b><span>${t(zahl === 1 ? "Land" : "Länder")}</span></div><div><b>${kont}/7</b><span>${t("Kontinente")}</span></div><div><b>${pio ? pio + "×" : "–"}</b><span>${t("Pionier")}</span></div></div><div class="sb-karte">${karte}</div>` : "";
   const sortiert = laender.filter(cc => STAATEN.has(cc)).slice(0, 11);
   const stempel = sortiert.length ? `<div class="sb-stempel">${sortiert.map((cc, i) => `<span class="stempel-ink${i % 3 === 1 ? " eckig" : ""}" style="--i:${i};--r:${((i * 37) % 26) - 13}deg;--sf:${STEMPEL_FARBEN[i % STEMPEL_FARBEN.length]}">${flagge(cc)}<small>${cc}</small></span>`).join("")}${zahl > sortiert.length ? `<span class="stempel-mehr">+${zahl - sortiert.length}</span>` : ""}</div>` : "";
-  const knoepfe = selbst ? "" : `<div class="sb-knoepfe"><button class="knopf-leise" id="sb-karte-zeigen">📍 ${t("Auf der Karte")}</button>${!ECHT ? `<button class="knopf-leise" id="sb-nachricht">💬 ${t("Nachricht")}</button>` : ""}</div>`;
+  const knoepfe = selbst ? "" : `<div class="sb-knoepfe"><button class="knopf-leise" id="sb-karte-zeigen">📍 ${t("Auf der Karte")}</button><button class="knopf-leise" id="sb-nachricht">💬 ${t("Nachricht")}</button></div>`;
   const blatt = document.getElementById("sb-blatt");
   blatt.style.setProperty("--sb-farbe", p.farbe || "#0a84ff");
   blatt.innerHTML = `<button class="sb-zu" id="sb-zu" aria-label="${t("Schließen")}">✕</button>
@@ -1549,7 +1559,7 @@ function gruppeBeitreten(p, still) {
     if (document.getElementById("info").classList.contains("offen")) infoZeigen(infoGruppe);
   }, 3500);
 }
-async function gruppeVerlassen() {
+async function reisegruppeVerlassen() {
   const g = gruppeVon("du"); if (!g) return;
   if (ECHT) { const { error } = await SB.rpc("gruppe_verlassen"); if (error) return hinweis(t("Das hat nicht geklappt")); }
   g.leute = g.leute.filter(id => id !== "du");
@@ -1568,7 +1578,7 @@ function gruppeKnopfSetzen(gruppe) {
   k.style.display = zeigen ? "inline-block" : "none";
   if (!zeigen) return;
   const offen = nahe.filter(p => !meine || !meine.leute.includes(p.id));
-  if (!offen.length) { k.textContent = t("👥 Gruppe verlassen"); k.onclick = () => fragen(t("Nicht mehr zusammen unterwegs? Die anderen sehen dich dann wieder einzeln."), [[t("Gruppe verlassen"), gruppeVerlassen, true]]); return; }
+  if (!offen.length) { k.textContent = t("👥 Gruppe verlassen"); k.onclick = () => fragen(t("Nicht mehr zusammen unterwegs? Die anderen sehen dich dann wieder einzeln."), [[t("Gruppe verlassen"), reisegruppeVerlassen, true]]); return; }
   const p = offen[0];
   k.textContent = gruppenAnfrage === p.id || (ECHT && ANFRAGEN.mitreiseRaus.includes(p.id)) ? t("👥 Anfrage gesendet") : offen.length === 1 ? t("👥 Mit {name} unterwegs", { name: p.name }) : t("👥 Zusammen unterwegs");
   k.onclick = () => { if (gruppenAnfrage === p.id || (ECHT && ANFRAGEN.mitreiseRaus.includes(p.id))) return; offen.length === 1 ? gruppeBeitreten(p) : fragen(t("Mit wem reist du zusammen?"), offen.map(q => [q.name, () => gruppeBeitreten(q)])); };
@@ -1749,7 +1759,6 @@ if (!ECHT) { let gezeigt = null; try { gezeigt = localStorage.getItem("ahoi-prot
 
 // ---------- Echte App: Profil, Ort, Einladen, Verwaltung ----------
 const BALD = {
-  chat: ["💬", "Chat", "Der Chat mit deinen Freunden kommt als Nächstes."],
   ideen: ["🏡", "Ideen", "Unterkunfts-Ideen und Ortstipps kommen bald."]
 };
 function fragen(titel, knoepfe) {
@@ -1765,9 +1774,102 @@ function meinBildZeigen() {
   [bild, knopf].forEach(el => { el.classList.toggle("mit-bild", !!du.bild); el.style.backgroundImage = du.bild ? `url('${du.bild}')` : ""; });
 }
 function meinOrtZeigen() { const p = ECHT_DATEN.profil; document.getElementById("mein-ort").textContent = p.ort ? `${flagge(p.land)} ${p.ort}` : t("Noch kein Ort"); }
+// ---------- Echte App: Chat (Alle, Gruppen, Einzelchats) mit Supabase Realtime ----------
+// Gelesen-Stand und „nur bei mir gelöscht“ merkt sich das Gerät; neue Nachrichten kommen sofort über Realtime.
+const CHAT_SPEICHER = "ahoi-chat";
+let chatStand = { gelesen: {}, weg: {} };
+try { chatStand = Object.assign(chatStand, JSON.parse(localStorage.getItem(CHAT_SPEICHER) || "{}")); } catch (e) {}
+const chatStandSpeichern = () => { try { localStorage.setItem(CHAT_SPEICHER, JSON.stringify(chatStand)); } catch (e) {} };
+function nachrichtAusDb(x) {
+  const von = x.von ? idVon(x.von) : null;
+  if (x.system) { const name = von === "du" ? t("Du") : personOder(von).name; return { id: x.id, von, system: `<b>${ohneHtml(name)}</b> ${t(x.text === "erstellt" ? (von === "du" ? "hast die Gruppe erstellt" : "hat die Gruppe erstellt") : (von === "du" ? "hast die Gruppe verlassen" : "hat die Gruppe verlassen"))}` }; }
+  return { id: x.id, von, text: x.text, am: x.am };
+}
+function chatGelesen(c) {
+  c.ungelesen = 0;
+  const letzte = c.nachrichten[c.nachrichten.length - 1];
+  if (letzte && letzte.id) { chatStand.gelesen[c.id] = letzte.id; chatStandSpeichern(); }
+  chatPunkt();
+}
+function chatAusblenden(c) { const letzte = c.nachrichten[c.nachrichten.length - 1]; chatStand.weg[c.id] = letzte ? letzte.id || 0 : 0; chatStandSpeichern(); }
+let chatsGeladen = false;
+async function chatsLaden() {
+  if (!ECHT || familieModus || ECHT_DATEN.profil.art === "familie") return;
+  const [k, m, n] = await Promise.all([
+    SB.from("chat").select("id, art, name, erstellt_am"), SB.from("chat_mitglied").select("chat, person"),
+    SB.from("nachricht").select("id, chat, von, text, system, am").order("id", { ascending: false }).limit(800)
+  ]);
+  if (k.error || m.error || n.error) return;
+  const neu = k.data.map(x => {
+    const mit = m.data.filter(y => y.chat === x.id).map(y => idVon(y.person));
+    const nachrichten = n.data.filter(y => y.chat === x.id).reverse().map(nachrichtAusDb);
+    const gelesen = chatStand.gelesen[x.id] || 0;
+    return { id: x.id, art: x.art, name: x.art === "alle" ? t("Alle") : x.name, mitglieder: mit, mit: x.art === "einzel" ? mit.find(id => id !== "du") : null, nachrichten, erstellt: x.erstellt_am,
+      ungelesen: nachrichten.filter(y => y.id > gelesen && y.von !== "du" && !y.system).length };
+  }).filter(c => !(c.art === "einzel" && c.id in chatStand.weg && !c.nachrichten.some(y => y.id > chatStand.weg[c.id])));
+  // Reihenfolge: „Alle“ zuerst, dann nach letzter Nachricht
+  const zuletzt = c => { const l = c.nachrichten[c.nachrichten.length - 1]; return l ? l.id : 0; };
+  neu.sort((a, b) => (a.art === "alle" ? -1 : b.art === "alle" ? 1 : zuletzt(b) - zuletzt(a)));
+  if (!chatsGeladen) neu.forEach(c => { if (c.art === "alle" && !(c.id in chatStand.gelesen)) { c.ungelesen = Math.min(c.ungelesen, 3); } });
+  chats.splice(0, chats.length, ...neu);
+  if (aktuellerChat) aktuellerChat = chats.find(c => c.id === aktuellerChat.id) || null;
+  chatsGeladen = true;
+  if (document.getElementById("seite-chat").classList.contains("offen")) chatListeAufbauen(); else chatPunkt();
+  if (aktuellerChat && document.getElementById("seite-unterhaltung").classList.contains("offen")) { chatAufbauen(); chatGelesen(aktuellerChat); }
+}
+function nachrichtDazu(x) {
+  const c = chats.find(y => y.id === x.chat);
+  if (!c) return chatsLaden();
+  if (c.nachrichten.some(y => y.id === x.id)) return;
+  c.nachrichten.push(nachrichtAusDb(x));
+  if (c.art === "einzel") delete chatStand.weg[c.id];
+  const offen = aktuellerChat === c && document.getElementById("seite-unterhaltung").classList.contains("offen") && document.visibilityState === "visible";
+  if (offen) { chatAufbauen(); chatGelesen(c); }
+  else if (idVon(x.von) !== "du" && !x.system) c.ungelesen = (c.ungelesen || 0) + 1;
+  chats.sort((a, b) => (a.art === "alle" ? -1 : b.art === "alle" ? 1 : (b.nachrichten.at(-1)?.id || 0) - (a.nachrichten.at(-1)?.id || 0)));
+  if (document.getElementById("seite-chat").classList.contains("offen")) chatListeAufbauen(); else chatPunkt();
+}
+let chatKanal = null;
+function chatVerbinden() {
+  if (chatKanal) return;
+  chatKanal = SB.channel("nachrichten").on("postgres_changes", { event: "INSERT", schema: "public", table: "nachricht" }, e => nachrichtDazu(e.new)).subscribe();
+}
+async function chatSendenEcht(feld, text) {
+  const c = aktuellerChat; feld.value = "";
+  const { data, error } = await SB.from("nachricht").insert({ chat: c.id, text, sprache: SPRACHE }).select("id, chat, von, text, system, am").single();
+  if (error) { feld.value = text; return hinweis(t("Senden hat nicht geklappt")); }
+  nachrichtDazu(data);
+}
+async function einzelChatEcht(id) {
+  const p = person(id); if (!p || !p.uid) return;
+  const { data, error } = await SB.rpc("einzelchat", { ziel: p.uid });
+  if (error) return hinweis(t("Das hat nicht geklappt"));
+  delete chatStand.weg[data]; chatStandSpeichern();
+  await chatsLaden();
+  let c = chats.find(x => x.id === data);
+  if (!c) { c = { id: data, art: "einzel", mit: id, mitglieder: ["du", id], nachrichten: [] }; chats.splice(1, 0, c); }
+  gespraechOeffnen(c);
+}
+async function gruppeErstellenEcht(name, ids) {
+  const { data, error } = await SB.rpc("gruppe_erstellen", { name, leute: ids.map(id => person(id)?.uid).filter(Boolean) });
+  if (error) return hinweis(t("Das hat nicht geklappt"));
+  await chatsLaden();
+  const c = chats.find(x => x.id === data); if (c) gespraechOeffnen(c); else seiteZeigen("chat");
+}
+async function chatVerlassenEcht(c) {
+  const { error } = await SB.rpc("chat_verlassen", { c: c.id });
+  if (error) return hinweis(t("Das hat nicht geklappt"));
+  hinweis(t("Du hast die Gruppe verlassen")); await chatsLaden(); seiteZeigen("chat");
+}
+
 // ---------- Neu in Ahoi: nach jedem App-Update einmal eine kurze Übersicht ----------
 // Bei jedem Update oben einen Eintrag ergänzen (neueste zuerst). Wer neu dabei ist, sieht nur den neuesten.
 const NEUIGKEITEN = [
+  { id: "2026-11-23-chat", punkte: [
+    "💬 Der Chat ist da: ein gemeinsamer Chat für alle, eigene Gruppen und Einzelchats. Nachrichten kommen sofort an.",
+    "🪪 Im Steckbrief und auf der Karte: „Nachricht“ öffnet direkt den Chat mit der Person.",
+    "🚩 Pionier: Ab jetzt merkt sich Ahoi, wer aus dem Freundeskreis als Erster in einem Land war."
+  ] },
   { id: "2026-11-23-gruppen", punkte: [
     "👥 Reist ihr zusammen? Sind Freunde in deiner Nähe, fragt Ahoi kurz nach. Paare stehen mit ❤️ zusammen.",
     "🪪 Steckbrief: Tipp in „Wer ist wo?“ auf einen Namen und sieh Länder, nächste Reise und Ortszeit.",
@@ -1804,10 +1906,15 @@ let ersteVerbindungen = true;
 async function verbindungenLaden() {
   if (!ECHT || familieModus || ECHT_DATEN.profil.art === "familie") return;
   const uid = ECHT_DATEN.uid;
-  const [lae, paare, mitgl, anfr] = await Promise.all([
+  const [lae, paare, mitgl, anfr, pio] = await Promise.all([
     SB.from("profile").select("id, laender"), SB.from("paar").select("von, an, bestaetigt"),
-    SB.from("reisegruppe_mitglied").select("person, gruppe"), SB.from("mitreise_anfrage").select("von, an")
+    SB.from("reisegruppe_mitglied").select("person, gruppe"), SB.from("mitreise_anfrage").select("von, an"), SB.rpc("pioniere")
   ]);
+  // Pionier: wer aus dem Freundeskreis als Erster in einem Land war (seit Beginn des Orte-Verlaufs)
+  if (!pio.error && Array.isArray(pio.data)) {
+    PIONIERE_ALLE = Object.fromEntries(pio.data.map(x => [x.land, x.person]));
+    PIONIER = pio.data.filter(x => x.person === uid).map(x => x.land);
+  }
   // Länder: eigene Liste aus der Datenbank; ist sie dort noch leer, die vom Gerät hochladen
   if (!lae.error) {
     const proId = Object.fromEntries(lae.data.map(x => [x.id, (x.laender || []).map(staatVon).filter(Boolean)]));
@@ -1985,6 +2092,7 @@ function echtEinrichten() {
   if (p.art === "familie") return familieEchtStarten();
   familieListeAufbauen(); setTimeout(neuDabeiPruefen, 2500);
   verbindungenLaden().catch(() => {});
+  chatsLaden().then(chatVerbinden).catch(() => {});
   // Vorschau „So sieht sie es“: die Familie sieht nur dich
   document.getElementById("familie-start").onclick = () => { FAMILIE_SIEHT = ["du"]; document.getElementById("fam-kopf").textContent = t("So sieht deine Familie dich"); document.getElementById("familie-ende").textContent = t("Zurück"); familieSetzen(true); };
   // Bereiche, die noch nicht live sind
@@ -2038,7 +2146,7 @@ function echtEinrichten() {
     document.getElementById("verwaltung-zeile").onclick = () => { seiteZeigen("verwaltung"); verwaltungAufbauen(); };
     verwaltungLaden().catch(() => {});
   }
-  document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") { echtAktualisieren(); standortStill(); reisenLaden(); if (p.ist_admin) verwaltungLaden().catch(() => {}); } });
+  document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") { echtAktualisieren(); standortStill(); reisenLaden(); chatsLaden().catch(() => {}); if (p.ist_admin) verwaltungLaden().catch(() => {}); } });
   setTimeout(standortStill, 3000);
 }
 if (ECHT) echtEinrichten();

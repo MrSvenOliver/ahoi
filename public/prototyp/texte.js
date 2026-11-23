@@ -569,4 +569,12 @@ const TEXTE = {
   "🕐 Der Zeitunterschied zu jedem Freund steht jetzt direkt dabei.": ["🕐 The time difference to every friend is now shown right there.", "🕐 Časový rozdiel ku každému priateľovi je teraz hneď vidieť."],
   "🌍 Länder zählen wie bei der UN: 195 Staaten, Überseegebiete gehören zum Mutterland.": ["🌍 Countries count like at the UN: 195 states, overseas territories belong to their mother country.", "🌍 Krajiny sa počítajú ako v OSN: 195 štátov, zámorské územia patria k materskej krajine."],
   "✈️ Reiseziele: auch Tokio, Kuala Lumpur und ganze Länder wie „Malaysia“.": ["✈️ Destinations: now also Tokyo, Kuala Lumpur and whole countries like “Malaysia”.", "✈️ Ciele ciest: aj Tokio, Kuala Lumpur a celé krajiny ako „Malajzia“."],
+  "hast die Gruppe erstellt": ["created the group", "si vytvoril(a) skupinu"],
+  "hat die Gruppe erstellt": ["created the group", "vytvoril(a) skupinu"],
+  "hast die Gruppe verlassen": ["left the group", "si opustil(a) skupinu"],
+  "hat die Gruppe verlassen": ["left the group", "opustil(a) skupinu"],
+  "Du hast die Gruppe verlassen": ["You left the group", "Opustil(a) si skupinu"],
+  "💬 Der Chat ist da: ein gemeinsamer Chat für alle, eigene Gruppen und Einzelchats. Nachrichten kommen sofort an.": ["💬 Chat is here: one chat for everyone, your own groups and one-to-one chats. Messages arrive instantly.", "💬 Chat je tu: spoločný chat pre všetkých, vlastné skupiny a súkromné chaty. Správy prídu hneď."],
+  "🪪 Im Steckbrief und auf der Karte: „Nachricht“ öffnet direkt den Chat mit der Person.": ["🪪 On the profile card and the map: “Message” opens the chat with that person.", "🪪 V profile a na mape: „Správa“ otvorí chat s danou osobou."],
+  "🚩 Pionier: Ab jetzt merkt sich Ahoi, wer aus dem Freundeskreis als Erster in einem Land war.": ["🚩 Pioneer: from now on Ahoi remembers who in your circle was first in a country.", "🚩 Priekopník: Ahoi si odteraz pamätá, kto z priateľov bol v krajine prvý."],
 };
