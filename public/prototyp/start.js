@@ -119,8 +119,9 @@ async function leuteLaden() {
     const r = await SB.storage.from("profilbilder").createSignedUrls(pfade, 86400);
     (r.data || []).forEach(d => { if (d.signedUrl) urls[d.path] = d.signedUrl; });
   }
-  const liste = data.map(r => ({ id: r.id === ECHT_DATEN.uid ? "du" : r.id, uid: r.id, name: r.id === ECHT_DATEN.uid ? t("Du") : r.name || "?", echterName: r.name, ort: r.ort, land: r.land, lat: r.lat, lon: r.lon, tz: r.zeitzone || "UTC", farbe: farbeVon(r.id), statusRoh: r.status, bild: urls[r.foto] || null, geist: r.geist }))
-    .filter(p => p.lat != null && p.lon != null && p.land);
+  const alle = data.map(r => ({ id: r.id === ECHT_DATEN.uid ? "du" : r.id, uid: r.id, name: r.id === ECHT_DATEN.uid ? t("Du") : r.name || "?", echterName: r.name, ort: r.ort, land: r.land, lat: r.lat, lon: r.lon, tz: r.zeitzone || "UTC", farbe: farbeVon(r.id), statusRoh: r.status, bild: urls[r.foto] || null, geist: r.geist }));
+  ECHT_DATEN.alle = alle; // auch Mitglieder ohne Ort (für Reisen und Namen)
+  const liste = alle.filter(p => p.lat != null && p.lon != null && p.land);
   liste.sort((a, b) => (a.id === "du" ? -1 : b.id === "du" ? 1 : 0));
   ECHT_DATEN.leute = liste;
   return liste;

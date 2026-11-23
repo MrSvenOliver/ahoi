@@ -12,7 +12,7 @@ Entschieden am 23.11.2026 (A + C + E, danach geändert): Anmeldung mit E-Mail un
 - [x] Datenbank-Grundlagen geschrieben und geprüft: `supabase/01-grundlagen.sql` (Profile, Einladungslinks mit Freigabe, erstes Konto wird Admin, Geistermodus, private Profilbilder, Sicherheitsregeln)
 - [x] Supabase-Projekt angelegt (Frankfurt, kostenlos), Grundlagen eingespielt und geprüft, Bestätigungsmail aus (23.11.2026)
 - [x] Echte App unter https://mrsvenoliver.github.io/ahoi/ (Prototyp bleibt unter …/ahoi/prototyp/): Anmeldung, Registrierung mit Einladungslink, Warten auf Freigabe, erster Start mit Foto und Standort, echtes „Wer ist wo?“, Einladen, Verwaltung (Freigeben, Ablehnen, Startpasswort, Entfernen), Passwort ändern, Geistermodus
-- [ ] Sven registriert sich als Erster über …/ahoi/?einladung=start (wird Admin)
+- [x] Sven registriert sich als Erster über …/ahoi/?einladung=start (wird Admin)
 - [ ] Test mit Sven, dann 2–3 Freunde
 
 1. **Datenbank und Konten:** Supabase-Projekt (kostenlos, Server in Frankfurt), Tabellen, Sicherheitsregeln (jeder sieht nur seine Freunde), Speicher für Profilbilder
@@ -24,10 +24,15 @@ Entschieden am 23.11.2026 (A + C + E, danach geändert): Anmeldung mit E-Mail un
 7. **Feedback und Verwaltung:** Feedback-Liste und Admin-Bereich für Sven, kurzer Datenschutz-Hinweis mit Zustimmung, wöchentliche Sicherung und Wachhalte-Aufruf für Supabase
 8. **Beta-Start:** zuerst 2–3 Freunde, dann bis 10
 
+## Erledigt nach dem Beta-Start
+- [x] Sven registriert, fünf persönliche Einladungen verschickt (23.11.2026)
+- [x] Echte Reisen mit Treffern, echtes Feedback mit Screenshot, Wachhalten, wöchentliche Sicherung (Geheimnis von Sven fehlt noch)
+
 ## Als Nächstes in der echten App
 - Familie einladen (Auswahl ist schon da, Anmeldung und schlanke Familien-Ansicht fehlen noch)
 - Paar, Freundeskreise und Meine Länder in der Datenbank (bisher nur im Prototyp bzw. auf dem Gerät)
-- Reisen, Chat, Ideen, Rückblicke mit echten Daten
+- Chat, Ideen, Rückblicke mit echten Daten
+- „Neu dabei“-Hinweis und Mitteilungen (Push)
 
 ## Später
 - Netzwerk („Kenne ich“)

@@ -3,6 +3,12 @@
 Jede Entscheidung mit Datum. Neue Einträge kommen oben dazu.
 
 ## 23.11.2026
+- Nächstes Paket A + C + E: Datensicherung und Wachhalten, echtes Feedback, echte Reisen mit Treffern
+- Reisen in der echten App: feste Reisen (Ort aus der Suche, Ankunft, Abreise) und Vielleicht-Pläne (Ort, Monat); vergangene Reisen verschwinden; eigene Reisen antippen zum Löschen
+- Treffer: gleiche Zeit am selben Ort (unter 50 km) bei zwei Reisen; jemand reist dorthin, wo du gerade bist; du reist dorthin, wo jemand gerade ist
+- Feedback: Lasche am Rand und „Mehr“ im Profil, Art (Fehler, Idee, Sonstiges), Text, Screenshot; nur Sven sieht alles in der Verwaltung und hakt ab; auch wer noch auf Freigabe wartet, kann Feedback schicken
+- Wachhalten: zweimal pro Woche eine kleine Anfrage an Supabase über GitHub Actions (nur öffentlicher Schlüssel)
+- Sicherung: jeden Sonntag eine Kopie der Datenbank im privaten Repository ahoi-backup (letzte 12 Wochen); das Zugangs-Geheimnis trägt Sven selbst bei GitHub ein
 - Paar (E): in der Info-Karte „❤️ Wir sind ein Paar“, die andere Person bestätigt
 - Freundeskreise (H): nur Filter auf Karte und „Wer ist wo?“, ändern nicht, wer einen sieht
 - Einladen (J + L): ein Knopf, der zuerst fragt: Nomaden-Freund oder Familie; Familie braucht keine Freigabe

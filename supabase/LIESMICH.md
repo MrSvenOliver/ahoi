@@ -15,3 +15,8 @@
 - `01-grundlagen.sql`: Profile, Einladungen, Fotos, Sicherheitsregeln (am 23.11.2026 eingespielt)
 - `02-verwaltung.sql`: Admin setzt ein neues Startpasswort, wenn jemand sein Passwort vergessen hat
 - `03-vorab-einladungen.sql`: persönliche Einladungen von Sven (sofort frei, 30 Tage, lebenslang kostenlos)
+- `04-reisen-feedback.sql`: Reisen (fest oder vielleicht) und Feedback mit Screenshots
+
+## Betrieb
+- Wachhalten: `.github/workflows/wachhalten.yml` (Montag und Donnerstag)
+- Sicherung: im privaten Repository `ahoi-backup`, jeden Sonntag, braucht das Geheimnis `SUPABASE_DB_URL`

@@ -1,0 +1,23 @@
+# Hält das kostenlose Supabase-Projekt wach (es pausiert sonst nach einer Woche ohne Betrieb).
+# Zweimal pro Woche eine kleine Anfrage an die Datenbank, nur mit dem öffentlichen Schlüssel.
+name: Supabase wachhalten
+
+on:
+  schedule:
+    - cron: "17 6 * * 1,4"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  wecken:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Datenbank anfragen
+        run: |
+          curl -fsS -X POST "https://zsmulyttciqruuqrcebv.supabase.co/rest/v1/rpc/einladung_pruefen" \
+            -H "apikey: sb_publishable_o5czNn9EsdZkQzMapyWBtw_QooxP6Zt" \
+            -H "Content-Type: application/json" \
+            -d '{"c":"wachhalten"}'
+          echo " – Supabase ist wach"

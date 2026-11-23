@@ -663,15 +663,52 @@ document.querySelectorAll("[data-zurueck]").forEach(b => b.onclick = () => b.dat
 document.getElementById("profil-knopf").onclick = () => seiteZeigen("profil");
 document.getElementById("reise-neu").onclick = () => seiteZeigen("reise-neu");
 document.getElementById("reise-an").addEventListener("change", e => { const ab = document.getElementById("reise-ab"); ab.min = e.target.value; if (ab.value && ab.value < e.target.value) ab.value = e.target.value; });
-document.getElementById("reise-speichern").onclick = () => { hinweis("Speichern kommt in Phase 3"); seiteZeigen("reisen"); };
+// Reise eintragen: Ort aus der Suche, feste Daten oder ein Vielleicht mit Monat
+let reiseOrt = null;
+function reiseFormularLeeren() {
+  reiseOrt = null;
+  ["reise-ort", "reise-an", "reise-ab", "reise-monat"].forEach(id => document.getElementById(id).value = "");
+  document.getElementById("reise-gewaehlt").textContent = ""; document.getElementById("reise-orte").innerHTML = "";
+  document.getElementById("reise-vielleicht").classList.remove("an"); reiseArtZeigen();
+  const heute = new Date().toISOString().slice(0, 10);
+  document.getElementById("reise-an").min = heute; document.getElementById("reise-ab").min = heute;
+  document.getElementById("reise-monat").min = heute.slice(0, 7);
+}
+function reiseArtZeigen() {
+  const viel = document.getElementById("reise-vielleicht").classList.contains("an");
+  document.getElementById("reise-daten").hidden = viel; document.getElementById("reise-monat-zeile").hidden = !viel;
+}
+document.getElementById("reise-vielleicht").addEventListener("click", () => setTimeout(reiseArtZeigen));
+ortSucheVerbinden(document.getElementById("reise-ort"), document.getElementById("reise-orte"), async o => {
+  reiseOrt = o; document.getElementById("reise-gewaehlt").textContent = `${flagge(o.land)} ${o.ort}`;
+  document.getElementById("reise-orte").innerHTML = ""; document.getElementById("reise-ort").value = "";
+});
+document.getElementById("reise-neu").addEventListener("click", reiseFormularLeeren);
+document.getElementById("reise-speichern").onclick = async e => {
+  if (!ECHT) { hinweis(t("Im Prototyp wird nichts gespeichert")); return seiteZeigen("reisen"); }
+  if (!reiseOrt) return hinweis(t("Bitte einen Ort aus der Liste wählen"));
+  const viel = document.getElementById("reise-vielleicht").classList.contains("an");
+  const daten = { ort: reiseOrt.ort, land: reiseOrt.land, lat: reiseOrt.lat, lon: reiseOrt.lon, vielleicht: viel };
+  if (viel) { daten.monat = document.getElementById("reise-monat").value; if (!daten.monat) return hinweis(t("Bitte einen Monat wählen")); }
+  else {
+    daten.ankunft = document.getElementById("reise-an").value; daten.abreise = document.getElementById("reise-ab").value;
+    if (!daten.ankunft || !daten.abreise) return hinweis(t("Bitte Ankunft und Abreise wählen"));
+    if (daten.abreise < daten.ankunft) return hinweis(t("Die Abreise liegt vor der Ankunft"));
+  }
+  beschaeftigt(e.target, true);
+  const { error } = await SB.from("reise").insert(daten);
+  beschaeftigt(e.target, false);
+  if (error) return hinweis(t("Speichern hat nicht geklappt"));
+  hinweis(t("Reise gespeichert")); seiteZeigen("reisen"); reisenLaden();
+};
 document.querySelectorAll(".schalter").forEach(b => b.onclick = () => b.classList.toggle("an"));
 document.querySelectorAll(".segmente.klein").forEach(box => box.querySelectorAll("button").forEach(b => b.onclick = () => { box.querySelectorAll("button").forEach(x => x.classList.remove("aktiv")); b.classList.add("aktiv"); }));
 
-const person = id => leute.find(p => p.id === id);
+const person = id => leute.find(p => p.id === id) || (ECHT ? (ECHT_DATEN.alle || []).find(p => p.id === id) : undefined);
 const ava = (p, gross) => `<div class="klein-ava" style="${kopfStil(p)}${gross ? ";width:42px;height:42px" : ""}">${kopfText(p)}</div>`;
 
 // ---------- Reisen ----------
-const reisen = [
+const reisen = ECHT ? [] : [
   { wer: ["alex"], ziel: "Marrakesch", land: "MA", von: "2026-12-03", bis: "2026-12-14" },
   { wer: ["sam"], ziel: "Wien", land: "AT", von: "2026-12-10", bis: "2026-12-12" },
   { wer: ["mia"], ziel: "Oaxaca", land: "MX", von: "2026-12-20", bis: "2027-01-05" },
@@ -682,7 +719,7 @@ const reisen = [
   { wer: ["du"], ziel: "Mexiko", land: "MX", monat: "2027-03", vielleicht: true },
   { wer: ["alex"], ziel: "Kapstadt", land: "ZA", monat: "2027-04", vielleicht: true },
 ];
-reisen.forEach(r => r.ziel = t(r.ziel));
+if (!ECHT) reisen.forEach(r => r.ziel = t(r.ziel));
 const reiseSchluessel = r => r.von || r.monat + "-32";
 const datum = iso => new Date(iso + "T12:00:00");
 const kurz = iso => datum(iso).toLocaleDateString(LOC, { day: "numeric", month: "numeric" });
@@ -693,17 +730,26 @@ function reisenAufbauen() {
   for (const r of reisen) {
     const m = monatName(r.von || r.monat);
     if (m !== monat) { monat = m; html += `<h2>${m}</h2>`; }
-    const ps = r.wer.map(person);
-    const gesichter = ps.slice(0, 2).map((p, i) => `<div class="klein-ava" style="left:${ps.length > 1 ? i * 20 : 10}px;z-index:${2 - i};background:${p.farbe}">${kuerzel(p.name)}</div>`).join("");
+    const ps = r.wer.map(person).filter(Boolean);
+    if (!ps.length) continue;
+    const gesichter = ps.slice(0, 2).map((p, i) => `<div class="klein-ava" style="left:${ps.length > 1 ? i * 20 : 10}px;z-index:${2 - i};${kopfStil(p)}">${kopfText(p)}</div>`).join("");
     const naechte = r.von ? Math.round((datum(r.bis) - datum(r.von)) / 864e5) : null;
-    html += `<div class="kasten reise${r.vielleicht ? " vielleicht" : ""}">
+    html += `<div class="kasten reise${r.vielleicht ? " vielleicht" : ""}${ECHT && r.wer[0] === "du" ? " eigen" : ""}"${r.id ? ` data-reise="${r.id}"` : ""}>
       <div class="gesichter">${gesichter}</div>
       <div class="text"><span class="wer">${ps.map(p => p.name).join(" & ")}</span>
-        <span class="ziel">${flagge(r.land)}&nbsp;&nbsp;${r.ziel}</span>
+        <span class="ziel">${r.land ? flagge(r.land) : "📍"}&nbsp;&nbsp;${ohneHtml(r.ziel)}</span>
         <span class="wann">${r.von ? kurz(r.von) + " – " + kurz(r.bis) : t("irgendwann im {m}", { m: datum(r.monat + "-01").toLocaleDateString(LOC, { month: "long" }) })}</span></div>
       <div class="art">${r.vielleicht ? '<span class="vielleicht-text">' + t("Vielleicht") + '</span>' : `<b>${naechte}</b><small>${t(naechte === 1 ? "Nacht" : "Nächte")}</small>`}</div></div>`;
   }
-  document.getElementById("reise-liste").innerHTML = html;
+  document.getElementById("reise-liste").innerHTML = html || (ECHT ? `<div class="bald"><div style="font-size:44px">✈️</div><b>${t("Noch keine Reisen")}</b>${t("Trag deine nächste Reise ein. Wenn Freunde zur selben Zeit am selben Ort sind, zeigt Ahoi euch einen Treffer.")}</div>` : "");
+  if (ECHT) document.querySelectorAll("#reise-liste .reise.eigen").forEach(k => k.onclick = () => {
+    const r = reisen.find(x => x.id === k.dataset.reise);
+    fragen(`${r.ziel} · ${r.von ? kurz(r.von) + " – " + kurz(r.bis) : monatName(r.monat)}`, [[t("Reise löschen"), async () => {
+      const { error } = await SB.from("reise").delete().eq("id", r.id);
+      if (error) return hinweis(t("Das hat nicht geklappt"));
+      hinweis(t("Reise gelöscht")); reisenLaden();
+    }, true]]);
+  });
 }
 
 // ---------- Chat ----------
@@ -1325,9 +1371,96 @@ function familieEinladen() { hinweis(ECHT ? t("Familie einladen kommt bald") : t
 ["einladen-zeile", "einladen-unten"].forEach(id => document.getElementById(id).onclick = einladenWahl);
 document.getElementById("familie-einladen").onclick = familieEinladen;
 
+// ---------- Echte App: Reisen und Treffer ----------
+async function reisenLaden() {
+  const { data, error } = await SB.from("reise").select("*").order("ankunft", { nullsFirst: false });
+  if (error) return hinweis(t("Laden hat nicht geklappt"));
+  const heute = new Date().toISOString().slice(0, 10), monatJetzt = heute.slice(0, 7);
+  const neu = data.filter(r => r.vielleicht ? r.monat >= monatJetzt : r.abreise >= heute).map(r => ({
+    id: r.id, wer: [r.von === ECHT_DATEN.uid ? "du" : r.von], ziel: r.ort, land: r.land, lat: r.lat, lon: r.lon,
+    von: r.vielleicht ? null : r.ankunft, bis: r.vielleicht ? null : r.abreise, monat: r.vielleicht ? r.monat : null, vielleicht: r.vielleicht
+  }));
+  reisen.splice(0, reisen.length, ...neu);
+  reisenAufbauen(); trefferAufbauen();
+}
+const nahe = (a, b) => a.lat != null && b.lat != null && entfernungKm(a.lat, a.lon, b.lat, b.lon) < NAH_KM;
+function trefferFinden() {
+  const heute = new Date().toISOString().slice(0, 10), du = ich(), treffer = [];
+  const fest = reisen.filter(r => r.von), meine = fest.filter(r => r.wer[0] === "du"), andere = fest.filter(r => r.wer[0] !== "du");
+  const dazu = (art, ort, land, wer, von, bis) => {
+    const alt = treffer.find(x => x.art === art && x.ort === ort && x.von === von && x.bis === bis);
+    if (alt) { if (!alt.wer.includes(wer)) alt.wer.push(wer); } else treffer.push({ art, ort, land, wer: [wer], von, bis });
+  };
+  // Beide reisen zur selben Zeit an denselben Ort
+  for (const m of meine) for (const a of andere) {
+    const von = m.von > a.von ? m.von : a.von, bis = m.bis < a.bis ? m.bis : a.bis;
+    if (von <= bis && nahe(m, a)) dazu("reise", m.ziel, m.land, a.wer[0], von, bis);
+  }
+  // Jemand reist dorthin, wo du gerade bist (solange du keine eigene Reise woandershin hast)
+  for (const a of andere) {
+    const wegDann = meine.some(m => m.von <= a.bis && m.bis >= a.von && !nahe(m, a));
+    if (!wegDann && nahe(du, a)) dazu("kommt", a.ziel, a.land, a.wer[0], a.von < heute ? heute : a.von, a.bis);
+  }
+  // Du reist dorthin, wo jemand gerade ist
+  for (const m of meine) for (const p of leute) if (p.id !== "du" && nahe(m, p)) dazu("dort", m.ziel, m.land, p.id, m.von, m.bis);
+  return treffer.sort((a, b) => a.von.localeCompare(b.von));
+}
+function trefferAufbauen() {
+  const namen = ids => ids.map(person).filter(Boolean).map(p => p.name).join(" & ");
+  document.getElementById("treffer-liste").innerHTML = trefferFinden().map(x => {
+    const zeit = `${kurz(x.von)} – ${kurz(x.bis)}`;
+    if (x.art === "reise") return `<div class="kasten treffer"><b>🧭 ${t("Treffer: {ort}", { ort: ohneHtml(x.ort) })}</b><span>${t("Du und {namen} seid vom {zeit} gleichzeitig dort.", { namen: ohneHtml(namen(x.wer)), zeit })}</span></div>`;
+    if (x.art === "kommt") return `<div class="kasten treffer"><b>🧭 ${t("{namen} kommt zu dir", { namen: ohneHtml(namen(x.wer)) })}</b><span>${flagge(x.land)} ${ohneHtml(x.ort)} · ${zeit}</span></div>`;
+    return `<div class="kasten treffer"><b>🧭 ${t("{namen} ist gerade in {ort}", { namen: ohneHtml(namen(x.wer)), ort: ohneHtml(x.ort) })}</b><span>${t("Du bist dort vom {zeit}.", { zeit })}</span></div>`;
+  }).join("");
+}
+
+// ---------- Feedback: Fehler, Ideen, Sonstiges an Sven ----------
+async function feedbackSenden(knopf) {
+  const text = document.getElementById("fb-text").value.trim();
+  if (!text) return hinweis(t("Bitte kurz beschreiben, was dir aufgefallen ist"));
+  if (!ECHT) { hinweis(t("Danke! Im Prototyp wird nichts gesendet")); return feedbackSchliessen(); }
+  const art = (document.querySelector("#fb-arten .aktiv") || {}).dataset?.art || "fehler", datei = document.getElementById("fb-bild").files[0];
+  beschaeftigt(knopf, true);
+  try {
+    let bild = null;
+    if (datei) {
+      const b = await createImageBitmap(datei), f = Math.min(1, 1600 / Math.max(b.width, b.height)), c = document.createElement("canvas");
+      c.width = Math.round(b.width * f); c.height = Math.round(b.height * f); c.getContext("2d").drawImage(b, 0, 0, c.width, c.height);
+      const blob = await new Promise(ok => c.toBlob(ok, "image/jpeg", 0.85));
+      bild = `${ECHT_DATEN.uid}/${Date.now()}.jpg`;
+      const r = await SB.storage.from("feedback").upload(bild, blob, { contentType: "image/jpeg" });
+      if (r.error) throw r.error;
+    }
+    const geraet = `${stil} · ${SPRACHE} · ${VERSION} · ${navigator.userAgent.replace(/^Mozilla\/5\.0 /, "").slice(0, 120)}`;
+    const { error } = await SB.from("feedback").insert({ art, text, bild, geraet });
+    if (error) throw error;
+    document.getElementById("fb-text").value = ""; document.getElementById("fb-bild").value = ""; document.getElementById("fb-bild-name").textContent = "";
+    hinweis(t("Danke! Ist bei Sven angekommen")); feedbackSchliessen();
+  } catch (e) { hinweis(t("Senden hat nicht geklappt")); }
+  beschaeftigt(knopf, false);
+}
+document.getElementById("fb-senden").onclick = e => feedbackSenden(e.target);
+document.getElementById("fb-bild").addEventListener("change", e => { document.getElementById("fb-bild-name").textContent = e.target.files[0] ? "📎 " + e.target.files[0].name : ""; });
+const FB_ART = { fehler: "🐞", idee: "💡", sonstiges: "💬" };
+async function feedbackListeAufbauen() {
+  const box = document.getElementById("feedback-liste");
+  const { data, error } = await SB.from("feedback").select("*").order("erledigt").order("erstellt_am", { ascending: false }).limit(100);
+  if (error) { box.innerHTML = ""; return; }
+  const pfade = data.filter(f => f.bild).map(f => f.bild), urls = {};
+  if (pfade.length) { const r = await SB.storage.from("feedback").createSignedUrls(pfade, 3600); (r.data || []).forEach(d => { if (d.signedUrl) urls[d.path] = d.signedUrl; }); }
+  const name = id => ((mitgliederDaten.find(m => m.id === id) || {}).name) || "?";
+  box.innerHTML = data.length ? data.map(f => `<div class="kasten fb-eintrag${f.erledigt ? " erledigt" : ""}"><div class="fb-kopf"><span>${FB_ART[f.art] || "💬"} ${ohneHtml(name(f.von))}</span><span>${new Date(f.erstellt_am).toLocaleString(LOC, { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}</span></div><p>${ohneHtml(f.text)}</p><div class="fb-fuss">${urls[f.bild] ? `<a class="knopf-leise" href="${urls[f.bild]}" target="_blank" rel="noopener">📎 ${t("Screenshot")}</a>` : ""}<button class="knopf-leise" data-fb="${f.id}" data-ok="${f.erledigt ? 0 : 1}">${f.erledigt ? t("Wieder öffnen") : "✓ " + t("Erledigt")}</button></div></div>`).join("") : `<p class="hinweis-band" style="margin:4px 0">${t("Noch kein Feedback")}</p>`;
+  box.querySelectorAll("[data-fb]").forEach(b => b.onclick = async () => {
+    b.disabled = true;
+    const { error } = await SB.from("feedback").update({ erledigt: b.dataset.ok === "1" }).eq("id", b.dataset.fb);
+    if (error) { b.disabled = false; return hinweis(t("Das hat nicht geklappt")); }
+    feedbackListeAufbauen(); verwaltungLaden().catch(() => {});
+  });
+}
+
 // ---------- Echte App: Profil, Ort, Einladen, Verwaltung ----------
 const BALD = {
-  reisen: ["✈️", "Reisen", "Hier trägst du bald deine Reisen ein und siehst, wann ihr euch über den Weg lauft."],
   chat: ["💬", "Chat", "Der Chat mit deinen Freunden kommt als Nächstes."],
   ideen: ["🏡", "Ideen", "Unterkunfts-Ideen und Ortstipps kommen bald."]
 };
@@ -1349,7 +1482,7 @@ async function echtAktualisieren() {
     if (!neu.some(p => p.id === "du")) return;
     neu.forEach(p => { p.status = statusAusDb(p.statusRoh); });
     leute.splice(0, leute.length, ...neu);
-    pinsSetzen(); listeAufbauen(); meinBildZeigen();
+    pinsSetzen(); listeAufbauen(); meinBildZeigen(); trefferAufbauen();
   } catch (e) {}
 }
 // Beim Öffnen: Standort still aktualisieren, wenn er erlaubt ist und sich die Stadt geändert hat
@@ -1385,7 +1518,8 @@ async function verwaltungLaden() {
   const { data, error } = await SB.from("profile").select("id,name,freigegeben,ist_admin,eingeladen_von,erstellt_am,gratis").order("erstellt_am");
   if (error) throw error;
   mitgliederDaten = data;
-  const zahl = data.filter(x => !x.freigegeben).length;
+  const offen = await SB.from("feedback").select("id", { count: "exact", head: true }).eq("erledigt", false);
+  const zahl = data.filter(x => !x.freigegeben).length + (offen.count || 0);
   document.getElementById("wartende-zahl").textContent = zahl || "";
   return data;
 }
@@ -1395,6 +1529,7 @@ function startPasswort() {
 }
 async function verwaltungAufbauen() {
   try { await verwaltungLaden(); } catch (e) { return hinweis(t("Laden hat nicht geklappt")); }
+  feedbackListeAufbauen();
   const nameVon = id => (mitgliederDaten.find(x => x.id === id) || {}).name || "?";
   const tag = iso => new Date(iso).toLocaleDateString(LOC, { day: "numeric", month: "short" });
   const wartende = mitgliederDaten.filter(x => !x.freigegeben), mitglieder = mitgliederDaten.filter(x => x.freigegeben);
@@ -1431,6 +1566,7 @@ function echtEinrichten() {
   for (const [seite, [symbol, titel, text]] of Object.entries(BALD))
     document.getElementById("seite-" + seite).innerHTML = `<div class="seite-kopf"><h1>${t(titel)}</h1></div><div class="bald"><div style="font-size:44px">${symbol}</div><b>${t("Kommt bald")}</b>${t(text)}<p><a href="prototyp/">${t("Im Prototyp schon ansehen")}</a></p></div>`;
   document.querySelectorAll("#leiste .punkt").forEach(el => el.remove());
+  reisenLaden();
   // Profil
   document.getElementById("profil-name").textContent = p.name || t("Du");
   document.getElementById("konto-email").textContent = ECHT_DATEN.email || "";
@@ -1477,7 +1613,7 @@ function echtEinrichten() {
     document.getElementById("verwaltung-zeile").onclick = () => { seiteZeigen("verwaltung"); verwaltungAufbauen(); };
     verwaltungLaden().catch(() => {});
   }
-  document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") { echtAktualisieren(); standortStill(); if (p.ist_admin) verwaltungLaden().catch(() => {}); } });
+  document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") { echtAktualisieren(); standortStill(); reisenLaden(); if (p.ist_admin) verwaltungLaden().catch(() => {}); } });
   setTimeout(standortStill, 3000);
 }
 if (ECHT) echtEinrichten();

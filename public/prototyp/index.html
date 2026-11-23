@@ -873,6 +873,19 @@
   @keyframes hochfedern { 0% { transform: translateY(100%); } 100% { transform: none; } }
   @keyframes seite-federn { 0% { transform: translateY(18px); opacity: 0; } 100% { transform: none; opacity: 1; } }
   @media (prefers-reduced-motion: reduce) { .radar-strahl, .wolken, .pin .ziel { display: none !important; } [data-stil] .pin-innen, [data-stil="modern"] .info.offen, [data-stil="modern"] .aktion-blatt.offen .innen, [data-stil="modern"] .seite.offen { animation: none !important; } }
+
+  [hidden] { display: none !important; }
+  /* Feedback und Reisen */
+  .fb-bild-knopf { display: inline-block; cursor: pointer; margin-top: 4px; }
+  .fb-bild-name { display: block; font-size: 13px; color: var(--text-leise); margin-top: 6px; }
+  .fb-eintrag { padding: 12px 14px; }
+  .fb-eintrag.erledigt { opacity: 0.55; }
+  .fb-eintrag .fb-kopf { display: flex; justify-content: space-between; gap: 8px; font-size: 13px; color: var(--text-leise); }
+  .fb-eintrag p { margin: 6px 0 8px; font-size: 15px; line-height: 1.45; white-space: pre-wrap; }
+  .fb-eintrag .fb-fuss { display: flex; gap: 8px; flex-wrap: wrap; }
+  .fb-eintrag .knopf-leise { padding: 6px 11px; font-size: 13px; }
+  .reise.eigen { cursor: pointer; }
+  #treffer-liste .treffer { margin-bottom: 10px; }
 </style>
 </head>
 <body>
@@ -927,18 +940,23 @@
 <!-- Reisen -->
 <section class="seite" id="seite-reisen">
   <div class="seite-kopf"><h1>Reisen</h1><button class="knopf-gross" id="reise-neu">+ Reise</button></div>
-  <div class="kasten treffer"><b>🧭 Treffer: Lissabon</b><span>Du, Lea &amp; Nico seid vom 10. bis 15.1. gleichzeitig dort.</span></div>
+  <div class="kasten treffer nur-proto"><b>🧭 Treffer: Lissabon</b><span>Du, Lea &amp; Nico seid vom 10. bis 15.1. gleichzeitig dort.</span></div>
+  <div id="treffer-liste" class="nur-echt"></div>
   <div id="reise-liste"></div>
-  <p class="hinweis-band">Beispieldaten · Eintragen funktioniert ab Phase 3</p>
+  <p class="hinweis-band nur-proto">Beispieldaten · Eintragen funktioniert ab Phase 3</p>
+  <p class="hinweis-band nur-echt">Deine eigenen Reisen antippen zum Löschen · Treffer erscheinen, wenn ihr zur selben Zeit am selben Ort seid</p>
 </section>
 
 <!-- Neue Reise: Auswahl -->
 <section class="seite" id="seite-reise-neu">
   <div class="seite-kopf"><h1>Reise</h1><button class="knopf-leise" data-zurueck="reisen">Abbrechen</button></div>
   <div class="kasten formular">
-    <label>Wohin?<input placeholder="Ort suchen, z. B. Lissabon"></label>
-    <div class="zwei"><label>Ankunft<input type="date" id="reise-an"></label><label>Abreise<input type="date" id="reise-ab"></label></div>
-    <div class="zeile-einst"><div>Nur ein Vielleicht<small>Noch nicht sicher, ohne genaue Daten</small></div><button class="schalter"></button></div>
+    <label>Wohin?<input id="reise-ort" placeholder="Ort suchen, z. B. Lissabon" autocomplete="off"></label>
+    <div class="ort-treffer" id="reise-orte"></div>
+    <p class="es-ort" id="reise-gewaehlt"></p>
+    <div class="zwei" id="reise-daten"><label>Ankunft<input type="date" id="reise-an"></label><label>Abreise<input type="date" id="reise-ab"></label></div>
+    <label id="reise-monat-zeile" hidden>Ungefähr im Monat<input type="month" id="reise-monat"></label>
+    <div class="zeile-einst"><div>Nur ein Vielleicht<small>Noch nicht sicher, ohne genaue Daten</small></div><button class="schalter" id="reise-vielleicht"></button></div>
   </div>
   <button class="knopf-gross" style="width:100%" id="reise-speichern">Speichern</button>
 </section>
@@ -1106,15 +1124,15 @@
   <div class="kasten nur-proto" id="mitteilungen"></div>
   <h2 class="nur-echt" id="verwaltung-titel" hidden>Verwaltung</h2>
   <div class="kasten einst-gruppe nur-echt" id="verwaltung-kasten" hidden>
-    <button class="einst-zeile" id="verwaltung-zeile"><span class="einst-symbol sym-blau"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5 5 6.5v5c0 4.3 3 7.6 7 9 4-1.4 7-4.7 7-9v-5l-7-3Z"/><path d="m9 12 2 2 4-4"/></svg></span><span class="einst-name">Freigaben und Mitglieder</span><span class="einst-wert"><span class="zaehler" id="wartende-zahl"></span></span><span class="einst-pfeil">›</span></button>
+    <button class="einst-zeile" id="verwaltung-zeile"><span class="einst-symbol sym-blau"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5 5 6.5v5c0 4.3 3 7.6 7 9 4-1.4 7-4.7 7-9v-5l-7-3Z"/><path d="m9 12 2 2 4-4"/></svg></span><span class="einst-name">Freigaben, Mitglieder, Feedback</span><span class="einst-wert"><span class="zaehler" id="wartende-zahl"></span></span><span class="einst-pfeil">›</span></button>
   </div>
   <h2 class="nur-echt">Konto</h2>
   <div class="kasten einst-gruppe nur-echt">
     <button class="einst-zeile" id="passwort-zeile"><span class="einst-symbol sym-lila"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="10.5" width="14" height="10" rx="2"/><path d="M8.5 10.5V7.5a3.5 3.5 0 0 1 7 0v3"/></svg></span><span class="einst-name">Passwort ändern</span><span class="einst-wert" id="konto-email"></span><span class="einst-pfeil">›</span></button>
     <button class="einst-zeile" id="abmelden-zeile"><span class="einst-symbol sym-rosa"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h4.5v15H14M10 8l-4 4 4 4M6 12h10"/></svg></span><span class="einst-name">Abmelden</span><span class="einst-pfeil">›</span></button>
   </div>
-  <h2 class="nur-proto">Mehr</h2>
-  <div class="kasten nur-proto">
+  <h2>Mehr</h2>
+  <div class="kasten">
     <div class="zeile-einst"><div>Feedback an Sven<small>Fehler oder Idee, gern mit Screenshot</small></div><button class="knopf-leise" onclick="feedbackOeffnen()">Schreiben</button></div>
   </div>
   <p class="hinweis-band nur-proto">Beispieldaten · Einstellungen werden ab Phase 2 gespeichert (Stil und Sprache schon jetzt)</p>
@@ -1128,7 +1146,7 @@
   <div class="zeile-einst"><div>Meinen Standort zeigen<small>Nur für dich, um die Entfernung zu sehen. Niemand sonst sieht ihn.</small></div><button class="schalter" id="familie-standort"></button></div>
   <button class="knopf-leise" id="familie-ende" style="width:100%;margin-top:6px">Prototyp: zurück zur Nomaden-Ansicht</button>
 </section>
-<button class="feedback-lasche nur-proto" id="feedback-lasche" aria-label="Feedback an Sven">Feedback</button>
+<button class="feedback-lasche" id="feedback-lasche" aria-label="Feedback an Sven">Feedback</button>
 <section class="seite" id="seite-kreise">
   <div class="seite-kopf"><h1>Freundeskreise</h1><button class="knopf-leise" data-zurueck="profil">Fertig</button></div>
   <p class="kreise-erklaerung">Kreise sind nur für dich: ein Filter für Karte und „Wer ist wo?“. Wer dich sehen kann, ändert sich dadurch nicht.</p>
@@ -1149,6 +1167,8 @@
   <div class="kasten" id="wartende"></div>
   <h2>Mitglieder</h2>
   <div class="kasten" id="mitglieder"></div>
+  <h2>Feedback</h2>
+  <div id="feedback-liste"></div>
   <p class="hinweis-band">Passwort vergessen? Neues Startpasswort setzen und der Person sagen. Sie kann es danach im Profil ändern.</p>
 </section>
 <section class="seite" id="seite-konto">
@@ -1162,10 +1182,10 @@
 <section class="seite" id="seite-feedback" style="z-index:45">
   <div class="seite-kopf"><h1>Feedback</h1><button class="knopf-leise" data-zurueck="__zurueck">Schließen</button></div>
   <p style="color:var(--text-leise);margin-top:-6px">Fehler gefunden oder eine Idee? Geht direkt an Sven.</p>
-  <div class="segmente klein" style="margin-bottom:10px"><button class="aktiv">🐞 Fehler</button><button>💡 Idee</button><button>💬 Sonstiges</button></div>
-  <div class="kasten formular"><label>Was ist dir aufgefallen?<textarea rows="5" style="display:block;width:100%;margin-top:6px;border:1px solid var(--trenner);background:var(--flaeche);color:var(--text);border-radius:12px;padding:12px;font:inherit;font-size:16px"></textarea></label>
-    <button class="knopf-leise" onclick="hinweis('Screenshot anhängen kommt in Phase 6')">📎 Screenshot anhängen</button></div>
-  <button class="knopf-gross" style="width:100%" onclick="hinweis('Danke! Senden kommt in Phase 6'); feedbackSchliessen()">Senden</button>
+  <div class="segmente klein" id="fb-arten" style="margin-bottom:10px"><button class="aktiv" data-art="fehler">🐞 Fehler</button><button data-art="idee">💡 Idee</button><button data-art="sonstiges">💬 Sonstiges</button></div>
+  <div class="kasten formular"><label>Was ist dir aufgefallen?<textarea id="fb-text" rows="5" maxlength="2000" style="display:block;width:100%;margin-top:6px;border:1px solid var(--trenner);background:var(--flaeche);color:var(--text);border-radius:12px;padding:12px;font:inherit;font-size:16px"></textarea></label>
+    <label class="knopf-leise fb-bild-knopf">📎 Screenshot anhängen<input type="file" id="fb-bild" accept="image/*" hidden></label><span class="fb-bild-name" id="fb-bild-name"></span></div>
+  <button class="knopf-gross" style="width:100%" id="fb-senden">Senden</button>
 </section>
 <div class="hinweis" id="hinweis"></div>
 
