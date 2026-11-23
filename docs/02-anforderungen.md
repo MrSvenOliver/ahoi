@@ -38,7 +38,7 @@ Gesammelte Wünsche und Entscheidungen von Sven. Gebaut wird erst, wenn die Anfo
 
 ## Profil und Login
 - Nur echtes Profilbild (Foto-Upload), Pins zeigen das Foto
-- Login: E-Mail-Code + Google; Apple-Login später mit dem App-Store-Schritt (Apple-Entwicklerkonto)
+- Login: E-Mail-Adresse und Passwort, ohne Bestätigungsmail (die App verschickt keine E-Mails); iPhone kann das Passwort im Schlüsselbund speichern und mit Face ID ausfüllen; man bleibt angemeldet, bis man sich abmeldet; Passwort im Profil änderbar; vergessenes Passwort setzt Sven im Admin-Bereich neu; E-Mail-Adresse im Profil korrigierbar; Google und Apple später
 - Paare: einer fragt an, der andere bestätigt; keine Frage beim Anmelden; Herz erscheint automatisch nur, wenn beide am selben Ort sind; keine Verbindungslinie auf der Karte; beim Antippen einer Person erscheint nur diese Person, nie der Partner oder andere Freunde
 - Freunde am selben Ort: gemeinsamer Pin mit 🤝
 - Standort-Genauigkeit Standard: Stadt (jeder kann es ändern)
@@ -103,7 +103,7 @@ Gesammelte Wünsche und Entscheidungen von Sven. Gebaut wird erst, wenn die Anfo
 - Optional: eigenen Standort nur für sich einschalten, um die Entfernung zu sehen
 
 ## Netzwerk und Einladungen
-- Einladungen: Mitglieder schlagen vor, Sven gibt frei
+- Einladungen per Link: ein Mitglied tippt „Freund einladen“ und schickt den Link über den Teilen-Knopf (WhatsApp o. Ä.); die neue Person registriert sich mit E-Mail, Passwort und Name und sieht „Wartet auf Freigabe“; Sven bekommt eine Mitteilung und gibt frei oder lehnt ab; jeder Link gilt einmal und 14 Tage; ohne Link keine Registrierung
 - "Kenne ich"-Verbindungen (gegenseitig bestätigt) und gemeinsame Kontakte im Profil
 - Ziel: Nomaden-Netzwerk kann wachsen
 

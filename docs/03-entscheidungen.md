@@ -3,8 +3,10 @@
 Jede Entscheidung mit Datum. Neue Einträge kommen oben dazu.
 
 ## 23.11.2026
+- Anmeldung geändert: E-Mail-Adresse und Passwort statt E-Mail-Code, keine Bestätigungsmail, also kein E-Mail-Dienst nötig; Passwort im Schlüsselbund speicherbar, angemeldet bleiben; vergessenes Passwort setzt Sven neu
+- Einladungen (B): jedes Mitglied verschickt einen Einladungslink per Messenger, die Person registriert sich selbst und wartet auf Svens Freigabe; Link gilt einmal und 14 Tage; ohne Link keine Registrierung; das erste Konto wird Admin
 - Beta-Start A + C + E: Anmeldung zuerst nur per E-Mail-Code (Google später); zuerst live: Anmeldung, Profilfoto, Standort, „Wer ist wo?“, Einladungen; Claude richtet Supabase im Browser ein, Sven meldet sich einmal an
-- Einladungen: Mitglied schlägt eine E-Mail-Adresse vor, Sven gibt frei; wer sich mit einer freigegebenen Adresse anmeldet, ist sofort Mitglied; alle anderen sehen nichts
+- Einladungen zunächst über freigegebene E-Mail-Adressen geplant, am selben Tag durch Einladungslinks ersetzt (siehe oben)
 - Profilbilder privat: nur Mitglieder sehen sie
 - Spielerisches (Auswahl A + C + J + L + R): Status zum Antippen (ohne „Unterwegs“, das ist bei Nomaden immer so), Meine Länder mit Freirubbel-Karte und Kontinent-Ring, Pionier-Fahne mit Meldung im Chat „Alle“, Dein Nomadenjahr als Rückblick, Ortstipps mit Daumen hoch
 - Länder-Sammlung im Profil ersetzt durch eine Zeile „Meine Länder“ mit eigener Seite
