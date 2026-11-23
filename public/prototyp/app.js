@@ -16,7 +16,7 @@ Object.assign(leute.find(p => p.id === "alex"), { status: "treffen", laender: 23
 Object.assign(leute.find(p => p.id === "sam"), { status: "basis", laender: 9 });
 Object.assign(leute.find(p => p.id === "lea"), { status: "sport", laender: 31 });
 Object.assign(leute.find(p => p.id === "nico"), { laender: 18 });
-Object.assign(leute.find(p => p.id === "mia"), { status: "angekommen", laender: 14 });
+Object.assign(leute.find(p => p.id === "mia"), { status: "angekommen", laender: 14, stand: new Date(Date.now() - 4 * 864e5).toISOString() });
 Object.assign(leute.find(p => p.id === "jonas"), { status: "arbeit", laender: 27 });
 Object.assign(leute.find(p => p.id === "ben"), { laender: 12 });
 Object.assign(leute.find(p => p.id === "kim"), { status: "treffen", laender: 16 });
@@ -63,6 +63,10 @@ function entfernungKm(lat1, lon1, lat2, lon2) {
   const dSigma = B * sinSigma * (cos2SigmaM + B / 4 * (cosSigma * (-1 + 2 * cos2SigmaM ** 2) - B / 6 * cos2SigmaM * (-3 + 4 * sinSigma ** 2) * (-3 + 4 * cos2SigmaM ** 2)));
   return b * A * (sigma - dSigma) / 1000;
 }
+// Ein Ort ist so aktuell wie das letzte Öffnen der App. Älter als ein Tag: „zuletzt vor X Tagen“, und die App fragt nicht nach „zusammen unterwegs“.
+const ortAlterTage = p => p && p.stand ? Math.floor((Date.now() - new Date(p.stand)) / 864e5) : 0;
+const ortAktuell = p => ortAlterTage(p) < 1;
+const ortAlterText = p => { const n = ortAlterTage(p); return n < 1 ? "" : "🕓 " + (n === 1 ? t("gestern") : t("vor {n} Tagen", { n })); };
 const km = d => d < 1 ? t("Am selben Ort") : d.toLocaleString(LOC, { maximumFractionDigits: d < 10 ? 1 : 0 }) + " km";
 
 // Großkreis-Linie (kürzester Weg auf der Kugel) als Punktfolge
@@ -537,7 +541,7 @@ function listeAufbauen() {
     if (dabei.length) paarText = ` · ${t("mit")} ${dabei.map(q => q.id === "du" ? t("dir") : ohneHtml(q.name)).join(", ")}`;
     const li = document.createElement("li");
     li.innerHTML = `<div class="ava" style="${kopfStil(p)}">${kopfText(p)}</div>
-      <div class="zeile"><b>${ohneHtml(p.name)}</b><span>${flagge(p.land)} ${ohneHtml(p.ort)} · ${uhrzeit(p.tz)}${t(" Uhr")}${paarText}</span>${statusText(p) ? `<small class="status-klein">${ohneHtml(statusText(p))}</small>` : ""}</div>
+      <div class="zeile"><b>${ohneHtml(p.name)}</b><span>${flagge(p.land)} ${ohneHtml(p.ort)} · ${ortAktuell(p) ? uhrzeit(p.tz) + t(" Uhr") : `<i class="ort-alt">${ortAlterText(p)}</i>`}${paarText}</span>${statusText(p) ? `<small class="status-klein">${ohneHtml(statusText(p))}</small>` : ""}</div>
       ${p.d < 1 ? `<div class="weite"><b class="gleicher-ort">${t("Am selben Ort")}</b></div>` : `<div class="weite"><b data-km="${p.d}">${km(p.d)}</b><span>${t("von dir")}</span></div>`}`;
     li.onclick = () => { if (!ECHT && !familieModus) return steckbriefOeffnen(person(p.id)); zuPerson(p); infoZeigen([p]); };
     ul.appendChild(li);
@@ -548,7 +552,7 @@ function listeAufbauen() {
 function infoZeigen(gruppe) {
   const du = familieModus ? BETRACHTER : ich(), p = gruppe[0], info = document.getElementById("info");
   const name = gruppe.map(x => x.name).join(" & ");
-  let text = (gruppe.length === 1 && statusText(p) && !familieModus ? `<span class="status-zeile">${ohneHtml(statusText(p))}</span><br>` : "") + `${flagge(p.land)} <b>${ohneHtml(p.ort)}</b> · ${t("Ortszeit")} <b>${uhrzeit(p.tz)}${t(" Uhr")}</b>`;
+  let text = (gruppe.length === 1 && statusText(p) && !familieModus ? `<span class="status-zeile">${ohneHtml(statusText(p))}</span><br>` : "") + `${flagge(p.land)} <b>${ohneHtml(p.ort)}</b> · ${t("Ortszeit")} <b>${uhrzeit(p.tz)}${t(" Uhr")}</b>` + (gruppe.length === 1 && !ortAktuell(p) ? `<br><i class="ort-alt">${ortAlterText(p)}</i>` : "");
   const abstand = p.id !== du.id && du.lat != null ? entfernungKm(du.lat, du.lon, p.lat, p.lon) : null;
   if (abstand != null && (!familieModus || familieMitStandort) && !gruppe.some(x => x.id === du.id)) text += abstand < 1 ? `<br>📍 <b>${t("Am selben Ort")}</b>` : `<br>${t("Entfernung zu dir:")} <b data-km="${abstand}">${km(abstand)}</b>`;
   if (gruppe.length > 1) {
@@ -1472,7 +1476,7 @@ async function steckbriefOeffnen(p) {
     welt.map(l => laender.includes(l.i) ? `<path class="an" style="--i:${nr++}" d="${l.d}" fill="${f.an}" stroke="${f.rand}" stroke-width=".25"/>` : `<path d="${l.d}" fill="${f.land}" stroke="${f.rand}" stroke-width=".25"/>`).join("") +
     (p.lat != null ? `<circle class="sb-ring" cx="${(p.lon + 180).toFixed(1)}" cy="${(90 - p.lat).toFixed(1)}" r="2.4" fill="none" stroke="${stil === "mission" ? "#e8a33a" : "#ff375f"}" stroke-width=".8"/><circle cx="${(p.lon + 180).toFixed(1)}" cy="${(90 - p.lat).toFixed(1)}" r="1.8" fill="${stil === "mission" ? "#e8a33a" : "#ff375f"}" stroke="#fff" stroke-width=".5"/>` : "") + `</svg>`;
   const feld = (label, wert, breit) => `<div class="sb-feld${breit ? " sb-breit" : ""}"><span>${label}</span><b>${wert}</b></div>`;
-  let felder = feld(t("Gerade in"), p.ort ? `${flagge(p.land)} ${ohneHtml(p.ort)}` : "–") + feld(t("Ortszeit"), `${uhrzeit(p.tz)}${t(" Uhr")}`);
+  let felder = feld(ortAktuell(p) ? t("Gerade in") : t("Zuletzt in"), p.ort ? `${flagge(p.land)} ${ohneHtml(p.ort)}` : "–") + feld(ortAktuell(p) ? t("Ortszeit") : t("Stand"), ortAktuell(p) ? `${uhrzeit(p.tz)}${t(" Uhr")}` : ortAlterText(p));
   if (abstand != null) felder += feld(t("Entfernung"), abstand < 1 ? t("Am selben Ort") : km(abstand), true);
   if (mit.length) felder += feld(t("Reist mit"), (!rg && partner ? "❤️ " : "") + gruppenText(mit), true);
   if (reise) felder += feld(t("Nächste Reise"), `${reise.land ? flagge(reise.land) : "📍"} ${ohneHtml(reise.ziel)} · ${reise.von ? kurz(reise.von) + " – " + kurz(reise.bis) : t("irgendwann im {m}", { m: datum(reise.monat + "-01").toLocaleDateString(LOC, { month: "long" }) })}`, true);
@@ -1554,7 +1558,7 @@ function nachbarnFragen() {
   const du = ich(); if (du.lat == null) return;
   let gefragt = {}; try { gefragt = JSON.parse(localStorage.getItem("ahoi-gefragt") || "{}"); } catch (e) {}
   const meine = gruppeVon("du");
-  const p = leute.find(q => q.id !== "du" && q.lat != null && entfernungKm(du.lat, du.lon, q.lat, q.lon) < NAH_KM && !(meine && meine.leute.includes(q.id)) && !gefragt[q.id + "|" + du.ort]);
+  const p = leute.find(q => q.id !== "du" && q.lat != null && ortAktuell(q) && entfernungKm(du.lat, du.lon, q.lat, q.lon) < NAH_KM && !(meine && meine.leute.includes(q.id)) && !gefragt[q.id + "|" + du.ort]);
   if (!p) return;
   const merken = () => { gefragt[p.id + "|" + du.ort] = 1; try { localStorage.setItem("ahoi-gefragt", JSON.stringify(gefragt)); } catch (e) {} };
   const wo = entfernungKm(du.lat, du.lon, p.lat, p.lon) < 1 ? t("ist auch in {ort}", { ort: du.ort }) : t("ist in deiner Nähe ({ort})", { ort: p.ort });

@@ -125,7 +125,7 @@ async function leuteLaden() {
     const r = await SB.storage.from("profilbilder").createSignedUrls(pfade, 86400);
     (r.data || []).forEach(d => { if (d.signedUrl) urls[d.path] = d.signedUrl; });
   }
-  const alle = data.map(r => ({ id: r.id === ECHT_DATEN.uid ? "du" : r.id, uid: r.id, name: r.id === ECHT_DATEN.uid ? t("Du") : r.name || "?", echterName: r.name, ort: r.ort, land: r.land, lat: r.lat, lon: r.lon, tz: r.zeitzone || "UTC", farbe: farbeVon(r.id), statusRoh: r.status, bild: urls[r.foto] || null, geist: r.geist }));
+  const alle = data.map(r => ({ id: r.id === ECHT_DATEN.uid ? "du" : r.id, uid: r.id, name: r.id === ECHT_DATEN.uid ? t("Du") : r.name || "?", echterName: r.name, ort: r.ort, land: r.land, lat: r.lat, lon: r.lon, tz: r.zeitzone || "UTC", farbe: farbeVon(r.id), statusRoh: r.status, bild: urls[r.foto] || null, geist: r.geist, stand: r.standort_am }));
   ECHT_DATEN.alle = alle; // auch Mitglieder ohne Ort (für Reisen und Namen)
   const liste = alle.filter(p => p.lat != null && p.lon != null && p.land);
   liste.sort((a, b) => (a.id === "du" ? -1 : b.id === "du" ? 1 : 0));

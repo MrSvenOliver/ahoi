@@ -544,4 +544,8 @@ const TEXTE = {
   "Nein, nur am selben Ort": ["No, just the same place", "Nie, len na rovnakom mieste"],
   "Ganzes Land · Ort noch offen": ["Whole country · place still open", "Celá krajina · miesto ešte otvorené"],
   "🪪 So sehen dich andere": ["🪪 How others see you", "🪪 Ako ťa vidia ostatní"],
+  "Zuletzt in": ["Last seen in", "Naposledy v"],
+  "gestern": ["yesterday", "včera"],
+  "vor {n} Tagen": ["{n} days ago", "pred {n} dňami"],
+  "➕ Einladen": ["➕ Invite", "➕ Pozvať"],
 };
