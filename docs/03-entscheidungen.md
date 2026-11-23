@@ -3,6 +3,8 @@
 Jede Entscheidung mit Datum. Neue Einträge kommen oben dazu.
 
 ## 23.11.2026
+- Alte Orte: Ein Ort ist so aktuell wie das letzte Öffnen der App. Ist er älter als einen Tag, steht „🕓 vor X Tagen“ dabei, und die App fragt dann nicht „Reist ihr zusammen?“
+- Zeitunterschied: in „Wer ist wo?“ unter der Entfernung („🕐 +6 Std.“), in der Info-Karte neben der Ortszeit, im Steckbrief und in der Familien-Ansicht als „6 Std. später als bei dir“; gerechnet ab der Uhr des Geräts, auf dem man gerade schaut
 - Am selben Ort heißt nicht zusammen unterwegs (A): kein automatisches 🤝 und kein „Zusammen unterwegs“ mehr; die Karte zeigt bei mehreren Personen am selben Ort nur die Zahl
 - Reisegruppen (B): wer zusammen reist, bestätigt das gegenseitig; ist jemand in deiner Nähe (unter 50 km), fragt die App einmal pro Ort „Reist ihr zusammen?“; Paare in der Gruppe stehen mit ❤️ zusammen (Beispiel „Alex ❤️ Sam · Lea · Mia“); zieht jemand weiter, fällt er aus der Gruppe, bleibt nur einer, endet sie; zuerst im Prototyp, in der echten App nach Svens Blick darauf (braucht eine neue Tabelle)
 - Länder (D): es zählen nur die 195 Staaten (193 UN-Mitglieder plus Vatikan und Palästina); Überseegebiete wie St. Martin, Sint Maarten, Puerto Rico oder Grönland zählen für ihr Mutterland; Kosovo und Taiwan zählen nicht; die Antarktis zählt nur für die 7 Kontinente

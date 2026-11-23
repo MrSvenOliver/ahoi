@@ -84,6 +84,14 @@ function grosskreis(lon1, lat1, lon2, lat2, n = 128) {
 }
 const flagge = cc => cc.toUpperCase().replace(/./g, c => String.fromCodePoint(127397 + c.charCodeAt()));
 const uhrzeit = tz => new Intl.DateTimeFormat(LOC, { timeZone: tz, hour: "2-digit", minute: "2-digit" }).format(new Date());
+// Zeitunterschied zur eigenen Uhr (Zeitzone des Geräts, auf dem man gerade schaut), in Stunden
+const MEINE_TZ = Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
+function tzVersatz(tz) { try { const d = new Date(); d.setSeconds(0, 0); return Math.round((new Date(d.toLocaleString("en-US", { timeZone: tz })) - new Date(d.toLocaleString("en-US", { timeZone: "UTC" }))) / 6e4); } catch (e) { return 0; } }
+const zeitDiff = tz => (tzVersatz(tz) - tzVersatz(MEINE_TZ)) / 60;
+const stunden = h => Math.abs(h).toLocaleString(LOC, { maximumFractionDigits: 2 });
+// kurz: „+6 Std.“ · lang: „6 Std. später als bei dir“
+const zeitDiffKurz = tz => { const h = zeitDiff(tz); return h ? `${h > 0 ? "+" : "−"}${t("{n} Std.", { n: stunden(h) })}` : ""; };
+const zeitDiffLang = tz => { const h = zeitDiff(tz); return !h ? t("gleiche Uhrzeit wie bei dir") : t(h > 0 ? "{n} Std. später als bei dir" : "{n} Std. früher als bei dir", { n: stunden(h) }); };
 const kuerzel = n => n === t("Du") ? t("DU") : n.slice(0, 2).toUpperCase();
 // Gesicht: Foto, sonst Farbe mit Kürzel
 const kopfStil = p => p.bild ? `background:${p.farbe} url('${p.bild}') center/cover` : `background:${p.farbe}`;
@@ -542,7 +550,7 @@ function listeAufbauen() {
     const li = document.createElement("li");
     li.innerHTML = `<div class="ava" style="${kopfStil(p)}">${kopfText(p)}</div>
       <div class="zeile"><b>${ohneHtml(p.name)}</b><span>${flagge(p.land)} ${ohneHtml(p.ort)} · ${ortAktuell(p) ? uhrzeit(p.tz) + t(" Uhr") : `<i class="ort-alt">${ortAlterText(p)}</i>`}${paarText}</span>${statusText(p) ? `<small class="status-klein">${ohneHtml(statusText(p))}</small>` : ""}</div>
-      ${p.d < 1 ? `<div class="weite"><b class="gleicher-ort">${t("Am selben Ort")}</b></div>` : `<div class="weite"><b data-km="${p.d}">${km(p.d)}</b><span>${t("von dir")}</span></div>`}`;
+      ${p.d < 1 ? `<div class="weite"><b class="gleicher-ort">${t("Am selben Ort")}</b>${zeitDiffKurz(p.tz) ? `<span class="zeit-diff">${zeitDiffKurz(p.tz)}</span>` : ""}</div>` : `<div class="weite"><b data-km="${p.d}">${km(p.d)}</b><span>${t("von dir")}</span>${zeitDiffKurz(p.tz) ? `<span class="zeit-diff">🕐 ${zeitDiffKurz(p.tz)}</span>` : ""}</div>`}`;
     li.onclick = () => { if (!ECHT && !familieModus) return steckbriefOeffnen(person(p.id)); zuPerson(p); infoZeigen([p]); };
     ul.appendChild(li);
   }
@@ -552,7 +560,7 @@ function listeAufbauen() {
 function infoZeigen(gruppe) {
   const du = familieModus ? BETRACHTER : ich(), p = gruppe[0], info = document.getElementById("info");
   const name = gruppe.map(x => x.name).join(" & ");
-  let text = (gruppe.length === 1 && statusText(p) && !familieModus ? `<span class="status-zeile">${ohneHtml(statusText(p))}</span><br>` : "") + `${flagge(p.land)} <b>${ohneHtml(p.ort)}</b> · ${t("Ortszeit")} <b>${uhrzeit(p.tz)}${t(" Uhr")}</b>` + (gruppe.length === 1 && !ortAktuell(p) ? `<br><i class="ort-alt">${ortAlterText(p)}</i>` : "");
+  let text = (gruppe.length === 1 && statusText(p) && !familieModus ? `<span class="status-zeile">${ohneHtml(statusText(p))}</span><br>` : "") + `${flagge(p.land)} <b>${ohneHtml(p.ort)}</b> · ${t("Ortszeit")} <b>${uhrzeit(p.tz)}${t(" Uhr")}</b>${p.id !== "du" && zeitDiffKurz(p.tz) ? ` <span class="zeit-diff">${zeitDiffKurz(p.tz)}</span>` : ""}` + (gruppe.length === 1 && !ortAktuell(p) ? `<br><i class="ort-alt">${ortAlterText(p)}</i>` : "");
   const abstand = p.id !== du.id && du.lat != null ? entfernungKm(du.lat, du.lon, p.lat, p.lon) : null;
   if (abstand != null && (!familieModus || familieMitStandort) && !gruppe.some(x => x.id === du.id)) text += abstand < 1 ? `<br>📍 <b>${t("Am selben Ort")}</b>` : `<br>${t("Entfernung zu dir:")} <b data-km="${abstand}">${km(abstand)}</b>`;
   if (gruppe.length > 1) {
@@ -1163,7 +1171,7 @@ function familieAufbauen() {
     const weitere = reisen.filter(x => x !== r && x.wer.includes(p.id) && (x.vielleicht || x.bis >= heute));
     return `<div class="fam-karte" data-id="${p.id}"><div class="ava" style="${kopfStil(p)}">${kopfText(p)}</div><div style="flex:1">
       <b class="fam-name">${ohneHtml(p.name)}</b><div class="wo">${flagge(p.land)}&nbsp; ${t(p.id === "du" ? "bist in" : "ist in")} <b style="display:inline;font-size:16px">${ohneHtml(p.ort)}</b></div>
-      <div class="klein">${t("Dort ist es {z} Uhr", { z: uhrzeit(p.tz) })}${familieMitStandort ? " · " + (entfernungKm(du.lat, du.lon, p.lat, p.lon) < 1 ? t("Am selben Ort") : t("{km} von dir", { km: km(entfernungKm(du.lat, du.lon, p.lat, p.lon)) })) : ""}</div>
+      <div class="klein">${t("Dort ist es {z} Uhr", { z: uhrzeit(p.tz) })} · ${zeitDiffLang(p.tz)}${familieMitStandort ? " · " + (entfernungKm(du.lat, du.lon, p.lat, p.lon) < 1 ? t("Am selben Ort") : t("{km} von dir", { km: km(entfernungKm(du.lat, du.lon, p.lat, p.lon)) })) : ""}</div>
       ${r ? `<div class="naechste"><span class="nr-titel">${t("✈︎ Nächste Reise")}</span><span class="nr-ort">${flagge(r.land)}&nbsp; ${ohneHtml(r.ziel)}</span><span class="nr-daten">${kurz(r.von)} – ${kurz(r.bis)} · ${naechte} ${t(naechte === 1 ? "Nacht" : "Nächte")}</span></div>` : ""}
       ${weitere.length ? `<div class="weitere">${weitere.map(x => `${flagge(x.land)} ${ohneHtml(x.ziel)} · ${x.von ? kurz(x.von) + "–" + kurz(x.bis) : t("vielleicht im {m}", { m: datum(x.monat + "-01").toLocaleDateString(LOC, { month: "long" }) })}`).join("<br>")}</div>` : ""}
     </div></div>`;
@@ -1476,7 +1484,8 @@ async function steckbriefOeffnen(p) {
     welt.map(l => laender.includes(l.i) ? `<path class="an" style="--i:${nr++}" d="${l.d}" fill="${f.an}" stroke="${f.rand}" stroke-width=".25"/>` : `<path d="${l.d}" fill="${f.land}" stroke="${f.rand}" stroke-width=".25"/>`).join("") +
     (p.lat != null ? `<circle class="sb-ring" cx="${(p.lon + 180).toFixed(1)}" cy="${(90 - p.lat).toFixed(1)}" r="2.4" fill="none" stroke="${stil === "mission" ? "#e8a33a" : "#ff375f"}" stroke-width=".8"/><circle cx="${(p.lon + 180).toFixed(1)}" cy="${(90 - p.lat).toFixed(1)}" r="1.8" fill="${stil === "mission" ? "#e8a33a" : "#ff375f"}" stroke="#fff" stroke-width=".5"/>` : "") + `</svg>`;
   const feld = (label, wert, breit) => `<div class="sb-feld${breit ? " sb-breit" : ""}"><span>${label}</span><b>${wert}</b></div>`;
-  let felder = feld(ortAktuell(p) ? t("Gerade in") : t("Zuletzt in"), p.ort ? `${flagge(p.land)} ${ohneHtml(p.ort)}` : "–") + feld(ortAktuell(p) ? t("Ortszeit") : t("Stand"), ortAktuell(p) ? `${uhrzeit(p.tz)}${t(" Uhr")}` : ortAlterText(p));
+  let felder = feld(ortAktuell(p) ? t("Gerade in") : t("Zuletzt in"), p.ort ? `${flagge(p.land)} ${ohneHtml(p.ort)}${ortAktuell(p) ? "" : `<small class="ort-alt sb-klein">${ortAlterText(p)}</small>`}` : "–") +
+    feld(t("Ortszeit"), `${uhrzeit(p.tz)}${t(" Uhr")}${selbst ? "" : `<small class="sb-klein">${zeitDiffLang(p.tz)}</small>`}`);
   if (abstand != null) felder += feld(t("Entfernung"), abstand < 1 ? t("Am selben Ort") : km(abstand), true);
   if (mit.length) felder += feld(t("Reist mit"), (!rg && partner ? "❤️ " : "") + gruppenText(mit), true);
   if (reise) felder += feld(t("Nächste Reise"), `${reise.land ? flagge(reise.land) : "📍"} ${ohneHtml(reise.ziel)} · ${reise.von ? kurz(reise.von) + " – " + kurz(reise.bis) : t("irgendwann im {m}", { m: datum(reise.monat + "-01").toLocaleDateString(LOC, { month: "long" }) })}`, true);

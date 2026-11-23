@@ -548,4 +548,8 @@ const TEXTE = {
   "gestern": ["yesterday", "včera"],
   "vor {n} Tagen": ["{n} days ago", "pred {n} dňami"],
   "➕ Einladen": ["➕ Invite", "➕ Pozvať"],
+  "{n} Std.": ["{n} h", "{n} h"],
+  "gleiche Uhrzeit wie bei dir": ["same time as you", "rovnaký čas ako u teba"],
+  "{n} Std. später als bei dir": ["{n} h ahead of you", "o {n} h neskôr ako u teba"],
+  "{n} Std. früher als bei dir": ["{n} h behind you", "o {n} h skôr ako u teba"],
 };
