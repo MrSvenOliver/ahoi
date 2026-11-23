@@ -23,7 +23,7 @@ jobs:
       - name: Versionsstempel setzen (damit die App neue Stände selbst erkennt)
         run: |
           V="$(date -u +%Y%m%d%H%M)-${GITHUB_SHA::7}"
-          sed -i "s/__VERSION__/$V/g" public/prototyp/app.js
+          sed -i "s/__VERSION__/$V/g" public/prototyp/app.js public/prototyp/start.js public/prototyp/index.html
           echo "{\"version\":\"$V\"}" > public/prototyp/version.json
       - name: Echte App aus dem gemeinsamen Code bauen
         run: bash werkzeuge/app-bauen.sh

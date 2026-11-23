@@ -7,7 +7,9 @@ const maske = s => String(s ?? "").replace(/[&<>"']/g, z => ({ "&": "&amp;", "<"
 function skriptLaden(src) {
   return new Promise((ok, fehler) => { const s = document.createElement("script"); s.src = src; s.onload = ok; s.onerror = fehler; document.body.appendChild(s); });
 }
-function appLaden() { return skriptLaden("app.js"); }
+// Stand der Veröffentlichung: hängt an jeder Datei, damit das iPhone nie alte und neue Dateien mischt
+const STAND = "__VERSION__";
+function appLaden() { return skriptLaden("app.js?v=" + STAND); }
 
 // ---------- Zugangs-Bildschirme ----------
 const zugang = () => document.getElementById("zugang");
@@ -149,7 +151,7 @@ function ersterStart() {
 
 async function echtStarten() {
   document.getElementById("start").classList.remove("weg");
-  try { await skriptLaden("supabase.js"); } catch (e) { zeige("anmelden"); return fehlerZeigen("anmelden", t("Keine Verbindung. Bitte Internet prüfen.")); }
+  try { await skriptLaden("supabase.js?v=" + STAND); } catch (e) { zeige("anmelden"); return fehlerZeigen("anmelden", t("Keine Verbindung. Bitte Internet prüfen.")); }
   SB = supabase.createClient(SB_URL, SB_KEY, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: false, storageKey: "ahoi-anmeldung" } });
   ECHT_DATEN = { uid: null, profil: null, leute: [] };
   // Einladungslink: …/ahoi/?einladung=CODE
