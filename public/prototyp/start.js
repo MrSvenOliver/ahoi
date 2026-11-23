@@ -38,7 +38,7 @@ const PHOTON = "https://photon.komoot.io";
 const photonSprache = () => ({ de: "de", en: "en" }[SPRACHE] || "default");
 function ortAusMerkmalen(pr) {
   const ort = pr.city || (["city", "town", "village"].includes(pr.osm_value) ? pr.name : "") || pr.town || pr.village || pr.district || pr.county || pr.name || "";
-  return { ort, land: (pr.countrycode || "").toUpperCase() };
+  return { ort, land: pr.countrycode ? pr.countrycode.toUpperCase() : null };
 }
 // Stadt-genau: Mittelpunkt der Stadt statt des genauen Standorts
 async function stadtMitte(ort, land, lat, lon) {
@@ -70,7 +70,7 @@ async function orteSuchen(text) {
   const gesehen = new Set();
   return (j.features || []).filter(f => ["city", "town", "village", "municipality", "hamlet", "suburb", "island"].includes(f.properties.osm_value) && f.properties.countrycode).map(f => {
     const pr = f.properties;
-    return { ort: pr.name, land: pr.countrycode.toUpperCase(), lat: +f.geometry.coordinates[1].toFixed(4), lon: +f.geometry.coordinates[0].toFixed(4), zusatz: [pr.state, pr.country].filter(Boolean).join(", ") };
+    return { ort: pr.name, land: pr.countrycode ? pr.countrycode.toUpperCase() : null, lat: +f.geometry.coordinates[1].toFixed(4), lon: +f.geometry.coordinates[0].toFixed(4), zusatz: [pr.state, pr.country].filter(Boolean).join(", ") };
   }).filter(o => { const k = o.ort + o.land; if (gesehen.has(k)) return false; gesehen.add(k); return true; });
 }
 async function standortSpeichern(o) {

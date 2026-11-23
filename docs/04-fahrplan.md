@@ -29,6 +29,7 @@ Entschieden am 23.11.2026 (A + C + E, danach geändert): Anmeldung mit E-Mail un
 - [x] Echte Reisen mit Treffern, echtes Feedback mit Screenshot, Wachhalten, wöchentliche Sicherung (läuft seit 23.11.2026, erste Sicherung im Backup-Repository angekommen)
 
 - [x] Familien-Zugang und „Neu dabei“-Hinweis (23.11.2026)
+- [x] Live-Test mit echten Testkonten (Nomade, Familie, Reise, Treffer, Feedback mit Bild, Geistermodus, Familie pausieren), danach Testdaten gelöscht; behoben: Absturz der Treffer in der Familienansicht, Standort ohne Ländercode, „1 Freunde“, doppelter Punkt im Treffer, Kürzel „DU“ statt eigener Initialen (23.11.2026)
 
 ## Als Nächstes in der echten App
 - Paar, Freundeskreise und Meine Länder in der Datenbank (bisher nur im Prototyp bzw. auf dem Gerät)

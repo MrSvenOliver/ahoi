@@ -81,7 +81,18 @@ const uhrzeit = tz => new Intl.DateTimeFormat(LOC, { timeZone: tz, hour: "2-digi
 const kuerzel = n => n === t("Du") ? t("DU") : n.slice(0, 2).toUpperCase();
 // Gesicht: Foto, sonst Farbe mit Kürzel
 const kopfStil = p => p.bild ? `background:${p.farbe} url('${p.bild}') center/cover` : `background:${p.farbe}`;
-const kopfText = p => p.bild ? "" : kuerzel(p.name);
+const kopfText = p => p.bild ? "" : kuerzel(p.echterName || p.name);
+
+// Einzahl und Mehrzahl (Slowakisch hat eine eigene Form für 2–4)
+const ZAEHLWOERTER = {
+  freunde: { de: ["Freund", "Freunde"], en: ["friend", "friends"], sk: ["priateľ", "priatelia", "priateľov"] },
+  laender: { de: ["Land", "Länder"], en: ["country", "countries"], sk: ["krajina", "krajiny", "krajín"] }
+};
+function anzahl(n, art) {
+  const w = ZAEHLWOERTER[art][SPRACHE] || ZAEHLWOERTER[art].de;
+  const wort = n === 1 ? w[0] : SPRACHE === "sk" ? (n >= 2 && n <= 4 ? w[1] : w[2]) : w[1];
+  return `${n} ${wort}`;
+}
 
 // ---------- Farben der Karte (hell / dunkel) ----------
 const dunkel = window.matchMedia("(prefers-color-scheme: dark)");
@@ -472,7 +483,7 @@ function listeAufbauen() {
   const du = ich();
   const andere = sichtbareLeute().filter(p => p.id !== "du").map(p => ({ ...p, d: du.lat == null ? 0 : entfernungKm(du.lat, du.lon, p.lat, p.lon) })).sort((x, y) => x.d - y.d);
   const laenderZahl = new Set(andere.map(p => p.land)).size;
-  document.getElementById("zusammenfassung").textContent = `${t("{n} Freunde", { n: andere.length })} · ${t("{n} Länder", { n: laenderZahl })} · ${versionText(VERSION)}`;
+  document.getElementById("zusammenfassung").textContent = `${anzahl(andere.length, "freunde")} · ${anzahl(laenderZahl, "laender")} · ${versionText(VERSION)}`;
   const ul = document.getElementById("liste"); ul.innerHTML = "";
   for (const p of andere) {
     let paarText = "";
@@ -495,7 +506,7 @@ function infoZeigen(gruppe) {
   if (p.id !== du.id && (!familieModus || familieMitStandort)) text += `<br>${t("Entfernung zu dir:")} <b data-km="${entfernungKm(du.lat, du.lon, p.lat, p.lon)}">${km(entfernungKm(du.lat, du.lon, p.lat, p.lon))}</b>`;
   if (istPaar(gruppe)) text += `<br>${t("❤️ Paar · gerade zusammen unterwegs")}`;
   else if (gruppe.length > 1) text += `<br>${t("🤝 Zusammen unterwegs")}`;
-  if (gruppe.length === 1 && !familieModus) { const n = p.id === "du" ? besucht.length : p.laender; if (n) text += `<br>${t("🌍 {n} Länder", { n })}`; }
+  if (gruppe.length === 1 && !familieModus) { const n = p.id === "du" ? besucht.length : p.laender; if (n) text += `<br>🌍 ${anzahl(n, "laender")}`; }
   info.querySelector("h3").textContent = name;
   info.querySelector("p").innerHTML = text;
   const chatKnopf = document.getElementById("info-chat");
@@ -1264,7 +1275,7 @@ async function meineLaenderAufbauen() {
   if (!welt) { try { welt = await (await fetch("weltkarte.json")).json(); } catch (e) { welt = []; } }
   const f = KONT_FARBEN[stil], kontVon = Object.fromEntries(welt.map(l => [l.i, l.k]));
   const kont = [...new Set(besucht.map(cc => kontVon[cc]).filter(k => k && k !== "AN"))];
-  document.getElementById("ml-zahl").textContent = t("{n} Länder", { n: besucht.length });
+  document.getElementById("ml-zahl").textContent = anzahl(besucht.length, "laender");
   document.getElementById("ml-kont").textContent = t("{n} von 7 Kontinenten", { n: kont.length + (besucht.some(cc => kontVon[cc] === "AN") ? 1 : 0) });
   const pio = PIONIER.filter(cc => besucht.includes(cc));
   document.getElementById("ml-pionier").textContent = pio.length ? t("🚩 {n}× Pionier", { n: pio.length }) : "";
@@ -1419,7 +1430,7 @@ async function reisenLaden() {
   reisenAufbauen(); trefferAufbauen();
   if (familieModus) familieAufbauen();
 }
-const nahe = (a, b) => a.lat != null && b.lat != null && entfernungKm(a.lat, a.lon, b.lat, b.lon) < NAH_KM;
+const nahe = (a, b) => !!a && !!b && a.lat != null && b.lat != null && entfernungKm(a.lat, a.lon, b.lat, b.lon) < NAH_KM;
 function trefferFinden() {
   const heute = new Date().toISOString().slice(0, 10), du = ich(), treffer = [];
   const fest = reisen.filter(r => r.von), meine = fest.filter(r => r.wer[0] === "du"), andere = fest.filter(r => r.wer[0] !== "du");
@@ -1447,7 +1458,7 @@ function trefferAufbauen() {
     const zeit = `${kurz(x.von)} – ${kurz(x.bis)}`;
     if (x.art === "reise") return `<div class="kasten treffer"><b>🧭 ${t("Treffer: {ort}", { ort: ohneHtml(x.ort) })}</b><span>${t("Du und {namen} seid vom {zeit} gleichzeitig dort.", { namen: ohneHtml(namen(x.wer)), zeit })}</span></div>`;
     if (x.art === "kommt") return `<div class="kasten treffer"><b>🧭 ${t("{namen} kommt zu dir", { namen: ohneHtml(namen(x.wer)) })}</b><span>${flagge(x.land)} ${ohneHtml(x.ort)} · ${zeit}</span></div>`;
-    return `<div class="kasten treffer"><b>🧭 ${t("{namen} ist gerade in {ort}", { namen: ohneHtml(namen(x.wer)), ort: ohneHtml(x.ort) })}</b><span>${t("Du bist dort vom {zeit}.", { zeit })}</span></div>`;
+    return `<div class="kasten treffer"><b>🧭 ${t("{namen} ist gerade in {ort}", { namen: ohneHtml(namen(x.wer)), ort: ohneHtml(x.ort) })}</b><span>${t("Du bist dort vom {zeit}", { zeit })}</span></div>`;
   }).join("");
 }
 
