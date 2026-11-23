@@ -26,7 +26,7 @@ Entschieden am 23.11.2026 (A + C + E, danach geändert): Anmeldung mit E-Mail un
 
 ## Erledigt nach dem Beta-Start
 - [x] Sven registriert, fünf persönliche Einladungen verschickt (23.11.2026)
-- [x] Echte Reisen mit Treffern, echtes Feedback mit Screenshot, Wachhalten, wöchentliche Sicherung (Geheimnis von Sven fehlt noch)
+- [x] Echte Reisen mit Treffern, echtes Feedback mit Screenshot, Wachhalten, wöchentliche Sicherung (läuft seit 23.11.2026, erste Sicherung im Backup-Repository angekommen)
 
 - [x] Familien-Zugang und „Neu dabei“-Hinweis (23.11.2026)
 
