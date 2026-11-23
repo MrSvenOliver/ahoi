@@ -161,5 +161,14 @@ drop policy if exists "fotos loeschen" on storage.objects;
 create policy "fotos loeschen" on storage.objects for delete
   using (bucket_id = 'profilbilder' and (storage.foldername(name))[1] = auth.uid()::text);
 
+-- ---------- Zugriffsrechte für die App ----------
+-- Neue Tabellen werden nicht automatisch freigegeben; was die App braucht, steht hier.
+-- Was jemand davon wirklich sieht oder ändern darf, entscheiden die Regeln oben.
+grant usage on schema public to anon, authenticated;
+grant select, update, delete on public.profile to authenticated;
+grant select, insert on public.einladung to authenticated;
+grant select on public.wer_ist_wo to authenticated;
+grant execute on function public.ist_mitglied(), public.ist_admin() to authenticated;
+
 -- ---------- Erster Admin ----------
 -- Das erste Konto, das sich registriert, wird automatisch Admin (Sven registriert sich direkt nach der Einrichtung).

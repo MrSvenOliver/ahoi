@@ -3,6 +3,7 @@
 Jede Entscheidung mit Datum. Neue Einträge kommen oben dazu.
 
 ## 23.11.2026
+- Supabase eingerichtet: Organisation „Ahoi“, Projekt „ahoi“, kostenlos, Frankfurt; Anmeldung bei Supabase über Svens GitHub-Konto
 - Anmeldung geändert: E-Mail-Adresse und Passwort statt E-Mail-Code, keine Bestätigungsmail, also kein E-Mail-Dienst nötig; Passwort im Schlüsselbund speicherbar, angemeldet bleiben; vergessenes Passwort setzt Sven neu
 - Einladungen (B): jedes Mitglied verschickt einen Einladungslink per Messenger, die Person registriert sich selbst und wartet auf Svens Freigabe; Link gilt einmal und 14 Tage; ohne Link keine Registrierung; das erste Konto wird Admin
 - Beta-Start A + C + E: Anmeldung zuerst nur per E-Mail-Code (Google später); zuerst live: Anmeldung, Profilfoto, Standort, „Wer ist wo?“, Einladungen; Claude richtet Supabase im Browser ein, Sven meldet sich einmal an

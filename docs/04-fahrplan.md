@@ -10,7 +10,8 @@
 Entschieden am 23.11.2026 (A + C + E, danach geändert): Anmeldung mit E-Mail und Passwort ohne Bestätigungsmail; Einladung per Link, Sven gibt frei; zuerst gehen Anmeldung, Profilfoto, Standort, „Wer ist wo?“ und Einladungen live, der Rest bleibt vorerst Beispieldaten; Claude richtet Supabase im Browser ein, Sven meldet sich dafür einmal an.
 
 - [x] Datenbank-Grundlagen geschrieben und geprüft: `supabase/01-grundlagen.sql` (Profile, Einladungslinks mit Freigabe, erstes Konto wird Admin, Geistermodus, private Profilbilder, Sicherheitsregeln)
-- [ ] Supabase-Projekt anlegen (Frankfurt), Grundlagen ausführen, E-Mail-Bestätigung ausschalten, Sven registriert sich als Erster (wird Admin)
+- [x] Supabase-Projekt angelegt (Frankfurt, kostenlos), Grundlagen eingespielt und geprüft, Bestätigungsmail aus (23.11.2026)
+- [ ] Sven registriert sich als Erster in der App (wird Admin)
 - [ ] App an Supabase anbinden: Anmeldung, Registrierung mit Einladungslink, Warten auf Freigabe, erster Start, Foto, Standort, „Wer ist wo?“, Freigabe und Passwort-Neusetzen im Admin-Bereich
 - [ ] Test mit Sven, dann 2–3 Freunde
 
