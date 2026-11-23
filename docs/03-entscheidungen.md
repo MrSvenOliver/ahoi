@@ -3,6 +3,9 @@
 Jede Entscheidung mit Datum. Neue Einträge kommen oben dazu.
 
 ## 23.11.2026
+- Beta-Start A + C + E: Anmeldung zuerst nur per E-Mail-Code (Google später); zuerst live: Anmeldung, Profilfoto, Standort, „Wer ist wo?“, Einladungen; Claude richtet Supabase im Browser ein, Sven meldet sich einmal an
+- Einladungen: Mitglied schlägt eine E-Mail-Adresse vor, Sven gibt frei; wer sich mit einer freigegebenen Adresse anmeldet, ist sofort Mitglied; alle anderen sehen nichts
+- Profilbilder privat: nur Mitglieder sehen sie
 - Spielerisches (Auswahl A + C + J + L + R): Status zum Antippen (ohne „Unterwegs“, das ist bei Nomaden immer so), Meine Länder mit Freirubbel-Karte und Kontinent-Ring, Pionier-Fahne mit Meldung im Chat „Alle“, Dein Nomadenjahr als Rückblick, Ortstipps mit Daumen hoch
 - Länder-Sammlung im Profil ersetzt durch eine Zeile „Meine Länder“ mit eigener Seite
 - Profil aufgeräumt: oben Sprache und Stil, dann Freunde, Familie, Mitteilungen, Privatsphäre; Über mich und Länder-Sammlung weiter unten
