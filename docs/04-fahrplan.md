@@ -11,8 +11,8 @@ Entschieden am 23.11.2026 (A + C + E, danach geändert): Anmeldung mit E-Mail un
 
 - [x] Datenbank-Grundlagen geschrieben und geprüft: `supabase/01-grundlagen.sql` (Profile, Einladungslinks mit Freigabe, erstes Konto wird Admin, Geistermodus, private Profilbilder, Sicherheitsregeln)
 - [x] Supabase-Projekt angelegt (Frankfurt, kostenlos), Grundlagen eingespielt und geprüft, Bestätigungsmail aus (23.11.2026)
-- [ ] Sven registriert sich als Erster in der App (wird Admin)
-- [ ] App an Supabase anbinden: Anmeldung, Registrierung mit Einladungslink, Warten auf Freigabe, erster Start, Foto, Standort, „Wer ist wo?“, Freigabe und Passwort-Neusetzen im Admin-Bereich
+- [x] Echte App unter https://mrsvenoliver.github.io/ahoi/ (Prototyp bleibt unter …/ahoi/prototyp/): Anmeldung, Registrierung mit Einladungslink, Warten auf Freigabe, erster Start mit Foto und Standort, echtes „Wer ist wo?“, Einladen, Verwaltung (Freigeben, Ablehnen, Startpasswort, Entfernen), Passwort ändern, Geistermodus
+- [ ] Sven registriert sich als Erster über …/ahoi/?einladung=start (wird Admin)
 - [ ] Test mit Sven, dann 2–3 Freunde
 
 1. **Datenbank und Konten:** Supabase-Projekt (kostenlos, Server in Frankfurt), Tabellen, Sicherheitsregeln (jeder sieht nur seine Freunde), Speicher für Profilbilder

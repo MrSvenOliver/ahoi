@@ -3,6 +3,11 @@
 Jede Entscheidung mit Datum. Neue Einträge kommen oben dazu.
 
 ## 23.11.2026
+- Echte App unter mrsvenoliver.github.io/ahoi/, der Prototyp mit Beispieldaten bleibt unter …/ahoi/prototyp/ (A); beide nutzen denselben Code, die echte App erkennt sich an der Adresse
+- In der echten App zeigen Reisen, Chat und Ideen vorerst „Kommt bald“ mit Link zum Prototyp (keine Beispieldaten neben echten Freunden); Familie, Freundeskreise, Paare, Mitteilungen, Nomadenjahr und die Feedback-Lasche sind dort ausgeblendet, bis sie funktionieren
+- Meine Länder werden in der echten App vorerst nur auf dem Gerät gespeichert; das Land des aktuellen Orts kommt automatisch dazu
+- Standort stadtgenau über Photon (Daten aus OpenStreetMap); ohne Standort-Erlaubnis sucht man die Stadt von Hand; beim Öffnen wird die Stadt still aktualisiert, wenn der Standort erlaubt ist
+- Neue Anmeldungen sieht Sven vorerst als rote Zahl im Profil unter „Freigaben und Mitglieder“ (Push-Mitteilung kommt später)
 - Supabase eingerichtet: Organisation „Ahoi“, Projekt „ahoi“, kostenlos, Frankfurt; Anmeldung bei Supabase über Svens GitHub-Konto
 - Anmeldung geändert: E-Mail-Adresse und Passwort statt E-Mail-Code, keine Bestätigungsmail, also kein E-Mail-Dienst nötig; Passwort im Schlüsselbund speicherbar, angemeldet bleiben; vergessenes Passwort setzt Sven neu
 - Einladungen (B): jedes Mitglied verschickt einen Einladungslink per Messenger, die Person registriert sich selbst und wartet auf Svens Freigabe; Link gilt einmal und 14 Tage; ohne Link keine Registrierung; das erste Konto wird Admin

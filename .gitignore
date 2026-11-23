@@ -1,1 +1,14 @@
 .DS_Store
+# Echte App: wird aus public/prototyp/ gebaut (werkzeuge/app-bauen.sh)
+/public/index.html
+/public/basis.js
+/public/start.js
+/public/app.js
+/public/texte.js
+/public/supabase.js
+/public/sw.js
+/public/manifest.webmanifest
+/public/weltkarte.json
+/public/laender-50m.geojson
+/public/papier.png
+/public/version.json

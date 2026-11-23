@@ -2,7 +2,7 @@
 // App-Dateien: zuerst aus dem Netz (damit neue Stände sofort ankommen), ohne Netz aus dem Speicher.
 // Schriften und Kartenbibliothek: aus dem Speicher, falls vorhanden (Kartenkacheln nicht, sonst wächst der Speicher endlos).
 const SPEICHER = "ahoi-v1";
-const KERN = ["./", "./index.html", "./texte.js", "./weltkarte.json", "./manifest.webmanifest", "./laender-50m.geojson", "../icons/icon-192.png", "../icons/apple-touch-icon.png"];
+const KERN = ["./", "./index.html", "./texte.js", "./basis.js", "./start.js", "./app.js", "./supabase.js", "./weltkarte.json", "./manifest.webmanifest", "./laender-50m.geojson", "../icons/icon-192.png", "../icons/apple-touch-icon.png"];
 
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(SPEICHER).then(c => c.addAll(KERN)).then(() => self.skipWaiting()));

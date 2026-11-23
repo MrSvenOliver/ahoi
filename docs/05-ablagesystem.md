@@ -23,7 +23,8 @@ Ahoi App/
 │   │   ├── kartenstil/              (gewählte Stilvorlage)
 │   │   └── farben-schriften.md
 │   ├── public/icons/                (App-Icons in allen Größen, erstellt von Claude)
-│   ├── src/                         (Code der App)
+│   ├── public/prototyp/             (Code der App; Prototyp und echte App nutzen denselben Code)
+│   ├── werkzeuge/app-bauen.sh       (baut daraus die echte App unter …/ahoi/)
 │   ├── supabase/                    (Datenbank-Aufbau)
 │   └── .github/workflows/           (automatisches Veröffentlichen, wöchentlicher Wecker, Backup)
 │
