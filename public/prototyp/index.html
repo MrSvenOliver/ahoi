@@ -300,6 +300,15 @@
   .ist-dabei { background: var(--gruen) !important; }
   .schritte div { display: flex; align-items: center; gap: 10px; padding: 6px 0; font-size: 15px; }
   .schritte span { width: 26px; height: 26px; border-radius: 50%; background: var(--tinte); color: var(--papier); display: grid; place-items: center; font-size: 13px; font-weight: 700; flex: none; }
+  .idee-vorschau { display: flex; gap: 12px; align-items: center; font-size: 14px; }
+  .idee-vorschau .vb { width: 72px; height: 72px; border-radius: 12px; background: var(--trenner) center / cover; flex: none; }
+  .idee-vorschau small { display: block; color: var(--text-leise); margin-top: 3px; }
+  .foto-wahl { display: block; padding: 10px 0 2px; color: var(--tinte); font-weight: 600; cursor: pointer; }
+  .zahlen.zwei { grid-template-columns: repeat(2, 1fr); }
+  .herzen.an { background: #fff !important; }
+  .idee .extra { display: block; font-size: 13px; color: var(--text-leise); }
+  .sb-links { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin-top: 14px; }
+  .sb-links a { font-size: 13px; font-weight: 600; padding: 6px 11px; border-radius: 999px; background: var(--trenner); color: var(--text); text-decoration: none; }
   .knopf-riesig { width: 100%; border: 0; border-radius: 18px; padding: 20px; margin-bottom: 10px; background: #e0565b; color: #fff; font: inherit; font-size: 18px; font-weight: 800; cursor: pointer; box-shadow: 0 8px 20px rgba(224, 86, 91, 0.3); }
   .mehr-optionen summary { font-weight: 700; cursor: pointer; list-style: none; }
   .mehr-optionen summary::after { content: " ›"; color: var(--text-leise); }
@@ -971,6 +980,10 @@
   .kreis-symbole { display: flex; gap: 6px; margin-bottom: 4px; }
   .kreis-symbole button { width: 40px; height: 40px; border-radius: 12px; border: 1px solid var(--trenner); background: transparent; font-size: 20px; cursor: pointer; }
   .kreis-symbole button.aktiv { border-color: var(--tinte); box-shadow: 0 0 0 1.5px var(--tinte) inset; }
+  .mit-symbol { display: flex; gap: 8px; align-items: flex-start; }
+  .zeilen-symbol { flex: none; width: 22px; text-align: center; }
+  .hinweis-band.eingerueckt { text-align: left; padding-left: 30px; }
+  .aktion-text { display: block; font-weight: 400; font-size: 14px; line-height: 1.45; color: var(--text-leise); margin: 8px 4px 6px; text-align: left; }
   .wahl-knopf { display: block; text-align: left !important; padding: 14px 16px !important; }
   .wahl-knopf b { display: block; font-size: 16px; }
   .wahl-knopf small { display: block; font-weight: 400; color: var(--text-leise); font-size: 13px; margin-top: 3px; line-height: 1.35; }
@@ -1162,20 +1175,27 @@
     <div><span>2</span>Oben auf <b>Teilen ⬆︎</b> → <b>Link kopieren</b></div>
     <div><span>3</span>Hier auf den großen Knopf tippen</div>
   </div>
-  <button class="knopf-riesig" id="einfuegen">📋 Airbnb-Link einfügen</button>
-  <div class="kasten" id="idee-vorschau" style="display:none"></div>
+  <button class="knopf-riesig" id="einfuegen">📋 Link einfügen</button>
+  <div class="kasten idee-vorschau" id="idee-vorschau" style="display:none"></div>
+  <div class="kasten formular">
+    <label>Link (Airbnb, Booking, Webseite …)<input id="idee-link" placeholder="https://…" inputmode="url" autocomplete="off"></label>
+    <label>Wo ist das?<input id="idee-ort" placeholder="Stadt suchen" autocomplete="off"></label>
+    <div class="ort-treffer" id="idee-orte"></div>
+    <label class="foto-wahl"><span id="idee-foto-text">📷 Eigenes Foto dazulegen (freiwillig)</span><input type="file" id="idee-foto" accept="image/*" hidden></label>
+  </div>
   <details class="kasten mehr-optionen">
     <summary>Weitere Angaben (freiwillig)</summary>
     <div class="formular" style="margin-top:12px">
-      <label>Anderer Link (Booking, Webseite …)<input id="idee-link" placeholder="https://…"></label>
-      <label>Notiz<input placeholder="z. B. Für Januar?"></label>
-      <div class="zwei"><label>Zeitraum<input placeholder="z. B. 8.–20.1."></label><label>Preis pro Nacht<input inputmode="numeric" placeholder="€ (für den Rechner)"></label></div>
-      <div class="zeile-einst"><div>Plätze für die Gruppe<small>Laut Airbnb 8 Gäste – du kannst weniger freigeben</small></div><span class="zaehler"><button id="pl-minus">−</button><b id="pl-zahl">8</b><button id="pl-plus">+</button></span></div>
+      <label>Notiz<input id="idee-notiz" maxlength="200" placeholder="z. B. Für Januar?"></label>
+      <div class="zwei"><label>Anreise<input type="date" id="idee-an"></label><label>Abreise<input type="date" id="idee-ab"></label></div>
+      <label>Preis pro Nacht<input id="idee-preis" inputmode="numeric" placeholder="€ (für den Rechner)"></label>
+      <div class="zeile-einst"><div>Plätze insgesamt<small>Mit dir. Leer lassen, wenn es egal ist.</small></div><span class="zaehler"><button id="pl-minus" type="button">−</button><b id="pl-zahl">–</b><button id="pl-plus" type="button">+</button></span></div>
     </div>
-    <h2 style="margin-left:0">Wer sieht das?</h2>
-    <div class="segmente klein" id="sicht-wahl"><button class="aktiv" data-s="alle">🌍 Alle</button><button data-s="kreis">👥 Kreis</button><button data-s="einzeln">👤 Einzeln</button></div>
-    <div id="sicht-detail" style="margin-top:12px;display:none"></div>
+    <h2 class="nur-proto" style="margin-left:0">Wer sieht das?</h2>
+    <div class="segmente klein nur-proto" id="sicht-wahl"><button class="aktiv" data-s="alle">🌍 Alle</button><button data-s="kreis">👥 Kreis</button><button data-s="einzeln">👤 Einzeln</button></div>
+    <div id="sicht-detail" class="nur-proto" style="margin-top:12px;display:none"></div>
   </details>
+  <p class="hinweis-band nur-echt">Alle Nomaden-Freunde sehen den Eintrag. Wer dabei ist, kommt automatisch in eine gemeinsame Gruppe im Chat.</p>
   <button class="knopf-gross" style="width:100%" id="idee-speichern">Teilen</button>
 </section>
 
@@ -1195,6 +1215,7 @@
   <div class="seite-kopf"><h1>Tipp teilen</h1><button class="knopf-leise" data-zurueck="ideen">Abbrechen</button></div>
   <div class="kasten formular">
     <label>Ort<input id="tipp-ort" placeholder="z. B. Lissabon" autocomplete="off"></label>
+    <div class="ort-treffer" id="tipp-orte"></div>
     <div style="font-size:13px;font-weight:600;color:var(--text-leise);margin-bottom:8px">Art</div>
     <div class="chips" id="tipp-arten" style="flex-wrap:wrap;margin:0 0 14px;padding:0"></div>
     <label>Dein Tipp<textarea id="tipp-text" rows="4" style="display:block;width:100%;margin-top:6px;border:1px solid var(--trenner);background:var(--flaeche);color:var(--text);border-radius:12px;padding:12px;font:inherit;font-size:16px" placeholder="Kurz und konkret, z. B. wo, wann, worauf achten"></textarea></label>
@@ -1245,9 +1266,13 @@
     <div class="stil-block"><span class="einst-unter">Stil</span><div class="stil-wahl" id="stil-wahl" role="radiogroup" aria-label="Stil"></div>
 </div>
   </div>
+  <h2>Über dich</h2>
+  <div class="kasten einst-gruppe">
+    <button class="einst-zeile" id="links-zeile"><span class="einst-symbol sym-blau"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg></span><span class="einst-name">Social Media und Webseite</span><span class="einst-wert" id="links-wert"></span><span class="einst-pfeil">›</span></button>
+  </div>
   <h2>Freunde</h2>
   <div class="kasten einst-gruppe">
-    <button class="einst-zeile" id="einladen-zeile"><span class="einst-symbol sym-gruen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="8" r="3.5"/><path d="M3.5 19.5c.8-3.6 3.4-5.5 6.5-5.5s5.7 1.9 6.5 5.5M18.5 8v6M15.5 11h6"/></svg></span><span class="einst-name">Einladen</span><span class="einst-wert">Freunde oder Familie</span><span class="einst-pfeil">›</span></button>
+    <button class="einst-zeile" id="einladen-zeile"><span class="einst-symbol sym-gruen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="8" r="3.5"/><path d="M3.5 19.5c.8-3.6 3.4-5.5 6.5-5.5s5.7 1.9 6.5 5.5M18.5 8v6M15.5 11h6"/></svg></span><span class="einst-name">Nomaden-Freund einladen</span><span class="einst-wert"></span><span class="einst-pfeil">›</span></button>
     <button class="einst-zeile nur-proto" id="kreise-zeile"><span class="einst-symbol sym-blau"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="9" r="3"/><circle cx="16.5" cy="10" r="2.5"/><path d="M3.5 19c.6-3 2.8-4.6 5.5-4.6s4.9 1.6 5.5 4.6M14.5 15.2c.6-.3 1.3-.4 2-.4 2.2 0 3.8 1.3 4.3 3.7"/></svg></span><span class="einst-name">Freundeskreise</span><span class="einst-wert" id="kreise-wert"></span><span class="einst-pfeil">›</span></button>
     <button class="einst-zeile" id="paar-zeile"><span class="einst-symbol sym-rosa"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19.5s-7.5-4.3-7.5-9.6A4.2 4.2 0 0 1 12 7.6a4.2 4.2 0 0 1 7.5 2.3c0 5.3-7.5 9.6-7.5 9.6Z"/></svg></span><span class="einst-name">Partner</span><span class="einst-wert" id="paar-wert">Nicht verknüpft</span><span class="einst-pfeil">›</span></button>
   </div>
@@ -1259,7 +1284,7 @@
   </div>
   <h2>Familie</h2>
   <div class="kasten">
-    <p class="familie-erklaerung">🏡 Deine Familie sieht, wo du bist und wohin du reist. Mehr nicht. Sie meldet sich nur mit Name und E-Mail an und teilt selbst nichts.</p>
+    <p class="familie-erklaerung">🏡 Für alle, die zu Hause bleiben und wissen möchten, wo du gerade bist. Sie bekommen eine schlanke Ansicht nur mit dir: dein Ort, deine nächsten Reisen und wie spät es bei dir ist.</p>
     <div class="zeile-einst nur-proto"><div>Mama<small>sieht dich</small></div><button class="schalter an" aria-label="Mama darf mich sehen"></button></div>
     <div class="zeile-einst nur-proto"><div>Papa<small>Einladung verschickt</small></div><button class="schalter an" aria-label="Papa darf mich sehen"></button></div>
     <div class="nur-echt" id="familie-liste"></div>
@@ -1276,10 +1301,10 @@
   <div class="kasten nur-proto" id="mitteilungen"></div>
   <h2 class="nur-echt">Mitteilungen</h2>
   <div class="kasten nur-echt" id="mitteilungen-echt">
-    <div class="zeile-einst"><div>💬 Neue Chat-Nachrichten<small id="push-zustand">Push aufs Handy</small></div><button class="schalter" id="push-schalter" aria-label="Push für neue Chat-Nachrichten"></button></div>
-    <p class="hinweis-band" style="margin:2px 0 10px;text-align:left">Einzelne Chats schaltest du im Chat mit der Glocke 🔔 stumm.</p>
-    <div class="zeile-einst"><div>📍 Nachfrage zu deinem Ort<small id="ort-zustand">Höchstens einmal im Monat</small></div><button class="schalter" id="ort-schalter" aria-label="Push-Nachfrage zu deinem Ort"></button></div>
-    <p class="hinweis-band" style="margin:2px 0 0;text-align:left">Ahoi fragt, ob du noch am selben Ort bist, oder ob du laut Reiseplan schon woanders bist.</p>
+    <div class="zeile-einst"><div class="mit-symbol"><span class="zeilen-symbol" aria-hidden="true">💬</span><div>Neue Chat-Nachrichten<small id="push-zustand">Push aufs Handy</small></div></div><button class="schalter" id="push-schalter" aria-label="Push für neue Chat-Nachrichten"></button></div>
+    <p class="hinweis-band eingerueckt" style="margin:2px 0 10px">Einzelne Chats schaltest du im Chat mit der Glocke 🔔 stumm.</p>
+    <div class="zeile-einst"><div class="mit-symbol"><span class="zeilen-symbol" aria-hidden="true">📍</span><div>Nachfrage zu deinem Ort<small id="ort-zustand">Höchstens einmal im Monat</small></div></div><button class="schalter" id="ort-schalter" aria-label="Push-Nachfrage zu deinem Ort"></button></div>
+    <p class="hinweis-band eingerueckt" style="margin:2px 0 0">Ahoi fragt, ob du noch am selben Ort bist, oder ob du laut Reiseplan schon woanders bist.</p>
   </div>
   <h2 class="nur-echt" id="verwaltung-titel" hidden>Verwaltung</h2>
   <div class="kasten einst-gruppe nur-echt" id="verwaltung-kasten" hidden>
@@ -1337,6 +1362,12 @@
   <h2>Feedback</h2>
   <div id="feedback-liste"></div>
   <p class="hinweis-band">Passwort vergessen? Neues Startpasswort setzen und der Person sagen. Sie kann es danach im Profil ändern.</p>
+</section>
+<section class="seite" id="seite-links">
+  <div class="seite-kopf"><h1>Social Media</h1><button class="knopf-leise" data-zurueck="profil">Abbrechen</button></div>
+  <p class="kreise-erklaerung">Alles freiwillig. Deine Nomaden-Freunde sehen die Links klein in deinem Steckbrief.</p>
+  <div class="kasten formular" id="links-felder"></div>
+  <button class="knopf-gross" style="width:100%" id="links-speichern">Speichern</button>
 </section>
 <section class="seite" id="seite-konto">
   <div class="seite-kopf"><h1>Passwort ändern</h1><button class="knopf-leise" data-zurueck="profil">Abbrechen</button></div>

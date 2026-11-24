@@ -3,7 +3,7 @@ const leute = ECHT ? ECHT_DATEN.leute : [
   { id: "du",    name: "Du",    ort: "Málaga",      land: "ES", lat: 36.7213, lon: -4.4214,  tz: "Europe/Madrid",       farbe: "#7a5a3a" },
   { id: "alex",  name: "Alex",  ort: "Lissabon",    land: "PT", lat: 38.7223, lon: -9.1393,  tz: "Europe/Lisbon",       farbe: "#c0582f", paar: "p1" },
   { id: "sam",   name: "Sam",   ort: "Bratislava",  land: "SK", lat: 48.1486, lon: 17.1077,  tz: "Europe/Bratislava",   farbe: "#3f6b8a", paar: "p1" },
-  { id: "lea",   name: "Lea",   ort: "Canggu, Bali",land: "ID", lat: -8.6478, lon: 115.1385, tz: "Asia/Makassar",       farbe: "#6f8a3a", paar: "p2" },
+  { id: "lea",   name: "Lea",   ort: "Canggu, Bali",land: "ID", lat: -8.6478, lon: 115.1385, tz: "Asia/Makassar",       farbe: "#6f8a3a", paar: "p2", links: { instagram: "lea.unterwegs", web: "https://example.com" } },
   { id: "nico",  name: "Nico",  ort: "Canggu, Bali",land: "ID", lat: -8.6478, lon: 115.1385, tz: "Asia/Makassar",       farbe: "#4f7a6a", paar: "p2" },
   { id: "mia",   name: "Mia",   ort: "Mexiko-Stadt",land: "MX", lat: 19.4326, lon: -99.1332, tz: "America/Mexico_City", farbe: "#a8467a" },
   { id: "jonas", name: "Jonas", ort: "Chiang Mai",  land: "TH", lat: 18.7883, lon: 98.9853,  tz: "Asia/Bangkok",        farbe: "#b98a2e" },
@@ -740,7 +740,7 @@ function stilWechseln(neu) {
   stilLaden();
 }
 // ---------- Bereiche wechseln ----------
-const seiten = ["reisen", "reise-neu", "chat", "unterhaltung", "gruppe-neu", "ideen", "idee-neu", "tipp-neu", "profil", "meine-laender", "laender", "feedback", "verwaltung", "konto", "kreise"];
+const seiten = ["reisen", "reise-neu", "chat", "unterhaltung", "gruppe-neu", "ideen", "idee-neu", "tipp-neu", "profil", "meine-laender", "laender", "feedback", "verwaltung", "konto", "kreise", "links"];
 const TAB_VON = { "reise-neu": "reisen", "idee-neu": "ideen", "tipp-neu": "ideen", "unterhaltung": "chat", "gruppe-neu": "chat" };
 function seiteZeigen(name) {
   for (const s of seiten) document.getElementById("seite-" + s).classList.toggle("offen", s === name);
@@ -1176,6 +1176,7 @@ tipps.forEach(x => x.ort = t(x.ort));
 // Im Prototyp gibt es keine echten Inserat-Links, deshalb die Suche am Ort.
 function ansehenLink(i) {
   const leuteZahl = 1 + i.dabei.length;
+  if (i.echt && !/airbnb\./i.test(i.link)) return i.link;
   if (i.quelle === "booking.com") { const u = new URL("https://www.booking.com/searchresults.html"); u.searchParams.set("ss", i.ort); u.searchParams.set("group_adults", leuteZahl); if (i.anreise) { u.searchParams.set("checkin", i.anreise); u.searchParams.set("checkout", i.abreise); } return u.href; }
   const echt = !!i.link, u = new URL(i.link || `https://www.airbnb.de/s/${encodeURIComponent(i.ort)}/homes`);
   if (i.anreise) { u.searchParams.set(echt ? "check_in" : "checkin", i.anreise); u.searchParams.set(echt ? "check_out" : "checkout", i.abreise); }
@@ -1207,9 +1208,17 @@ function tippsAufbauen() {
     const p = person(x.von), an = x.daumen.includes("du");
     return `<div class="kasten tipp"><div class="tipp-kopf"><span class="tipp-art">${t(TIPP_ARTEN[x.art])}</span><span>${flagge(x.land)} ${ohneHtml(x.ort)}</span></div>
       <p>${ohneHtml(x.text)}</p>
-      <div class="tipp-fuss"><span><span class="klein-ava" style="background:${p.farbe}">${kuerzel(p.name)}</span>${p.name}</span><button class="daumen${an ? " an" : ""}" data-i="${tipps.indexOf(x)}">👍 ${x.daumen.length}</button></div></div>`;
-  }).join("");
-  document.querySelectorAll("#tipps-liste .daumen").forEach(b => b.onclick = () => { const x = tipps[b.dataset.i], k = x.daumen.indexOf("du"); if (k >= 0) x.daumen.splice(k, 1); else x.daumen.push("du"); tippsAufbauen(); });
+      <div class="tipp-fuss"><span><span class="klein-ava" style="background:${p.farbe}">${kuerzel(p.name)}</span>${x.von === "du" ? t("Du") : p.name}${x.echt && x.von === "du" ? ` · <button class="tipp-weg" data-i="${tipps.indexOf(x)}">${t("Löschen")}</button>` : ""}</span><button class="daumen${an ? " an" : ""}" data-i="${tipps.indexOf(x)}">👍 ${x.daumen.length}</button></div></div>`;
+  }).join("") || (ECHT ? `<p class="hinweis-band">${t("Noch keine Tipps. Teile ein Café, ein Essen oder einen Ort, den du magst, mit „+ Tipp“.")}</p>` : "");
+  document.querySelectorAll("#tipps-liste .daumen").forEach(b => b.onclick = async () => {
+    const x = tipps[b.dataset.i], k = x.daumen.indexOf("du");
+    if (x.echt) { const r = k >= 0 ? await SB.from("tipp_daumen").delete().eq("tipp", x.id).eq("person", ECHT_DATEN.uid) : await SB.from("tipp_daumen").insert({ tipp: x.id }); if (r.error) return hinweis(t("Das hat nicht geklappt")); }
+    if (k >= 0) x.daumen.splice(k, 1); else x.daumen.push("du"); tippsAufbauen();
+  });
+  document.querySelectorAll("#tipps-liste .tipp-weg").forEach(b => b.onclick = () => fragen(t("Tipp löschen?"), [[t("Löschen"), async () => {
+    const x = tipps[b.dataset.i]; const { error } = await SB.from("tipp").delete().eq("id", x.id);
+    if (error) return hinweis(t("Das hat nicht geklappt")); tipps.splice(tipps.indexOf(x), 1); tippsAufbauen();
+  }, true]]));
 }
 function ideenAufbauen() {
   document.querySelectorAll("#ideen-reiter button").forEach(b => b.classList.toggle("aktiv", b.dataset.r === ideenReiter));
@@ -1217,38 +1226,47 @@ function ideenAufbauen() {
   document.getElementById("bereich-tipps").style.display = ideenReiter === "tipps" ? "" : "none";
   document.getElementById("idee-neu").textContent = t(ideenReiter === "tipps" ? "+ Tipp" : "+ Teilen");
   if (ideenReiter === "tipps") tippsAufbauen();
-  const laender = ["alle", ...new Set(ideen.map(i => i.land))];
+  const laender = ["alle", ...new Set(ideen.map(i => i.land).filter(Boolean))];
   document.getElementById("ideen-filter").innerHTML = laender.map(l => `<button data-l="${l}" class="${l === ideenFilter ? "aktiv" : ""}">${l === "alle" ? t("Alle|Filter") : flagge(l) + " " + new Intl.DisplayNames([SPRACHE], { type: "region" }).of(l)}</button>`).join("");
   document.querySelectorAll("#ideen-filter button").forEach(b => b.onclick = () => { ideenFilter = b.dataset.l; ideenAufbauen(); });
   document.getElementById("ideen-liste").innerHTML = ideen.map((i, n) => {
     if (ideenFilter !== "alle" && i.land !== ideenFilter) return "";
     if (i.abreise && i.abreise < new Date().toISOString().slice(0, 10)) return "";
-    const belegt = 1 + i.dabei.length, frei = Math.max(0, i.plaetze - belegt), ichDabei = i.dabei.includes("du");
+    const belegt = 1 + i.dabei.length, frei = i.plaetze ? Math.max(0, i.plaetze - belegt) : 99, ichDabei = i.dabei.includes("du"), eigen = i.von === "du";
     const proPerson = Math.round(i.preis / belegt);
-    return `
-    <div class="kasten idee">
-      <div class="bild" style="background:${i.farbe}"><span class="quelle">${i.quelle}</span><span class="sicht">${i.sicht}</span>${i.gebucht ? '<span class="gebucht">' + t("✅ Gebucht") + '</span>' : ""}<button class="herzen" data-n="${n}">❤️ ${i.herzen}</button></div>
-      <div class="inhalt">
-        <b>${t("{art} in {ort}", { art: i.art, ort: i.ort })} ${flagge(i.land)}</b>
-        <span class="ort">${[i.bewertung ? "★ " + i.bewertung : "", i.anreise ? kurz(i.anreise) + "–" + kurz(i.abreise) : i.zeitraum].filter(Boolean).join(" · ")}</span>
-        <div class="geteilt">${ava(person(i.von))}<span><b>${person(i.von).name}</b><br>${i.notiz ? "„" + ohneHtml(i.notiz) + "“" : t("hat das geteilt")}</span></div>
-        <div class="zahlen">
+    // Echte Einträge: Titel aus der Vorschau, z. B. „Wohnung in Lissabon · ★4,9 · 2 Schlafzimmer“
+    const teile = i.echt && i.titel ? i.titel.split(" · ") : null;
+    const kopf = teile ? ohneHtml(teile[0]) : i.echt ? ohneHtml(i.ort) : t("{art} in {ort}", { art: i.art, ort: i.ort });
+    const bildStil = i.bild ? `background:var(--trenner) center / cover url('${String(i.bild).replace(/['"()\\]/g, c => encodeURIComponent(c))}')` : `background:${i.farbe}`;
+    const zahlen = !i.echt ? `<div class="zahlen">
           <div><b>🛏 ${parseInt(i.zimmer) || "–"}</b><small>${t("Schlafzimmer")}</small></div>
           <div><b>👥 ${i.plaetze}</b><small>${i.plaetze < i.gaeste ? t("von {n} Gästen", { n: i.gaeste }) : t("Gäste")}</small></div>
           <div class="${frei ? "" : "voll"}"><b>${frei ? frei : t("Voll")}</b><small>${t(frei ? "Plätze frei" : "alle vergeben")}</small></div>
-        </div>
+        </div>` : i.plaetze ? `<div class="zahlen zwei"><div><b>👥 ${i.plaetze}</b><small>${t("Plätze")}</small></div><div class="${frei ? "" : "voll"}"><b>${frei ? frei : t("Voll")}</b><small>${t(frei ? "Plätze frei" : "alle vergeben")}</small></div></div>` : "";
+    const chatKnopf = !i.echt ? `<button class="knopf-leise">💬 ${i.kommentare}</button>` : (i.chat && (eigen || ichDabei)) ? `<button class="knopf-leise idee-chat" data-n="${n}">💬 ${t("Gruppe")}</button>` : eigen ? "" : `<button class="knopf-leise idee-chat" data-n="${n}">💬 ${ohneHtml(person(i.von).name)}</button>`;
+    return `
+    <div class="kasten idee">
+      <div class="bild" style="${bildStil}"><span class="quelle">${ohneHtml(i.quelle || "")}</span>${i.echt ? "" : `<span class="sicht">${i.sicht}</span>`}${i.gebucht ? '<span class="gebucht">' + t("✅ Gebucht") + '</span>' : ""}<button class="herzen${i.herzIch ? " an" : ""}" data-n="${n}">❤️ ${i.herzen}</button></div>
+      <div class="inhalt">
+        <b>${kopf} ${i.land ? flagge(i.land) : ""}</b>
+        <span class="ort">${[i.echt && teile ? ohneHtml(i.ort) : "", i.bewertung ? "★ " + i.bewertung : "", i.anreise ? kurz(i.anreise) + "–" + kurz(i.abreise) : i.zeitraum].filter(Boolean).join(" · ")}</span>
+        ${teile && teile.length > 1 ? `<span class="extra">${ohneHtml(teile.slice(1).join(" · "))}</span>` : ""}
+        <div class="geteilt">${ava(person(i.von))}<span><b>${eigen ? t("Du") : person(i.von).name}</b><br>${i.notiz ? "„" + ohneHtml(i.notiz) + "“" : t("hat das geteilt")}</span></div>
+        ${zahlen}
         ${i.preis ? `<div class="rechner">💶 ${i.preis} € / ${t("Nacht")} · <b>${t("{n} € pro Person", { n: proPerson })}</b> ${t("bei {n}", { n: belegt })}</div>` : ""}
         <div class="dabei-leiste"><div class="dabei-gesichter">${[i.von, ...i.dabei].map(id => ava(person(id))).join("")}</div></div>
         <div class="aktionen">
-          ${i.gebucht ? `<button class="knopf-gross ist-dabei" disabled style="opacity:1">${t("✅ Gebucht · steht in Reisen")}</button>` : `<button class="knopf-gross dabei-knopf ${ichDabei ? "ist-dabei" : ""}" data-n="${n}" ${!frei && !ichDabei ? "disabled" : ""}>${t(ichDabei ? "✓ Du bist dabei" : frei ? "🙋 Ich wäre dabei" : "Leider voll")}</button>`}
-          <button class="knopf-leise">💬 ${i.kommentare}</button>
+          ${i.gebucht ? `<button class="knopf-gross ist-dabei" disabled style="opacity:1">${t("✅ Gebucht · steht in Reisen")}</button>` : i.echt && eigen ? "" : `<button class="knopf-gross dabei-knopf ${ichDabei ? "ist-dabei" : ""}" data-n="${n}" ${!frei && !ichDabei ? "disabled" : ""}>${t(ichDabei ? "✓ Du bist dabei" : frei ? "🙋 Ich wäre dabei" : "Leider voll")}</button>`}
+          ${chatKnopf}
         </div>
         <div class="aktionen" style="margin-top:8px">
-          <a class="knopf-leise" href="${ansehenLink(i)}" target="_blank" rel="noopener" style="text-decoration:none;flex:1;text-align:center">${t(i.anreise ? "Preis ansehen ↗" : "Ansehen ↗")}</a>
-          ${(ichDabei || i.von === "du") && !i.gebucht ? `<button class="knopf-leise gebucht-knopf" data-n="${n}" style="flex:1">${t("✓ Gebucht")}</button>` : ""}
+          <a class="knopf-leise" href="${ohneHtml(ansehenLink(i))}" target="_blank" rel="noopener" style="text-decoration:none;flex:1;text-align:center">${t(i.anreise ? "Preis ansehen ↗" : "Ansehen ↗")}</a>
+          ${(ichDabei || eigen) && !i.gebucht && (!i.echt || i.anreise) ? `<button class="knopf-leise gebucht-knopf" data-n="${n}" style="flex:1">${t("✓ Gebucht")}</button>` : ""}
+          ${i.echt && eigen ? `<button class="knopf-leise idee-weg" data-n="${n}" aria-label="${t("Löschen")}">🗑</button>` : ""}
         </div>
       </div></div>`;
-  }).join("");
+  }).join("") || (ECHT ? `<p class="hinweis-band">${t("Noch nichts auf der Wishlist. Teile eine Unterkunft, die dir gefällt, mit „+ Teilen“.")}</p>` : "");
+  if (ECHT) return wishlistKnoepfe();
   document.querySelectorAll(".herzen").forEach(b => b.onclick = () => { ideen[b.dataset.n].herzen++; ideenAufbauen(); });
   document.querySelectorAll(".dabei-knopf").forEach(b => b.onclick = () => {
     const i = ideen[b.dataset.n], k = i.dabei.indexOf("du");
@@ -1272,30 +1290,100 @@ document.getElementById("idee-neu").onclick = () => {
   seiteZeigen("tipp-neu");
 };
 document.querySelectorAll("#ideen-reiter button").forEach(b => b.onclick = () => { ideenReiter = b.dataset.r; ideenAufbauen(); });
-document.getElementById("tipp-speichern").onclick = () => {
+let tippOrtWahl = null;
+document.getElementById("tipp-ort").addEventListener("input", () => { tippOrtWahl = null; });
+ortSucheVerbinden(document.getElementById("tipp-ort"), document.getElementById("tipp-orte"), o => { tippOrtWahl = o; document.getElementById("tipp-ort").value = o.ort; document.getElementById("tipp-orte").innerHTML = ""; });
+document.getElementById("tipp-speichern").onclick = async e => {
   const ort = document.getElementById("tipp-ort").value.trim(), text = document.getElementById("tipp-text").value.trim();
   if (!ort || !text) return hinweis(t("Bitte Ort und Tipp ausfüllen"));
+  if (ECHT) {
+    const o = tippOrtWahl && tippOrtWahl.ort === ort ? tippOrtWahl : { ort, land: ich().land || null, lat: null, lon: null };
+    beschaeftigt(e.target, true);
+    const { error } = await SB.from("tipp").insert({ ort: o.ort, land: o.land, lat: o.lat, lon: o.lon, art: document.querySelector("#tipp-arten .aktiv").dataset.a, text });
+    beschaeftigt(e.target, false);
+    if (error) return hinweis(t("Das hat nicht geklappt"));
+    tippsOrt = null; tippsFilter = "alle"; seiteZeigen("ideen"); await wishlistLaden(); hinweis(t("Tipp geteilt")); return;
+  }
   const bekannt = [...leute, ...tipps].find(x => x.ort.toLowerCase() === ort.toLowerCase());
   tipps.unshift({ von: "du", ort, land: bekannt ? bekannt.land : ich().land, art: document.querySelector("#tipp-arten .aktiv").dataset.a, text, daumen: [] });
   tippsOrt = null; tippsFilter = "alle"; seiteZeigen("ideen"); ideenAufbauen(); hinweis(t("Tipp geteilt"));
 };
 document.getElementById("einfuegen").onclick = async () => {
-  try { document.getElementById("idee-link").value = await navigator.clipboard.readText(); vorschauZeigen(); }
-  catch (e) { document.querySelector(".mehr-optionen").open = true; hinweis("Link bitte ins Feld einfügen"); document.getElementById("idee-link").focus(); }
+  try { const v = (await navigator.clipboard.readText()).trim(); if (!v) throw 0; document.getElementById("idee-link").value = v; vorschauZeigen(); }
+  catch (e) { hinweis(t("Link bitte ins Feld einfügen")); document.getElementById("idee-link").focus(); }
 };
-document.getElementById("idee-link").addEventListener("input", vorschauZeigen);
+document.getElementById("idee-link").addEventListener("input", () => { clearTimeout(vorschauZeigen.uhr); vorschauZeigen.uhr = setTimeout(vorschauZeigen, 500); });
+// Link aus geteiltem Text holen (Airbnb teilt oft „Schau dir das an: https://…“)
+const linkAus = v => { const m = String(v || "").match(/https:\/\/[^\s"'<>]+/i); return m ? m[0] : null; };
+const quelleVon = link => { try { const h = new URL(link).hostname.replace(/^www\./, ""); return /airbnb|abnb\.me/.test(h) ? "Airbnb" : /booking\./.test(h) ? "Booking" : h.split(".").slice(-2).join("."); } catch (e) { return ""; } };
+let ideeVorschau = null, ideeOrt = null, ideeFoto = null;
+async function vorschauEcht(link) {
+  const box = document.getElementById("idee-vorschau");
+  box.style.display = "flex"; box.innerHTML = `<div class="vb"></div><div><b>${t("Vorschau wird geladen …")}</b></div>`;
+  let v = null;
+  try { const r = await SB.functions.invoke("vorschau", { body: { url: link } }); v = r.data && r.data.ok ? r.data : null; } catch (e) {}
+  if (linkAus(document.getElementById("idee-link").value) !== link) return;
+  ideeVorschau = v ? { titel: v.titel, bild: v.bild } : null;
+  const bild = ideeFoto ? URL.createObjectURL(ideeFoto) : v && v.bild;
+  box.innerHTML = `<div class="vb" style="${bild ? `background-image:url('${bild.replace(/'/g, "%27")}')` : ""}"></div><div><b>${ohneHtml((v && v.titel) || quelleVon(link))}</b><small>${v ? (v.bild ? t("Bild und Titel übernommen") : t("Kein Bild gefunden, du kannst ein eigenes Foto dazulegen")) : t("Keine Vorschau möglich, du kannst ein eigenes Foto dazulegen")}</small></div>`;
+  // Ort vorschlagen, wenn der Titel ihn nennt („… in Lissabon“)
+  const ortFeld = document.getElementById("idee-ort"), m = v && v.titel && v.titel.split(" · ")[0].match(/ in ([^·,]+)$/);
+  if (m && !ortFeld.value.trim()) { ortFeld.value = m[1].trim(); ortFeld.dispatchEvent(new Event("input")); }
+}
 function vorschauZeigen() {
   const v = document.getElementById("idee-link").value.trim(), box = document.getElementById("idee-vorschau");
-  if (!v) { box.style.display = "none"; return; }
+  if (!v) { box.style.display = "none"; ideeVorschau = null; return; }
+  if (ECHT) { const l = linkAus(v); if (l) { if (l !== v) document.getElementById("idee-link").value = l; vorschauEcht(l); } return; }
   const airbnb = /(airbnb\.[a-z.]+\/(rooms|h)\/|abnb\.me\/)/i.test(v);
   box.style.display = "block";
   box.innerHTML = airbnb
     ? `✅ <b>${t("Airbnb erkannt")}</b><br><span style='font-size:13px;color:var(--text-leise)'>${t("Foto, Art, Ort, Bewertung, Schlafzimmer und Gäste werden automatisch übernommen (im Prototyp noch Beispiel).")}</span>`
     : `🔗 <b>${t("Webseite erkannt")}</b><br><span style='font-size:13px;color:var(--text-leise)'>${t("Titel und Bild kommen aus der Vorschau der Seite.")}</span>`;
 }
-let plaetze = 8;
-document.getElementById("pl-minus").onclick = () => { plaetze = Math.max(2, plaetze - 1); document.getElementById("pl-zahl").textContent = plaetze; };
-document.getElementById("pl-plus").onclick = () => { plaetze = Math.min(8, plaetze + 1); document.getElementById("pl-zahl").textContent = plaetze; };
+let plaetze = null;
+const plaetzeZeigen = () => { document.getElementById("pl-zahl").textContent = plaetze || "–"; };
+document.getElementById("pl-minus").onclick = () => { plaetze = !plaetze || plaetze <= 2 ? null : plaetze - 1; plaetzeZeigen(); };
+document.getElementById("pl-plus").onclick = () => { plaetze = plaetze ? Math.min(30, plaetze + 1) : 2; plaetzeZeigen(); };
+document.getElementById("idee-ort").addEventListener("input", () => { ideeOrt = null; });
+ortSucheVerbinden(document.getElementById("idee-ort"), document.getElementById("idee-orte"), o => { ideeOrt = o; document.getElementById("idee-ort").value = o.ort; document.getElementById("idee-orte").innerHTML = ""; });
+document.getElementById("idee-foto").addEventListener("change", e => {
+  ideeFoto = e.target.files[0] || null;
+  document.getElementById("idee-foto-text").textContent = ideeFoto ? t("📷 Foto ausgewählt · ändern") : t("📷 Eigenes Foto dazulegen (freiwillig)");
+  const vb = document.querySelector("#idee-vorschau .vb"); if (vb && ideeFoto) vb.style.backgroundImage = `url('${URL.createObjectURL(ideeFoto)}')`;
+});
+function ideeFormularLeeren() {
+  ["idee-link", "idee-ort", "idee-notiz", "idee-an", "idee-ab", "idee-preis"].forEach(id => document.getElementById(id).value = "");
+  document.getElementById("idee-vorschau").style.display = "none"; document.getElementById("idee-orte").innerHTML = "";
+  ideeVorschau = null; ideeOrt = null; ideeFoto = null; plaetze = null; plaetzeZeigen();
+  document.getElementById("idee-foto").value = ""; document.getElementById("idee-foto-text").textContent = t("📷 Eigenes Foto dazulegen (freiwillig)");
+}
+async function wunschSpeichern(knopf) {
+  const link = linkAus(document.getElementById("idee-link").value);
+  if (!link) return hinweis(t("Bitte einen Link einfügen"));
+  const ortText = document.getElementById("idee-ort").value.trim();
+  if (!ideeOrt || ideeOrt.ort !== ortText) return hinweis(t("Bitte den Ort aus der Liste wählen"));
+  const an = document.getElementById("idee-an").value || null, ab = document.getElementById("idee-ab").value || null;
+  if ((an && !ab) || (!an && ab) || (an && ab && ab < an)) return hinweis(t("Bitte Anreise und Abreise prüfen"));
+  const preis = parseInt(document.getElementById("idee-preis").value.replace(/\D/g, "")) || null;
+  beschaeftigt(knopf, true);
+  try {
+    let foto = null;
+    if (ideeFoto) {
+      const b = await createImageBitmap(ideeFoto).catch(() => new Promise((ok, nein) => { const i = new Image(); i.onload = () => ok(i); i.onerror = nein; i.src = URL.createObjectURL(ideeFoto); }));
+      const f = Math.min(1, 1600 / Math.max(b.width, b.height)), cv = document.createElement("canvas");
+      cv.width = Math.round(b.width * f); cv.height = Math.round(b.height * f); cv.getContext("2d").drawImage(b, 0, 0, cv.width, cv.height);
+      const blob = await new Promise(ok => cv.toBlob(ok, "image/jpeg", 0.8));
+      foto = `${ECHT_DATEN.uid}/${crypto.randomUUID()}.jpg`;
+      const up = await SB.storage.from("wunschbilder").upload(foto, blob, { contentType: "image/jpeg" });
+      if (up.error) throw up.error;
+    }
+    const { error } = await SB.from("wunsch").insert({ link, titel: ideeVorschau && ideeVorschau.titel || null, bild_url: ideeVorschau && ideeVorschau.bild || null, foto, quelle: quelleVon(link),
+      ort: ideeOrt.ort, land: ideeOrt.land, lat: ideeOrt.lat, lon: ideeOrt.lon, anreise: an, abreise: ab, preis, plaetze, notiz: document.getElementById("idee-notiz").value.trim() || null });
+    if (error) { if (foto) SB.storage.from("wunschbilder").remove([foto]).catch(() => {}); throw error; }
+    ideeFormularLeeren(); ideenReiter = "unterkunft"; seiteZeigen("ideen"); await wishlistLaden(); hinweis(t("Auf der Wishlist geteilt"));
+  } catch (e) { hinweis(t("Teilen hat nicht geklappt")); }
+  beschaeftigt(knopf, false);
+}
 document.querySelectorAll("#sicht-wahl button").forEach(b => b.onclick = () => {
   document.querySelectorAll("#sicht-wahl button").forEach(x => x.classList.toggle("aktiv", x === b));
   const d = document.getElementById("sicht-detail"), art = b.dataset.s;
@@ -1305,7 +1393,65 @@ document.querySelectorAll("#sicht-wahl button").forEach(b => b.onclick = () => {
   d.querySelectorAll(".schalter").forEach(x => x.onclick = () => x.classList.toggle("an"));
   d.querySelectorAll(".chips button").forEach(x => x.onclick = () => x.classList.toggle("aktiv"));
 });
-document.getElementById("idee-speichern").onclick = () => { hinweis("Teilen kommt in Phase 5"); seiteZeigen("ideen"); };
+document.getElementById("idee-speichern").onclick = e => { if (ECHT) return wunschSpeichern(e.target); hinweis(t("Im Prototyp wird nichts geteilt")); seiteZeigen("ideen"); };
+// ---------- Wishlist in der echten App: laden und Knöpfe ----------
+const wunschBilder = {};
+async function wishlistLaden() {
+  if (!ECHT || familieModus || ECHT_DATEN.profil.art === "familie") return;
+  const [w, d, h, tp, td] = await Promise.all([
+    SB.from("wunsch").select("*").order("erstellt_am", { ascending: false }), SB.from("wunsch_dabei").select("wunsch, person"), SB.from("wunsch_herz").select("wunsch, person"),
+    SB.from("tipp").select("*").order("erstellt_am", { ascending: false }), SB.from("tipp_daumen").select("tipp, person")
+  ]);
+  if (!w.error && !d.error && !h.error) {
+    const fotos = w.data.map(x => x.foto).filter(f => f && !wunschBilder[f]);
+    if (fotos.length) { const r = await SB.storage.from("wunschbilder").createSignedUrls(fotos, 86400); (r.data || []).forEach(x => { if (x.signedUrl) wunschBilder[x.path] = x.signedUrl; }); }
+    ideen.splice(0, ideen.length, ...w.data.map(x => {
+      const herz = h.data.filter(y => y.wunsch === x.id), f = farbeVon(x.id);
+      return { id: x.id, echt: true, von: idVon(x.von), titel: x.titel, ort: x.ort, land: x.land, lat: x.lat, lon: x.lon, link: x.link, quelle: x.quelle || quelleVon(x.link),
+        bild: x.foto ? wunschBilder[x.foto] : x.bild_url, notiz: x.notiz || "", anreise: x.anreise, abreise: x.abreise, preis: x.preis, plaetze: x.plaetze, foto: x.foto,
+        dabei: d.data.filter(y => y.wunsch === x.id).map(y => idVon(y.person)), herzen: herz.length, herzIch: herz.some(y => y.person === ECHT_DATEN.uid),
+        gebucht: x.gebucht, chat: x.chat, farbe: `linear-gradient(135deg, ${f}66, ${f})` };
+    }).filter(i => person(i.von) && !(i.abreise && i.abreise < new Date().toISOString().slice(0, 10) && !i.gebucht)));
+  }
+  if (!tp.error && !td.error) tipps.splice(0, tipps.length, ...tp.data.map(x => ({ id: x.id, echt: true, von: idVon(x.von), ort: x.ort, land: x.land, art: x.art, text: x.text, daumen: td.data.filter(y => y.tipp === x.id).map(y => idVon(y.person)) })).filter(x => person(x.von)));
+  if (document.getElementById("seite-ideen").classList.contains("offen")) ideenAufbauen();
+}
+function wishlistKnoepfe() {
+  const i = b => ideen[b.dataset.n];
+  document.querySelectorAll(".herzen").forEach(b => b.onclick = async () => {
+    const x = i(b), r = x.herzIch ? await SB.from("wunsch_herz").delete().eq("wunsch", x.id).eq("person", ECHT_DATEN.uid) : await SB.from("wunsch_herz").insert({ wunsch: x.id });
+    if (r.error) return hinweis(t("Das hat nicht geklappt"));
+    x.herzIch = !x.herzIch; x.herzen += x.herzIch ? 1 : -1; ideenAufbauen();
+  });
+  document.querySelectorAll(".dabei-knopf").forEach(b => b.onclick = async () => {
+    const x = i(b), ja = !x.dabei.includes("du");
+    beschaeftigt(b, true);
+    const { error } = await SB.rpc("wunsch_dabei_setzen", { w: x.id, ja });
+    beschaeftigt(b, false);
+    if (error) return hinweis(/voll/i.test(error.message) ? t("Leider voll") : t("Das hat nicht geklappt"));
+    hinweis(ja ? t("Du bist dabei · {name} sieht das in eurer Gruppe im Chat", { name: person(x.von).name }) : t("Du bist nicht mehr dabei"));
+    await wishlistLaden(); chatsLaden().catch(() => {});
+  });
+  document.querySelectorAll(".gebucht-knopf").forEach(b => b.onclick = () => {
+    const x = i(b), wer = [x.von, ...x.dabei].map(id => id === "du" ? t("dich") : person(id).name).join(", ");
+    fragen(t("Gebucht? Die Reise wird eingetragen für {wer}.", { wer }), [[t("✓ Ja, gebucht"), async () => {
+      const { error } = await SB.rpc("wunsch_gebucht", { w: x.id });
+      if (error) return hinweis(t("Das hat nicht geklappt"));
+      hinweis(t("In Reisen eingetragen für {wer}", { wer })); await wishlistLaden(); reisenLaden();
+    }]]);
+  });
+  document.querySelectorAll(".idee-chat").forEach(b => b.onclick = async () => {
+    const x = i(b);
+    if (x.chat && (x.von === "du" || x.dabei.includes("du"))) { await chatsLaden(); const c = chats.find(y => y.id === x.chat); if (c) return gespraechOeffnen(c); }
+    einzelChat(x.von);
+  });
+  document.querySelectorAll(".idee-weg").forEach(b => b.onclick = () => fragen(t("Von der Wishlist löschen?"), [[t("Löschen"), async () => {
+    const x = i(b); const { error } = await SB.from("wunsch").delete().eq("id", x.id);
+    if (error) return hinweis(t("Das hat nicht geklappt"));
+    if (x.foto) SB.storage.from("wunschbilder").remove([x.foto]).catch(() => {});
+    await wishlistLaden();
+  }, true]]));
+}
 // ---------- Familien-Ansicht ----------
 function naechsteReise(id) {
   const heute = new Date().toISOString().slice(0, 10);
@@ -1667,7 +1813,8 @@ async function steckbriefOeffnen(p) {
   const zahlen = laenderVon(p) ? `<div class="sb-zahlen"><div><b data-zahl="${zahl}">${zahl}</b><span>${t(zahl === 1 ? "Land" : "Länder")}</span></div><div><b>${kont}/7</b><span>${t("Kontinente")}</span></div><div><b>${pio ? pio + "×" : "–"}</b><span>${t("Pionier")}</span></div></div><div class="sb-karte">${karte}</div>` : "";
   const sortiert = laender.filter(cc => STAATEN.has(cc)).slice(0, 11);
   const stempel = sortiert.length ? `<div class="sb-stempel">${sortiert.map((cc, i) => `<span class="stempel-ink${i % 3 === 1 ? " eckig" : ""}" style="--i:${i};--r:${((i * 37) % 26) - 13}deg;--sf:${STEMPEL_FARBEN[i % STEMPEL_FARBEN.length]}">${flagge(cc)}<small>${cc}</small></span>`).join("")}${zahl > sortiert.length ? `<span class="stempel-mehr">+${zahl - sortiert.length}</span>` : ""}</div>` : "";
-  const knoepfe = selbst ? "" : `<div class="sb-knoepfe"><button class="knopf-leise" id="sb-karte-zeigen">📍 ${t("Auf der Karte")}</button><button class="knopf-leise" id="sb-nachricht">💬 ${t("Nachricht")}</button></div>`;
+  const linksHtml = Object.entries((selbst ? meineLinks : p.links) || {}).map(([k, v]) => { const u = linkZiel(k, v), a = LINK_ARTEN.find(x => x[0] === k); return u && a ? `<a href="${ohneHtml(u)}" target="_blank" rel="noopener">${a[1]}</a>` : ""; }).join("");
+  const knoepfe = (linksHtml ? `<div class="sb-links">${linksHtml}</div>` : "") + (selbst ? "" : `<div class="sb-knoepfe"><button class="knopf-leise" id="sb-karte-zeigen">📍 ${t("Auf der Karte")}</button><button class="knopf-leise" id="sb-nachricht">💬 ${t("Nachricht")}</button></div>`);
   const blatt = document.getElementById("sb-blatt");
   blatt.style.setProperty("--sb-farbe", p.farbe || "#0a84ff");
   blatt.innerHTML = `<button class="sb-zu" id="sb-zu" aria-label="${t("Schließen")}">✕</button>
@@ -1695,6 +1842,34 @@ function steckbriefZu() {
 document.getElementById("sb-hinten").onclick = steckbriefZu;
 document.addEventListener("keydown", e => { if (e.key === "Escape") steckbriefZu(); });
 document.getElementById("steckbrief-selbst").onclick = () => steckbriefOeffnen(ich());
+
+// ---------- Profil: Social Media und Webseite (freiwillig, klein im Steckbrief) ----------
+const LINK_ARTEN = [["instagram", "Instagram", "@name"], ["tiktok", "TikTok", "@name"], ["x", "X", "@name"], ["facebook", "Facebook", "Name oder Link"], ["linkedin", "LinkedIn", "Name oder Link"], ["web", "Webseite", "https://…"]];
+function linkZiel(k, v) {
+  v = String(v || "").trim(); if (!v) return null;
+  if (/^https?:\/\//i.test(v)) return v.replace(/^http:/i, "https:");
+  const n = encodeURIComponent(v.replace(/^@/, "").replace(/\s+/g, ""));
+  return { instagram: `https://instagram.com/${n}`, tiktok: `https://www.tiktok.com/@${n}`, x: `https://x.com/${n}`, facebook: `https://facebook.com/${n}`, linkedin: `https://www.linkedin.com/in/${n}`, web: `https://${v.replace(/\s+/g, "")}` }[k] || null;
+}
+let meineLinks = {};
+function linksWertZeigen() { const n = Object.keys(meineLinks).length; document.getElementById("links-wert").textContent = n ? t("{n} eingetragen", { n }) : t("Freiwillig"); }
+function linksSeiteAufbauen() {
+  document.getElementById("links-felder").innerHTML = LINK_ARTEN.map(([k, name, ph]) => `<label>${name}<input data-link="${k}" maxlength="200" autocomplete="off" autocapitalize="off" spellcheck="false" inputmode="${k === "web" || k === "linkedin" || k === "facebook" ? "url" : "text"}" placeholder="${ohneHtml(t(ph))}" value="${ohneHtml(meineLinks[k] || "")}"></label>`).join("");
+}
+document.getElementById("links-zeile").onclick = () => { linksSeiteAufbauen(); seiteZeigen("links"); };
+document.getElementById("links-speichern").onclick = async e => {
+  const neu = {};
+  document.querySelectorAll("#links-felder [data-link]").forEach(f => { const v = f.value.trim(); if (v) neu[f.dataset.link] = v.slice(0, 200); });
+  if (ECHT) {
+    beschaeftigt(e.target, true);
+    const { error } = await SB.from("profile").update({ links: neu }).eq("id", ECHT_DATEN.uid);
+    beschaeftigt(e.target, false);
+    if (error) return hinweis(t("Speichern hat nicht geklappt"));
+  } else { try { localStorage.setItem("ahoi-links", JSON.stringify(neu)); } catch (x) {} }
+  meineLinks = neu; linksWertZeigen(); seiteZeigen("profil"); hinweis(t("Gespeichert"));
+};
+if (!ECHT) { try { meineLinks = JSON.parse(localStorage.getItem("ahoi-links") || "{}"); } catch (e) {} }
+linksWertZeigen();
 
 // ---------- Reisegruppe: „Reist du zusammen mit …?“ ----------
 let gruppenAnfrage = null;
@@ -1765,12 +1940,22 @@ function einladenWahl() {
   const blatt = document.getElementById("aktion-blatt");
   document.getElementById("aktion-titel").textContent = t("Wen lädst du ein?");
   const box = document.getElementById("aktion-knoepfe"); box.innerHTML = "";
-  [[t("🧭 Nomaden-Freund"), t("Sieht alle Freunde auf der Karte. Sven gibt frei."), () => ECHT ? freundEinladen() : hinweis(t("Einladungslink erstellt (Beispiel)"))],
-   [t("🏡 Familie"), t("Sieht nur dich: wo du bist und wohin du reist. Ohne Freigabe."), familieEinladen]].forEach(([titel, text, f]) => {
+  [[t("🧭 Nomaden-Freund"), t("Ist selbst unterwegs: sieht alle auf der Karte, chattet mit und trägt eigene Reisen ein."), nomadeEinladen],
+   [t("🏡 Familie"), t("Bleibt zu Hause und möchte nur dich im Blick behalten. Bekommt eine schlanke Ansicht."), familieErklaeren]].forEach(([titel, text, f]) => {
     const b = document.createElement("button"); b.className = "knopf-leise wahl-knopf"; b.innerHTML = `<b>${titel}</b><small>${text}</small>`;
     b.onclick = () => { blatt.classList.remove("offen"); f(); }; box.appendChild(b);
   });
   blatt.classList.add("offen");
+}
+const nomadeEinladen = () => ECHT ? freundEinladen() : hinweis(t("Einladungslink erstellt (Beispiel)"));
+// Familie: erst zeigen, was sie bekommt, dann den Link erstellen
+function familieErklaeren() {
+  fragen(t("🏡 Familie einladen"), [
+    [t("Link erstellen und teilen"), familieEinladen],
+    [t("So sieht es für sie aus"), () => document.getElementById("familie-start").click()]
+  ]);
+  const titel = document.getElementById("aktion-titel");
+  titel.innerHTML = `${t("🏡 Familie einladen")}<small class="aktion-text">${t("Für Eltern, Geschwister und alle, die nicht mitreisen. Sie sehen nur dich: wo du gerade bist, wohin du als Nächstes reist und wie spät es bei dir ist. Für sie gibt es keinen Chat, keine anderen Freunde und nichts einzutragen. Du kannst das jederzeit pausieren.")}</small>`;
 }
 async function familieEinladen() {
   if (!ECHT) return hinweis(t("Familien-Link erstellt (Beispiel): sieht nur dich"));
@@ -1799,8 +1984,9 @@ async function familieListeAufbauen() {
     familieListeAufbauen();
   });
 }
-["einladen-zeile", "einladen-unten"].forEach(id => document.getElementById(id).onclick = einladenWahl);
-document.getElementById("familie-einladen").onclick = familieEinladen;
+document.getElementById("einladen-unten").onclick = einladenWahl;
+document.getElementById("einladen-zeile").onclick = nomadeEinladen;
+document.getElementById("familie-einladen").onclick = familieErklaeren;
 
 // ---------- Echte App: Reisen und Treffer ----------
 async function reisenLaden() {
@@ -1942,9 +2128,7 @@ function neuBannerZeigen(neu) {
 if (!ECHT) { let gezeigt = null; try { gezeigt = localStorage.getItem("ahoi-proto-neu"); localStorage.setItem("ahoi-proto-neu", "1"); } catch (e) {} if (!gezeigt) setTimeout(() => neuBannerZeigen([leute.find(p => p.id === "mia")]), 6000); }
 
 // ---------- Echte App: Profil, Ort, Einladen, Verwaltung ----------
-const BALD = {
-  ideen: ["💛", "Wishlist", "Unterkünfte und Ortstipps kommen bald."]
-};
+const BALD = {};
 function fragen(titel, knoepfe) {
   const blatt = document.getElementById("aktion-blatt");
   document.getElementById("aktion-abbrechen").style.display = "";
@@ -2106,7 +2290,7 @@ function pushAnzeigen() {
   [["push-schalter", "push-zustand", PUSH.chat, t("Push aufs Handy")], ["ort-schalter", "ort-zustand", PUSH.ort, t("Höchstens einmal im Monat")]].forEach(([sid, zid, will, leer]) => {
     const an = PUSH.abo && will, sch = document.getElementById(sid), z = document.getElementById(zid);
     if (sch) { sch.classList.toggle("an", an); sch.setAttribute("aria-pressed", an ? "true" : "false"); }
-    if (z) z.textContent = geraet || (an ? t("An auf diesem Gerät") : leer);
+    if (z) z.textContent = geraet || (an ? t("Auf diesem Gerät eingeschaltet") : leer);
   });
   glockeSetzen();
 }
@@ -2184,6 +2368,11 @@ async function ortNachfragen(sofort) {
 // ---------- Neu in Ahoi: nach jedem App-Update einmal eine kurze Übersicht ----------
 // Bei jedem Update oben einen Eintrag ergänzen (neueste zuerst). Wer neu dabei ist, sieht nur den neuesten.
 const NEUIGKEITEN = [
+  { id: "2026-11-24-wishlist", punkte: [
+    "💛 Die Wishlist ist da: Unterkünfte teilen, „Ich wäre dabei“ und Ortstipps.",
+    "🔗 Im Profil kannst du Instagram, TikTok & Co. und deine Webseite eintragen.",
+    "🏡 Familie einladen hat einen eigenen Knopf mit kurzer Erklärung."
+  ] },
   { id: "2026-11-24-fotos", punkte: [
     "📷 Fotos im Chat: Kamera-Knopf neben dem Textfeld.",
     "🧭 Treffer zeigen Monat, Jahr und Länderflagge.",
@@ -2248,7 +2437,7 @@ async function verbindungenLaden() {
   if (!ECHT || familieModus || ECHT_DATEN.profil.art === "familie") return;
   const uid = ECHT_DATEN.uid;
   const [lae, paare, mitgl, anfr, pio] = await Promise.all([
-    SB.from("profile").select("id, laender, status_am, push_chat, push_ort"), SB.from("paar").select("von, an, bestaetigt"),
+    SB.from("profile").select("id, laender, status_am, push_chat, push_ort, links"), SB.from("paar").select("von, an, bestaetigt"),
     SB.from("reisegruppe_mitglied").select("person, gruppe"), SB.from("mitreise_anfrage").select("von, an"), SB.rpc("pioniere")
   ]);
   // Pionier: wer aus dem Freundeskreis als Erster in einem Land war (seit Beginn des Orte-Verlaufs)
@@ -2260,6 +2449,9 @@ async function verbindungenLaden() {
   if (!lae.error) {
     const proId = Object.fromEntries(lae.data.map(x => [x.id, (x.laender || []).map(staatVon).filter(Boolean)]));
     [...leute, ...(ECHT_DATEN.alle || [])].forEach(p => { const l = proId[p.uid]; if (l && p.id !== "du") { p.laenderListe = l; p.laender = l.filter(cc => STAATEN.has(cc)).length; } });
+    const linksVon = Object.fromEntries(lae.data.map(x => [x.id, x.links || {}]));
+    [...leute, ...(ECHT_DATEN.alle || [])].forEach(p => { if (p.uid && linksVon[p.uid]) p.links = linksVon[p.uid]; });
+    if (linksVon[uid]) { meineLinks = linksVon[uid]; linksWertZeigen(); }
     const ichRoh = lae.data.find(x => x.id === uid);
     if (ichRoh) { ECHT_DATEN.profil.status_am = ichRoh.status_am; PUSH.chat = ichRoh.push_chat !== false; PUSH.ort = ichRoh.push_ort !== false; pushAnzeigen(); statusAufbauen(); }
     const meine = proId[uid] || [];
@@ -2492,6 +2684,8 @@ function echtEinrichten() {
   setTimeout(pushPruefen, 1500); setTimeout(rundrufZeigen, 6000);
   // Vorschau „So sieht sie es“: die Familie sieht nur dich
   document.getElementById("familie-start").onclick = () => { FAMILIE_SIEHT = ["du"]; document.getElementById("fam-kopf").textContent = t("So sieht deine Familie dich"); document.getElementById("familie-ende").textContent = t("Zurück"); familieSetzen(true); };
+  // Wishlist: Beispieldaten weg, echte laden
+  ideen.length = 0; tipps.length = 0; wishlistLaden().catch(() => {});
   // Bereiche, die noch nicht live sind
   for (const [seite, [symbol, titel, text]] of Object.entries(BALD))
     document.getElementById("seite-" + seite).innerHTML = `<div class="seite-kopf"><h1>${t(titel)}</h1></div><div class="bald"><div style="font-size:44px">${symbol}</div><b>${t("Kommt bald")}</b>${t(text)}<p><a href="prototyp/">${t("Im Prototyp schon ansehen")}</a></p></div>`;
@@ -2543,7 +2737,7 @@ function echtEinrichten() {
     document.getElementById("verwaltung-zeile").onclick = () => { seiteZeigen("verwaltung"); verwaltungAufbauen(); };
     verwaltungLaden().catch(() => {});
   }
-  document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") { echtAktualisieren(); standortStill(); rundrufZeigen(); reisenLaden(); chatsLaden().catch(() => {}); if (p.ist_admin) verwaltungLaden().catch(() => {}); } });
+  document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") { echtAktualisieren(); standortStill(); rundrufZeigen(); wishlistLaden().catch(() => {}); reisenLaden(); chatsLaden().catch(() => {}); if (p.ist_admin) verwaltungLaden().catch(() => {}); } });
   setTimeout(standortStill, 3000);
 }
 if (ECHT) echtEinrichten();
