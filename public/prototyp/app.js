@@ -694,7 +694,9 @@ document.getElementById("knopf-ich").onclick = () => {
 
 
 // ---------- Offline-Start ----------
-if ("serviceWorker" in navigator) window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
+// Service Worker: in der echten App kommt app.js erst nach der Anmeldung, dann ist „load“ schon vorbei
+const swAnmelden = () => navigator.serviceWorker.register("sw.js").catch(() => null);
+if ("serviceWorker" in navigator) { if (document.readyState === "complete") swAnmelden(); else window.addEventListener("load", swAnmelden); }
 
 // ---------- Neue Version automatisch laden ----------
 const VERSION = "__VERSION__";
@@ -1999,51 +2001,66 @@ async function chatVerlassenEcht(c) {
 
 // ---------- Push-Mitteilungen (echte App) ----------
 // Funktioniert auf dem iPhone nur, wenn Ahoi auf dem Home-Bildschirm liegt (ab iOS 16.4). Die Schlüssel kommen vom Server.
-const PUSH = { an: false, chat: true, geht: "serviceWorker" in navigator && "PushManager" in window && "Notification" in window };
+// abo = dieses Gerät ist angemeldet; chat / ort = was man bekommen möchte (gilt für alle Geräte)
+const PUSH = { abo: false, chat: true, ort: true, geht: "serviceWorker" in navigator && "PushManager" in window && "Notification" in window };
+Object.defineProperty(PUSH, "an", { get: () => PUSH.abo && PUSH.chat }); // für die Glocke im Chat
 const alsApp = () => window.navigator.standalone === true || matchMedia("(display-mode: standalone)").matches;
 const istIphone = () => /iPhone|iPad|iPod/.test(navigator.userAgent);
 const b64 = s => { const p = "=".repeat((4 - (s.length % 4)) % 4), roh = atob((s + p).replace(/-/g, "+").replace(/_/g, "/")); return Uint8Array.from([...roh].map(c => c.charCodeAt(0))); };
+const abwarten = (v, ms) => Promise.race([v, new Promise((_, nein) => setTimeout(() => nein(new Error("Zeit")), ms))]);
+async function aboSpeichern(sub) {
+  const k = sub.toJSON().keys;
+  return SB.from("push_abo").upsert({ endpunkt: sub.endpoint, p256dh: k.p256dh, auth: k.auth, geraet: navigator.userAgent.slice(0, 120) });
+}
 async function pushPruefen() {
   if (!ECHT || !PUSH.geht) return pushAnzeigen();
   try {
     const reg = await navigator.serviceWorker.getRegistration();
     const sub = reg && await reg.pushManager.getSubscription();
-    PUSH.an = !!sub && Notification.permission === "granted" && PUSH.chat;
-    if (sub) await SB.from("push_abo").upsert({ endpunkt: sub.endpoint, p256dh: sub.toJSON().keys.p256dh, auth: sub.toJSON().keys.auth, geraet: navigator.userAgent.slice(0, 120) });
+    PUSH.abo = !!sub && Notification.permission === "granted";
+    if (sub) await aboSpeichern(sub);
   } catch (e) {}
   pushAnzeigen();
 }
 function pushAnzeigen() {
-  const s = document.getElementById("push-schalter"), z = document.getElementById("push-zustand");
-  if (s) { s.classList.toggle("an", PUSH.an); s.setAttribute("aria-pressed", PUSH.an ? "true" : "false"); }
-  if (z) z.textContent = !PUSH.geht ? (istIphone() && !alsApp() ? t("Erst Ahoi zum Home-Bildschirm hinzufügen") : t("Auf diesem Gerät nicht möglich")) : PUSH.an ? t("An auf diesem Gerät") : Notification.permission === "denied" ? t("In den Einstellungen des Handys blockiert") : t("Push aufs Handy");
+  const geraet = !PUSH.geht ? (istIphone() && !alsApp() ? t("Erst Ahoi zum Home-Bildschirm hinzufügen") : t("Auf diesem Gerät nicht möglich")) : typeof Notification !== "undefined" && Notification.permission === "denied" ? t("In den Einstellungen des Handys blockiert") : null;
+  [["push-schalter", "push-zustand", PUSH.chat, t("Push aufs Handy")], ["ort-schalter", "ort-zustand", PUSH.ort, t("Höchstens einmal im Monat")]].forEach(([sid, zid, will, leer]) => {
+    const an = PUSH.abo && will, sch = document.getElementById(sid), z = document.getElementById(zid);
+    if (sch) { sch.classList.toggle("an", an); sch.setAttribute("aria-pressed", an ? "true" : "false"); }
+    if (z) z.textContent = geraet || (an ? t("An auf diesem Gerät") : leer);
+  });
   glockeSetzen();
 }
-async function pushEinschalten() {
-  if (!ECHT) return hinweis(t("Im Prototyp gibt es keine Push-Mitteilungen"));
-  if (!PUSH.geht) return hinweis(istIphone() && !alsApp() ? t("Auf dem iPhone: Ahoi über Teilen → „Zum Home-Bildschirm“ hinzufügen und von dort öffnen") : t("Dieses Gerät kann keine Push-Mitteilungen"));
+// Gerät für Push anmelden (fragt einmal nach der Erlaubnis); true, wenn es geklappt hat
+async function pushAbo() {
+  if (!ECHT) { hinweis(t("Im Prototyp gibt es keine Push-Mitteilungen")); return false; }
+  if (!PUSH.geht) { hinweis(istIphone() && !alsApp() ? t("Auf dem iPhone: Ahoi über Teilen → „Zum Home-Bildschirm“ hinzufügen und von dort öffnen") : t("Dieses Gerät kann keine Push-Mitteilungen")); return false; }
+  if (PUSH.abo) return true;
   try {
     const erlaubt = await Notification.requestPermission();
-    if (erlaubt !== "granted") { pushAnzeigen(); return hinweis(t("Mitteilungen sind am Handy nicht erlaubt")); }
+    if (erlaubt !== "granted") { pushAnzeigen(); hinweis(t("Mitteilungen sind am Handy nicht erlaubt")); return false; }
     let { data: schluessel } = await SB.rpc("push_schluessel_oeffentlich");
     if (!schluessel) { await fetch(SB_URL + "/functions/v1/push", { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" }).catch(() => {}); ({ data: schluessel } = await SB.rpc("push_schluessel_oeffentlich")); }
-    if (!schluessel) return hinweis(t("Push ist gerade nicht erreichbar"));
-    const reg = await navigator.serviceWorker.ready;
+    if (!schluessel) { hinweis(t("Push ist gerade nicht erreichbar")); return false; }
+    await swAnmelden();
+    const reg = await abwarten(navigator.serviceWorker.ready, 10000);
     const sub = (await reg.pushManager.getSubscription()) || await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: b64(schluessel) });
-    const k = sub.toJSON().keys;
-    const a = await SB.from("push_abo").upsert({ endpunkt: sub.endpoint, p256dh: k.p256dh, auth: k.auth, geraet: navigator.userAgent.slice(0, 120) });
+    const a = await aboSpeichern(sub);
     if (a.error) throw a.error;
-    await SB.from("profile").update({ push_chat: true }).eq("id", ECHT_DATEN.uid);
-    PUSH.chat = true; PUSH.an = true; pushAnzeigen();
-    hinweis(t("🔔 Push ist an: neue Nachrichten kommen aufs Handy"));
-  } catch (e) { hinweis(t("Push hat nicht geklappt")); pushAnzeigen(); }
+    PUSH.abo = true; return true;
+  } catch (e) { hinweis(t("Push hat nicht geklappt")); pushAnzeigen(); return false; }
 }
-async function pushAusschalten() {
-  await SB.from("profile").update({ push_chat: false }).eq("id", ECHT_DATEN.uid);
-  PUSH.chat = false; PUSH.an = false; pushAnzeigen();
-  hinweis(t("🔕 Keine Push-Mitteilungen mehr für Chats"));
+async function pushWunsch(art, an) {
+  if (an && !(await pushAbo())) return;
+  const spalte = art === "chat" ? "push_chat" : "push_ort";
+  const { error } = await SB.from("profile").update({ [spalte]: an }).eq("id", ECHT_DATEN.uid);
+  if (error) return hinweis(t("Speichern hat nicht geklappt"));
+  PUSH[art] = an; pushAnzeigen();
+  hinweis(art === "chat" ? (an ? t("🔔 Push ist an: neue Nachrichten kommen aufs Handy") : t("🔕 Keine Push-Mitteilungen mehr für Chats")) : (an ? t("📍 Ahoi fragt höchstens einmal im Monat nach deinem Ort") : t("Keine Nachfrage mehr zu deinem Ort")));
 }
-document.getElementById("push-schalter").onclick = () => PUSH.an ? pushAusschalten() : pushEinschalten();
+const pushEinschalten = () => pushWunsch("chat", true);
+document.getElementById("push-schalter").onclick = () => pushWunsch("chat", !(PUSH.abo && PUSH.chat));
+document.getElementById("ort-schalter").onclick = () => pushWunsch("ort", !(PUSH.abo && PUSH.ort));
 // Aus einer Mitteilung geöffnet: Chat oder Ort-Frage direkt zeigen
 function pushZiel(url) {
   const q = new URL(url, location.href).searchParams;
@@ -2087,6 +2104,10 @@ async function ortNachfragen(sofort) {
 // ---------- Neu in Ahoi: nach jedem App-Update einmal eine kurze Übersicht ----------
 // Bei jedem Update oben einen Eintrag ergänzen (neueste zuerst). Wer neu dabei ist, sieht nur den neuesten.
 const NEUIGKEITEN = [
+  { id: "2026-11-24-push2", punkte: [
+    "🔔 Push lässt sich jetzt einschalten: Profil → Mitteilungen → „Neue Chat-Nachrichten“.",
+    "📍 Die Nachfrage zu deinem Ort hat einen eigenen Schalter."
+  ] },
   { id: "2026-11-24-push", punkte: [
     "🔔 Push für neue Nachrichten: einschalten unter Profil → Mitteilungen oder mit der Glocke im Chat.",
     "💬 Chats zeigen das Profilbild. Nach links wischen löscht einen Chat, Gruppen bekommen ein eigenes Emoji.",
@@ -2140,7 +2161,7 @@ async function verbindungenLaden() {
   if (!ECHT || familieModus || ECHT_DATEN.profil.art === "familie") return;
   const uid = ECHT_DATEN.uid;
   const [lae, paare, mitgl, anfr, pio] = await Promise.all([
-    SB.from("profile").select("id, laender, status_am, push_chat"), SB.from("paar").select("von, an, bestaetigt"),
+    SB.from("profile").select("id, laender, status_am, push_chat, push_ort"), SB.from("paar").select("von, an, bestaetigt"),
     SB.from("reisegruppe_mitglied").select("person, gruppe"), SB.from("mitreise_anfrage").select("von, an"), SB.rpc("pioniere")
   ]);
   // Pionier: wer aus dem Freundeskreis als Erster in einem Land war (seit Beginn des Orte-Verlaufs)
@@ -2153,7 +2174,7 @@ async function verbindungenLaden() {
     const proId = Object.fromEntries(lae.data.map(x => [x.id, (x.laender || []).map(staatVon).filter(Boolean)]));
     [...leute, ...(ECHT_DATEN.alle || [])].forEach(p => { const l = proId[p.uid]; if (l && p.id !== "du") { p.laenderListe = l; p.laender = l.filter(cc => STAATEN.has(cc)).length; } });
     const ichRoh = lae.data.find(x => x.id === uid);
-    if (ichRoh) { ECHT_DATEN.profil.status_am = ichRoh.status_am; PUSH.chat = ichRoh.push_chat !== false; if (!PUSH.chat) PUSH.an = false; pushAnzeigen(); statusAufbauen(); }
+    if (ichRoh) { ECHT_DATEN.profil.status_am = ichRoh.status_am; PUSH.chat = ichRoh.push_chat !== false; PUSH.ort = ichRoh.push_ort !== false; pushAnzeigen(); statusAufbauen(); }
     const meine = proId[uid] || [];
     if (!meine.length && besucht.length) besuchtSpeichern();
     else if (meine.length) { besucht = [...new Set(meine)]; try { localStorage.setItem(LAENDER_SCHLUESSEL, JSON.stringify(besucht)); } catch (e) {} if (ich().land && landDazu(ich().land)) {} stempelAufbauen(); }

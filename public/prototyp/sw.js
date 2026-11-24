@@ -5,7 +5,8 @@ const SPEICHER = "ahoi-v1";
 const KERN = ["./", "./index.html", "./texte.js", "./basis.js", "./start.js", "./app.js", "./supabase.js", "./weltkarte.json", "./manifest.webmanifest", "./laender-50m.geojson", "../icons/icon-192.png", "../icons/apple-touch-icon.png"];
 
 self.addEventListener("install", e => {
-  e.waitUntil(caches.open(SPEICHER).then(c => c.addAll(KERN)).then(() => self.skipWaiting()));
+  // Einzeln speichern: fehlt eine Datei, soll der Service Worker trotzdem laufen (sonst kein Push)
+  e.waitUntil(caches.open(SPEICHER).then(c => Promise.all(KERN.map(u => c.add(u).catch(() => {})))).then(() => self.skipWaiting()));
 });
 self.addEventListener("activate", e => {
   e.waitUntil(caches.keys().then(k => Promise.all(k.filter(n => n !== SPEICHER).map(n => caches.delete(n)))).then(() => self.clients.claim()));
