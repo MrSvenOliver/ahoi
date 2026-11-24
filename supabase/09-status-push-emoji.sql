@@ -62,7 +62,7 @@ create or replace function public.chat_emoji_setzen(c uuid, emoji text) returns 
 language plpgsql security definer set search_path = public as $$
 begin
   if not exists (select 1 from chat_mitglied m join chat k on k.id = m.chat where m.chat = c and m.person = auth.uid() and k.art = 'gruppe') then raise exception 'Nur Gruppenmitglieder'; end if;
-  update chat set emoji = left(nullif(trim(emoji), ''), 16) where id = c;
+  update chat set emoji = left(nullif(trim(chat_emoji_setzen.emoji), ''), 16) where id = c;
 end $$;
 revoke execute on function public.gruppe_erstellen(text, uuid[], text), public.chat_emoji_setzen(uuid, text) from public, anon;
 grant execute on function public.gruppe_erstellen(text, uuid[], text), public.chat_emoji_setzen(uuid, text) to authenticated;
