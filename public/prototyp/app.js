@@ -1768,13 +1768,35 @@ function kreisChipsAufbauen() {
 }
 document.getElementById("kreis-chips").addEventListener("pointerdown", e => e.stopPropagation());
 function kreiseSpeichern() { if (!ECHT) try { localStorage.setItem("ahoi-kreise", JSON.stringify(kreise)); } catch (e) {} kreisChipsAufbauen(); }
+const kreisFiltern = () => { pinsSetzen(); listeAufbauen(); };
+// Echte App: Kreise liegen in der Datenbank, nur die Besitzerin oder der Besitzer sieht sie
+async function kreiseLaden() {
+  const { data, error } = await SB.from("kreis").select("id, name, symbol, leute").order("erstellt_am");
+  if (error) throw error;
+  kreise = data.map(x => ({ id: x.id, name: x.name, symbol: x.symbol, leute: x.leute.map(idVon).filter(id => id !== "du") }));
+  if (!kreise.some(k => k.id === kreisFilter)) kreisFilter = "alle";
+  kreisChipsAufbauen(); kreisFiltern();
+}
 let neuerKreis = null;
 function kreiseSeiteAufbauen() {
-  document.getElementById("kreis-liste").innerHTML = kreise.map(k => `<div class="kasten kreis"><div class="kreis-symbol">${k.symbol}</div><div class="zeile"><b>${ohneHtml(k.name)}</b><div class="gesichter">${k.leute.map(person).filter(Boolean).map(p => ava(p)).join("")}</div></div><button class="knopf-leise" data-weg="${k.id}" aria-label="${t("Entfernen")}">✕</button></div>`).join("") || `<p class="hinweis-band">${t("Noch keine Kreise")}</p>`;
-  document.querySelectorAll("#kreis-liste [data-weg]").forEach(b => b.onclick = () => { kreise = kreise.filter(k => k.id !== b.dataset.weg); if (kreisFilter === b.dataset.weg) kreisFilter = "alle"; kreiseSpeichern(); kreiseSeiteAufbauen(); pinsSetzen(); listeAufbauen(); });
+  document.getElementById("kreis-liste").innerHTML = kreise.map(k => `<div class="kasten kreis" data-bearbeiten="${k.id}"><div class="kreis-symbol">${k.symbol}</div><div class="zeile"><b>${ohneHtml(k.name)}</b><div class="gesichter">${k.leute.map(person).filter(Boolean).map(p => ava(p)).join("")}</div></div><button class="knopf-leise" data-weg="${k.id}" aria-label="${t("Entfernen")}">✕</button></div>`).join("") || `<p class="hinweis-band">${t("Noch keine Kreise")}</p>`;
+  document.querySelectorAll("#kreis-liste [data-weg]").forEach(b => b.onclick = async e => {
+    e.stopPropagation(); const id = b.dataset.weg;
+    if (ECHT) { const { error } = await SB.from("kreis").delete().eq("id", id); if (error) return hinweis(t("Das hat nicht geklappt")); }
+    kreise = kreise.filter(k => k.id !== id); if (kreisFilter === id) kreisFilter = "alle";
+    if (neuerKreis && neuerKreis.id === id) neuerKreis = null;
+    kreiseSpeichern(); kreiseSeiteAufbauen(); kreisFiltern();
+  });
+  document.querySelectorAll("#kreis-liste [data-bearbeiten]").forEach(el => el.onclick = () => {
+    const k = kreise.find(x => x.id === el.dataset.bearbeiten); if (!k) return;
+    neuerKreis = { id: k.id, name: k.name, symbol: k.symbol, leute: [...k.leute], alt: true };
+    document.getElementById("kreis-name").value = k.name; kreiseSeiteAufbauen();
+    document.getElementById("kreis-neu").scrollIntoView({ behavior: "smooth", block: "start" });
+  });
   const form = document.getElementById("kreis-neu");
   form.hidden = !neuerKreis; document.getElementById("kreis-plus").hidden = !!neuerKreis;
   if (!neuerKreis) return;
+  document.getElementById("kreis-titel").textContent = t(neuerKreis.alt ? "Kreis bearbeiten" : "Neuer Kreis");
   document.getElementById("kreis-symbole").innerHTML = KREIS_SYMBOLE.map(z => `<button data-z="${z}" class="${neuerKreis.symbol === z ? "aktiv" : ""}">${z}</button>`).join("");
   document.querySelectorAll("#kreis-symbole button").forEach(b => b.onclick = () => { neuerKreis.symbol = b.dataset.z; kreiseSeiteAufbauen(); });
   document.getElementById("kreis-leute").innerHTML = leute.filter(p => p.id !== "du").map(p => `<button data-p="${p.id}" class="${neuerKreis.leute.includes(p.id) ? "aktiv" : ""}">${ohneHtml(p.name)}</button>`).join("");
@@ -1782,10 +1804,23 @@ function kreiseSeiteAufbauen() {
 }
 document.getElementById("kreis-name").addEventListener("input", e => { if (neuerKreis) neuerKreis.name = e.target.value; });
 document.getElementById("kreis-plus").onclick = () => { neuerKreis = { id: "k" + Date.now(), name: "", symbol: "⭐", leute: [] }; document.getElementById("kreis-name").value = ""; kreiseSeiteAufbauen(); document.getElementById("kreis-name").focus(); };
-document.getElementById("kreis-speichern").onclick = () => {
-  if (!neuerKreis.name.trim()) return hinweis(t("Bitte einen Namen eingeben"));
-  if (!neuerKreis.leute.length) return hinweis(t("Bitte mindestens eine Person wählen"));
-  neuerKreis.name = neuerKreis.name.trim(); kreise.push(neuerKreis); neuerKreis = null; kreiseSpeichern(); kreiseSeiteAufbauen(); hinweis(t("Kreis gespeichert"));
+document.getElementById("kreis-abbrechen").onclick = () => { neuerKreis = null; kreiseSeiteAufbauen(); };
+document.getElementById("kreis-speichern").onclick = async e => {
+  const k = neuerKreis; if (!k) return;
+  const name = k.name.trim();
+  if (!name) return hinweis(t("Bitte einen Namen eingeben"));
+  if (!k.leute.length) return hinweis(t("Bitte mindestens eine Person wählen"));
+  if (ECHT) {
+    const knopf = e.currentTarget, werte = { name, symbol: k.symbol, leute: k.leute };
+    beschaeftigt(knopf, true);
+    const r = k.alt ? await SB.from("kreis").update(werte).eq("id", k.id).select("id").single() : await SB.from("kreis").insert(werte).select("id").single();
+    beschaeftigt(knopf, false);
+    if (r.error) return hinweis(t("Speichern hat nicht geklappt"));
+    k.id = r.data.id;
+  }
+  const fertig = { id: k.id, name, symbol: k.symbol, leute: k.leute }, i = kreise.findIndex(x => x.id === k.id);
+  if (i >= 0) kreise[i] = fertig; else kreise.push(fertig);
+  neuerKreis = null; kreiseSpeichern(); kreiseSeiteAufbauen(); kreisFiltern(); hinweis(t("Kreis gespeichert"));
 };
 document.getElementById("kreise-zeile").onclick = () => { neuerKreis = null; seiteZeigen("kreise"); kreiseSeiteAufbauen(); };
 kreisChipsAufbauen();
@@ -2573,6 +2608,9 @@ async function ortNachfragen(sofort) {
 // ---------- Neu in Ahoi: nach jedem App-Update einmal eine kurze Übersicht ----------
 // Bei jedem Update oben einen Eintrag ergänzen (neueste zuerst). Wer neu dabei ist, sieht nur den neuesten.
 const NEUIGKEITEN = [
+  { id: "2026-11-24-kreise", punkte: [
+    "👥 Freundeskreise sind da: Profil → Freundeskreise. Ein Kreis ist nur für dich und filtert Karte und „Wer ist wo?“, niemand sonst sieht ihn."
+  ] },
   { id: "2026-11-24-chat", punkte: [
     "💬 Den großen Chat „Alle“ gibt es nicht mehr, nur noch Einzelchats und Gruppen.",
     "🔔 Push für Chats: aus, nur Einzelchats, nur Gruppen oder alles. Die Mitteilungen sind jetzt übersichtlicher in Bereiche getrennt."
@@ -2915,6 +2953,7 @@ function echtEinrichten() {
   // Freunde laden; wurde ein QR-Link eines Mitglieds geöffnet, gleich verbinden
   document.getElementById("freunde-zeile").hidden = true;
   freundeLaden().catch(() => {});
+  kreiseLaden().catch(() => {});
   try { const qr = localStorage.getItem("ahoi-einladung"); localStorage.removeItem("ahoi-einladung"); if (qr && /^q[0-9a-f]{32}$/.test(qr)) setTimeout(() => qrVerbinden(qr), 2500); } catch (e) {}
   // Wishlist: Beispieldaten weg, echte laden
   ideen.length = 0; tipps.length = 0; wishlistLaden().catch(() => {});

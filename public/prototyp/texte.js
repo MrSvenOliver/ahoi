@@ -463,7 +463,7 @@ const TEXTE = {
   "Partner": ["Partner", "Partner"],
   "＋ Familie einladen": ["＋ Invite family", "＋ Pozvať rodinu"],
   "So sieht sie es": ["See their view", "Ako to vidí"],
-  "Kreise sind nur für dich: ein Filter für Karte und „Wer ist wo?“. Wer dich sehen kann, ändert sich dadurch nicht.": ["Circles are just for you: a filter for the map and “Who is where?”. They don't change who can see you.", "Kruhy sú len pre teba: filter pre mapu a „Kto je kde?“. Nemenia, kto ťa vidí."],
+  "Kreise sind nur für dich: ein Filter für Karte und „Wer ist wo?“. Wer dich sehen kann, ändert sich dadurch nicht. Zum Ändern auf einen Kreis tippen.": ["Circles are just for you: a filter for the map and “Who is where?”. They don't change who can see you. Tap a circle to change it.", "Kruhy sú len pre teba: filter pre mapu a „Kto je kde?“. Nemenia, kto ťa vidí. Ak chceš kruh zmeniť, ťukni naň."],
   "Neuer Kreis": ["New circle", "Nový kruh"],
   "Name, z. B. Surf-Crew": ["Name, e.g. Surf crew", "Názov, napr. Surf partia"],
   "Wer gehört dazu?": ["Who's in it?", "Kto do neho patrí?"],
@@ -833,4 +833,6 @@ const TEXTE = {
   "Alles": ["All", "Všetko"],
   "💬 Den großen Chat „Alle“ gibt es nicht mehr, nur noch Einzelchats und Gruppen.": ["💬 The big “Everyone” chat is gone, there are only private chats and groups now.", "💬 Veľký chat „Všetci“ už nie je, len súkromné chaty a skupiny."],
   "🔔 Push für Chats: aus, nur Einzelchats, nur Gruppen oder alles. Die Mitteilungen sind jetzt übersichtlicher in Bereiche getrennt.": ["🔔 Push for chats: off, private only, groups only or all. Notifications are now clearly split into sections.", "🔔 Push pre chaty: vypnuté, len súkromné, len skupiny alebo všetko. Upozornenia sú teraz prehľadne rozdelené."],
+  "Kreis bearbeiten": ["Edit circle", "Upraviť kruh"],
+  "👥 Freundeskreise sind da: Profil → Freundeskreise. Ein Kreis ist nur für dich und filtert Karte und „Wer ist wo?“, niemand sonst sieht ihn.": ["👥 Friend circles are here: Profile → Friend circles. A circle is just for you and filters the map and “Who is where?”, nobody else sees it.", "👥 Kruhy priateľov sú tu: Profil → Okruhy priateľov. Kruh je len pre teba a filtruje mapu a „Kto je kde?“, nikto iný ho nevidí."],
 };
