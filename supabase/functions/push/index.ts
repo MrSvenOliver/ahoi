@@ -112,18 +112,17 @@ async function chatNachricht(id: number) {
   if (!n) return 0;
   const [chat] = await sql`select id, art, name, emoji from public.chat where id = ${n.chat}`;
   if (!chat) return 0;
-  // push_chat_art: „alle“ = jeder Chat, „gruppen“ = Einzel- und Gruppenchats, „aus“ = keine
-  const empfaenger = chat.art === "alle"
-    ? await sql`select id from public.profile where freigegeben and art = 'nomade' and push_chat_art = 'alle' and id is distinct from ${n.von}
-                and id not in (select person from public.chat_stumm where chat = ${chat.id})`
-    : await sql`select p.id from public.chat_mitglied m join public.profile p on p.id = m.person
-                where m.chat = ${chat.id} and p.push_chat_art <> 'aus' and p.id is distinct from ${n.von}
+  // Den Chat „Alle“ gibt es nicht mehr. push_chat_art: „einzel“, „gruppen“, „alle“ (= beides) oder „aus“
+  if (chat.art === "alle") return 0;
+  const passend = chat.art === "einzel" ? "einzel" : "gruppen";
+  const empfaenger = await sql`select p.id from public.chat_mitglied m join public.profile p on p.id = m.person
+                where m.chat = ${chat.id} and p.push_chat_art in ('alle', ${passend}) and p.id is distinct from ${n.von}
                 and p.id not in (select person from public.chat_stumm where chat = ${chat.id})`;
   const name = await nameVon(n.von);
   return verschicken(empfaenger.map((x) => x.id), (sprache) => ({
     // Kurz halten: 💬 und wer schreibt (Person oder Gruppe), ohne Nachrichtentext.
     // Das iPhone setzt darunter selbst „von Ahoi“, so bleibt es bei zwei Zeilen.
-    title: `💬 ${chat.art === "einzel" ? name : chat.art === "alle" ? text(sprache, "alle") : chat.name}`,
+    title: `💬 ${chat.art === "einzel" ? name : chat.name}`,
     body: "",
     url: `${APP}?chat=${chat.id}`,
     tag: `chat-${chat.id}`,

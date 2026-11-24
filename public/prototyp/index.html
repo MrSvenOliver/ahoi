@@ -1019,9 +1019,13 @@
   .hinweis-band.eingerueckt { text-align: left; padding-left: 30px; }
   .aktion-text { display: block; font-weight: 400; font-size: 14px; line-height: 1.45; color: var(--text-leise); margin: 8px 4px 6px; text-align: left; }
   #push-wahl.aus { opacity: 0.45; pointer-events: none; }
-  .push-gruppe { margin: 14px 0 2px; font-size: 13px; font-weight: 700; color: var(--text-leise); text-transform: uppercase; letter-spacing: 0.4px; }
-  #push-wahl .zeile-einst { padding: 9px 0; }
+  .push-gruppe { margin: 18px 4px 6px; font-size: 13px; font-weight: 700; color: var(--text-leise); text-transform: uppercase; letter-spacing: 0.4px; }
+  .push-kasten { padding-top: 4px; padding-bottom: 4px; }
+  #push-wahl .zeile-einst { padding: 10px 0; }
+  #push-wahl .zeile-einst:last-child { border-bottom: 0; }
   #push-wahl .segmente { width: 100%; margin: 6px 0 2px; }
+  #chat-wahl { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; }
+  #chat-wahl button { min-width: 0; padding-left: 4px; padding-right: 4px; }
   .wahl-knopf { display: block; text-align: left !important; padding: 14px 16px !important; }
   .wahl-knopf b { display: block; font-size: 16px; }
   .wahl-knopf small { display: block; font-weight: 400; color: var(--text-leise); font-size: 13px; margin-top: 3px; line-height: 1.35; }
@@ -1340,9 +1344,9 @@
   <div class="kasten nur-proto" id="mitteilungen"></div>
   <h2 class="nur-echt">Mitteilungen</h2>
   <div class="kasten nur-echt" id="mitteilungen-echt">
-    <div class="zeile-einst"><div class="mit-symbol"><span class="zeilen-symbol" aria-hidden="true">🔔</span><div>Push auf diesem Gerät<small id="push-zustand">Aus</small></div></div><button class="schalter" id="push-schalter" aria-label="Push auf diesem Gerät"></button></div>
-    <div id="push-wahl"></div>
+    <div class="zeile-einst" style="border:0"><div class="mit-symbol"><span class="zeilen-symbol" aria-hidden="true">🔔</span><div>Push auf diesem Gerät<small id="push-zustand">Aus</small></div></div><button class="schalter" id="push-schalter" aria-label="Push auf diesem Gerät"></button></div>
   </div>
+  <div class="nur-echt" id="push-wahl"></div>
   <h2 class="nur-echt" id="verwaltung-titel" hidden>Verwaltung</h2>
   <div class="kasten einst-gruppe nur-echt" id="verwaltung-kasten" hidden>
     <button class="einst-zeile" id="verwaltung-zeile"><span class="einst-symbol sym-blau"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5 5 6.5v5c0 4.3 3 7.6 7 9 4-1.4 7-4.7 7-9v-5l-7-3Z"/><path d="m9 12 2 2 4-4"/></svg></span><span class="einst-name">Freigaben, Mitglieder, Feedback</span><span class="einst-wert"><span class="zahl-marke" id="wartende-zahl"></span></span><span class="einst-pfeil">›</span></button>

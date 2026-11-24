@@ -828,4 +828,9 @@ const TEXTE = {
   "ihr alle in {ort}": ["all of you in {ort}", "všetci v {ort}"],
   "ihr alle in {ort}, wo genau ist noch offen": ["all of you in {ort}, exactly where is still open", "všetci v {ort}, kde presne, je ešte otvorené"],
   "🔔 Unter Profil → Mitteilungen wählst du selbst, wofür du Push bekommst, mit Ruhezeit nachts.": ["🔔 Under Profile → Notifications you choose what you get push for, with quiet hours at night.", "🔔 V Profil → Upozornenia si vyberieš, na čo chceš push, s tichým režimom v noci."],
+  "Einzel": ["Private", "Súkromné"],
+  "Gruppen": ["Groups", "Skupiny"],
+  "Alles": ["All", "Všetko"],
+  "💬 Den großen Chat „Alle“ gibt es nicht mehr, nur noch Einzelchats und Gruppen.": ["💬 The big “Everyone” chat is gone, there are only private chats and groups now.", "💬 Veľký chat „Všetci“ už nie je, len súkromné chaty a skupiny."],
+  "🔔 Push für Chats: aus, nur Einzelchats, nur Gruppen oder alles. Die Mitteilungen sind jetzt übersichtlicher in Bereiche getrennt.": ["🔔 Push for chats: off, private only, groups only or all. Notifications are now clearly split into sections.", "🔔 Push pre chaty: vypnuté, len súkromné, len skupiny alebo všetko. Upozornenia sú teraz prehľadne rozdelené."],
 };

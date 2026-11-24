@@ -959,6 +959,8 @@ function chatPunkt() {
   if (!punkt) { punkt = document.createElement("span"); punkt.className = "punkt"; knopf.appendChild(punkt); }
   punkt.textContent = summe;
 }
+// Der große Chat „Alle“ ist raus (24.11.2026); es gibt nur noch Einzelchats und Gruppen
+{ const k = chats.findIndex(c => c.art === "alle"); if (k >= 0) chats.splice(k, 1); }
 function chatListeAufbauen() {
   const reihe = [...chats.filter(c => c.art === "alle"), ...chats.filter(c => c.art !== "alle")];
   document.getElementById("chat-liste").innerHTML = reihe.map(c => {
@@ -1042,7 +1044,7 @@ async function chatStummSetzen(c, stumm) {
 // Glocke im Chat: Ist Push auf diesem Gerät noch aus, schaltet sie Push ein; sonst schaltet sie diesen Chat stumm oder wieder laut
 function glockeSetzen() {
   const g = document.getElementById("chat-glocke"), c = aktuellerChat; if (!c) return;
-  const pushAn = ECHT ? PUSH.an : true;
+  const pushAn = ECHT ? pushFuer(c) : true;
   g.textContent = !pushAn || c.stumm ? "🔕" : "🔔";
   g.classList.toggle("aus", !pushAn || !!c.stumm);
   g.title = !pushAn ? t("Push für neue Nachrichten einschalten") : c.stumm ? t("Mitteilungen für diesen Chat einschalten") : t("Diesen Chat stummschalten");
@@ -1050,7 +1052,7 @@ function glockeSetzen() {
 }
 document.getElementById("chat-glocke").onclick = () => {
   const c = aktuellerChat; if (!c) return;
-  if (ECHT && !PUSH.an) return pushEinschalten();
+  if (ECHT && !pushFuer(c)) return pushEinschalten();
   chatStummSetzen(c, !c.stumm);
 };
 document.getElementById("aktion-abbrechen").onclick = () => document.getElementById("aktion-blatt").classList.remove("offen");
@@ -2362,7 +2364,7 @@ let chatsGeladen = false;
 async function chatsLaden() {
   if (!ECHT || familieModus || ECHT_DATEN.profil.art === "familie") return;
   const [k, m, n] = await Promise.all([
-    SB.from("chat").select("id, art, name, emoji, erstellt_am"), SB.from("chat_mitglied").select("chat, person"),
+    SB.from("chat").select("id, art, name, emoji, erstellt_am").neq("art", "alle"), SB.from("chat_mitglied").select("chat, person"),
     SB.from("nachricht").select("id, chat, von, text, system, am, foto").order("id", { ascending: false }).limit(800)
   ]);
   if (k.error || m.error || n.error) return;
@@ -2388,7 +2390,7 @@ async function chatsLaden() {
 }
 async function nachrichtDazu(x) {
   const c = chats.find(y => y.id === x.chat);
-  if (!c) return chatsLaden();
+  if (!c) { if (chatsGeladen && nachrichtDazu.unbekannt !== x.chat) { nachrichtDazu.unbekannt = x.chat; chatsLaden(); } return; }
   if (c.nachrichten.some(y => y.id === x.id)) return;
   if (x.foto) { await fotoLinksHolen([x.foto]).catch(() => {}); if (c.nachrichten.some(y => y.id === x.id)) return; }
   c.nachrichten.push(nachrichtAusDb(x));
@@ -2437,8 +2439,10 @@ async function chatVerlassenEcht(c) {
 // abo = dieses Gerät ist angemeldet; chat / ort = was man bekommen möchte (gilt für alle Geräte)
 // abo = dieses Gerät bekommt Push; wahl = was man bekommen möchte (gilt für alle Geräte, steht im Profil)
 const PUSH = { abo: false, neu: false, geht: "serviceWorker" in navigator && "PushManager" in window && "Notification" in window,
-  wahl: { push_chat: true, push_chat_art: "gruppen", push_ort: true, push_wunsch_neu: false, push_wunsch_dabei: true, push_wunsch_update: true, push_naehe: true, push_treffer: true, push_reise: false, push_leute: true, push_ruhe: true } };
-Object.defineProperty(PUSH, "an", { get: () => PUSH.abo && (PUSH.neu ? PUSH.wahl.push_chat_art !== "aus" : PUSH.wahl.push_chat) }); // für die Glocke im Chat
+  wahl: { push_chat: true, push_chat_art: "alle", push_ort: true, push_wunsch_neu: false, push_wunsch_dabei: true, push_wunsch_update: true, push_naehe: true, push_treffer: true, push_reise: false, push_leute: true, push_ruhe: true } };
+Object.defineProperty(PUSH, "an", { get: () => PUSH.abo && (PUSH.neu ? PUSH.wahl.push_chat_art !== "aus" : PUSH.wahl.push_chat) });
+// Für die Glocke im Chat: bekommt man für diese Art von Chat überhaupt Push? (einzel / gruppe)
+const pushFuer = c => PUSH.an && (!PUSH.neu || PUSH.wahl.push_chat_art === "alle" || PUSH.wahl.push_chat_art === (c.art === "einzel" ? "einzel" : "gruppen"));
 // Auswahl (Entscheidung vom 24.11.2026); die neuen Schalter erscheinen, sobald die Datenbank sie kennt (SQL 16)
 const PUSH_GRUPPEN = [
   ["🏡", "Wishlist", [["push_wunsch_neu", "Neuer Eintrag"], ["push_wunsch_dabei", "Jemand ist bei meinem Eintrag dabei"], ["push_wunsch_update", "Gebucht oder neuer Preis"]]],
@@ -2473,10 +2477,10 @@ function pushAnzeigen() {
   box.classList.toggle("aus", !PUSH.abo);
   const schalter = ([k, name, unter]) => `<div class="zeile-einst"><div>${t(name)}${unter ? `<small>${t(unter)}</small>` : ""}</div><button class="schalter${w[k] ? " an" : ""}" data-push="${k}" aria-pressed="${w[k] ? "true" : "false"}" aria-label="${t(name)}"></button></div>`;
   const chat = PUSH.neu
-    ? `<div class="segmente klein" id="chat-wahl">${[["aus", "Aus"], ["gruppen", "Einzel und Gruppen"], ["alle", "Alle Chats"]].map(([a, n]) => `<button data-chat="${a}" class="${w.push_chat_art === a ? "aktiv" : ""}">${t(n)}</button>`).join("")}</div>`
+    ? `<div class="segmente klein" id="chat-wahl">${[["aus", "Aus"], ["einzel", "Einzel"], ["gruppen", "Gruppen"], ["alle", "Alles"]].map(([a, n]) => `<button data-chat="${a}" class="${w.push_chat_art === a ? "aktiv" : ""}">${t(n)}</button>`).join("")}</div>`
     : schalter(["push_chat", "Neue Chat-Nachrichten"]);
-  box.innerHTML = `<div class="push-gruppe">💬 ${t("Chat")}</div>${chat}<p class="hinweis-band" style="margin:4px 0 0;text-align:left">${t("Einzelne Chats schaltest du im Chat mit der Glocke 🔔 stumm.")}</p>` +
-    (PUSH.neu ? PUSH_GRUPPEN : [["📍", "Orte und Reisen", [["push_ort", "Nachfrage zu deinem Ort", "höchstens einmal im Monat"]]]]).map(([sym, titel, liste]) => `<div class="push-gruppe">${sym} ${t(titel)}</div>${liste.map(schalter).join("")}`).join("");
+  box.innerHTML = `<div class="push-gruppe">💬 ${t("Chat")}</div><div class="kasten push-kasten">${chat}<p class="hinweis-band" style="margin:6px 0 2px;text-align:left">${t("Einzelne Chats schaltest du im Chat mit der Glocke 🔔 stumm.")}</p></div>` +
+    (PUSH.neu ? PUSH_GRUPPEN : [["📍", "Orte und Reisen", [["push_ort", "Nachfrage zu deinem Ort", "höchstens einmal im Monat"]]]]).map(([sym, titel, liste]) => `<div class="push-gruppe">${sym} ${t(titel)}</div><div class="kasten push-kasten">${liste.map(schalter).join("")}</div>`).join("");
   box.querySelectorAll("[data-push]").forEach(b => b.onclick = () => pushWahlSetzen({ [b.dataset.push]: !w[b.dataset.push] }));
   box.querySelectorAll("[data-chat]").forEach(b => b.onclick = () => pushWahlSetzen({ push_chat_art: b.dataset.chat, push_chat: b.dataset.chat !== "aus" }));
   glockeSetzen();
@@ -2518,7 +2522,7 @@ async function pushAbmelden() {
 async function pushEinschalten() {
   if (!(await pushAbo())) return;
   pushAnzeigen();
-  if (!PUSH.an) await pushWahlSetzen(PUSH.neu ? { push_chat_art: "gruppen", push_chat: true } : { push_chat: true });
+  if (!aktuellerChat || !pushFuer(aktuellerChat)) await pushWahlSetzen(PUSH.neu ? { push_chat_art: "alle", push_chat: true } : { push_chat: true });
   hinweis(t("🔔 Push ist an: neue Nachrichten kommen aufs Handy"));
 }
 document.getElementById("push-schalter").onclick = async () => {
@@ -2569,6 +2573,10 @@ async function ortNachfragen(sofort) {
 // ---------- Neu in Ahoi: nach jedem App-Update einmal eine kurze Übersicht ----------
 // Bei jedem Update oben einen Eintrag ergänzen (neueste zuerst). Wer neu dabei ist, sieht nur den neuesten.
 const NEUIGKEITEN = [
+  { id: "2026-11-24-chat", punkte: [
+    "💬 Den großen Chat „Alle“ gibt es nicht mehr, nur noch Einzelchats und Gruppen.",
+    "🔔 Push für Chats: aus, nur Einzelchats, nur Gruppen oder alles. Die Mitteilungen sind jetzt übersichtlicher in Bereiche getrennt."
+  ] },
   { id: "2026-11-24-freunde-push", punkte: [
     "🤝 Neu im Profil: dein Ahoi-Code. Zeig ihn Leuten, die du unterwegs triffst, oder scanne ihren Code.",
     "💡 „Kennst du sie?“ schlägt Freunde deiner Freunde vor.",
