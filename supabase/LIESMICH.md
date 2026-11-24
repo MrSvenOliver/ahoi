@@ -21,6 +21,7 @@
 - `07-orte-verlauf.sql`: Orte-Verlauf (für Rückblicke) und „Pionier“
 - `08-chat.sql`: Chat (Alle, Gruppen, Einzelchats) mit Realtime
 - `09-status-push-emoji.sql`: Status gilt 24 Stunden, Gruppen-Emoji, Push (Abos, stumme Chats, Trigger an die Edge Function, tägliche Ort-Frage über pg_cron)
+- `10-push-ort.sql`: eigener Schalter für die monatliche Nachfrage zum Ort
 - `functions/push/index.ts`: Edge Function „push“ (im Dashboard unter Edge Functions angelegt; „Verify JWT“ aus, weil die Datenbank sie ohne Anmeldung aufruft; sie erzeugt ihre Push-Schlüssel selbst)
 
 ## Betrieb

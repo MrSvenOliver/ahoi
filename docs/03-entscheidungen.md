@@ -3,6 +3,7 @@
 Jede Entscheidung mit Datum. Neue Einträge kommen oben dazu.
 
 ## 24.11.2026
+- Mitteilungen: zwei getrennte Schalter, „💬 Neue Chat-Nachrichten“ und „📍 Nachfrage zu deinem Ort“ (höchstens einmal im Monat); der Service Worker meldet sich jetzt auch in der echten App an (vorher fehlte er dort, deshalb ging Push nicht einzuschalten)
 - Chats: Einzelchats zeigen das Profilbild der Person (in der Liste und im Chat-Kopf); Gruppen bekommen ein eigenes Emoji (beim Erstellen wählen, später über „Emoji ändern“), keine Collage aus Profilbildern
 - Chat löschen durch Wischen nach links: Einzelchat „nur bei dir löschen“, Gruppe „verlassen“; „Alle“ lässt sich nicht löschen
 - Push-Mitteilungen für neue Chat-Nachrichten: Schalter unter Profil → Mitteilungen und eine Glocke im Chat (schaltet Push ein oder diesen Chat stumm); stumme Chats und „aus“ gelten auf dem Server; auf dem iPhone nur mit Ahoi auf dem Home-Bildschirm; die Push-Schlüssel erzeugt die Edge Function „push“ selbst

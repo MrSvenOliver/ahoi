@@ -76,7 +76,7 @@ async function ortFrage() {
         and (x.lat is null and x.land is distinct from p.land
              or x.lat is not null and (p.lat is null or public.abstand_km(p.lat, p.lon, x.lat, x.lon) > 15))
       order by x.ankunft limit 1) r on true
-    where p.freigegeben and p.art = 'nomade' and not p.geist and p.ort is not null
+    where p.freigegeben and p.art = 'nomade' and p.push_ort and not p.geist and p.ort is not null
       and exists (select 1 from public.push_abo a where a.person = p.id)
       and (p.ort_frage_am is null or p.ort_frage_am < now() - interval '30 days')
       and (r.ort is not null or p.standort_am is null or p.standort_am < now() - interval '30 days')`;
