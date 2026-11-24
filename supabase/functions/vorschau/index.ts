@@ -23,20 +23,30 @@ Deno.serve(async (req) => {
     let u: URL;
     try { u = new URL(String(url)); } catch { return antwort({ ok: false }); }
     if (u.protocol !== "https:" || /^(localhost|127\.|10\.|192\.168\.|169\.254\.)/.test(u.hostname)) return antwort({ ok: false });
-    const r = await fetch(u.href, {
-      redirect: "follow", signal: AbortSignal.timeout(8000),
-      headers: { "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1", "Accept-Language": "de,en;q=0.8" },
-    });
-    if (!r.ok || !r.body) return antwort({ ok: false, ziel: r.url });
-    // nur den Anfang lesen, die Vorschau-Angaben stehen oben
-    const leser = r.body.getReader(); let html = "", menge = 0;
-    while (menge < 1_500_000) { const { done, value } = await leser.read(); if (done) break; menge += value.length; html += new TextDecoder().decode(value, { stream: true }); if (/<\/head>/i.test(html)) break; }
-    leser.cancel().catch(() => {});
+    // Seite laden; eine Weiterleitung per <meta http-equiv="refresh"> (z. B. Airbnb auf die Länderseite) wird einmal mitgemacht
+    let ziel = u.href, html = "";
+    for (let runde = 0; runde < 3; runde++) {
+      const r = await fetch(ziel, {
+        redirect: "follow", signal: AbortSignal.timeout(8000),
+        headers: { "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1", "Accept-Language": "en-US,en;q=0.9", "Accept": "text/html" },
+      });
+      if (!r.ok || !r.body) return antwort({ ok: false, ziel: r.url });
+      ziel = r.url;
+      // nur den Anfang lesen, die Vorschau-Angaben stehen oben
+      const leser = r.body.getReader(); html = ""; let menge = 0;
+      while (menge < 1_500_000) { const { done, value } = await leser.read(); if (done) break; menge += value.length; html += new TextDecoder().decode(value, { stream: true }); if (/<\/head>/i.test(html)) break; }
+      leser.cancel().catch(() => {});
+      const weiter = html.match(/<meta[^>]+http-equiv=["']refresh["'][^>]*content=["'][^"']*url=([^"'>]+)["']/i)?.[1];
+      if (!weiter || meta(html, ["og:title"])) break;
+      ziel = new URL(entschluesseln(weiter)!.replace(/^['"]|['"]$/g, ""), ziel).href;
+      if (!ziel.startsWith("https://")) break;
+    }
     const titel = entschluesseln(meta(html, ["og:title", "twitter:title"]) || html.match(/<title[^>]*>([^<]*)<\/title>/i)?.[1] || null);
     let bild = entschluesseln(meta(html, ["og:image", "og:image:secure_url", "twitter:image"]));
     if (bild && bild.startsWith("//")) bild = "https:" + bild;
     if (bild && !bild.startsWith("https://")) bild = null;
-    return antwort({ ok: !!(titel || bild), titel: titel?.slice(0, 160) || null, bild: bild?.slice(0, 800) || null, ziel: r.url });
+    const brauchbar = titel && !/^(weiterleitung|redirect|just a moment|access denied)/i.test(titel) ? titel : null;
+    return antwort({ ok: !!(brauchbar || bild), titel: brauchbar?.slice(0, 160) || null, bild: bild?.slice(0, 800) || null, ziel });
   } catch (_e) {
     return antwort({ ok: false });
   }
