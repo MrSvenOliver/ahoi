@@ -740,7 +740,7 @@ function stilWechseln(neu) {
   stilLaden();
 }
 // ---------- Bereiche wechseln ----------
-const seiten = ["reisen", "reise-neu", "chat", "unterhaltung", "gruppe-neu", "ideen", "idee-neu", "tipp-neu", "profil", "meine-laender", "laender", "feedback", "verwaltung", "konto", "kreise", "links"];
+const seiten = ["reisen", "reise-neu", "chat", "unterhaltung", "gruppe-neu", "ideen", "idee-neu", "tipp-neu", "profil", "meine-laender", "laender", "feedback", "verwaltung", "konto", "kreise", "links", "freunde"];
 const TAB_VON = { "reise-neu": "reisen", "idee-neu": "ideen", "tipp-neu": "ideen", "unterhaltung": "chat", "gruppe-neu": "chat" };
 function seiteZeigen(name) {
   for (const s of seiten) document.getElementById("seite-" + s).classList.toggle("offen", s === name);
@@ -1913,6 +1913,115 @@ document.getElementById("links-speichern").onclick = async e => {
 if (!ECHT) { try { meineLinks = JSON.parse(localStorage.getItem("ahoi-links") || "{}"); } catch (e) {} }
 linksWertZeigen();
 
+// ---------- Freunde: Ahoi-Name, QR-Code, Scannen, Vorschläge (Entscheidung C + E: alle sehen weiter alle) ----------
+const FREUNDE = { name: null, code: null, freunde: [], rein: [], raus: [], vorschlaege: [] };
+const einladeLink = code => location.origin + location.pathname.replace(/index\.html$/, "").replace(/prototyp\/$/, "") + "?einladung=" + code;
+const pidVon = uid => ECHT ? idVon(uid) : uid;
+const nameVonUid = uid => { const p = person(pidVon(uid)) || (ECHT_DATEN && ECHT_DATEN.alle || []).find(x => x.uid === uid); return p ? (p.echterName || p.name) : "?"; };
+async function freundeLaden() {
+  if (!ECHT || familieModus || ECHT_DATEN.profil.art === "familie") return;
+  const uid = ECHT_DATEN.uid;
+  const [n, c, f, a, v] = await Promise.all([SB.from("profile").select("ahoi_name").eq("id", uid).maybeSingle(), SB.rpc("mein_qr_code"), SB.from("freundschaft").select("a, b"), SB.from("freund_anfrage").select("von, an"), SB.rpc("freund_vorschlaege")]);
+  if (!n.error && n.data) FREUNDE.name = n.data.ahoi_name;
+  if (!c.error) FREUNDE.code = c.data;
+  document.getElementById("freunde-zeile").hidden = !!c.error || !c.data;
+  if (!f.error) FREUNDE.freunde = f.data.map(x => x.a === uid ? x.b : x.a);
+  if (!a.error) { FREUNDE.rein = a.data.filter(x => x.an === uid).map(x => x.von); FREUNDE.raus = a.data.filter(x => x.von === uid).map(x => x.an); }
+  if (!v.error) FREUNDE.vorschlaege = v.data || [];
+  document.getElementById("freunde-zahl").textContent = FREUNDE.rein.length || "";
+  if (document.getElementById("seite-freunde").classList.contains("offen")) freundeAufbauen();
+}
+async function freundeAufbauen() {
+  const qrBox = document.getElementById("qr-bild");
+  const code = ECHT ? FREUNDE.code : "qbeispiel", name = ECHT ? FREUNDE.name : "du.unterwegs";
+  document.getElementById("ahoi-name").textContent = "@" + (name || "…");
+  if (code) {
+    try { if (typeof qrcode === "undefined") await skriptLaden("qrcode.js?v=" + VERSION); const q = qrcode(0, "M"); q.addData(einladeLink(code)); q.make(); qrBox.innerHTML = q.createSvgTag({ cellSize: 4, margin: 0, scalable: true }); }
+    catch (e) { qrBox.textContent = ""; }
+  }
+  const zeile = (uid, unter, knoepfe) => `<div class="freund-zeile">${ava(person(pidVon(uid)) || { name: nameVonUid(uid), farbe: farbeVon(uid) })}<div><b>${ohneHtml(nameVonUid(uid))}</b>${unter ? `<small>${unter}</small>` : ""}</div>${knoepfe || ""}</div>`;
+  const rein = ECHT ? FREUNDE.rein : [];
+  document.getElementById("freund-anfragen").innerHTML = rein.length ? `<h2>${t("Möchten sich mit dir verbinden")}</h2><div class="kasten">${rein.map(u => zeile(u, "", `<button class="knopf-gross" data-ja="${u}">${t("Annehmen")}</button><button class="knopf-leise" data-nein="${u}" aria-label="${t("Ablehnen")}">✕</button>`)).join("")}</div>` : "";
+  const vs = ECHT ? FREUNDE.vorschlaege : [{ id: "tom", name: "Tom", gemeinsam: 2, ueber: ["Lea", "Nico"] }];
+  document.getElementById("freund-vorschlaege").innerHTML = vs.length ? `<h2>${t("Kennst du sie?")}</h2><div class="kasten">${vs.map(v => `<div class="freund-zeile">${ava({ name: v.name, farbe: farbeVon(v.id) })}<div><b>${ohneHtml(v.name)}</b><small>${ohneHtml(v.gemeinsam > 2 ? t("kennt {a}, {b} und {n} weitere", { a: v.ueber[0], b: v.ueber[1], n: v.gemeinsam - 2 }) : v.ueber.length > 1 ? t("kennt {a} und {b}", { a: v.ueber[0], b: v.ueber[1] }) : t("kennt {a}", { a: v.ueber[0] }))}</small></div><button class="knopf-leise" data-kenne="${v.id}">${t("Kenne ich")}</button></div>`).join("")}</div>` : "";
+  const liste = ECHT ? FREUNDE.freunde : leute.filter(p => p.id !== "du").map(p => p.id);
+  document.getElementById("freunde-titel").textContent = t("Deine Freunde ({n})", { n: liste.length });
+  document.getElementById("freunde-liste").innerHTML = liste.length ? liste.map(u => zeile(u, FREUNDE.raus.includes(u) ? t("Anfrage gesendet") : "")).join("") : `<p class="hinweis-band" style="margin:4px 0">${t("Noch keine Freunde. Zeig deinen Code!")}</p>`;
+  document.querySelectorAll("[data-ja],[data-nein]").forEach(b => b.onclick = async () => {
+    const ja = !!b.dataset.ja, ziel = b.dataset.ja || b.dataset.nein;
+    const { error } = await SB.rpc("freund_antworten", { ziel, ja }); if (error) return hinweis(t("Das hat nicht geklappt"));
+    if (ja) hinweis(t("Ihr seid jetzt befreundet: {name}", { name: nameVonUid(ziel) })); freundeLaden();
+  });
+  document.querySelectorAll("[data-kenne]").forEach(b => b.onclick = async () => {
+    if (!ECHT) return hinweis(t("Anfrage gesendet (Beispiel)"));
+    const { data, error } = await SB.rpc("freund_anfragen", { ziel: b.dataset.kenne }); if (error) return hinweis(t("Das hat nicht geklappt"));
+    hinweis(data === "befreundet" ? t("Ihr seid jetzt befreundet: {name}", { name: nameVonUid(b.dataset.kenne) }) : t("Anfrage gesendet")); freundeLaden();
+  });
+}
+document.getElementById("freunde-zeile").onclick = () => { seiteZeigen("freunde"); freundeAufbauen(); freundeLaden().catch(() => {}); };
+document.getElementById("ahoi-name-aendern").onclick = () => { const f = document.getElementById("ahoi-name-feld"); f.hidden = !f.hidden; const e = document.getElementById("ahoi-name-eingabe"); e.value = FREUNDE.name || ""; if (!f.hidden) e.focus(); };
+document.getElementById("ahoi-name-ok").onclick = async e => {
+  const neu = document.getElementById("ahoi-name-eingabe").value.trim().toLowerCase().replace(/^@/, "");
+  if (!/^[a-z0-9][a-z0-9._]{2,19}$/.test(neu)) return hinweis(t("3–20 Zeichen: Buchstaben, Zahlen, Punkt oder Unterstrich"));
+  if (!ECHT) return hinweis(t("Im Prototyp wird nichts gespeichert"));
+  beschaeftigt(e.target, true);
+  const { error } = await SB.from("profile").update({ ahoi_name: neu }).eq("id", ECHT_DATEN.uid);
+  beschaeftigt(e.target, false);
+  if (error) return hinweis(/duplicate|unique/i.test(error.message) ? t("Der Name ist schon vergeben") : t("Speichern hat nicht geklappt"));
+  FREUNDE.name = neu; document.getElementById("ahoi-name-feld").hidden = true; freundeAufbauen(); hinweis(t("Gespeichert"));
+};
+document.getElementById("freund-suchen").onclick = () => {
+  fragen(t("Ahoi-Name suchen"), [[t("Suchen"), async () => {
+    const name = (document.getElementById("freund-suche-feld") || {}).value || "";
+    if (!ECHT) return hinweis(t("Im Prototyp nur Beispiel"));
+    const { data } = await SB.rpc("freund_suchen", { name });
+    if (!data) return hinweis(t("Niemand mit diesem Ahoi-Namen gefunden"));
+    if (data.id === ECHT_DATEN.uid) return hinweis(t("Das bist du selbst"));
+    fragen(t("{name} gefunden (@{n})", { name: data.name, n: data.ahoi_name }), [[t("Verbinden"), async () => {
+      const r = await SB.rpc("freund_anfragen", { ziel: data.id }); if (r.error) return hinweis(t("Das hat nicht geklappt"));
+      hinweis(r.data === "schon" ? t("Ihr seid schon befreundet") : r.data === "befreundet" ? t("Ihr seid jetzt befreundet: {name}", { name: data.name }) : t("Anfrage gesendet")); freundeLaden();
+    }]]);
+  }]]);
+  const titel = document.getElementById("aktion-titel");
+  titel.innerHTML = `${t("Ahoi-Name suchen")}<input id="freund-suche-feld" class="ort-suche" placeholder="@name" autocomplete="off" autocapitalize="off" spellcheck="false">`;
+  setTimeout(() => document.getElementById("freund-suche-feld").focus(), 50);
+};
+// Scannen mit der Kamera (jsQR, nur bei Bedarf geladen)
+let scanStrom = null;
+function scannerZu() { document.getElementById("scanner").classList.remove("offen"); if (scanStrom) scanStrom.getTracks().forEach(s => s.stop()); scanStrom = null; }
+document.getElementById("scanner-zu").onclick = scannerZu;
+document.getElementById("qr-scannen").onclick = async () => {
+  if (!ECHT) return hinweis(t("Im Prototyp nur Beispiel"));
+  const box = document.getElementById("scanner"), video = document.getElementById("scanner-video"), text = document.getElementById("scanner-text");
+  try {
+    if (typeof jsQR === "undefined") await skriptLaden("jsqr.js?v=" + VERSION);
+    scanStrom = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" }, audio: false });
+  } catch (e) { return hinweis(t("Kamera nicht erlaubt. Du kannst den Code auch mit der normalen Kamera-App scannen.")); }
+  text.textContent = t("Halte die Kamera auf einen Ahoi-Code"); box.classList.add("offen");
+  video.srcObject = scanStrom; await video.play().catch(() => {});
+  const cv = document.createElement("canvas"), cx = cv.getContext("2d", { willReadFrequently: true });
+  const schritt = async () => {
+    if (!scanStrom) return;
+    if (video.readyState >= 2) {
+      const w = 480, h = Math.round(w * video.videoHeight / video.videoWidth) || 480; cv.width = w; cv.height = h; cx.drawImage(video, 0, 0, w, h);
+      const r = jsQR(cx.getImageData(0, 0, w, h).data, w, h, { inversionAttempts: "dontInvert" });
+      if (r && r.data) {
+        const m = r.data.match(/[?&]einladung=(q[0-9a-f]{32})/);
+        if (!m) { text.textContent = t("Das ist kein Ahoi-Code"); }
+        else { scannerZu(); return qrVerbinden(m[1]); }
+      }
+    }
+    requestAnimationFrame(schritt);
+  };
+  requestAnimationFrame(schritt);
+};
+async function qrVerbinden(code) {
+  const { data, error } = await SB.rpc("freund_per_qr", { code });
+  if (error || !data) return hinweis(t("Der Code passt zu keinem Mitglied"));
+  if (data.selbst) return hinweis(t("Das ist dein eigener Code"));
+  hinweis(t("Ihr seid jetzt befreundet: {name}", { name: data.name })); freundeLaden();
+}
+
 // ---------- Reisegruppe: „Reist du zusammen mit …?“ ----------
 let gruppenAnfrage = null;
 function gruppeBeitreten(p, still) {
@@ -2731,6 +2840,10 @@ function echtEinrichten() {
   setTimeout(pushPruefen, 1500); setTimeout(rundrufZeigen, 6000);
   // Vorschau „So sieht sie es“: die Familie sieht nur dich
   document.getElementById("familie-start").onclick = () => { FAMILIE_SIEHT = ["du"]; document.getElementById("fam-kopf").textContent = t("So sieht deine Familie dich"); document.getElementById("familie-ende").textContent = t("Zurück"); familieSetzen(true); };
+  // Freunde laden; wurde ein QR-Link eines Mitglieds geöffnet, gleich verbinden
+  document.getElementById("freunde-zeile").hidden = true;
+  freundeLaden().catch(() => {});
+  try { const qr = localStorage.getItem("ahoi-einladung"); localStorage.removeItem("ahoi-einladung"); if (qr && /^q[0-9a-f]{32}$/.test(qr)) setTimeout(() => qrVerbinden(qr), 2500); } catch (e) {}
   // Wishlist: Beispieldaten weg, echte laden
   ideen.length = 0; tipps.length = 0; wishlistLaden().catch(() => {});
   // Bereiche, die noch nicht live sind

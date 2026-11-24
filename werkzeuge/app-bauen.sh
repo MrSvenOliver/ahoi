@@ -4,7 +4,7 @@
 # Die erzeugten Dateien stehen nicht im Repository (.gitignore); GitHub baut sie bei jeder Veröffentlichung neu.
 set -euo pipefail
 cd "$(dirname "$0")/../public"
-for f in index.html basis.js start.js app.js texte.js supabase.js sw.js manifest.webmanifest weltkarte.json laender-50m.geojson papier.png; do
+for f in index.html basis.js start.js app.js texte.js supabase.js qrcode.js jsqr.js sw.js manifest.webmanifest weltkarte.json laender-50m.geojson papier.png; do
   cp "prototyp/$f" "$f"
 done
 # Symbole liegen von hier aus in icons/ statt ../icons/

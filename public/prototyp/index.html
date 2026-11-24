@@ -62,7 +62,7 @@
 
 
   /* Kopfzeile */
-  .kopf { position: fixed; top: calc(env(safe-area-inset-top) + 18px); left: 12px; right: 12px; display: flex; justify-content: space-between; align-items: center; z-index: 10; pointer-events: none; }
+  .kopf { position: fixed; top: calc(env(safe-area-inset-top) + 26px); left: 12px; right: 12px; display: flex; justify-content: space-between; align-items: center; z-index: 10; pointer-events: none; }
   .marke, .knoepfe { pointer-events: auto; display: flex; align-items: center; gap: 8px; background: var(--glas); border: 1px solid var(--glas-rand); box-shadow: var(--schatten); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-radius: 999px; }
   .marke { padding: 5px 16px 5px 5px; }
   .marke img { width: 34px; height: 34px; border-radius: 50%; object-fit: cover; flex: none; }
@@ -121,7 +121,7 @@
   @keyframes drehen { from { transform: rotate(-200deg) scale(0.7); opacity: 0; } to { transform: rotate(0) scale(1); opacity: 1; } }
 
   /* Stil-Auswahl (nur im Prototyp) */
-  .stilwahl { position: fixed; top: calc(env(safe-area-inset-top) + 74px); right: 12px; left: 12px; max-width: 420px; margin-left: auto; z-index: 30; background: var(--glas); border: 1px solid var(--glas-rand); box-shadow: var(--schatten); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); border-radius: 22px; padding: 14px; display: none; }
+  .stilwahl { position: fixed; top: calc(env(safe-area-inset-top) + 82px); right: 12px; left: 12px; max-width: 420px; margin-left: auto; z-index: 30; background: var(--glas); border: 1px solid var(--glas-rand); box-shadow: var(--schatten); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); border-radius: 22px; padding: 14px; display: none; }
   .stilwahl.offen { display: block; }
   .stilwahl h4 { margin: 10px 2px 6px; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.6px; color: var(--text-leise); }
   .stilwahl h4:first-child { margin-top: 0; }
@@ -172,7 +172,7 @@
   .profil-knopf { width: 44px; height: 44px; border-radius: 50%; border: 2px solid var(--gold); display: grid; place-items: center; color: #fff8ea; font-weight: 700; font-size: 14px; background: #7a5a3a; cursor: pointer; padding: 0; }
 
   /* ---------- Seiten (Reisen, Chat, Ideen, Profil) ---------- */
-  .seite { position: fixed; left: 0; right: 0; top: 0; bottom: var(--leiste-h); z-index: 35; background: var(--flaeche); overflow-y: auto; -webkit-overflow-scrolling: touch; display: none; padding: calc(env(safe-area-inset-top) + 22px) 16px 24px; }
+  .seite { position: fixed; left: 0; right: 0; top: 0; bottom: var(--leiste-h); z-index: 35; background: var(--flaeche); overflow-y: auto; -webkit-overflow-scrolling: touch; display: none; padding: calc(env(safe-area-inset-top) + 32px) 16px 24px; }
   .seite.offen { display: block; animation: einblenden 0.22s ease; }
   @keyframes einblenden { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
   html.seite-auf::after { content: ""; position: fixed; top: 0; left: 0; right: 0; height: env(safe-area-inset-top); background: var(--flaeche); z-index: 36; pointer-events: none; }
@@ -308,6 +308,26 @@
   .zahlen.zwei { grid-template-columns: repeat(2, 1fr); }
   .herzen.an { background: #fff !important; }
   .idee .extra { display: block; font-size: 13px; color: var(--text-leise); }
+  .qr-kasten { text-align: center; }
+  .qr-bild { width: 220px; height: 220px; margin: 6px auto 10px; background: #fff; border-radius: 16px; padding: 12px; box-sizing: border-box; }
+  .qr-bild svg { width: 100%; height: 100%; display: block; }
+  .qr-name { display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 18px; }
+  .qr-name-feld { display: flex; align-items: center; gap: 6px; margin-top: 8px; }
+  .qr-name-feld span { font-size: 18px; font-weight: 700; color: var(--text-leise); }
+  .qr-name-feld input { flex: 1; min-width: 0; border: 1px solid var(--trenner); background: var(--flaeche); color: var(--text); border-radius: 12px; padding: 10px 12px; font: inherit; font-size: 16px; }
+  .qr-text { color: var(--text-leise); font-size: 14px; line-height: 1.45; margin: 10px 4px 2px; }
+  .qr-knoepfe { display: flex; gap: 8px; margin: 12px 0 4px; }
+  .qr-knoepfe button { flex: 1; }
+  .freund-zeile { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--trenner); font-size: 15px; }
+  .freund-zeile:last-child { border-bottom: 0; }
+  .freund-zeile > div:not(.klein-ava) { flex: 1; min-width: 0; }
+  .freund-zeile .klein-ava { flex: none; width: 36px; height: 36px; }
+  .freund-zeile small { display: block; color: var(--text-leise); font-size: 13px; }
+  .scanner { position: fixed; inset: 0; z-index: 95; background: #000; display: none; flex-direction: column; align-items: center; justify-content: center; gap: 16px; padding: env(safe-area-inset-top) 20px calc(env(safe-area-inset-bottom) + 20px); color: #fff; }
+  .scanner.offen { display: flex; }
+  .scanner video { width: 100%; max-width: 420px; aspect-ratio: 1; object-fit: cover; border-radius: 20px; }
+  .scanner-rahmen { position: absolute; width: min(60vw, 260px); aspect-ratio: 1; border: 3px solid rgba(255, 255, 255, 0.85); border-radius: 18px; pointer-events: none; top: 50%; left: 50%; transform: translate(-50%, -62%); }
+  .scanner p { margin: 0; font-size: 15px; text-align: center; }
   .sb-links { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin-top: 14px; }
   .sb-links a { font-size: 13px; font-weight: 600; padding: 6px 11px; border-radius: 999px; background: var(--trenner); color: var(--text); text-decoration: none; }
   .knopf-riesig { width: 100%; border: 0; border-radius: 18px; padding: 20px; margin-bottom: 10px; background: #e0565b; color: #fff; font: inherit; font-size: 18px; font-weight: 800; cursor: pointer; box-shadow: 0 8px 20px rgba(224, 86, 91, 0.3); }
@@ -376,7 +396,7 @@
   .feedback-lasche { position: fixed; right: 0; top: 46%; z-index: 44; transform: translateY(-50%) rotate(-90deg); transform-origin: 100% 50%; translate: 0 0; border: 0; border-radius: 10px 10px 0 0; padding: 5px 10px; background: var(--tinte); color: var(--papier); font: inherit; font-size: 11px; font-weight: 700; letter-spacing: 0.3px; opacity: 0.55; cursor: pointer; margin-right: 13px; }
   .feedback-lasche:active { opacity: 1; }
   html.tippt .feedback-lasche { display: none; }
-  .hinweis { position: fixed; left: 50%; top: calc(env(safe-area-inset-top) + 78px); transform: translate(-50%, -10px); z-index: 20; background: var(--tinte); color: var(--papier); padding: 8px 14px; border-radius: 999px; font-size: 13px; opacity: 0; transition: opacity 0.25s, transform 0.25s; pointer-events: none; white-space: nowrap; }
+  .hinweis { position: fixed; left: 50%; top: calc(env(safe-area-inset-top) + 86px); transform: translate(-50%, -10px); z-index: 20; background: var(--tinte); color: var(--papier); padding: 8px 14px; border-radius: 999px; font-size: 13px; opacity: 0; transition: opacity 0.25s, transform 0.25s; pointer-events: none; white-space: nowrap; }
   .hinweis.zeigen { opacity: 1; transform: translate(-50%, 0); }
 
   .maplibregl-ctrl-attrib { background: transparent !important; font-size: 10px; }
@@ -672,12 +692,12 @@
   /* Mission · militärischer: Kennzeichnungsleiste, Rufnamen an den Pins, Entfernungsringe, Schablonen-Titel; Fließtext normal geschrieben */
   [data-stil="mission"] { --schablone: "Saira Stencil One", "Rajdhani", sans-serif; }
   .kennung { display: none; }
-  [data-stil="mission"] .kennung { display: flex; position: fixed; top: env(safe-area-inset-top); left: 0; right: 0; z-index: 11; height: 18px; align-items: center; justify-content: center; gap: 10px; pointer-events: none;
+  [data-stil="mission"] .kennung { display: none; position: fixed; top: env(safe-area-inset-top); left: 0; right: 0; z-index: 11; height: 18px; align-items: center; justify-content: center; gap: 10px; pointer-events: none;
     font-family: var(--mono); font-size: 9.5px; letter-spacing: 2.5px; color: var(--amber); text-transform: uppercase; background: rgba(6, 16, 28, 0.92); border-bottom: 1px solid rgba(232, 163, 58, 0.35); }
   [data-stil="mission"] .kennung i { width: 6px; height: 6px; border-radius: 50%; background: var(--gruen); box-shadow: 0 0 8px var(--gruen); animation: blinken 2s steps(1) infinite; }
   @keyframes blinken { 50% { opacity: 0.25; } }
-  [data-stil="mission"] .kopf { top: calc(env(safe-area-inset-top) + 28px); }
-  [data-stil="mission"] .seite { padding-top: calc(env(safe-area-inset-top) + 36px); }
+  [data-stil="mission"] .kopf { top: calc(env(safe-area-inset-top) + 26px); }
+  [data-stil="mission"] .seite { padding-top: calc(env(safe-area-inset-top) + 34px); }
   [data-stil="mission"] .seite-kopf h1, [data-stil="mission"] .blatt-kopf h2 { font-family: var(--schablone); font-weight: 400; letter-spacing: 2px; text-transform: uppercase; }
   [data-stil="mission"] .blatt-kopf h2 { font-size: 26px; }
   [data-stil="mission"] .seite h2::before { content: "// "; color: var(--tinte); }
@@ -892,7 +912,7 @@
   [data-stil="abenteuer"] .status-chips button.aktiv { box-shadow: 0 2px 0 rgba(48, 30, 16, 0.4); }
 
   /* Echte App: Anmeldung und erster Start */
-  .zugang { position: fixed; inset: 0; z-index: 80; display: none; overflow-y: auto; background: var(--flaeche); padding: calc(env(safe-area-inset-top) + 28px) 18px calc(env(safe-area-inset-bottom) + 28px); }
+  .zugang { position: fixed; inset: 0; z-index: 80; display: none; overflow-y: auto; background: var(--flaeche); padding: calc(env(safe-area-inset-top) + 34px) 18px calc(env(safe-area-inset-bottom) + 28px); }
   .zugang.offen { display: block; }
   .zugang-teil { max-width: 420px; margin: 0 auto; text-align: center; }
   .zugang-logo { width: 84px; height: 84px; border-radius: 22px; margin: 18px auto 6px; display: block; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15); }
@@ -967,8 +987,8 @@
   [data-stil="mission"] .rb-karte { filter: drop-shadow(0 0 6px rgba(95, 212, 234, 0.25)); }
   @media (prefers-reduced-motion: reduce) { .rb-karte { transition: none; } }
 
-  .zugang-sprache { position: absolute; top: calc(env(safe-area-inset-top) + 12px); right: 14px; min-width: 44px; height: 36px; padding: 0 10px; border-radius: 999px; border: 1px solid var(--trenner); background: var(--karte-bg); color: var(--text); font: inherit; font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 6px; cursor: pointer; z-index: 2; }
-  .zugang-sprachen { position: absolute; top: calc(env(safe-area-inset-top) + 54px); right: 14px; z-index: 3; background: var(--karte-bg); border: 1px solid var(--trenner); border-radius: 14px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15); overflow: hidden; }
+  .zugang-sprache { position: absolute; top: calc(env(safe-area-inset-top) + 24px); right: 14px; min-width: 44px; height: 36px; padding: 0 10px; border-radius: 999px; border: 1px solid var(--trenner); background: var(--karte-bg); color: var(--text); font: inherit; font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 6px; cursor: pointer; z-index: 2; }
+  .zugang-sprachen { position: absolute; top: calc(env(safe-area-inset-top) + 66px); right: 14px; z-index: 3; background: var(--karte-bg); border: 1px solid var(--trenner); border-radius: 14px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15); overflow: hidden; }
   .zugang-sprachen button { display: flex; align-items: center; gap: 10px; width: 100%; border: 0; border-bottom: 1px solid var(--trenner); background: transparent; color: var(--text); padding: 12px 16px; font: inherit; font-size: 15px; text-align: left; cursor: pointer; }
   .zugang-sprachen button:last-child { border-bottom: 0; }
 
@@ -1054,7 +1074,7 @@
   [data-stil="abenteuer"] .treffer.leise { background: rgba(255, 250, 238, 0.55); border: 1.5px dashed #8a6a48; color: #3a2414; }
 
   /* Neu dabei */
-  .neu-banner { position: fixed; left: 50%; top: calc(env(safe-area-inset-top) + 74px); transform: translateX(-50%); z-index: 22; border: 1px solid var(--glas-rand); background: var(--glas); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); color: var(--text); border-radius: 999px; padding: 9px 16px; font: inherit; font-size: 14px; font-weight: 600; box-shadow: var(--schatten); cursor: pointer; white-space: nowrap; max-width: 92vw; overflow: hidden; text-overflow: ellipsis; animation: neu-rein 0.5s cubic-bezier(0.3, 1.3, 0.5, 1); }
+  .neu-banner { position: fixed; left: 50%; top: calc(env(safe-area-inset-top) + 82px); transform: translateX(-50%); z-index: 22; border: 1px solid var(--glas-rand); background: var(--glas); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); color: var(--text); border-radius: 999px; padding: 9px 16px; font: inherit; font-size: 14px; font-weight: 600; box-shadow: var(--schatten); cursor: pointer; white-space: nowrap; max-width: 92vw; overflow: hidden; text-overflow: ellipsis; animation: neu-rein 0.5s cubic-bezier(0.3, 1.3, 0.5, 1); }
   @keyframes neu-rein { from { transform: translate(-50%, -18px); opacity: 0; } to { transform: translateX(-50%); opacity: 1; } }
   [data-stil="mission"] .neu-banner { border-radius: 2px; border-color: var(--amber); color: var(--amber); font-family: var(--mono); font-size: 12px; text-transform: uppercase; letter-spacing: 1px; }
   .fam-leer { color: var(--text-leise); font-size: 14px; padding: 10px 2px; }
@@ -1287,6 +1307,7 @@
   <h2>Freunde</h2>
   <div class="kasten einst-gruppe">
     <button class="einst-zeile" id="einladen-zeile"><span class="einst-symbol sym-gruen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="8" r="3.5"/><path d="M3.5 19.5c.8-3.6 3.4-5.5 6.5-5.5s5.7 1.9 6.5 5.5M18.5 8v6M15.5 11h6"/></svg></span><span class="einst-name">Nomaden-Freund einladen</span><span class="einst-wert"></span><span class="einst-pfeil">›</span></button>
+    <button class="einst-zeile" id="freunde-zeile"><span class="einst-symbol sym-gruen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><path d="M14 14h2v2h-2zM18 18h2v2h-2zM14 18h2M18 14h2"/></svg></span><span class="einst-name">Mein Ahoi-Code und Freunde</span><span class="einst-wert"><span class="zahl-marke" id="freunde-zahl"></span></span><span class="einst-pfeil">›</span></button>
     <button class="einst-zeile nur-proto" id="kreise-zeile"><span class="einst-symbol sym-blau"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="9" r="3"/><circle cx="16.5" cy="10" r="2.5"/><path d="M3.5 19c.6-3 2.8-4.6 5.5-4.6s4.9 1.6 5.5 4.6M14.5 15.2c.6-.3 1.3-.4 2-.4 2.2 0 3.8 1.3 4.3 3.7"/></svg></span><span class="einst-name">Freundeskreise</span><span class="einst-wert" id="kreise-wert"></span><span class="einst-pfeil">›</span></button>
     <button class="einst-zeile" id="paar-zeile"><span class="einst-symbol sym-rosa"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19.5s-7.5-4.3-7.5-9.6A4.2 4.2 0 0 1 12 7.6a4.2 4.2 0 0 1 7.5 2.3c0 5.3-7.5 9.6-7.5 9.6Z"/></svg></span><span class="einst-name">Partner</span><span class="einst-wert" id="paar-wert">Nicht verknüpft</span><span class="einst-pfeil">›</span></button>
   </div>
@@ -1377,6 +1398,21 @@
   <div id="feedback-liste"></div>
   <p class="hinweis-band">Passwort vergessen? Neues Startpasswort setzen und der Person sagen. Sie kann es danach im Profil ändern.</p>
 </section>
+<section class="seite" id="seite-freunde">
+  <div class="seite-kopf"><h1>Freunde</h1><button class="knopf-leise" data-zurueck="profil">Fertig</button></div>
+  <div class="kasten qr-kasten">
+    <div class="qr-bild" id="qr-bild" aria-label="Dein Ahoi-Code"></div>
+    <div class="qr-name"><b id="ahoi-name">@…</b><button class="knopf-leise" id="ahoi-name-aendern" type="button">Ändern</button></div>
+    <div class="qr-name-feld" id="ahoi-name-feld" hidden><span>@</span><input id="ahoi-name-eingabe" maxlength="20" autocomplete="off" autocapitalize="off" spellcheck="false"><button class="knopf-gross" id="ahoi-name-ok" type="button">OK</button></div>
+    <p class="qr-text">Zeig diesen Code, wenn du jemanden unterwegs triffst. Wer schon bei Ahoi ist, ist danach mit dir befreundet. Wer neu ist, meldet sich damit an und wird von Sven freigegeben.</p>
+  </div>
+  <div class="qr-knoepfe"><button class="knopf-gross" id="qr-scannen" type="button">📷 Code scannen</button><button class="knopf-leise" id="freund-suchen" type="button">@ Ahoi-Name suchen</button></div>
+  <div id="freund-anfragen"></div>
+  <div id="freund-vorschlaege"></div>
+  <h2 id="freunde-titel">Deine Freunde</h2>
+  <div class="kasten" id="freunde-liste"></div>
+</section>
+<div class="scanner" id="scanner" role="dialog" aria-label="Code scannen"><video id="scanner-video" playsinline muted></video><div class="scanner-rahmen"></div><p id="scanner-text">Halte die Kamera auf einen Ahoi-Code</p><button class="knopf-gross" id="scanner-zu" type="button">Schließen</button></div>
 <section class="seite" id="seite-links">
   <div class="seite-kopf"><h1>Social Media</h1><button class="knopf-leise" data-zurueck="profil">Abbrechen</button></div>
   <p class="kreise-erklaerung">Alles freiwillig. Deine Nomaden-Freunde sehen die Links klein in deinem Steckbrief.</p>

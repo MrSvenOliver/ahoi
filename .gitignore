@@ -6,6 +6,8 @@
 /public/app.js
 /public/texte.js
 /public/supabase.js
+/public/qrcode.js
+/public/jsqr.js
 /public/sw.js
 /public/manifest.webmanifest
 /public/weltkarte.json
