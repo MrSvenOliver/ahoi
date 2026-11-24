@@ -590,7 +590,7 @@ function infoZeigen(gruppe) {
   const chatKnopf = document.getElementById("info-chat");
   chatKnopf.style.display = !familieModus && gruppe.length === 1 && p.id !== "du" ? "inline-block" : "none";
   chatKnopf.onclick = () => einzelChat(p.id);
-  const tippKnopf = document.getElementById("info-tipps"), tippZahl = familieModus || ECHT ? 0 : tipps.filter(x => x.ort === p.ort).length;
+  const tippKnopf = document.getElementById("info-tipps"), tippZahl = TIPPS_AN && !familieModus && !ECHT ? tipps.filter(x => x.ort === p.ort).length : 0;
   tippKnopf.style.display = tippZahl ? "inline-block" : "none";
   tippKnopf.textContent = tippZahl ? t("💡 {n} Tipps zu {ort}", { n: tippZahl, ort: p.ort }) : "";
   tippKnopf.onclick = () => { tippsOrt = p.ort; ideenReiter = "tipps"; seiteZeigen("ideen"); ideenAufbauen(); };
@@ -747,6 +747,7 @@ function seiteZeigen(name) {
   document.querySelectorAll("#leiste button").forEach(b => b.setAttribute("aria-current", b.dataset.seite === name ? "page" : "false"));
   document.querySelectorAll("#leiste button").forEach(b => b.classList.toggle("aktiv", b.dataset.seite === (TAB_VON[name] || name)));
   document.getElementById("info").classList.remove("offen");
+  document.documentElement.classList.toggle("seite-auf", seiten.includes(name));
   if (name === "chat") chatListeAufbauen();
   if (name === "karte") { blattSetzen(false); map.resize(); }
 }
@@ -1220,7 +1221,11 @@ function tippsAufbauen() {
     if (error) return hinweis(t("Das hat nicht geklappt")); tipps.splice(tipps.indexOf(x), 1); tippsAufbauen();
   }, true]]));
 }
+// Ortstipps sind vorerst ausgeblendet (Entscheidung 24.11.2026); Daten und Code bleiben für später
+const TIPPS_AN = false;
 function ideenAufbauen() {
+  if (!TIPPS_AN) ideenReiter = "unterkunft";
+  document.getElementById("ideen-reiter").hidden = !TIPPS_AN;
   document.querySelectorAll("#ideen-reiter button").forEach(b => b.classList.toggle("aktiv", b.dataset.r === ideenReiter));
   document.getElementById("bereich-unterkunft").style.display = ideenReiter === "unterkunft" ? "" : "none";
   document.getElementById("bereich-tipps").style.display = ideenReiter === "tipps" ? "" : "none";
@@ -1238,20 +1243,22 @@ function ideenAufbauen() {
     const teile = i.echt && i.titel ? i.titel.split(" · ") : null;
     const kopf = teile ? ohneHtml(teile[0]) : i.echt ? ohneHtml(i.ort) : t("{art} in {ort}", { art: i.art, ort: i.ort });
     const bildStil = i.bild ? `background:var(--trenner) center / cover url('${String(i.bild).replace(/['"()\\]/g, c => encodeURIComponent(c))}')` : `background:${i.farbe}`;
+    const kz = i.echt ? wunschZahlen(i) : null;
+    const zellen = kz ? [kz.zimmer && [`🛏 ${kz.zimmer}`, t(kz.zimmer === 1 ? "Schlafzimmer|1" : "Schlafzimmer")], kz.betten && [`🛌 ${kz.betten}`, t(kz.betten === 1 ? "Bett" : "Betten")], i.gaeste && [`👥 ${i.gaeste}`, t("Gäste max.")], i.plaetze && [frei ? `${frei}` : t("Voll"), t(frei ? "Plätze frei" : "alle vergeben"), !frei]].filter(Boolean) : [];
     const zahlen = !i.echt ? `<div class="zahlen">
           <div><b>🛏 ${parseInt(i.zimmer) || "–"}</b><small>${t("Schlafzimmer")}</small></div>
           <div><b>👥 ${i.plaetze}</b><small>${i.plaetze < i.gaeste ? t("von {n} Gästen", { n: i.gaeste }) : t("Gäste")}</small></div>
           <div class="${frei ? "" : "voll"}"><b>${frei ? frei : t("Voll")}</b><small>${t(frei ? "Plätze frei" : "alle vergeben")}</small></div>
-        </div>` : i.plaetze ? `<div class="zahlen zwei"><div><b>👥 ${i.plaetze}</b><small>${t("Plätze")}</small></div><div class="${frei ? "" : "voll"}"><b>${frei ? frei : t("Voll")}</b><small>${t(frei ? "Plätze frei" : "alle vergeben")}</small></div></div>` : "";
+        </div>` : zellen.length ? `<div class="zahlen" style="grid-template-columns:repeat(${zellen.length},1fr)">${zellen.map(([w, l, voll]) => `<div class="${voll ? "voll" : ""}"><b>${w}</b><small>${l}</small></div>`).join("")}</div>` : "";
     const chatKnopf = !i.echt ? `<button class="knopf-leise">💬 ${i.kommentare}</button>` : (i.chat && (eigen || ichDabei)) ? `<button class="knopf-leise idee-chat" data-n="${n}">💬 ${t("Gruppe")}</button>` : eigen ? "" : `<button class="knopf-leise idee-chat" data-n="${n}">💬 ${ohneHtml(person(i.von).name)}</button>`;
     return `
     <div class="kasten idee">
       <div class="bild" style="${bildStil}"><span class="quelle">${ohneHtml(i.quelle || "")}</span>${i.echt ? "" : `<span class="sicht">${i.sicht}</span>`}${i.gebucht ? '<span class="gebucht">' + t("✅ Gebucht") + '</span>' : ""}<button class="herzen${i.herzIch ? " an" : ""}" data-n="${n}">❤️ ${i.herzen}</button></div>
       <div class="inhalt">
         <b>${kopf} ${i.land ? flagge(i.land) : ""}</b>
-        <span class="ort">${[i.echt && teile ? ohneHtml(i.ort) : "", i.bewertung ? "★ " + i.bewertung : "", i.anreise ? kurz(i.anreise) + "–" + kurz(i.abreise) : i.zeitraum].filter(Boolean).join(" · ")}</span>
-        ${teile && teile.length > 1 ? `<span class="extra">${ohneHtml(teile.slice(1).join(" · "))}</span>` : ""}
-        <div class="geteilt">${ava(person(i.von))}<span><b>${eigen ? t("Du") : person(i.von).name}</b><br>${i.notiz ? "„" + ohneHtml(i.notiz) + "“" : t("hat das geteilt")}</span></div>
+        <span class="ort">${[i.echt && teile && !teile[0].includes(i.ort) ? ohneHtml(i.ort) : "", i.bewertung ? "★ " + i.bewertung : "", i.anreise ? kurz(i.anreise) + "–" + kurz(i.abreise) : i.zeitraum].filter(Boolean).join(" · ")}</span>
+        ${kz && kz.rest ? `<span class="extra">${ohneHtml(kz.rest)}</span>` : ""}
+        <div class="geteilt">${ava(person(i.von))}<span><b>${eigen ? t("Du") : person(i.von).name}</b>${i.notiz ? "„" + ohneHtml(i.notiz) + "“" : t("hat das geteilt")}</span></div>
         ${zahlen}
         ${i.preis ? `<div class="rechner">💶 ${i.preis} € / ${t("Nacht")} · <b>${t("{n} € pro Person", { n: proPerson })}</b> ${t("bei {n}", { n: belegt })}</div>` : ""}
         <div class="dabei-leiste"><div class="dabei-gesichter">${[i.von, ...i.dabei].map(id => ava(person(id))).join("")}</div></div>
@@ -1308,9 +1315,27 @@ document.getElementById("tipp-speichern").onclick = async e => {
   tipps.unshift({ von: "du", ort, land: bekannt ? bekannt.land : ich().land, art: document.querySelector("#tipp-arten .aktiv").dataset.a, text, daumen: [] });
   tippsOrt = null; tippsFilter = "alle"; seiteZeigen("ideen"); ideenAufbauen(); hinweis(t("Tipp geteilt"));
 };
+// Zwischenablage lesen: Airbnb legt einen Link (nicht nur Text) ab. Mit clipboard.read() bietet Safari dafür „Einfügen“ an,
+// readText() allein zeigt bei Links nur ein ausgegrautes „Einfügen“. Klappt beides nicht: ins Feld springen.
+async function zwischenablageLesen() {
+  const c = navigator.clipboard;
+  if (c && c.read) {
+    try {
+      for (const item of await c.read()) for (const typ of ["text/uri-list", "text/plain", "text/html"]) if (item.types.includes(typ)) {
+        let v = await (await item.getType(typ)).text();
+        if (typ === "text/uri-list") v = v.split(/\r?\n/).find(z => z && !z.startsWith("#")) || "";
+        if (v.trim()) return v.trim();
+      }
+    } catch (e) {}
+    return null;
+  }
+  if (c && c.readText) { try { return (await c.readText()).trim() || null; } catch (e) {} }
+  return null;
+}
 document.getElementById("einfuegen").onclick = async () => {
-  try { const v = (await navigator.clipboard.readText()).trim(); if (!v) throw 0; document.getElementById("idee-link").value = v; vorschauZeigen(); }
-  catch (e) { hinweis(t("Link bitte ins Feld einfügen")); document.getElementById("idee-link").focus(); }
+  const feld = document.getElementById("idee-link"), v = await zwischenablageLesen(), link = linkAus(v);
+  if (link) { feld.value = link; return vorschauZeigen(); }
+  feld.focus(); hinweis(t("Tippe lange ins Link-Feld und wähle „Einfügen“"));
 };
 document.getElementById("idee-link").addEventListener("input", () => { clearTimeout(vorschauZeigen.uhr); vorschauZeigen.uhr = setTimeout(vorschauZeigen, 500); });
 // Link aus geteiltem Text holen (Airbnb teilt oft „Schau dir das an: https://…“)
@@ -1323,9 +1348,10 @@ async function vorschauEcht(link) {
   let v = null;
   try { const r = await SB.functions.invoke("vorschau", { body: { url: link } }); v = r.data && r.data.ok ? r.data : null; } catch (e) {}
   if (linkAus(document.getElementById("idee-link").value) !== link) return;
-  ideeVorschau = v ? { titel: v.titel, bild: v.bild } : null;
+  ideeVorschau = v ? { titel: v.titel, bild: v.bild, gaeste: v.gaeste || null } : null;
+  if (v && v.gaeste && !plaetze) { plaetze = Math.min(30, Math.max(2, v.gaeste)); plaetzeZeigen(); }
   const bild = ideeFoto ? URL.createObjectURL(ideeFoto) : v && v.bild;
-  box.innerHTML = `<div class="vb" style="${bild ? `background-image:url('${bild.replace(/'/g, "%27")}')` : ""}"></div><div><b>${ohneHtml((v && v.titel) || quelleVon(link))}</b><small>${v ? (v.bild ? t("Bild und Titel übernommen") : t("Kein Bild gefunden, du kannst ein eigenes Foto dazulegen")) : t("Keine Vorschau möglich, du kannst ein eigenes Foto dazulegen")}</small></div>`;
+  box.innerHTML = `<div class="vb" style="${bild ? `background-image:url('${bild.replace(/'/g, "%27")}')` : ""}"></div><div><b>${ohneHtml((v && v.titel) || quelleVon(link))}</b><small>${v ? (v.bild ? t("Bild und Titel übernommen") : t("Kein Bild gefunden, du kannst ein eigenes Foto dazulegen")) + (v.gaeste ? " · " + t("bis {n} Gäste", { n: v.gaeste }) : "") : t("Keine Vorschau möglich, du kannst ein eigenes Foto dazulegen")}</small></div>`;
   // Ort vorschlagen, wenn der Titel ihn nennt („… in Lissabon“)
   // Airbnb englisch: „Tiny home in Mickleton · ★4.9“, deutsch: „Tiny House · Mickleton · ★4,9“
   const teile = v && v.titel ? v.titel.split(" · ") : [], ortFeld = document.getElementById("idee-ort");
@@ -1379,7 +1405,7 @@ async function wunschSpeichern(knopf) {
       const up = await SB.storage.from("wunschbilder").upload(foto, blob, { contentType: "image/jpeg" });
       if (up.error) throw up.error;
     }
-    const { error } = await SB.from("wunsch").insert({ link, titel: ideeVorschau && ideeVorschau.titel || null, bild_url: ideeVorschau && ideeVorschau.bild || null, foto, quelle: quelleVon(link),
+    const { error } = await SB.from("wunsch").insert({ link, titel: ideeVorschau && ideeVorschau.titel || null, bild_url: ideeVorschau && ideeVorschau.bild || null, gaeste: ideeVorschau && ideeVorschau.gaeste || null, foto, quelle: quelleVon(link),
       ort: ideeOrt.ort, land: ideeOrt.land, lat: ideeOrt.lat, lon: ideeOrt.lon, anreise: an, abreise: ab, preis, plaetze, notiz: document.getElementById("idee-notiz").value.trim() || null });
     if (error) { if (foto) SB.storage.from("wunschbilder").remove([foto]).catch(() => {}); throw error; }
     ideeFormularLeeren(); ideenReiter = "unterkunft"; seiteZeigen("ideen"); await wishlistLaden(); hinweis(t("Auf der Wishlist geteilt"));
@@ -1396,6 +1422,13 @@ document.querySelectorAll("#sicht-wahl button").forEach(b => b.onclick = () => {
   d.querySelectorAll(".chips button").forEach(x => x.onclick = () => x.classList.toggle("aktiv"));
 });
 document.getElementById("idee-speichern").onclick = e => { if (ECHT) return wunschSpeichern(e.target); hinweis(t("Im Prototyp wird nichts geteilt")); seiteZeigen("ideen"); };
+// Airbnb-Titel zerlegen: „Tiny home in Mickleton · ★4.9 · 1 bedroom · 1 bed · 1 bath“ (auch deutsch)
+function wunschZahlen(i) {
+  const teile = (i.titel || "").split(" · ").slice(1), zahl = re => { for (const x of teile) { const m = x.match(re); if (m) return +m[1]; } return null; };
+  const zimmer = zahl(/^(\d+)\s*(?:bedrooms?|Schlafzimmer|spáln)/i), betten = zahl(/^(\d+)\s*(?:beds?|Betten|Bett|post)(?!\w)/i);
+  const rest = teile.filter(x => !/^\d+\s*(?:bedrooms?|Schlafzimmer|beds?|Betten|Bett|baths?|bathrooms?|Badezimmer|Bad|private|shared|spáln|post|kúpe)/i.test(x) && x !== i.ort).join(" · ");
+  return { zimmer, betten, rest };
+}
 // ---------- Wishlist in der echten App: laden und Knöpfe ----------
 const wunschBilder = {};
 async function wishlistLaden() {
@@ -1410,7 +1443,7 @@ async function wishlistLaden() {
     ideen.splice(0, ideen.length, ...w.data.map(x => {
       const herz = h.data.filter(y => y.wunsch === x.id), f = farbeVon(x.id);
       return { id: x.id, echt: true, von: idVon(x.von), titel: x.titel, ort: x.ort, land: x.land, lat: x.lat, lon: x.lon, link: x.link, quelle: x.quelle || quelleVon(x.link),
-        bild: x.foto ? wunschBilder[x.foto] : x.bild_url, notiz: x.notiz || "", anreise: x.anreise, abreise: x.abreise, preis: x.preis, plaetze: x.plaetze, foto: x.foto,
+        bild: x.foto ? wunschBilder[x.foto] : x.bild_url, notiz: x.notiz || "", anreise: x.anreise, abreise: x.abreise, preis: x.preis, plaetze: x.plaetze, gaeste: x.gaeste, foto: x.foto,
         dabei: d.data.filter(y => y.wunsch === x.id).map(y => idVon(y.person)), herzen: herz.length, herzIch: herz.some(y => y.person === ECHT_DATEN.uid),
         gebucht: x.gebucht, chat: x.chat, farbe: `linear-gradient(135deg, ${f}66, ${f})` };
     }).filter(i => person(i.von) && !(i.abreise && i.abreise < new Date().toISOString().slice(0, 10) && !i.gebucht)));
@@ -2370,8 +2403,13 @@ async function ortNachfragen(sofort) {
 // ---------- Neu in Ahoi: nach jedem App-Update einmal eine kurze Übersicht ----------
 // Bei jedem Update oben einen Eintrag ergänzen (neueste zuerst). Wer neu dabei ist, sieht nur den neuesten.
 const NEUIGKEITEN = [
+  { id: "2026-11-24-feinschliff", punkte: [
+    "🛏 Die Wishlist zeigt Schlafzimmer, Betten und wie viele Gäste reinpassen.",
+    "📋 „Link einfügen“ klappt jetzt mit Airbnb-Links.",
+    "✨ Oben ist mehr Abstand zur Statusleiste, nichts wirkt mehr verschwommen."
+  ] },
   { id: "2026-11-24-wishlist", punkte: [
-    "💛 Die Wishlist ist da: Unterkünfte teilen, „Ich wäre dabei“ und Ortstipps.",
+    "💛 Die Wishlist ist da: Unterkünfte teilen und sehen, wer dabei wäre.",
     "🔗 Im Profil kannst du Instagram, TikTok & Co. und deine Webseite eintragen.",
     "🏡 Familie einladen hat einen eigenen Knopf mit kurzer Erklärung."
   ] },

@@ -149,11 +149,29 @@ async function leuteLaden() {
   return liste;
 }
 
+// ---------- Anleitung „Ahoi als App“ ----------
+// Einmal zeigen, wenn Ahoi auf einem Handy im Browser läuft (nicht vom Home-Bildschirm). iPhone und Android getrennt.
+const istIos = () => /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+const istAndroid = () => /Android/i.test(navigator.userAgent);
+const imBrowser = () => !(window.navigator.standalone === true || matchMedia("(display-mode: standalone)").matches);
+let installEreignis = null;
+window.addEventListener("beforeinstallprompt", e => { e.preventDefault(); installEreignis = e; const k = document.getElementById("installieren-knopf"); if (k) k.hidden = false; });
+function installHinweisNoetig() {
+  if (!(istIos() || istAndroid()) || !imBrowser()) return false;
+  try { return !localStorage.getItem("ahoi-anleitung-gezeigt"); } catch (e) { return false; }
+}
+function anleitungZeigen() {
+  zeige("installieren");
+  document.querySelectorAll(".anleitung").forEach(el => el.hidden = el.dataset.geraet !== (istIos() ? "ios" : "android"));
+  document.getElementById("installieren-knopf").hidden = !installEreignis;
+}
+
 // ---------- Ablauf ----------
 async function weiter() {
   const p = await profilLaden();
   if (!p) return zeige("kein-zugang");
   if (!p.freigegeben) return zeige("warten");
+  if (installHinweisNoetig()) return anleitungZeigen();
   if (p.art === "familie") {
     // Familie: kein Ort, kein erster Start; sieht nur die Nomaden, die sie eingeladen haben
     await leuteLaden();
@@ -250,6 +268,17 @@ function formulareVerbinden() {
     beschaeftigt(knopf, false);
   });
   document.getElementById("zu-anmelden").onclick = () => zeige("anmelden");
+  document.getElementById("installieren-spaeter").onclick = async e => {
+    try { localStorage.setItem("ahoi-anleitung-gezeigt", "1"); } catch (x) {}
+    beschaeftigt(e.target, true); try { await weiter(); } catch (x) { zeige("anmelden"); } beschaeftigt(e.target, false);
+  };
+  document.getElementById("installieren-knopf").onclick = async () => {
+    if (!installEreignis) return;
+    installEreignis.prompt();
+    const { outcome } = await installEreignis.userChoice.catch(() => ({}));
+    installEreignis = null; document.getElementById("installieren-knopf").hidden = true;
+    if (outcome === "accepted") { try { localStorage.setItem("ahoi-anleitung-gezeigt", "1"); } catch (x) {} }
+  };
   document.querySelectorAll("[data-abmelden]").forEach(b => b.onclick = abmelden);
   document.getElementById("warten-pruefen").onclick = async e => {
     beschaeftigt(e.target, true);
