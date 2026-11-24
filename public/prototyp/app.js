@@ -152,7 +152,7 @@ const SYMBOLE = {
     karte: '<path d="M9 4 3 6.5v13.5l6-2.5 6 2.5 6-2.5V4l-6 2.5L9 4Z"/><path d="M9 4v13.5M15 6.5V20"/>',
     reisen: '<path d="M10.5 13.5 3 11l1.5-1.5 7.5 1 4-4.5a2 2 0 0 1 3 3l-4.5 4 1 7.5-1.5 1.5-2.5-7.5-3 3v2.5L7 22l-1-3-3-1 1.5-1.5H7l3.5-3Z"/>',
     chat: '<path d="M4 6.5A2.5 2.5 0 0 1 6.5 4h11A2.5 2.5 0 0 1 20 6.5v7a2.5 2.5 0 0 1-2.5 2.5H10l-4.5 3.5V16h0A2 2 0 0 1 4 14Z"/>',
-    ideen: '<path d="M3 11 12 4l9 7v9h-6v-6H9v6H3v-9Z"/>',
+    ideen: '<path d="M12 20.5s-7.6-4.6-9.5-9.3C1.1 7.8 3.2 4.8 6.5 4.8c2.3 0 3.8 1.4 5.5 3.4 1.7-2 3.2-3.4 5.5-3.4 3.3 0 5.4 3 4 6.4-1.9 4.7-9.5 9.3-9.5 9.3Z"/>',
     welt: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.8 3 2.8 15 0 18M12 3c-2.8 3-2.8 15 0 18"/>',
     ich: '<path d="M20 4 4 11.2l7.2 1.6L12.8 20Z"/>'
   },
@@ -160,7 +160,7 @@ const SYMBOLE = {
     karte: '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><path d="M12 12 18.4 5.6"/><circle cx="12" cy="12" r="1" fill="currentColor"/>',
     reisen: '<circle cx="6" cy="18" r="2"/><circle cx="18" cy="6" r="2"/><path d="M8 18h5a3 3 0 0 0 0-6h-2a3 3 0 0 1 0-6h5"/>',
     chat: '<circle cx="12" cy="10" r="2"/><path d="M12 12v9M8.5 6.5a5 5 0 0 0 0 7M15.5 6.5a5 5 0 0 1 0 7M5.5 3.5a9 9 0 0 0 0 13M18.5 3.5a9 9 0 0 1 0 13"/>',
-    ideen: '<path d="M4 20V9.5L12 4l8 5.5V20Z"/><circle cx="12" cy="13.5" r="3"/><path d="M12 9v1.5M12 16.5V18M7.5 13.5H9M15 13.5h1.5"/>',
+    ideen: '<path d="M12 3.5 14.6 9l6 .6-4.5 4 1.3 5.9L12 16.5l-5.4 3 1.3-5.9-4.5-4 6-.6Z"/>',
     welt: '<circle cx="12" cy="12" r="7.5"/><path d="M12 2.5v5M12 16.5v5M2.5 12h5M16.5 12h5"/>',
     ich: '<circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2.2" fill="currentColor"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/>'
   },
@@ -168,7 +168,7 @@ const SYMBOLE = {
     karte: '<path d="M6 4h12v14a2 2 0 0 1-2 2H6"/><path d="M6 4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2 2 2 0 0 0 2-2V6"/><path d="M12 9l3 3M15 9l-3 3"/><path d="M10.5 16.5c1.5-1.2 3.2-1.2 5 0" stroke-dasharray="1.4 1.8"/>',
     reisen: '<path d="M12 3v13M12 4l6.5 10H12M12 6.5 7 14h5"/><path d="M3 17h18l-2.5 3.5h-13Z"/>',
     chat: '<path d="M4.5 7c0-1.6 1.2-2.8 2.8-2.8h9.4c1.6 0 2.8 1.2 2.8 2.8v6c0 1.6-1.2 2.8-2.8 2.8H11.2L7 19.6v-3.8h0c-1.4 0-2.5-1.2-2.5-2.7Z"/><path d="M8 8.6c1-.7 2-.7 3 0s2 .7 3 0 2-.7 2.6 0M8 12h5"/>',
-    ideen: '<path d="M2.5 20h19M5 20l7-15 7 15M12 5v15M9.5 20 12 15l2.5 5"/>',
+    ideen: '<path d="M12 20.5s-7.6-4.6-9.5-9.3C1.1 7.8 3.2 4.8 6.5 4.8c2.3 0 3.8 1.4 5.5 3.4 1.7-2 3.2-3.4 5.5-3.4 3.3 0 5.4 3 4 6.4-1.9 4.7-9.5 9.3-9.5 9.3Z"/><path d="M8 9.5c.6-1 1.6-1.4 2.5-1" stroke-dasharray="1.5 1.5"/>',
     welt: '<circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5Z"/>',
     ich: '<circle cx="12" cy="5.5" r="2"/><path d="M12 7.5V21M8.5 11h7M5 14.5a7 7 0 0 0 14 0M3.5 15.5 5 14l1.5 1.5M17.5 15.5 19 14l1.5 1.5"/>'
   }
@@ -757,6 +757,43 @@ function feedbackSchliessen() { seiteZeigen(vorFeedback); }
 document.getElementById("feedback-lasche").onclick = feedbackOeffnen;
 document.querySelectorAll("[data-hinweis]").forEach(b => b.onclick = () => hinweis(b.dataset.hinweis));
 document.querySelectorAll("[data-zurueck]").forEach(b => b.onclick = () => b.dataset.zurueck === "__zurueck" ? feedbackSchliessen() : seiteZeigen(b.dataset.zurueck));
+// Zurückwischen wie bei WhatsApp: vom linken Rand nach rechts ziehen = einen Schritt zurück
+// (Chat → Chat-Übersicht → Karte; Unterseiten wie mit ihrem Zurück-Knopf)
+function zurueckSchritt() {
+  const name = seiten.find(n => document.getElementById("seite-" + n).classList.contains("offen"));
+  if (!name) return null;
+  if (name === "unterhaltung") return () => document.getElementById("gespraech-zurueck").click();
+  if (name === "feedback") return feedbackSchliessen;
+  const knopf = document.querySelector(`#seite-${name} .seite-kopf [data-zurueck]`);
+  return knopf ? () => knopf.click() : () => seiteZeigen("karte");
+}
+(() => {
+  let seite = null, x0 = 0, y0 = 0, t0 = 0, dx = 0, an = false;
+  document.addEventListener("touchstart", e => {
+    seite = null; an = false; dx = 0;
+    const p = e.touches[0];
+    if (e.touches.length !== 1 || p.clientX > 24 || document.querySelector("#aktion-blatt.offen, .steckbrief.offen, .foto-gross.offen")) return;
+    const name = seiten.find(n => document.getElementById("seite-" + n).classList.contains("offen"));
+    if (!name) return;
+    seite = document.getElementById("seite-" + name); x0 = p.clientX; y0 = p.clientY; t0 = Date.now();
+  }, { passive: true });
+  document.addEventListener("touchmove", e => {
+    if (!seite) return;
+    const p = e.touches[0], mx = p.clientX - x0, my = p.clientY - y0;
+    if (!an) { if (Math.abs(my) > 10 && Math.abs(my) > mx) { seite = null; return; } if (mx < 10) return; an = true; seite.style.transition = "none"; }
+    dx = Math.max(0, mx); seite.style.transform = `translateX(${dx}px)`;
+  }, { passive: true });
+  const ende = () => {
+    if (!seite) return;
+    const s = seite; seite = null;
+    if (!an) return;
+    const weiter = dx > innerWidth * 0.33 || (dx > 50 && dx / (Date.now() - t0) > 0.5);
+    s.style.transition = "transform 0.18s ease";
+    s.style.transform = weiter ? `translateX(${innerWidth}px)` : "";
+    setTimeout(() => { if (weiter) { const zurueck = zurueckSchritt(); if (zurueck) zurueck(); } s.style.transition = ""; s.style.transform = ""; }, 180);
+  };
+  document.addEventListener("touchend", ende); document.addEventListener("touchcancel", ende);
+})();
 document.getElementById("profil-knopf").onclick = () => seiteZeigen("profil");
 document.getElementById("reise-neu").onclick = () => seiteZeigen("reise-neu");
 document.getElementById("reise-an").addEventListener("change", e => { const ab = document.getElementById("reise-ab"); ab.min = e.target.value; if (ab.value && ab.value < e.target.value) ab.value = e.target.value; });
@@ -909,6 +946,7 @@ function vorschau(c) {
   if (n.system) return n.system.replace(/<[^>]+>/g, "");
   const wer = c.art !== "einzel" ? (n.von === "du" ? t("Du") : personOder(n.von).name) + ": " : n.von === "du" ? t("Du") + ": " : "";
   if (n.sprache) return wer + t("🎤 Sprachnachricht");
+  if (n.foto) return wer + "📷 " + (n.text || t("Foto"));
   if (n.ort) return wer + "📍 " + n.ort;
   return wer + (istFremd(n) && uebersetzt[c.id] ? n.ue[SPRACHE] : n.text);
 }
@@ -1052,10 +1090,12 @@ function chatAufbauen() {
     if (istFremd(n) && an) inhalt += `<span class="ue-hinweis">${t(zeigUe ? "Übersetzt aus {s}" : "Original auf {s}", { s: spracheName(n.lang) })} · <button data-k="${k}">${t(zeigUe ? "Original anzeigen" : "Übersetzung anzeigen")}</button></span>`;
     if (n.ort) inhalt = `<div class="ortkarte"><div class="ikon">📍</div><div><b>${n.ort}</b><br><span style="font-size:13px;opacity:.8">${ohneHtml(zeigUe ? n.ue[SPRACHE] : n.text)}</span></div></div>`;
     if (n.sprache) inhalt = `<div class="sprache">▶︎<div class="welle"></div>${n.sprache}</div>`;
+    if (n.foto) inhalt = `<img class="chat-foto" src="${fotoLinks[n.foto] || n.foto}" alt="${t("Foto")}" loading="lazy" data-gross>` + (inhalt ? `<div class="foto-text">${inhalt}</div>` : "");
     const nameZeigen = !ich && c.art !== "einzel";
-    return `<div class="msg${ich ? " ich" : ""}">${ich ? "" : ava(p)}<div class="blase">${nameZeigen ? `<small>${p.name}</small>` : ""}${inhalt}${n.reaktion ? `<span class="reaktionen">${n.reaktion}</span>` : ""}</div></div>`;
+    return `<div class="msg${ich ? " ich" : ""}">${ich ? "" : ava(p)}<div class="blase${n.foto ? " mit-foto" : ""}">${nameZeigen ? `<small>${p.name}</small>` : ""}${inhalt}${n.reaktion ? `<span class="reaktionen">${n.reaktion}</span>` : ""}</div></div>`;
   }).join("");
   v.querySelectorAll(".ue-hinweis button").forEach(b => b.onclick = () => { const n = c.nachrichten[b.dataset.k]; n.original = !n.original; chatAufbauen(); });
+  v.querySelectorAll("img[data-gross]").forEach(i => { i.onclick = () => { const g = document.getElementById("foto-gross"); g.querySelector("img").src = i.src; g.classList.add("offen"); }; if (!i.complete) i.onload = () => { if (v.scrollHeight - v.scrollTop - v.clientHeight < 400) v.scrollTop = v.scrollHeight; }; });
   v.scrollTop = v.scrollHeight;
 }
 document.getElementById("uebersetzen").onclick = () => { const c = aktuellerChat; uebersetzt[c.id] = !uebersetzt[c.id]; c.nachrichten.forEach(n => delete n.original); chatAufbauen(); };
@@ -1071,6 +1111,9 @@ document.getElementById("chat-senden").onclick = senden;
 // Tastatur bleibt beim Senden offen: sonst verschiebt sich die Leiste zwischen Drücken und Loslassen und der Tipp geht ins Leere
 document.getElementById("chat-senden").addEventListener("pointerdown", e => e.preventDefault());
 document.getElementById("chat-senden").addEventListener("mousedown", e => e.preventDefault());
+document.getElementById("foto-gross").onclick = e => e.currentTarget.classList.remove("offen");
+document.getElementById("chat-foto").onclick = () => { if (!ECHT) return hinweis(t("Im Prototyp wird nichts gesendet")); document.getElementById("chat-foto-datei").click(); };
+document.getElementById("chat-foto-datei").addEventListener("change", e => { const d = e.target.files[0]; e.target.value = ""; chatFotoSenden(d); });
 document.getElementById("chat-mikro").onclick = () => hinweis("Gedrückt halten zum Aufnehmen – kommt mit dem echten Chat");
 document.getElementById("chat-text").addEventListener("keydown", e => { if (e.key === "Enter") senden(); });
 document.getElementById("chat-text").addEventListener("focus", () => document.documentElement.classList.add("tippt"));
@@ -1816,16 +1859,22 @@ function trefferFinden() {
   }
   return treffer.sort((a, b) => a.von.localeCompare(b.von));
 }
+// Monat und Jahr für die Überschrift: „März 2026“, „März – April 2026“, „Dezember 2026 – Januar 2027“
+function monatSpanne(von, bis) {
+  const a = datum(von), b = datum(bis), m = d => d.toLocaleDateString(LOC, { month: "long" }), j = d => d.getFullYear();
+  if (j(a) !== j(b)) return `${m(a)} ${j(a)} – ${m(b)} ${j(b)}`;
+  return a.getMonth() === b.getMonth() ? `${m(a)} ${j(a)}` : `${m(a)} – ${m(b)} ${j(a)}`;
+}
 function trefferAufbauen() {
   const namen = ids => ids.map(person).filter(Boolean).map(p => p.name).join(" & ");
   document.getElementById("treffer-liste").innerHTML = trefferFinden().map(x => {
-    const zeit = `${kurz(x.von)} – ${kurz(x.bis)}`, wer = ohneHtml(namen(x.wer));
-    if (x.art === "reise") return `<div class="kasten treffer"><b>🧭 ${t("Treffer: {ort}", { ort: ohneHtml(x.ort) })}</b><span>${t("Du und {namen} seid vom {zeit} gleichzeitig dort.", { namen: wer, zeit })}</span></div>`;
-    if (x.art === "nah") return `<div class="kasten treffer leise"><b>📍 ${t("{namen} in der Nähe", { namen: wer })}</b><span>${t("Vom {zeit} bist du in {ort}, {namen} in {ort2} ({km} entfernt).", { zeit, ort: ohneHtml(x.ort), namen: wer, ort2: ohneHtml(x.ort2), km: km(x.km) })}</span></div>`;
-    if (x.art === "land") return `<div class="kasten treffer leise"><b>${flagge(x.land)} ${t("Beide in {land}", { land: ohneHtml(x.ort) })}</b><span>${t("Du und {namen} seid vom {zeit} gleichzeitig in {land}. Wo genau, ist noch offen.", { namen: wer, zeit, land: ohneHtml(x.ort) })}</span></div>`;
-    if (x.art === "kommt") return `<div class="kasten treffer"><b>🧭 ${t("{namen} kommt zu dir", { namen: wer })}</b><span>${flagge(x.land)} ${ohneHtml(x.ort)} · ${zeit}</span></div>`;
-    if (x.art === "kommt-nah") return `<div class="kasten treffer leise"><b>📍 ${t("{namen} kommt in deine Nähe", { namen: wer })}</b><span>${flagge(x.land)} ${ohneHtml(x.ort)} · ${zeit} · ${t("{km} von {ort}", { km: km(x.km), ort: ohneHtml(x.ort2) })}</span></div>`;
-    return `<div class="kasten treffer"><b>🧭 ${t("{namen} ist gerade in {ort}", { namen: wer, ort: ohneHtml(x.ort) })}</b><span>${t("Du bist dort vom {zeit}", { zeit })}</span></div>`;
+    const zeit = `${kurz(x.von)} – ${kurz(x.bis)}`, wer = ohneHtml(namen(x.wer)), wann = ` <small class="treffer-wann">(${monatSpanne(x.von, x.bis)})</small>`, fl = x.land ? flagge(x.land) + " " : "";
+    if (x.art === "reise") return `<div class="kasten treffer"><b>🧭 ${t("Treffer: {ort}", { ort: ohneHtml(x.ort) })}${wann}</b><span>${fl}${t("Du und {namen} seid vom {zeit} gleichzeitig dort.", { namen: wer, zeit })}</span></div>`;
+    if (x.art === "nah") return `<div class="kasten treffer leise"><b>📍 ${t("{namen} in der Nähe", { namen: wer })}${wann}</b><span>${fl}${t("Vom {zeit} bist du in {ort}, {namen} in {ort2} ({km} entfernt).", { zeit, ort: ohneHtml(x.ort), namen: wer, ort2: ohneHtml(x.ort2), km: km(x.km) })}</span></div>`;
+    if (x.art === "land") return `<div class="kasten treffer leise"><b>${fl}${t("Beide in {land}", { land: ohneHtml(x.ort) })}${wann}</b><span>${t("Du und {namen} seid vom {zeit} gleichzeitig in {land}. Wo genau, ist noch offen.", { namen: wer, zeit, land: ohneHtml(x.ort) })}</span></div>`;
+    if (x.art === "kommt") return `<div class="kasten treffer"><b>🧭 ${t("{namen} kommt zu dir", { namen: wer })}${wann}</b><span>${fl}${ohneHtml(x.ort)} · ${zeit}</span></div>`;
+    if (x.art === "kommt-nah") return `<div class="kasten treffer leise"><b>📍 ${t("{namen} kommt in deine Nähe", { namen: wer })}${wann}</b><span>${fl}${ohneHtml(x.ort)} · ${zeit} · ${t("{km} von {ort}", { km: km(x.km), ort: ohneHtml(x.ort2) })}</span></div>`;
+    return `<div class="kasten treffer"><b>🧭 ${t("{namen} ist gerade in {ort}", { namen: wer, ort: ohneHtml(x.ort) })}${wann}</b><span>${fl}${t("Du bist dort vom {zeit}", { zeit })}</span></div>`;
   }).join("");
 }
 
@@ -1894,7 +1943,7 @@ if (!ECHT) { let gezeigt = null; try { gezeigt = localStorage.getItem("ahoi-prot
 
 // ---------- Echte App: Profil, Ort, Einladen, Verwaltung ----------
 const BALD = {
-  ideen: ["🏡", "Ideen", "Unterkunfts-Ideen und Ortstipps kommen bald."]
+  ideen: ["💛", "Wishlist", "Unterkünfte und Ortstipps kommen bald."]
 };
 function fragen(titel, knoepfe) {
   const blatt = document.getElementById("aktion-blatt");
@@ -1918,7 +1967,35 @@ const chatStandSpeichern = () => { try { localStorage.setItem(CHAT_SPEICHER, JSO
 function nachrichtAusDb(x) {
   const von = x.von ? idVon(x.von) : null;
   if (x.system) { const name = von === "du" ? t("Du") : personOder(von).name; return { id: x.id, von, system: `<b>${ohneHtml(name)}</b> ${t(x.text === "erstellt" ? (von === "du" ? "hast die Gruppe erstellt" : "hat die Gruppe erstellt") : (von === "du" ? "hast die Gruppe verlassen" : "hat die Gruppe verlassen"))}` }; }
-  return { id: x.id, von, text: x.text, am: x.am };
+  return { id: x.id, von, text: x.text, am: x.am, foto: x.foto || null };
+}
+// Chat-Fotos: privat gespeichert, angezeigt über zeitlich begrenzte Links (24 Std., beim Neuladen erneuert)
+const fotoLinks = {};
+async function fotoLinksHolen(pfade) {
+  const fehlen = [...new Set(pfade.filter(p => p && !fotoLinks[p]))];
+  if (!fehlen.length) return;
+  const { data } = await SB.storage.from("chatfotos").createSignedUrls(fehlen, 86400);
+  (data || []).forEach(d => { if (d.signedUrl) fotoLinks[d.path] = d.signedUrl; });
+}
+async function chatFotoSenden(datei) {
+  const c = aktuellerChat; if (!c || !datei) return;
+  const knopf = document.getElementById("chat-foto"), feld = document.getElementById("chat-text"), text = feld.value.trim();
+  beschaeftigt(knopf, true);
+  try {
+    const b = await createImageBitmap(datei).catch(() => new Promise((ok, nein) => { const i = new Image(); i.onload = () => ok(i); i.onerror = nein; i.src = URL.createObjectURL(datei); }));
+    const f = Math.min(1, 1600 / Math.max(b.width, b.height)), cv = document.createElement("canvas");
+    cv.width = Math.round(b.width * f); cv.height = Math.round(b.height * f); cv.getContext("2d").drawImage(b, 0, 0, cv.width, cv.height);
+    const blob = await new Promise(ok => cv.toBlob(ok, "image/jpeg", 0.8));
+    const pfad = `${c.id}/${crypto.randomUUID()}.jpg`;
+    const hoch = await SB.storage.from("chatfotos").upload(pfad, blob, { contentType: "image/jpeg" });
+    if (hoch.error) throw hoch.error;
+    fotoLinks[pfad] = URL.createObjectURL(blob); // eigenes Foto sofort zeigen
+    const { data, error } = await SB.from("nachricht").insert({ chat: c.id, text, foto: pfad, sprache: SPRACHE }).select("id, chat, von, text, system, am, foto").single();
+    if (error) { SB.storage.from("chatfotos").remove([pfad]).catch(() => {}); throw error; }
+    if (text) feld.value = "";
+    nachrichtDazu(data);
+  } catch (e) { hinweis(t("Foto senden hat nicht geklappt")); }
+  beschaeftigt(knopf, false);
 }
 function chatGelesen(c) {
   c.ungelesen = 0;
@@ -1932,9 +2009,10 @@ async function chatsLaden() {
   if (!ECHT || familieModus || ECHT_DATEN.profil.art === "familie") return;
   const [k, m, n] = await Promise.all([
     SB.from("chat").select("id, art, name, emoji, erstellt_am"), SB.from("chat_mitglied").select("chat, person"),
-    SB.from("nachricht").select("id, chat, von, text, system, am").order("id", { ascending: false }).limit(800)
+    SB.from("nachricht").select("id, chat, von, text, system, am, foto").order("id", { ascending: false }).limit(800)
   ]);
   if (k.error || m.error || n.error) return;
+  await fotoLinksHolen(n.data.map(x => x.foto)).catch(() => {});
   const st = await SB.from("chat_stumm").select("chat");
   const stumm = new Set(st.error ? [] : st.data.map(x => x.chat));
   const neu = k.data.map(x => {
@@ -1954,10 +2032,11 @@ async function chatsLaden() {
   if (document.getElementById("seite-chat").classList.contains("offen")) chatListeAufbauen(); else chatPunkt();
   if (aktuellerChat && document.getElementById("seite-unterhaltung").classList.contains("offen")) { chatAufbauen(); chatGelesen(aktuellerChat); }
 }
-function nachrichtDazu(x) {
+async function nachrichtDazu(x) {
   const c = chats.find(y => y.id === x.chat);
   if (!c) return chatsLaden();
   if (c.nachrichten.some(y => y.id === x.id)) return;
+  if (x.foto) { await fotoLinksHolen([x.foto]).catch(() => {}); if (c.nachrichten.some(y => y.id === x.id)) return; }
   c.nachrichten.push(nachrichtAusDb(x));
   if (c.art === "einzel") delete chatStand.weg[c.id];
   const offen = aktuellerChat === c && document.getElementById("seite-unterhaltung").classList.contains("offen") && document.visibilityState === "visible";
@@ -1973,7 +2052,7 @@ function chatVerbinden() {
 }
 async function chatSendenEcht(feld, text) {
   const c = aktuellerChat; feld.value = "";
-  const { data, error } = await SB.from("nachricht").insert({ chat: c.id, text, sprache: SPRACHE }).select("id, chat, von, text, system, am").single();
+  const { data, error } = await SB.from("nachricht").insert({ chat: c.id, text, sprache: SPRACHE }).select("id, chat, von, text, system, am, foto").single();
   if (error) { feld.value = text; return hinweis(t("Senden hat nicht geklappt")); }
   nachrichtDazu(data);
 }
@@ -2066,6 +2145,7 @@ function pushZiel(url) {
   const q = new URL(url, location.href).searchParams;
   if (q.get("chat")) { const c = chats.find(x => x.id === q.get("chat")); if (c) gespraechOeffnen(c); else chatsLaden().then(() => { const c2 = chats.find(x => x.id === q.get("chat")); if (c2) gespraechOeffnen(c2); }); }
   if (q.get("ort") === "frage") ortNachfragen(true);
+  if (q.get("rundruf")) try { localStorage.setItem("ahoi-rundruf", Math.max(+q.get("rundruf"), +localStorage.getItem("ahoi-rundruf") || 0)); } catch (e) {}
 }
 if ("serviceWorker" in navigator) navigator.serviceWorker.addEventListener("message", e => { if (e.data && e.data.ziel) pushZiel(e.data.ziel); });
 
@@ -2080,14 +2160,14 @@ async function ortNachfragen(sofort) {
   const merken = k => { gefragt[k] = heute; try { localStorage.setItem("ahoi-ortfrage", JSON.stringify(gefragt)); } catch (e) {} };
   const reise = reisen.find(r => r.wer[0] === "du" && r.von && r.von <= heute && r.bis >= heute);
   const woanders = reise && (reise.lat == null ? reise.land !== du.land : du.lat == null || entfernungKm(du.lat, du.lon, reise.lat, reise.lon) > GLEICH_KM);
-  const zumOrt = () => { seiteZeigen("profil"); setTimeout(() => { document.getElementById("ort-suche").scrollIntoView({ behavior: ruhig ? "auto" : "smooth", block: "center" }); document.getElementById("ort-suche").focus(); }, 350); };
+  const zumOrt = () => { seiteZeigen("profil"); setTimeout(async () => { const k = document.getElementById("ort-gps"); k.scrollIntoView({ behavior: ruhig ? "auto" : "smooth", block: "center" }); beschaeftigt(k, true); const ok = await ortPerGps(); beschaeftigt(k, false); if (!ok) document.getElementById("ort-suche").focus(); }, 350); };
   const bestaetigen = async () => { const { error } = await SB.rpc("ort_bestaetigen"); if (!error) { du.stand = new Date().toISOString(); hinweis(t("Danke! Ort bestätigt")); listeAufbauen(); } };
   if (woanders) {
     const k = "reise|" + reise.ziel + "|" + reise.von;
     if (!sofort && gefragt[k] === heute) return nachbarnFragen();
     merken(k);
     return fragen(t("Laut deinem Reiseplan bist du jetzt in {ort}. Stimmt das?", { ort: reise.ziel }), [
-      [reise.lat != null ? t("Ja, ich bin in {ort}", { ort: reise.ziel }) : t("Ja, Ort in {land} wählen", { land: landName(reise.land) }), () => reise.lat != null ? neuerOrt({ ort: reise.ziel, land: reise.land, lat: reise.lat, lon: reise.lon }) : zumOrt()],
+      [reise.lat != null ? t("Ja, ich bin in {ort}", { ort: reise.ziel }) : t("Ja, Ort aktualisieren"), () => reise.lat != null ? neuerOrt({ ort: reise.ziel, land: reise.land, lat: reise.lat, lon: reise.lon }) : zumOrt()],
       ...(du.ort ? [[t("Nein, noch in {ort}", { ort: du.ort }), bestaetigen]] : []),
       [t("Ich bin woanders"), zumOrt]
     ]);
@@ -2104,6 +2184,13 @@ async function ortNachfragen(sofort) {
 // ---------- Neu in Ahoi: nach jedem App-Update einmal eine kurze Übersicht ----------
 // Bei jedem Update oben einen Eintrag ergänzen (neueste zuerst). Wer neu dabei ist, sieht nur den neuesten.
 const NEUIGKEITEN = [
+  { id: "2026-11-24-fotos", punkte: [
+    "📷 Fotos im Chat: Kamera-Knopf neben dem Textfeld.",
+    "🧭 Treffer zeigen Monat, Jahr und Länderflagge.",
+    "👈 Vom linken Rand nach rechts wischen geht einen Schritt zurück.",
+    "📍 Dein Ort kommt jetzt nur noch über „Aktualisieren“.",
+    "💛 Aus „Ideen“ wird die Wishlist."
+  ] },
   { id: "2026-11-24-push2", punkte: [
     "🔔 Push lässt sich jetzt einschalten: Profil → Mitteilungen → „Neue Chat-Nachrichten“.",
     "📍 Die Nachfrage zu deinem Ort hat einen eigenen Schalter."
@@ -2270,6 +2357,15 @@ async function standortStill() {
     else if (!ECHT_DATEN.profil.standort_am || Date.now() - new Date(ECHT_DATEN.profil.standort_am) > 6 * 36e5) { await SB.rpc("ort_bestaetigen"); ECHT_DATEN.profil.standort_am = new Date().toISOString(); if (ich()) ich().stand = ECHT_DATEN.profil.standort_am; }
   } catch (e) {}
 }
+// Ort nur über die echte Ortung; die Stadtsuche erscheint erst, wenn die Ortung nicht erlaubt ist oder nichts findet
+async function ortPerGps() {
+  try { await neuerOrt(await standortErmitteln()); document.getElementById("ort-suche").hidden = true; return true; }
+  catch (err) {
+    const feld = document.getElementById("ort-suche"); feld.hidden = false;
+    hinweis(err && err.code === 1 ? t("Standort nicht erlaubt. Such deine Stadt einfach unten.") : t("Standort nicht gefunden. Such deine Stadt einfach unten."));
+    return false;
+  }
+}
 async function neuerOrt(o) {
   await standortSpeichern(o);
   meinOrtZeigen(); hinweis(t("Ort gespeichert"));
@@ -2302,9 +2398,50 @@ function startPasswort() {
   const z = "abcdefghjkmnpqrstuvwxyz23456789", r = crypto.getRandomValues(new Uint32Array(10));
   return "Ahoi-" + [...r].map(x => z[x % z.length]).join("");
 }
+// Mitteilung an alle (nur Admin): sofort oder geplant; verschickt wird von der Edge Function „push“
+const rundrufZeitKnopf = () => { const v = document.getElementById("rundruf-zeit").value; document.getElementById("rundruf-senden").textContent = v && new Date(v) > new Date(Date.now() + 60e3) ? t("Planen") : t("Jetzt senden"); };
+async function rundrufListe() {
+  const box = document.getElementById("rundruf-liste");
+  const { data, error } = await SB.from("rundruf").select("id,text,senden_am,raus").order("senden_am", { ascending: false }).limit(8);
+  if (error) { box.innerHTML = ""; return; }
+  const wann = iso => new Date(iso).toLocaleString(LOC, { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+  box.innerHTML = data.map(r => `<div class="rundruf-eintrag"><div><b>${ohneHtml(r.text)}</b><small>${r.raus ? t("Verschickt {zeit}", { zeit: wann(r.senden_am) }) : t("Geplant für {zeit}", { zeit: wann(r.senden_am) })}</small></div>${r.raus ? "" : `<button class="knopf-leise" data-rundruf-weg="${r.id}" aria-label="${t("Löschen")}">✕</button>`}</div>`).join("");
+  box.querySelectorAll("[data-rundruf-weg]").forEach(b => b.onclick = () => fragen(t("Geplante Mitteilung löschen?"), [[t("Löschen"), async () => {
+    const { error } = await SB.from("rundruf").delete().eq("id", b.dataset.rundrufWeg).eq("raus", false);
+    hinweis(error ? t("Das hat nicht geklappt") : t("Gelöscht")); rundrufListe();
+  }, true]]));
+}
+document.getElementById("rundruf-zeit").addEventListener("input", rundrufZeitKnopf);
+document.getElementById("rundruf-senden").onclick = e => {
+  const feld = document.getElementById("rundruf-text"), text = feld.value.trim(), v = document.getElementById("rundruf-zeit").value;
+  if (!text) return hinweis(t("Bitte erst einen Text schreiben"));
+  if (!ECHT) return hinweis(t("Im Prototyp wird nichts gesendet"));
+  const spaeter = v && new Date(v) > new Date(Date.now() + 60e3);
+  fragen(spaeter ? t("Mitteilung für {zeit} an alle planen?", { zeit: new Date(v).toLocaleString(LOC, { day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" }) }) : t("Jetzt an alle senden?"), [[spaeter ? t("Planen") : t("Senden"), async () => {
+    beschaeftigt(e.target, true);
+    const { error } = await SB.from("rundruf").insert({ text, senden_am: spaeter ? new Date(v).toISOString() : new Date().toISOString() });
+    beschaeftigt(e.target, false);
+    if (error) return hinweis(t("Das hat nicht geklappt"));
+    feld.value = ""; document.getElementById("rundruf-zeit").value = ""; rundrufZeitKnopf();
+    hinweis(spaeter ? t("Geplant") : t("Gesendet")); setTimeout(rundrufListe, spaeter ? 0 : 2500);
+  }]]);
+};
+// Für alle ohne Push auf diesem Gerät: die letzte Mitteilung an alle (höchstens 7 Tage alt) einmal in der App zeigen
+async function rundrufZeigen() {
+  if (!ECHT) return;
+  if (document.getElementById("aktion-blatt").classList.contains("offen")) return setTimeout(rundrufZeigen, 2000);
+  let gesehen = 0; try { gesehen = +localStorage.getItem("ahoi-rundruf") || 0; } catch (e) {}
+  const { data } = await SB.from("rundruf").select("id,text").gt("senden_am", new Date(Date.now() - 7 * 864e5).toISOString()).order("id", { ascending: false }).limit(1);
+  const r = data && data[0];
+  if (!r || r.id <= gesehen) return;
+  try { localStorage.setItem("ahoi-rundruf", r.id); } catch (e) {}
+  if (PUSH.abo) return; // kam schon per Push
+  fragen(r.text, [[t("Schön 🙂"), () => {}]]);
+  document.getElementById("aktion-abbrechen").style.display = "none";
+}
 async function verwaltungAufbauen() {
   try { await verwaltungLaden(); } catch (e) { return hinweis(t("Laden hat nicht geklappt")); }
-  feedbackListeAufbauen();
+  feedbackListeAufbauen(); rundrufListe();
   const nameVon = id => (mitgliederDaten.find(x => x.id === id) || {}).name || "?";
   const tag = iso => new Date(iso).toLocaleDateString(LOC, { day: "numeric", month: "short" });
   const wartende = mitgliederDaten.filter(x => !x.freigegeben), mitglieder = mitgliederDaten.filter(x => x.freigegeben);
@@ -2343,7 +2480,7 @@ function familieEchtStarten() {
   const ende = document.getElementById("familie-ende"); ende.textContent = t("Abmelden"); ende.onclick = () => fragen(t("Abmelden?"), [[t("Abmelden"), abmelden, true]]);
   document.getElementById("familie-sprache").onclick = () => document.getElementById("sprache-zeile").click();
   document.getElementById("feedback-lasche").hidden = true;
-  familieSetzen(true); reisenLaden();
+  familieSetzen(true); reisenLaden(); setTimeout(rundrufZeigen, 4000);
   document.addEventListener("visibilitychange", async () => { if (document.visibilityState === "visible") { try { const neu = await leuteLaden(); leute.splice(0, leute.length, ...neu); FAMILIE_SIEHT = leute.filter(x => x.id !== "du").map(x => x.id); familieAufbauen(); pinsSetzen(); reisenLaden(); } catch (e) {} } });
 }
 function echtEinrichten() {
@@ -2351,8 +2488,8 @@ function echtEinrichten() {
   if (p.art === "familie") return familieEchtStarten();
   familieListeAufbauen(); setTimeout(neuDabeiPruefen, 2500);
   verbindungenLaden().catch(() => {});
-  chatsLaden().then(chatVerbinden).then(() => { if (/[?&](chat|ort)=/.test(location.search)) { pushZiel(location.href); history.replaceState(null, "", location.pathname); } }).catch(() => {});
-  setTimeout(pushPruefen, 1500);
+  chatsLaden().then(chatVerbinden).then(() => { if (/[?&](chat|ort|rundruf)=/.test(location.search)) { pushZiel(location.href); history.replaceState(null, "", location.pathname); } }).catch(() => {});
+  setTimeout(pushPruefen, 1500); setTimeout(rundrufZeigen, 6000);
   // Vorschau „So sieht sie es“: die Familie sieht nur dich
   document.getElementById("familie-start").onclick = () => { FAMILIE_SIEHT = ["du"]; document.getElementById("fam-kopf").textContent = t("So sieht deine Familie dich"); document.getElementById("familie-ende").textContent = t("Zurück"); familieSetzen(true); };
   // Bereiche, die noch nicht live sind
@@ -2383,7 +2520,7 @@ function echtEinrichten() {
   });
   document.getElementById("ort-gps").onclick = async e => {
     beschaeftigt(e.target, true);
-    try { await neuerOrt(await standortErmitteln()); } catch (err) { hinweis(err && err.code === 1 ? t("Standort nicht erlaubt") : t("Standort nicht gefunden")); }
+    await ortPerGps();
     beschaeftigt(e.target, false);
   };
   ortSucheVerbinden(document.getElementById("ort-suche"), document.getElementById("ort-treffer"), async o => { await neuerOrt(o); document.getElementById("ort-treffer").innerHTML = ""; document.getElementById("ort-suche").value = ""; });
@@ -2406,7 +2543,7 @@ function echtEinrichten() {
     document.getElementById("verwaltung-zeile").onclick = () => { seiteZeigen("verwaltung"); verwaltungAufbauen(); };
     verwaltungLaden().catch(() => {});
   }
-  document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") { echtAktualisieren(); standortStill(); reisenLaden(); chatsLaden().catch(() => {}); if (p.ist_admin) verwaltungLaden().catch(() => {}); } });
+  document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") { echtAktualisieren(); standortStill(); rundrufZeigen(); reisenLaden(); chatsLaden().catch(() => {}); if (p.ist_admin) verwaltungLaden().catch(() => {}); } });
   setTimeout(standortStill, 3000);
 }
 if (ECHT) echtEinrichten();

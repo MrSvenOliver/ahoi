@@ -268,7 +268,7 @@ function formulareVerbinden() {
   document.getElementById("es-gps").onclick = async e => {
     beschaeftigt(e.target, true); fehlerZeigen("erster-start", "");
     try { const o = await standortErmitteln(); await standortSpeichern(o); ortGewaehlt(o); }
-    catch (err) { fehlerZeigen("erster-start", err && err.code === 1 ? t("Standort nicht erlaubt. Such deine Stadt einfach unten.") : t("Standort nicht gefunden. Such deine Stadt einfach unten.")); }
+    catch (err) { document.getElementById("es-suche").hidden = false; fehlerZeigen("erster-start", err && err.code === 1 ? t("Standort nicht erlaubt. Such deine Stadt einfach unten.") : t("Standort nicht gefunden. Such deine Stadt einfach unten.")); }
     beschaeftigt(e.target, false);
   };
   ortSucheVerbinden(document.getElementById("es-suche"), document.getElementById("es-treffer"), async o => { await standortSpeichern(o); ortGewaehlt(o); });

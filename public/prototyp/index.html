@@ -188,6 +188,7 @@
   .treffer { background: linear-gradient(135deg, #c0582f, #b8913f); color: #fff8ea; border: 0; }
   .treffer b { display: block; font-size: 16px; margin-bottom: 2px; }
   .treffer span { font-size: 13px; opacity: 0.92; }
+  .treffer-wann { font-size: 0.82em; font-weight: 600; opacity: 0.85; white-space: nowrap; }
   .reise { display: grid; grid-template-columns: 58px 1fr 56px; gap: 12px; align-items: center; }
   .reise .gesichter { position: relative; height: 40px; }
   .reise .gesichter .klein-ava { position: absolute; top: 2px; width: 36px; height: 36px; font-size: 12px; box-shadow: 0 0 0 2px var(--karte-bg); }
@@ -252,6 +253,12 @@
   .msg.ich { flex-direction: row-reverse; }
   .blase { max-width: 76%; background: var(--karte-bg); border: 1px solid var(--trenner); border-radius: 18px 18px 18px 6px; padding: 9px 12px; font-size: 15px; line-height: 1.35; position: relative; }
   .msg.ich .blase { background: var(--tinte); color: var(--papier); border-color: transparent; border-radius: 18px 18px 6px 18px; }
+  .chat-foto { display: block; width: 230px; max-width: 100%; min-height: 120px; max-height: 320px; height: auto; object-fit: cover; border-radius: 14px; background: var(--trenner); cursor: zoom-in; }
+  .blase.mit-foto { padding: 4px; }
+  .blase.mit-foto small, .blase.mit-foto .foto-text { padding: 4px 8px; }
+  .foto-gross { position: fixed; inset: 0; z-index: 90; background: rgba(0, 0, 0, 0.92); display: none; place-items: center; padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom); }
+  .foto-gross.offen { display: grid; }
+  .foto-gross img { max-width: 100vw; max-height: 100%; object-fit: contain; }
   .blase small { display: block; font-size: 12px; font-weight: 700; color: var(--text-leise); margin-bottom: 2px; }
   .erwaehnung { font-weight: 700; color: #c0582f; }
   .msg.ich .erwaehnung { color: #ffd9a8; }
@@ -998,6 +1005,14 @@
   /* Feedback und Reisen */
   .fb-bild-knopf { display: inline-block; cursor: pointer; margin-top: 4px; }
   .fb-bild-name { display: block; font-size: 13px; color: var(--text-leise); margin-top: 6px; }
+  .rundruf textarea { display: block; width: 100%; border: 1px solid var(--trenner); background: var(--flaeche); color: var(--text); border-radius: 12px; padding: 12px; font: inherit; font-size: 16px; resize: vertical; }
+  .rundruf-zeit { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 10px 0; font-size: 15px; }
+  .rundruf-zeit input { border: 1px solid var(--trenner); background: var(--flaeche); color: var(--text); border-radius: 10px; padding: 8px 10px; font: inherit; font-size: 15px; }
+  .rundruf #rundruf-senden { width: 100%; }
+  .rundruf-eintrag { display: flex; align-items: center; gap: 10px; padding: 10px 0 0; margin-top: 10px; border-top: 1px solid var(--trenner); font-size: 14px; }
+  .rundruf-eintrag div { flex: 1; min-width: 0; }
+  .rundruf-eintrag b { display: block; white-space: pre-wrap; }
+  .rundruf-eintrag small { color: var(--text-leise); }
   .fb-eintrag { padding: 12px 14px; }
   .fb-eintrag.erledigt { opacity: 0.55; }
   .fb-eintrag .fb-kopf { display: flex; justify-content: space-between; gap: 8px; font-size: 13px; color: var(--text-leise); }
@@ -1064,13 +1079,13 @@
   <button data-seite="karte" class="aktiv"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M9 4 3 6.5v13.5l6-2.5 6 2.5 6-2.5V4l-6 2.5L9 4Z"/><path d="M9 4v13.5M15 6.5V20"/></svg>Karte</button>
   <button data-seite="reisen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10.5 13.5 3 11l1.5-1.5 7.5 1 4-4.5a2 2 0 0 1 3 3l-4.5 4 1 7.5-1.5 1.5-2.5-7.5-3 3v2.5L7 22l-1-3-3-1 1.5-1.5H7l3.5-3Z"/></svg>Reisen</button>
   <button data-seite="chat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4V5Z"/></svg>Chat<span class="punkt">3</span></button>
-  <button data-seite="ideen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M3 11 12 4l9 7v9h-6v-6H9v6H3v-9Z"/></svg>Ideen</button>
+  <button data-seite="ideen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M12 20.5s-7.6-4.6-9.5-9.3C1.1 7.8 3.2 4.8 6.5 4.8c2.3 0 3.8 1.4 5.5 3.4 1.7-2 3.2-3.4 5.5-3.4 3.3 0 5.4 3 4 6.4-1.9 4.7-9.5 9.3-9.5 9.3Z"/></svg>Wishlist</button>
 </nav>
 
 <!-- Reisen -->
 <section class="seite" id="seite-reisen">
   <div class="seite-kopf"><h1>Reisen</h1><button class="knopf-gross" id="reise-neu">+ Reise</button></div>
-  <div class="kasten treffer nur-proto"><b>🧭 Treffer: Lissabon</b><span>Du, Lea &amp; Nico seid vom 10. bis 15.1. gleichzeitig dort.</span></div>
+  <div class="kasten treffer nur-proto"><b>🧭 Treffer: Lissabon <small class="treffer-wann">(Januar 2027)</small></b><span>🇵🇹 Du, Lea &amp; Nico seid vom 10. bis 15.1. gleichzeitig dort.</span></div>
   <div id="treffer-liste" class="nur-echt"></div>
   <div id="reise-liste"></div>
   <p class="hinweis-band nur-proto">Beispieldaten · Eintragen funktioniert ab Phase 3</p>
@@ -1101,12 +1116,14 @@
   <div class="gespraech-kopf"><button class="zurueck" id="gespraech-zurueck" aria-label="Zurück zu den Chats">‹</button><div class="gespraech-bild" id="gespraech-bild" aria-hidden="true"></div><div class="titel"><b id="gespraech-name"></b><span id="gespraech-unter"></span></div><button class="knopf-leise uebersetzen-knopf" id="uebersetzen" aria-pressed="false">🌐 Übersetzen</button><button class="glocke" id="chat-glocke" aria-label="Mitteilungen für diesen Chat"></button></div>
   <div class="verlauf" id="verlauf"></div>
   <div class="eingabe">
-    <button class="runder nur-proto" title="Foto, Ort oder Unterkunft teilen">＋</button>
+    <button class="runder" id="chat-foto" title="Foto senden" aria-label="Foto senden">📷</button>
+    <input type="file" id="chat-foto-datei" accept="image/*" hidden>
     <input id="chat-text" placeholder="Nachricht …" autocomplete="off">
     <button class="runder nur-proto" id="chat-mikro" title="Sprachnachricht" aria-label="Sprachnachricht aufnehmen">🎙️</button>
     <button class="runder senden" id="chat-senden" title="Senden" aria-label="Senden">↑</button>
   </div>
 </section>
+<div class="foto-gross" id="foto-gross" role="dialog" aria-label="Foto"><img alt=""></div>
 <section class="seite" id="seite-gruppe-neu">
   <div class="seite-kopf"><h1>Neue Gruppe</h1><button class="knopf-leise" data-zurueck="chat">Abbrechen</button></div>
   <div class="kasten formular">
@@ -1117,18 +1134,18 @@
     <div class="chips" id="gruppe-leute" style="flex-wrap:wrap;margin:0;padding:0"></div>
   </div>
   <button class="knopf-gross" style="width:100%" id="gruppe-erstellen">Gruppe erstellen</button>
-  <p class="hinweis-band">Gruppen entstehen auch von selbst: bei einem Treffer und wenn jemand bei einer Idee dabei ist</p>
+  <p class="hinweis-band">Gruppen entstehen auch von selbst: bei einem Treffer und wenn jemand bei einem Wishlist-Eintrag dabei ist</p>
 </section>
 <div class="aktion-blatt" id="aktion-blatt"><div class="innen"><b id="aktion-titel" style="display:block;text-align:center;margin-bottom:4px"></b><div id="aktion-knoepfe"></div><button class="knopf-leise" id="aktion-abbrechen">Abbrechen</button></div></div>
 
 <!-- Ideen -->
 <section class="seite" id="seite-ideen">
-  <div class="seite-kopf"><h1>Ideen</h1><button class="knopf-gross" id="idee-neu">+ Teilen</button></div>
+  <div class="seite-kopf"><h1>Wishlist</h1><button class="knopf-gross" id="idee-neu">+ Teilen</button></div>
   <div class="segmente reiter" id="ideen-reiter"><button class="aktiv" data-r="unterkunft">Unterkünfte</button><button data-r="tipps">Tipps</button></div>
   <div id="bereich-unterkunft">
     <div class="chips" id="ideen-filter"></div>
     <div id="ideen-liste"></div>
-    <p class="hinweis-band">Ideen mit Zeitraum verschwinden nach dem Abreisetag von selbst</p>
+    <p class="hinweis-band">Einträge mit Zeitraum verschwinden nach dem Abreisetag von selbst</p>
   </div>
   <div id="bereich-tipps" style="display:none">
     <div class="chips" id="tipps-filter"></div>
@@ -1218,7 +1235,7 @@
     <div class="nur-echt">
       <span class="einst-unter" style="margin-top:16px">Dein Ort</span>
       <div class="zeile-einst" style="border:0;padding-top:4px"><div id="mein-ort"></div><button class="knopf-leise" id="ort-gps">📍 Aktualisieren</button></div>
-      <input class="ort-suche" id="ort-suche" placeholder="Andere Stadt suchen" autocomplete="off">
+      <input class="ort-suche" id="ort-suche" placeholder="Stadt suchen" autocomplete="off" hidden>
       <div class="ort-treffer" id="ort-treffer"></div>
     </div>
   </div>
@@ -1309,6 +1326,14 @@
   <div class="kasten" id="wartende"></div>
   <h2>Mitglieder</h2>
   <div class="kasten" id="mitglieder"></div>
+  <h2>Mitteilung an alle</h2>
+  <div class="kasten rundruf">
+    <textarea id="rundruf-text" maxlength="300" rows="3" placeholder="z. B. 🎄 Frohe Weihnachten!"></textarea>
+    <label class="rundruf-zeit"><span>Senden am</span><input type="datetime-local" id="rundruf-zeit"></label>
+    <button class="knopf-gross" id="rundruf-senden" type="button">Jetzt senden</button>
+    <p class="hinweis-band" style="margin:8px 0 0;text-align:left">Die erste Zeile ist die Überschrift. Ohne Datum geht sie sofort raus. Wer Push aus hat, sieht sie beim nächsten Öffnen von Ahoi.</p>
+    <div id="rundruf-liste"></div>
+  </div>
   <h2>Feedback</h2>
   <div id="feedback-liste"></div>
   <p class="hinweis-band">Passwort vergessen? Neues Startpasswort setzen und der Person sagen. Sie kann es danach im Profil ändern.</p>
@@ -1386,7 +1411,7 @@
       <b class="es-frage">Wo bist du gerade?</b>
       <p class="es-ort" id="es-ort"></p>
       <button class="knopf-gross" id="es-gps" type="button" style="width:100%">📍 Meinen Standort verwenden</button>
-      <input id="es-suche" class="es-suche" placeholder="Oder Stadt suchen" autocomplete="off">
+      <input id="es-suche" class="es-suche" placeholder="Stadt suchen" autocomplete="off" hidden>
       <div class="ort-treffer" id="es-treffer"></div>
       <p class="zugang-klein" style="margin:8px 0 0">Deine Freunde sehen nur die Stadt, nie den genauen Ort.</p>
     </div>
