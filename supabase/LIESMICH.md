@@ -30,6 +30,7 @@
 - `16-push-wahl.sql`: Push-Auswahl im Profil (Chat aus/Einzel+Gruppen/alle, Wishlist, Nähe, Treffer, Reisen, neue Leute, Ruhezeit 22–8 Uhr mit Warteschlange), Trigger für die Ereignisse; danach die Edge Function „push“ neu veröffentlichen (erst nach SQL 16!)
 - `17-chat-ohne-alle.sql`: Der Chat „Alle“ ist raus (niemand kann mehr hineinschreiben, die App blendet ihn aus). Push für Chats: aus, einzel, gruppen oder alle; danach die Edge Function „push“ neu veröffentlichen (erst nach SQL 17!)
 - `18-kreise-ohne-alle.sql`: Chat „Alle“ endgültig gelöscht; Freundeskreise in der Datenbank (Tabelle `kreis`, nur für die Person sichtbar, der der Kreis gehört)
+- `19-ohne-kreise.sql`: Freundeskreise wieder entfernt (Tabelle `kreis` gelöscht)
 - `functions/vorschau/index.ts`: Edge Function „vorschau“ (Titel und Bild eines geteilten Links; „Verify JWT“ an, nur für angemeldete Mitglieder)
 - `functions/push/index.ts`: Edge Function „push“ (im Dashboard unter Edge Functions angelegt; „Verify JWT“ aus, weil die Datenbank sie ohne Anmeldung aufruft; sie erzeugt ihre Push-Schlüssel selbst)
 
