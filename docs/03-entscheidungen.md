@@ -145,3 +145,4 @@ Jede Entscheidung mit Datum. Neue Einträge kommen oben dazu.
 - Admin: Mitglieder entfernen/sperren, Nachrichten löschen, Aktivitätsübersicht
 - Paare: einer fragt an, der andere bestätigt
 - Ablage: Mac-Ordner Schreibtisch/Ahoi App (app + privat), GitHub "ahoi" öffentlich, GitHub "ahoi-backup" privat
+- 24.11.2026: Chat-Push nur noch „💬 Name“ (Person oder Gruppe), ohne Nachrichtentext. Das iPhone fügt bei Web-Apps immer eine Zeile „von Ahoi“ hinzu, die sich nicht entfernen lässt; so bleibt es bei zwei Zeilen.

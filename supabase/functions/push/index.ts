@@ -16,7 +16,6 @@ const TEXTE: Record<string, Record<string, string>> = {
   sk: { alle: "Všetci", noch: "Si ešte v {ort}?", nochText: "Ťukni, aby priatelia vedeli, kde si.", plan: "Podľa tvojho plánu ciest si teraz v {ort}", planText: "Je to tak? Ťukni a potvrď svoju polohu." },
 };
 const text = (sprache: string | null, k: string, ort = "") => (TEXTE[sprache || "de"] || TEXTE.de)[k].replace("{ort}", ort);
-const kuerzen = (s: string, n: number) => (s.length > n ? s.slice(0, n - 1) + "…" : s);
 
 async function schluessel() {
   const [da] = await sql`select oeffentlich, privat from public.push_schluessel where id = 1`;
@@ -59,8 +58,10 @@ async function chatNachricht(id: number) {
   const [von] = await sql`select name from public.profile where id = ${n.von}`;
   const name = von?.name || "Ahoi";
   return verschicken(empfaenger.map((x) => x.id), (sprache) => ({
-    title: chat.art === "einzel" ? name : chat.art === "alle" ? `🌍 ${text(sprache, "alle")}` : `${chat.emoji || "👥"} ${chat.name}`,
-    body: kuerzen(chat.art === "einzel" ? n.text : `${name}: ${n.text}`, 160),
+    // Kurz halten: 💬 und wer schreibt (Person oder Gruppe), ohne Nachrichtentext.
+    // Das iPhone setzt darunter selbst „von Ahoi“, so bleibt es bei zwei Zeilen.
+    title: `💬 ${chat.art === "einzel" ? name : chat.art === "alle" ? text(sprache, "alle") : chat.name}`,
+    body: "",
     url: `${APP}?chat=${chat.id}`,
     tag: `chat-${chat.id}`,
   }));
