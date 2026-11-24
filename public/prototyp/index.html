@@ -643,6 +643,9 @@
   [data-stil="modern"] .knopf:active, [data-stil="modern"] .leiste button:active, [data-stil="modern"] .knopf-gross:active, [data-stil="modern"] .knopf-leise:active { transform: scale(0.92); }
   [data-stil="modern"] .profil-knopf { width: 46px; height: 46px; border: 2.5px solid rgba(255, 255, 255, 0.9); box-shadow: 0 6px 18px rgba(0, 0, 0, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.5); }
   [data-stil="modern"] .marke { border-radius: 999px; }
+  /* Kopfleiste auf der Karte: klar und fast deckend, damit nichts milchig oder unscharf wirkt */
+  [data-stil="modern"] .kopf .marke, [data-stil="modern"] .kopf .knopf { background: rgba(255, 255, 255, 0.94); backdrop-filter: blur(6px) saturate(150%); -webkit-backdrop-filter: blur(6px) saturate(150%); border: 0.5px solid rgba(0, 0, 0, 0.08); box-shadow: 0 2px 10px rgba(0, 0, 0, 0.12); }
+  [data-stil="modern"] .kopf .profil-knopf { box-shadow: 0 2px 10px rgba(0, 0, 0, 0.16); }
   [data-stil="modern"] .hinweis { color: var(--text); }
   [data-stil="modern"] .blatt { background: var(--lg-schimmer), rgba(255, 255, 255, 0.62); }
   [data-stil="modern"] .leiste { background: var(--lg-schimmer), rgba(255, 255, 255, 0.4); }
