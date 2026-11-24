@@ -15,20 +15,20 @@ const TEXTE: Record<string, Record<string, string>> = {
   de: {
     alle: "Alle", noch: "Bist du noch in {ort}?", nochText: "Tippe kurz, damit deine Freunde wissen, wo du bist.", plan: "Laut deinem Reiseplan bist du jetzt in {ort}", planText: "Stimmt das? Tippe, um deinen Ort zu bestätigen.",
     wunschNeu: "🏡 {name} teilt eine Unterkunft in {ort}", wunschDabei: "🙋 {name} ist dabei: {ort}", wunschGebucht: "✅ Gebucht: {ort}", wunschPreis: "💶 Neuer Preis für {ort}: {pp} € pro Person",
-    reise: "✈️ {name} reist nach {ort} · {zeit}", treffer: "🧭 Treffer: {name} ist auch in {ort} · {zeit}", kommt: "🧭 {name} kommt nach {ort} · {zeit}",
-    naehe: "📍 {name} ist in deiner Nähe: {ort}", neu: "👋 Neu bei Ahoi: {name}", anfrage: "🤝 {name} möchte sich mit dir verbinden",
+    reise: "✈️ {name} reist nach {ort} · {zeit}", treffer: "📍 Treffer: {name} ist auch in {ort} · {zeit}", kommt: "📍 {name} kommt nach {ort} · {zeit}",
+    naehe: "🧭 {name} ist in deiner Nähe: {ort}", neu: "👋 Neu bei Ahoi: {name}", anfrage: "🤝 {name} möchte sich mit dir verbinden",
   },
   en: {
     alle: "Everyone", noch: "Still in {ort}?", nochText: "Tap so your friends know where you are.", plan: "According to your travel plan you're in {ort} now", planText: "Is that right? Tap to confirm your location.",
     wunschNeu: "🏡 {name} shares a place in {ort}", wunschDabei: "🙋 {name} is in: {ort}", wunschGebucht: "✅ Booked: {ort}", wunschPreis: "💶 New price for {ort}: {pp} € per person",
-    reise: "✈️ {name} is going to {ort} · {zeit}", treffer: "🧭 Match: {name} is in {ort} too · {zeit}", kommt: "🧭 {name} is coming to {ort} · {zeit}",
-    naehe: "📍 {name} is near you: {ort}", neu: "👋 New on Ahoi: {name}", anfrage: "🤝 {name} wants to connect with you",
+    reise: "✈️ {name} is going to {ort} · {zeit}", treffer: "📍 Match: {name} is in {ort} too · {zeit}", kommt: "📍 {name} is coming to {ort} · {zeit}",
+    naehe: "🧭 {name} is near you: {ort}", neu: "👋 New on Ahoi: {name}", anfrage: "🤝 {name} wants to connect with you",
   },
   sk: {
     alle: "Všetci", noch: "Si ešte v {ort}?", nochText: "Ťukni, aby priatelia vedeli, kde si.", plan: "Podľa tvojho plánu ciest si teraz v {ort}", planText: "Je to tak? Ťukni a potvrď svoju polohu.",
     wunschNeu: "🏡 {name} zdieľa ubytovanie v {ort}", wunschDabei: "🙋 {name} ide tiež: {ort}", wunschGebucht: "✅ Rezervované: {ort}", wunschPreis: "💶 Nová cena za {ort}: {pp} € na osobu",
-    reise: "✈️ {name} cestuje do {ort} · {zeit}", treffer: "🧭 Zhoda: {name} je tiež v {ort} · {zeit}", kommt: "🧭 {name} príde do {ort} · {zeit}",
-    naehe: "📍 {name} je blízko teba: {ort}", neu: "👋 Nový v Ahoi: {name}", anfrage: "🤝 {name} sa chce s tebou spojiť",
+    reise: "✈️ {name} cestuje do {ort} · {zeit}", treffer: "📍 Zhoda: {name} je tiež v {ort} · {zeit}", kommt: "📍 {name} príde do {ort} · {zeit}",
+    naehe: "🧭 {name} je blízko teba: {ort}", neu: "👋 Nový v Ahoi: {name}", anfrage: "🤝 {name} sa chce s tebou spojiť",
   },
 };
 const ORT_LOC: Record<string, string> = { de: "de-DE", en: "en-GB", sk: "sk-SK" };

@@ -823,7 +823,7 @@ const TEXTE = {
   "{namen} im selben Land": ["{namen} in the same country", "{namen} v rovnakej krajine"],
   "ihr beide in {ort}, wo genau ist noch offen": ["both of you in {ort}, exactly where is still open", "obaja v {ort}, kde presne, je ešte otvorené"],
   "{namen} ist dort, wo du hinreist": ["{namen} is where you're going", "{namen} je tam, kam cestuješ"],
-  "🧭 Lea & Nico am selben Ort": ["🧭 Lea & Nico in the same place", "🧭 Lea a Nico na rovnakom mieste"],
+  "📍 Lea & Nico am selben Ort": ["📍 Lea & Nico in the same place", "📍 Lea a Nico na rovnakom mieste"],
   "🇵🇹 10.1. – 15.1. · ihr alle in Lissabon": ["🇵🇹 10 Jan – 15 Jan · all of you in Lisbon", "🇵🇹 10.1. – 15.1. · všetci v Lisabone"],
   "ihr alle in {ort}": ["all of you in {ort}", "všetci v {ort}"],
   "ihr alle in {ort}, wo genau ist noch offen": ["all of you in {ort}, exactly where is still open", "všetci v {ort}, kde presne, je ešte otvorené"],

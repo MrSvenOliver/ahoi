@@ -2215,19 +2215,19 @@ function monatSpanne(von, bis) {
 }
 // Alle Treffer nach demselben Muster:
 // Überschrift „Symbol · Wer · Beziehung (Monat Jahr)“, darunter „Flagge · Zeitraum · wo genau“.
-// Farbig = selber Ort, hell = in der Nähe oder nur im selben Land.
+// Farbig mit 📍 = selber Ort, hell mit 🧭 = in der Nähe, 🌍 = nur im selben Land.
 function trefferAufbauen() {
   const namen = ids => ids.map(person).filter(Boolean).map(p => p.name).join(" & ");
   document.getElementById("treffer-liste").innerHTML = trefferFinden().map(x => {
     const zeit = `${kurz(x.von)} – ${kurz(x.bis)}`, wer = ohneHtml(namen(x.wer)), ort = ohneHtml(x.ort || ""), ort2 = ohneHtml(x.ort2 || "");
     const beide = x.wer.length > 1 ? "ihr alle in {ort}" : "ihr beide in {ort}";
     const muster = {
-      reise: () => ["🧭", t("{namen} am selben Ort", { namen: wer }), t(beide, { ort }), false],
-      nah: () => ["📍", t("{namen} in der Nähe", { namen: wer }), t("du in {ort}, {namen} in {ort2} · {km}", { ort, namen: wer, ort2, km: km(x.km) }), true],
+      reise: () => ["📍", t("{namen} am selben Ort", { namen: wer }), t(beide, { ort }), false],
+      nah: () => ["🧭", t("{namen} in der Nähe", { namen: wer }), t("du in {ort}, {namen} in {ort2} · {km}", { ort, namen: wer, ort2, km: km(x.km) }), true],
       land: () => ["🌍", t("{namen} im selben Land", { namen: wer }), t(x.wer.length > 1 ? "ihr alle in {ort}, wo genau ist noch offen" : "ihr beide in {ort}, wo genau ist noch offen", { ort }), true],
-      kommt: () => ["🧭", t("{namen} kommt zu dir", { namen: wer }), t(beide, { ort }), false],
-      "kommt-nah": () => ["📍", t("{namen} kommt in deine Nähe", { namen: wer }), t("du in {ort}, {namen} in {ort2} · {km}", { ort: ort2, namen: wer, ort2: ort, km: km(x.km) }), true],
-      dort: () => ["🧭", t("{namen} ist dort, wo du hinreist", { namen: wer }), t(beide, { ort }), false]
+      kommt: () => ["📍", t("{namen} kommt zu dir", { namen: wer }), t(beide, { ort }), false],
+      "kommt-nah": () => ["🧭", t("{namen} kommt in deine Nähe", { namen: wer }), t("du in {ort}, {namen} in {ort2} · {km}", { ort: ort2, namen: wer, ort2: ort, km: km(x.km) }), true],
+      dort: () => ["📍", t("{namen} ist dort, wo du hinreist", { namen: wer }), t(beide, { ort }), false]
     };
     const [symbol, kopf, wo, leise] = (muster[x.art] || muster.dort)();
     return `<div class="kasten treffer${leise ? " leise" : ""}"><b>${symbol} ${kopf} <small class="treffer-wann">(${monatSpanne(x.von, x.bis)})</small></b><span>${x.land ? flagge(x.land) + " " : ""}${zeit} · ${wo}</span></div>`;
