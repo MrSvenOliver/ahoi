@@ -2427,8 +2427,17 @@ async function chatVerlassenEcht(c) {
 // ---------- Push-Mitteilungen (echte App) ----------
 // Funktioniert auf dem iPhone nur, wenn Ahoi auf dem Home-Bildschirm liegt (ab iOS 16.4). Die Schlüssel kommen vom Server.
 // abo = dieses Gerät ist angemeldet; chat / ort = was man bekommen möchte (gilt für alle Geräte)
-const PUSH = { abo: false, chat: true, ort: true, geht: "serviceWorker" in navigator && "PushManager" in window && "Notification" in window };
-Object.defineProperty(PUSH, "an", { get: () => PUSH.abo && PUSH.chat }); // für die Glocke im Chat
+// abo = dieses Gerät bekommt Push; wahl = was man bekommen möchte (gilt für alle Geräte, steht im Profil)
+const PUSH = { abo: false, neu: false, geht: "serviceWorker" in navigator && "PushManager" in window && "Notification" in window,
+  wahl: { push_chat: true, push_chat_art: "gruppen", push_ort: true, push_wunsch_neu: false, push_wunsch_dabei: true, push_wunsch_update: true, push_naehe: true, push_treffer: true, push_reise: false, push_leute: true, push_ruhe: true } };
+Object.defineProperty(PUSH, "an", { get: () => PUSH.abo && (PUSH.neu ? PUSH.wahl.push_chat_art !== "aus" : PUSH.wahl.push_chat) }); // für die Glocke im Chat
+// Auswahl (Entscheidung vom 24.11.2026); die neuen Schalter erscheinen, sobald die Datenbank sie kennt (SQL 16)
+const PUSH_GRUPPEN = [
+  ["🏡", "Wishlist", [["push_wunsch_neu", "Neuer Eintrag"], ["push_wunsch_dabei", "Jemand ist bei meinem Eintrag dabei"], ["push_wunsch_update", "Gebucht oder neuer Preis"]]],
+  ["📍", "Orte und Reisen", [["push_naehe", "Ein Freund ist in deiner Nähe", "unter 50 km"], ["push_treffer", "Neuer Treffer", "gleiche Zeit, gleicher Ort"], ["push_reise", "Ein Freund trägt eine Reise ein"], ["push_ort", "Nachfrage zu deinem Ort", "höchstens einmal im Monat"]]],
+  ["🤝", "Freunde", [["push_leute", "Neue Leute und Anfragen"]]],
+  ["🌙", "Ruhezeit", [["push_ruhe", "Nachts still (22–8 Uhr)", "was nachts kommt, siehst du morgens"]]]
+];
 const alsApp = () => window.navigator.standalone === true || matchMedia("(display-mode: standalone)").matches;
 const istIphone = () => /iPhone|iPad|iPod/.test(navigator.userAgent);
 const b64 = s => { const p = "=".repeat((4 - (s.length % 4)) % 4), roh = atob((s + p).replace(/-/g, "+").replace(/_/g, "/")); return Uint8Array.from([...roh].map(c => c.charCodeAt(0))); };
@@ -2449,11 +2458,19 @@ async function pushPruefen() {
 }
 function pushAnzeigen() {
   const geraet = !PUSH.geht ? (istIphone() && !alsApp() ? t("Erst Ahoi zum Home-Bildschirm hinzufügen") : t("Auf diesem Gerät nicht möglich")) : typeof Notification !== "undefined" && Notification.permission === "denied" ? t("In den Einstellungen des Handys blockiert") : null;
-  [["push-schalter", "push-zustand", PUSH.chat, t("Push aufs Handy")], ["ort-schalter", "ort-zustand", PUSH.ort, t("Höchstens einmal im Monat")]].forEach(([sid, zid, will, leer]) => {
-    const an = PUSH.abo && will, sch = document.getElementById(sid), z = document.getElementById(zid);
-    if (sch) { sch.classList.toggle("an", an); sch.setAttribute("aria-pressed", an ? "true" : "false"); }
-    if (z) z.textContent = geraet || (an ? t("Auf diesem Gerät eingeschaltet") : leer);
-  });
+  const sch = document.getElementById("push-schalter");
+  sch.classList.toggle("an", PUSH.abo); sch.setAttribute("aria-pressed", PUSH.abo ? "true" : "false");
+  document.getElementById("push-zustand").textContent = geraet || (PUSH.abo ? t("Eingeschaltet. Wähle unten, was du bekommen möchtest.") : t("Aus"));
+  const box = document.getElementById("push-wahl"), w = PUSH.wahl;
+  box.classList.toggle("aus", !PUSH.abo);
+  const schalter = ([k, name, unter]) => `<div class="zeile-einst"><div>${t(name)}${unter ? `<small>${t(unter)}</small>` : ""}</div><button class="schalter${w[k] ? " an" : ""}" data-push="${k}" aria-pressed="${w[k] ? "true" : "false"}" aria-label="${t(name)}"></button></div>`;
+  const chat = PUSH.neu
+    ? `<div class="segmente klein" id="chat-wahl">${[["aus", "Aus"], ["gruppen", "Einzel und Gruppen"], ["alle", "Alle Chats"]].map(([a, n]) => `<button data-chat="${a}" class="${w.push_chat_art === a ? "aktiv" : ""}">${t(n)}</button>`).join("")}</div>`
+    : schalter(["push_chat", "Neue Chat-Nachrichten"]);
+  box.innerHTML = `<div class="push-gruppe">💬 ${t("Chat")}</div>${chat}<p class="hinweis-band" style="margin:4px 0 0;text-align:left">${t("Einzelne Chats schaltest du im Chat mit der Glocke 🔔 stumm.")}</p>` +
+    (PUSH.neu ? PUSH_GRUPPEN : [["📍", "Orte und Reisen", [["push_ort", "Nachfrage zu deinem Ort", "höchstens einmal im Monat"]]]]).map(([sym, titel, liste]) => `<div class="push-gruppe">${sym} ${t(titel)}</div>${liste.map(schalter).join("")}`).join("");
+  box.querySelectorAll("[data-push]").forEach(b => b.onclick = () => pushWahlSetzen({ [b.dataset.push]: !w[b.dataset.push] }));
+  box.querySelectorAll("[data-chat]").forEach(b => b.onclick = () => pushWahlSetzen({ push_chat_art: b.dataset.chat, push_chat: b.dataset.chat !== "aus" }));
   glockeSetzen();
 }
 // Gerät für Push anmelden (fragt einmal nach der Erlaubnis); true, wenn es geklappt hat
@@ -2475,17 +2492,31 @@ async function pushAbo() {
     PUSH.abo = true; return true;
   } catch (e) { hinweis(t("Push hat nicht geklappt")); pushAnzeigen(); return false; }
 }
-async function pushWunsch(art, an) {
-  if (an && !(await pushAbo())) return;
-  const spalte = art === "chat" ? "push_chat" : "push_ort";
-  const { error } = await SB.from("profile").update({ [spalte]: an }).eq("id", ECHT_DATEN.uid);
+async function pushWahlSetzen(neu) {
+  if (!ECHT) { Object.assign(PUSH.wahl, neu); return pushAnzeigen(); }
+  const { error } = await SB.from("profile").update(neu).eq("id", ECHT_DATEN.uid);
   if (error) return hinweis(t("Speichern hat nicht geklappt"));
-  PUSH[art] = an; pushAnzeigen();
-  hinweis(art === "chat" ? (an ? t("🔔 Push ist an: neue Nachrichten kommen aufs Handy") : t("🔕 Keine Push-Mitteilungen mehr für Chats")) : (an ? t("📍 Ahoi fragt höchstens einmal im Monat nach deinem Ort") : t("Keine Nachfrage mehr zu deinem Ort")));
+  Object.assign(PUSH.wahl, neu); pushAnzeigen();
 }
-const pushEinschalten = () => pushWunsch("chat", true);
-document.getElementById("push-schalter").onclick = () => pushWunsch("chat", !(PUSH.abo && PUSH.chat));
-document.getElementById("ort-schalter").onclick = () => pushWunsch("ort", !(PUSH.abo && PUSH.ort));
+// Gerät abmelden: keine Push-Mitteilungen mehr auf diesem Handy (die Auswahl bleibt für andere Geräte)
+async function pushAbmelden() {
+  try {
+    const reg = await navigator.serviceWorker.getRegistration(), sub = reg && await reg.pushManager.getSubscription();
+    if (sub) { await SB.from("push_abo").delete().eq("endpunkt", sub.endpoint); await sub.unsubscribe(); }
+  } catch (e) {}
+  PUSH.abo = false; pushAnzeigen(); hinweis(t("🔕 Keine Push-Mitteilungen mehr auf diesem Gerät"));
+}
+// Für die Glocke im Chat: Push einschalten (Gerät anmelden und Chat-Mitteilungen an)
+async function pushEinschalten() {
+  if (!(await pushAbo())) return;
+  pushAnzeigen();
+  if (!PUSH.an) await pushWahlSetzen(PUSH.neu ? { push_chat_art: "gruppen", push_chat: true } : { push_chat: true });
+  hinweis(t("🔔 Push ist an: neue Nachrichten kommen aufs Handy"));
+}
+document.getElementById("push-schalter").onclick = async () => {
+  if (PUSH.abo) return pushAbmelden();
+  if (await pushAbo()) { pushAnzeigen(); hinweis(t("🔔 Push ist an. Wähle unten, was du bekommen möchtest.")); }
+};
 // Aus einer Mitteilung geöffnet: Chat oder Ort-Frage direkt zeigen
 function pushZiel(url) {
   const q = new URL(url, location.href).searchParams;
@@ -2624,7 +2655,12 @@ async function verbindungenLaden() {
     [...leute, ...(ECHT_DATEN.alle || [])].forEach(p => { if (p.uid && linksVon[p.uid]) p.links = linksVon[p.uid]; });
     if (linksVon[uid]) { meineLinks = linksVon[uid]; linksWertZeigen(); }
     const ichRoh = lae.data.find(x => x.id === uid);
-    if (ichRoh) { ECHT_DATEN.profil.status_am = ichRoh.status_am; PUSH.chat = ichRoh.push_chat !== false; PUSH.ort = ichRoh.push_ort !== false; pushAnzeigen(); statusAufbauen(); }
+    if (ichRoh) {
+      ECHT_DATEN.profil.status_am = ichRoh.status_am; PUSH.wahl.push_chat = ichRoh.push_chat !== false; PUSH.wahl.push_ort = ichRoh.push_ort !== false;
+      const r = await SB.from("profile").select("push_chat_art, push_wunsch_neu, push_wunsch_dabei, push_wunsch_update, push_naehe, push_treffer, push_reise, push_leute, push_ruhe").eq("id", uid).maybeSingle();
+      PUSH.neu = !r.error && !!r.data; if (PUSH.neu) Object.assign(PUSH.wahl, r.data);
+      pushAnzeigen(); statusAufbauen();
+    }
     const meine = proId[uid] || [];
     if (!meine.length && besucht.length) besuchtSpeichern();
     else if (meine.length) { besucht = [...new Set(meine)]; try { localStorage.setItem(LAENDER_SCHLUESSEL, JSON.stringify(besucht)); } catch (e) {} if (ich().land && landDazu(ich().land)) {} stempelAufbauen(); }

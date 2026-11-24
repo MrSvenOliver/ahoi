@@ -27,6 +27,7 @@
 - `13-wishlist-links.sql`: Wishlist (Unterkünfte mit „Ich wäre dabei“, Gebucht → Reise, Ortstipps) und Social-Media-Links im Profil
 - `14-wishlist-gaeste.sql`: maximale Gästezahl aus der Airbnb-Vorschau
 - `15-freunde-qr.sql`: Freundschaften im Hintergrund (alle sehen vorerst weiter alle), Ahoi-Name, persönlicher QR-Code (gleichzeitig Einladung, Sven gibt frei), Vorschläge „Kennst du sie?“
+- `16-push-wahl.sql`: Push-Auswahl im Profil (Chat aus/Einzel+Gruppen/alle, Wishlist, Nähe, Treffer, Reisen, neue Leute, Ruhezeit 22–8 Uhr mit Warteschlange), Trigger für die Ereignisse; danach die Edge Function „push“ neu veröffentlichen (erst nach SQL 16!)
 - `functions/vorschau/index.ts`: Edge Function „vorschau“ (Titel und Bild eines geteilten Links; „Verify JWT“ an, nur für angemeldete Mitglieder)
 - `functions/push/index.ts`: Edge Function „push“ (im Dashboard unter Edge Functions angelegt; „Verify JWT“ aus, weil die Datenbank sie ohne Anmeldung aufruft; sie erzeugt ihre Push-Schlüssel selbst)
 
