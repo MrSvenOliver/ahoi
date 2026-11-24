@@ -788,4 +788,12 @@ const TEXTE = {
   "Code scannen": ["Scan code", "Skenovať kód"],
   "🤝 Neu im Profil: dein Ahoi-Code. Zeig ihn Leuten, die du unterwegs triffst, oder scanne ihren Code.": ["🤝 New in your profile: your Ahoi code. Show it to people you meet on the road, or scan theirs.", "🤝 Nové v profile: tvoj Ahoi kód. Ukáž ho ľuďom, ktorých stretneš na cestách, alebo naskenuj ich kód."],
   "💡 „Kennst du sie?“ schlägt Freunde deiner Freunde vor.": ["💡 “Do you know them?” suggests friends of your friends.", "💡 „Poznáš ich?“ navrhuje priateľov tvojich priateľov."],
+  "Gesamtpreis": ["Total price", "Celková cena"],
+  "€ für den ganzen Aufenthalt, wie bei Airbnb": ["€ for the whole stay, as shown on Airbnb", "€ za celý pobyt, ako na Airbnb"],
+  "gesamt": ["total", "spolu"],
+  "Preis ändern": ["Change price", "Zmeniť cenu"],
+  "Preis eintragen": ["Add price", "Zadať cenu"],
+  "Der Preis für den ganzen Aufenthalt, so wie Airbnb ihn bei deinen Daten anzeigt. Ahoi teilt ihn durch alle, die dabei sind.": ["The price for the whole stay, as Airbnb shows it for your dates. Ahoi splits it between everyone who's in.", "Cena za celý pobyt, ako ju Airbnb ukazuje pre tvoje dátumy. Ahoi ju rozdelí medzi všetkých, ktorí idú."],
+  "💶 Wishlist: Du trägst den Gesamtpreis ein, so wie Airbnb ihn bei deinen Daten zeigt. Ahoi teilt ihn durch alle, die dabei sind.": ["💶 Wishlist: you enter the total price, as Airbnb shows it for your dates. Ahoi splits it between everyone who's in.", "💶 Wishlist: zadáš celkovú cenu, ako ju Airbnb ukazuje pre tvoje dátumy. Ahoi ju rozdelí medzi všetkých, ktorí idú."],
+  "✨ Oben ist nichts mehr milchig.": ["✨ Nothing at the top looks milky anymore.", "✨ Hore už nič nie je zahmlené."],
 };

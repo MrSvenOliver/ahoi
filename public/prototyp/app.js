@@ -1155,9 +1155,9 @@ function ideeGruppe(i, dazu) {
 // Jede Idee ist ein geteilter Link. Bei Airbnb liest die App Foto, Art, Ort und Bewertung aus der Vorschau des Links.
 // Plätze und Preis legt die teilende Person fest (vorausgefüllt, sofern die Seite sie verrät).
 const ideen = [
-  { id: "lissabon", von: "lea", art: "Wohnung", ort: "Lissabon", land: "PT", bewertung: "4,9", zimmer: "2 Schlafzimmer", gaeste: 4, notiz: "Für Januar?", anreise: "2027-01-08", abreise: "2027-01-20", preis: 96, plaetze: 4, dabei: ["nico"], sicht: "🌍 Alle", herzen: 4, kommentare: 3, quelle: "Airbnb", farbe: "linear-gradient(135deg,#e9c99a,#c0582f)" },
+  { id: "lissabon", von: "lea", art: "Wohnung", ort: "Lissabon", land: "PT", bewertung: "4,9", zimmer: "2 Schlafzimmer", gaeste: 4, notiz: "Für Januar?", anreise: "2027-01-08", abreise: "2027-01-20", preis: 1150, plaetze: 4, dabei: ["nico"], sicht: "🌍 Alle", herzen: 4, kommentare: 3, quelle: "Airbnb", farbe: "linear-gradient(135deg,#e9c99a,#c0582f)" },
   { id: "ericeira", von: "alex", art: "Haus", ort: "Ericeira", land: "PT", bewertung: "4,8", zimmer: "3 Schlafzimmer", gaeste: 8, notiz: "Direkt am Surfstrand", anreise: "2027-02-13", abreise: "2027-02-20", preis: null, plaetze: 6, dabei: ["sam", "du"], sicht: "👥 Lieblingsleute", herzen: 2, kommentare: 1, quelle: "Airbnb", farbe: "linear-gradient(135deg,#bcd6d8,#3f6b8a)" },
-  { id: "canggu", von: "jonas", art: "Villa", ort: "Canggu", land: "ID", bewertung: "4,95", zimmer: "4 Schlafzimmer", gaeste: 8, notiz: "", zeitraum: "März", preis: 180, plaetze: 6, dabei: ["ben", "lea", "nico", "mia", "alex"], sicht: "🌍 Alle", herzen: 5, kommentare: 6, quelle: "Airbnb", farbe: "linear-gradient(135deg,#cfe0b8,#6f8a3a)" },
+  { id: "canggu", von: "jonas", art: "Villa", ort: "Canggu", land: "ID", bewertung: "4,95", zimmer: "4 Schlafzimmer", gaeste: 8, notiz: "", zeitraum: "März", preis: 2500, plaetze: 6, dabei: ["ben", "lea", "nico", "mia", "alex"], sicht: "🌍 Alle", herzen: 5, kommentare: 6, quelle: "Airbnb", farbe: "linear-gradient(135deg,#cfe0b8,#6f8a3a)" },
   { id: "chiangmai", von: "ben", art: "Gästehaus", ort: "Chiang Mai", land: "TH", bewertung: "", zimmer: "1 Schlafzimmer", gaeste: 3, notiz: "Günstig für länger", zeitraum: "flexibel", preis: null, plaetze: 3, dabei: [], sicht: "👤 3 Personen", herzen: 1, kommentare: 0, quelle: "booking.com", farbe: "linear-gradient(135deg,#f0dca8,#b98a2e)" },
 ];
 ideen.forEach(i => { i.art = t(i.art); i.ort = t(i.ort); if (i.zeitraum) i.zeitraum = t(i.zeitraum); i.sicht = t(i.sicht); });
@@ -1261,7 +1261,7 @@ function ideenAufbauen() {
         ${kz && kz.rest ? `<span class="extra">${ohneHtml(kz.rest)}</span>` : ""}
         <div class="geteilt">${ava(person(i.von))}<span><b>${eigen ? t("Du") : person(i.von).name}</b>${i.notiz ? "„" + ohneHtml(i.notiz) + "“" : t("hat das geteilt")}</span></div>
         ${zahlen}
-        ${i.preis ? `<div class="rechner">💶 ${i.preis} € / ${t("Nacht")} · <b>${t("{n} € pro Person", { n: proPerson })}</b> ${t("bei {n}", { n: belegt })}</div>` : ""}
+        ${i.preis ? `<div class="rechner">💶 ${i.preis.toLocaleString(LOC)} € ${t("gesamt")} · <b>${t("{n} € pro Person", { n: proPerson.toLocaleString(LOC) })}</b> ${t("bei {n}", { n: belegt })}</div>` : ""}
         <div class="dabei-leiste"><div class="dabei-gesichter">${[i.von, ...i.dabei].map(id => ava(person(id))).join("")}</div></div>
         <div class="aktionen">
           ${i.gebucht ? `<button class="knopf-gross ist-dabei" disabled style="opacity:1">${t("✅ Gebucht · steht in Reisen")}</button>` : i.echt && eigen ? `<button class="knopf-gross ist-dabei" disabled style="opacity:1">${t("✓ Dein Vorschlag · du bist dabei")}</button>` : `<button class="knopf-gross dabei-knopf ${ichDabei ? "ist-dabei" : ""}" data-n="${n}" ${!frei && !ichDabei ? "disabled" : ""}>${t(ichDabei ? "✓ Du bist dabei" : frei ? "🙋 Ich wäre dabei" : "Leider voll")}</button>`}
@@ -1270,7 +1270,7 @@ function ideenAufbauen() {
         <div class="aktionen" style="margin-top:8px">
           <a class="knopf-leise" href="${ohneHtml(ansehenLink(i))}" target="_blank" rel="noopener" style="text-decoration:none;flex:1;text-align:center">${t(i.anreise ? "Preis ansehen ↗" : "Ansehen ↗")}</a>
           ${(ichDabei || eigen) && !i.gebucht && (!i.echt || i.anreise) ? `<button class="knopf-leise gebucht-knopf" data-n="${n}" style="flex:1">${t("✓ Gebucht")}</button>` : ""}
-          ${i.echt && eigen ? `<button class="knopf-leise idee-weg" data-n="${n}" aria-label="${t("Löschen")}">🗑</button>` : ""}
+          ${i.echt && eigen ? `<button class="knopf-leise preis-knopf" data-n="${n}">💶 ${t(i.preis ? "Preis ändern" : "Preis eintragen")}</button><button class="knopf-leise idee-weg" data-n="${n}" aria-label="${t("Löschen")}">🗑</button>` : ""}
         </div>
       </div></div>`;
   }).join("") || (ECHT ? `<p class="hinweis-band">${t("Noch nichts auf der Wishlist. Teile eine Unterkunft, die dir gefällt, mit „+ Teilen“.")}</p>` : "");
@@ -1486,6 +1486,17 @@ function wishlistKnoepfe() {
     const x = i(b);
     if (x.chat && (x.von === "du" || x.dabei.includes("du"))) { await chatsLaden(); const c = chats.find(y => y.id === x.chat); if (c) return gespraechOeffnen(c); }
     einzelChat(x.von);
+  });
+  document.querySelectorAll(".preis-knopf").forEach(b => b.onclick = () => {
+    const x = i(b);
+    fragen(t("Gesamtpreis"), [[t("Speichern"), async () => {
+      const roh = (document.getElementById("preis-feld") || {}).value || "", preis = parseInt(roh.replace(/\D/g, "")) || null;
+      const { error } = await SB.from("wunsch").update({ preis }).eq("id", x.id);
+      if (error) return hinweis(t("Speichern hat nicht geklappt"));
+      x.preis = preis; ideenAufbauen(); hinweis(t("Gespeichert"));
+    }]]);
+    document.getElementById("aktion-titel").innerHTML = `${t("Gesamtpreis")}<small class="aktion-text">${t("Der Preis für den ganzen Aufenthalt, so wie Airbnb ihn bei deinen Daten anzeigt. Ahoi teilt ihn durch alle, die dabei sind.")}</small><input id="preis-feld" class="ort-suche" inputmode="numeric" placeholder="€" value="${x.preis || ""}" autocomplete="off">`;
+    setTimeout(() => document.getElementById("preis-feld").focus(), 50);
   });
   document.querySelectorAll(".idee-weg").forEach(b => b.onclick = () => fragen(t("Von der Wishlist löschen?"), [[t("Löschen"), async () => {
     const x = i(b); const { error } = await SB.from("wunsch").delete().eq("id", x.id);
@@ -2519,6 +2530,10 @@ async function ortNachfragen(sofort) {
 // ---------- Neu in Ahoi: nach jedem App-Update einmal eine kurze Übersicht ----------
 // Bei jedem Update oben einen Eintrag ergänzen (neueste zuerst). Wer neu dabei ist, sieht nur den neuesten.
 const NEUIGKEITEN = [
+  { id: "2026-11-24-gesamtpreis", punkte: [
+    "💶 Wishlist: Du trägst den Gesamtpreis ein, so wie Airbnb ihn bei deinen Daten zeigt. Ahoi teilt ihn durch alle, die dabei sind.",
+    "✨ Oben ist nichts mehr milchig."
+  ] },
   { id: "2026-11-24-feinschliff", punkte: [
     "🛏 Die Wishlist zeigt Schlafzimmer, Betten und wie viele Gäste reinpassen.",
     "📋 „Link einfügen“ klappt jetzt mit Airbnb-Links.",
