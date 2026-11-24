@@ -827,4 +827,5 @@ const TEXTE = {
   "🇵🇹 10.1. – 15.1. · ihr alle in Lissabon": ["🇵🇹 10 Jan – 15 Jan · all of you in Lisbon", "🇵🇹 10.1. – 15.1. · všetci v Lisabone"],
   "ihr alle in {ort}": ["all of you in {ort}", "všetci v {ort}"],
   "ihr alle in {ort}, wo genau ist noch offen": ["all of you in {ort}, exactly where is still open", "všetci v {ort}, kde presne, je ešte otvorené"],
+  "🔔 Unter Profil → Mitteilungen wählst du selbst, wofür du Push bekommst, mit Ruhezeit nachts.": ["🔔 Under Profile → Notifications you choose what you get push for, with quiet hours at night.", "🔔 V Profil → Upozornenia si vyberieš, na čo chceš push, s tichým režimom v noci."],
 };

@@ -2569,6 +2569,11 @@ async function ortNachfragen(sofort) {
 // ---------- Neu in Ahoi: nach jedem App-Update einmal eine kurze Übersicht ----------
 // Bei jedem Update oben einen Eintrag ergänzen (neueste zuerst). Wer neu dabei ist, sieht nur den neuesten.
 const NEUIGKEITEN = [
+  { id: "2026-11-24-freunde-push", punkte: [
+    "🤝 Neu im Profil: dein Ahoi-Code. Zeig ihn Leuten, die du unterwegs triffst, oder scanne ihren Code.",
+    "💡 „Kennst du sie?“ schlägt Freunde deiner Freunde vor.",
+    "🔔 Unter Profil → Mitteilungen wählst du selbst, wofür du Push bekommst, mit Ruhezeit nachts."
+  ] },
   { id: "2026-11-24-gesamtpreis", punkte: [
     "💶 Wishlist: Du trägst den Gesamtpreis ein, so wie Airbnb ihn bei deinen Daten zeigt. Ahoi teilt ihn durch alle, die dabei sind.",
     "✨ Oben ist nichts mehr milchig."
