@@ -34,7 +34,15 @@ Deno.serve(async (req) => {
       ziel = r.url;
       // nur den Anfang lesen, die Vorschau-Angaben stehen oben
       const leser = r.body.getReader(); html = ""; let menge = 0;
-      while (menge < 1_500_000) { const { done, value } = await leser.read(); if (done) break; menge += value.length; html += new TextDecoder().decode(value, { stream: true }); if (/<\/head>/i.test(html)) break; }
+      // Airbnb: die Gästezahl steht weiter unten im Seitentext („personCapacity“), dafür weiterlesen
+      const airbnb = /airbnb\./i.test(new URL(ziel).hostname);
+      const dekoder = new TextDecoder(); let kopfDa = false, kapDa = false;
+      while (menge < 1_500_000) {
+        const { done, value } = await leser.read(); if (done) break;
+        menge += value.length; const stueck = dekoder.decode(value, { stream: true }); const neu = html.slice(-40) + stueck; html += stueck;
+        kopfDa ||= /<\/head>/i.test(neu); kapDa ||= /"personCapacity":\d+/.test(neu);
+        if (kopfDa && (!airbnb || kapDa)) break;
+      }
       leser.cancel().catch(() => {});
       const weiter = html.match(/<meta[^>]+http-equiv=["']refresh["'][^>]*content=["'][^"']*url=([^"'>]+)["']/i)?.[1];
       if (!weiter || meta(html, ["og:title"])) break;
@@ -46,7 +54,8 @@ Deno.serve(async (req) => {
     if (bild && bild.startsWith("//")) bild = "https:" + bild;
     if (bild && !bild.startsWith("https://")) bild = null;
     const brauchbar = titel && !/^(weiterleitung|redirect|just a moment|access denied|attention required)|not a bot|captcha/i.test(titel) ? titel : null;
-    return antwort({ ok: !!(brauchbar || bild), titel: brauchbar?.slice(0, 160) || null, bild: bild?.slice(0, 800) || null, ziel });
+    const gaeste = Number(html.match(/"personCapacity":(\d+)/)?.[1]) || null;
+    return antwort({ ok: !!(brauchbar || bild), titel: brauchbar?.slice(0, 160) || null, bild: bild?.slice(0, 800) || null, gaeste: gaeste && gaeste <= 50 ? gaeste : null, ziel });
   } catch (_e) {
     return antwort({ ok: false });
   }
