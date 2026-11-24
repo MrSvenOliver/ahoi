@@ -749,4 +749,6 @@ const TEXTE = {
   "🛏 Die Wishlist zeigt Schlafzimmer, Betten und wie viele Gäste reinpassen.": ["🛏 The wishlist shows bedrooms, beds and how many guests fit.", "🛏 Wishlist ukazuje spálne, postele a koľko hostí sa zmestí."],
   "📋 „Link einfügen“ klappt jetzt mit Airbnb-Links.": ["📋 “Paste link” now works with Airbnb links.", "📋 „Vložiť odkaz“ teraz funguje s odkazmi z Airbnb."],
   "✨ Oben ist mehr Abstand zur Statusleiste, nichts wirkt mehr verschwommen.": ["✨ More space below the status bar at the top, nothing looks blurry anymore.", "✨ Hore je viac miesta pod stavovým riadkom, nič už nepôsobí rozmazane."],
+  "✓ Dein Vorschlag · du bist dabei": ["✓ Your suggestion · you're in", "✓ Tvoj návrh · si pri tom"],
+  "Zeitraum {von}–{bis} übernommen": ["Dates {von}–{bis} added", "Termín {von}–{bis} prevzatý"],
 };

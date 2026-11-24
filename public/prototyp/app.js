@@ -749,6 +749,7 @@ function seiteZeigen(name) {
   document.getElementById("info").classList.remove("offen");
   document.documentElement.classList.toggle("seite-auf", seiten.includes(name));
   if (name === "chat") chatListeAufbauen();
+  if (name === "ideen") { ideenAufbauen(); if (ECHT) wishlistLaden().catch(() => {}); }
   if (name === "karte") { blattSetzen(false); map.resize(); }
 }
 document.querySelectorAll("#leiste button").forEach(b => b.onclick = () => seiteZeigen(b.dataset.seite));
@@ -1263,7 +1264,7 @@ function ideenAufbauen() {
         ${i.preis ? `<div class="rechner">💶 ${i.preis} € / ${t("Nacht")} · <b>${t("{n} € pro Person", { n: proPerson })}</b> ${t("bei {n}", { n: belegt })}</div>` : ""}
         <div class="dabei-leiste"><div class="dabei-gesichter">${[i.von, ...i.dabei].map(id => ava(person(id))).join("")}</div></div>
         <div class="aktionen">
-          ${i.gebucht ? `<button class="knopf-gross ist-dabei" disabled style="opacity:1">${t("✅ Gebucht · steht in Reisen")}</button>` : i.echt && eigen ? "" : `<button class="knopf-gross dabei-knopf ${ichDabei ? "ist-dabei" : ""}" data-n="${n}" ${!frei && !ichDabei ? "disabled" : ""}>${t(ichDabei ? "✓ Du bist dabei" : frei ? "🙋 Ich wäre dabei" : "Leider voll")}</button>`}
+          ${i.gebucht ? `<button class="knopf-gross ist-dabei" disabled style="opacity:1">${t("✅ Gebucht · steht in Reisen")}</button>` : i.echt && eigen ? `<button class="knopf-gross ist-dabei" disabled style="opacity:1">${t("✓ Dein Vorschlag · du bist dabei")}</button>` : `<button class="knopf-gross dabei-knopf ${ichDabei ? "ist-dabei" : ""}" data-n="${n}" ${!frei && !ichDabei ? "disabled" : ""}>${t(ichDabei ? "✓ Du bist dabei" : frei ? "🙋 Ich wäre dabei" : "Leider voll")}</button>`}
           ${chatKnopf}
         </div>
         <div class="aktionen" style="margin-top:8px">
@@ -1338,6 +1339,10 @@ document.getElementById("einfuegen").onclick = async () => {
   feld.focus(); hinweis(t("Tippe lange ins Link-Feld und wähle „Einfügen“"));
 };
 document.getElementById("idee-link").addEventListener("input", () => { clearTimeout(vorschauZeigen.uhr); vorschauZeigen.uhr = setTimeout(vorschauZeigen, 500); });
+// Airbnb hängt den gewählten Zeitraum an den Link: …/rooms/123?check_in=2027-05-03&check_out=2027-05-07&adults=2
+function zeitraumAusLink(l) {
+  try { const q = new URL(l).searchParams, an = q.get("check_in") || q.get("checkin"), ab = q.get("check_out") || q.get("checkout"); return /^\d{4}-\d{2}-\d{2}$/.test(an || "") && /^\d{4}-\d{2}-\d{2}$/.test(ab || "") && ab > an ? { an, ab } : null; } catch (e) { return null; }
+}
 // Link aus geteiltem Text holen (Airbnb teilt oft „Schau dir das an: https://…“)
 const linkAus = v => { const m = String(v || "").match(/https:\/\/[^\s"'<>]+/i); return m ? m[0] : null; };
 const quelleVon = link => { try { const h = new URL(link).hostname.replace(/^www\./, ""); return /airbnb|abnb\.me/.test(h) ? "Airbnb" : /booking\./.test(h) ? "Booking" : h.split(".").slice(-2).join("."); } catch (e) { return ""; } };
@@ -1349,9 +1354,11 @@ async function vorschauEcht(link) {
   try { const r = await SB.functions.invoke("vorschau", { body: { url: link } }); v = r.data && r.data.ok ? r.data : null; } catch (e) {}
   if (linkAus(document.getElementById("idee-link").value) !== link) return;
   ideeVorschau = v ? { titel: v.titel, bild: v.bild, gaeste: v.gaeste || null } : null;
+  const zeit = zeitraumAusLink(link) || (v && v.ziel && zeitraumAusLink(v.ziel));
+  if (zeit) { document.getElementById("idee-an").value = zeit.an; document.getElementById("idee-ab").value = zeit.ab; document.querySelector("#seite-idee-neu .mehr-optionen").open = true; }
   if (v && v.gaeste && !plaetze) { plaetze = Math.min(30, Math.max(2, v.gaeste)); plaetzeZeigen(); }
   const bild = ideeFoto ? URL.createObjectURL(ideeFoto) : v && v.bild;
-  box.innerHTML = `<div class="vb" style="${bild ? `background-image:url('${bild.replace(/'/g, "%27")}')` : ""}"></div><div><b>${ohneHtml((v && v.titel) || quelleVon(link))}</b><small>${v ? (v.bild ? t("Bild und Titel übernommen") : t("Kein Bild gefunden, du kannst ein eigenes Foto dazulegen")) + (v.gaeste ? " · " + t("bis {n} Gäste", { n: v.gaeste }) : "") : t("Keine Vorschau möglich, du kannst ein eigenes Foto dazulegen")}</small></div>`;
+  box.innerHTML = `<div class="vb" style="${bild ? `background-image:url('${bild.replace(/'/g, "%27")}')` : ""}"></div><div><b>${ohneHtml((v && v.titel) || quelleVon(link))}</b><small>${v ? (v.bild ? t("Bild und Titel übernommen") : t("Kein Bild gefunden, du kannst ein eigenes Foto dazulegen")) + (v.gaeste ? " · " + t("bis {n} Gäste", { n: v.gaeste }) : "") + (zeit ? " · " + t("Zeitraum {von}–{bis} übernommen", { von: kurz(zeit.an), bis: kurz(zeit.ab) }) : "") : t("Keine Vorschau möglich, du kannst ein eigenes Foto dazulegen")}</small></div>`;
   // Ort vorschlagen, wenn der Titel ihn nennt („… in Lissabon“)
   // Airbnb englisch: „Tiny home in Mickleton · ★4.9“, deutsch: „Tiny House · Mickleton · ★4,9“
   const teile = v && v.titel ? v.titel.split(" · ") : [], ortFeld = document.getElementById("idee-ort");
