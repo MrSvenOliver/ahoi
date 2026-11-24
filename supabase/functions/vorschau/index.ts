@@ -45,7 +45,7 @@ Deno.serve(async (req) => {
     let bild = entschluesseln(meta(html, ["og:image", "og:image:secure_url", "twitter:image"]));
     if (bild && bild.startsWith("//")) bild = "https:" + bild;
     if (bild && !bild.startsWith("https://")) bild = null;
-    const brauchbar = titel && !/^(weiterleitung|redirect|just a moment|access denied)/i.test(titel) ? titel : null;
+    const brauchbar = titel && !/^(weiterleitung|redirect|just a moment|access denied|attention required)|not a bot|captcha/i.test(titel) ? titel : null;
     return antwort({ ok: !!(brauchbar || bild), titel: brauchbar?.slice(0, 160) || null, bild: bild?.slice(0, 800) || null, ziel });
   } catch (_e) {
     return antwort({ ok: false });

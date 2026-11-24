@@ -1327,7 +1327,9 @@ async function vorschauEcht(link) {
   const bild = ideeFoto ? URL.createObjectURL(ideeFoto) : v && v.bild;
   box.innerHTML = `<div class="vb" style="${bild ? `background-image:url('${bild.replace(/'/g, "%27")}')` : ""}"></div><div><b>${ohneHtml((v && v.titel) || quelleVon(link))}</b><small>${v ? (v.bild ? t("Bild und Titel übernommen") : t("Kein Bild gefunden, du kannst ein eigenes Foto dazulegen")) : t("Keine Vorschau möglich, du kannst ein eigenes Foto dazulegen")}</small></div>`;
   // Ort vorschlagen, wenn der Titel ihn nennt („… in Lissabon“)
-  const ortFeld = document.getElementById("idee-ort"), m = v && v.titel && v.titel.split(" · ")[0].match(/ in ([^·,]+)$/);
+  // Airbnb englisch: „Tiny home in Mickleton · ★4.9“, deutsch: „Tiny House · Mickleton · ★4,9“
+  const teile = v && v.titel ? v.titel.split(" · ") : [], ortFeld = document.getElementById("idee-ort");
+  const m = (teile[0] || "").match(/ in ([^·,]+)$/) || (teile[1] && !/[★\d]/.test(teile[1]) ? [null, teile[1]] : null);
   if (m && !ortFeld.value.trim()) { ortFeld.value = m[1].trim(); ortFeld.dispatchEvent(new Event("input")); }
 }
 function vorschauZeigen() {
