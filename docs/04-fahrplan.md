@@ -32,13 +32,13 @@ Entschieden am 23.11.2026 (A + C + E, danach geändert): Anmeldung mit E-Mail un
 - [x] Länder nach den 195 Staaten, kein Freirubbeln, „Am selben Ort“, kein automatisches „zusammen“, Ortssuche mit Tokio & Co. und ganzen Ländern; Reisegruppen und Steckbrief im Prototyp (23.11.2026)
 - [x] Paare, Reisegruppen, Meine Länder und Steckbrief in der echten App (SQL 06), „Neu in Ahoi“ nach jedem Update (23.11.2026)
 - [x] Orte-Verlauf mit Pionier (SQL 07) und Chat mit Alle, Gruppen und Einzelchats (SQL 08) (23.11.2026)
+- [x] Push für Chat-Nachrichten und monatliche Ort-Frage (Edge Function „push“, SQL 09), Status 24 Std., Gruppen-Emoji, Chat-Profilbilder, Wischen zum Löschen, Ort-Nachfrage nach Reiseplan (24.11.2026)
 - [x] Live-Test mit echten Testkonten (Nomade, Familie, Reise, Treffer, Feedback mit Bild, Geistermodus, Familie pausieren), danach Testdaten gelöscht; behoben: Absturz der Treffer in der Familienansicht, Standort ohne Ländercode, „1 Freunde“, doppelter Punkt im Treffer, Kürzel „DU“ statt eigener Initialen (23.11.2026)
 
 ## Als Nächstes in der echten App
 - Freundeskreise in der Datenbank (bisher nur auf dem Gerät)
 - Chat: Übersetzung (DeepL), Fotos, Orte, Sprachnachrichten
 - Ideen und Ortstipps; Rückblicke aus dem Orte-Verlauf (sobald genug Daten da sind)
-- Mitteilungen (Push)
 - Freundschaften statt „alle sehen alle“, sobald die App wächst (Vorschlag: über Einladungslinks + QR-Code)
 
 ## Später

@@ -719,6 +719,28 @@
   .zeit-diff { font-size: 0.86em; font-weight: 600; color: var(--text-leise); white-space: nowrap; }
   .weite .zeit-diff { display: block; margin-top: 2px; font-size: 11.5px; }
   .sb-klein { display: block; font-family: var(--sans); font-size: 12px; font-weight: 500; color: var(--text-leise); margin-top: 3px; letter-spacing: 0; text-transform: none; }
+  /* Chat: Bild im Kopf, Glocke, Wischen zum Löschen, Gruppen-Emoji, Status-Knopf */
+  .gespraech-bild { width: 38px; height: 38px; border-radius: 50%; flex: none; display: grid; place-items: center; font-size: 20px; font-weight: 700; color: #fff8ea; background: var(--trenner); }
+  .gespraech-bild:empty { display: none; }
+  [data-stil="mission"] .gespraech-bild { border-radius: 8px; border: 1.5px solid var(--tinte); }
+  .glocke { border: 0; background: var(--karte-bg); width: 36px; height: 36px; border-radius: 50%; font-size: 17px; cursor: pointer; flex: none; box-shadow: inset 0 0 0 1px var(--trenner); transition: transform 0.15s; }
+  .glocke:active { transform: scale(0.9); }
+  .glocke.aus { opacity: 0.55; }
+  [data-stil="mission"] .glocke { border-radius: 4px; background: transparent; box-shadow: inset 0 0 0 1px var(--glas-rand); }
+  .chat-zeile.wisch { position: relative; overflow: hidden; padding: 0; display: block; touch-action: pan-y; }
+  .chat-zeile.wisch .zeile-vorn { display: flex; gap: 12px; align-items: center; padding: 12px 2px; background: var(--flaeche); position: relative; z-index: 1; transition: transform 0.22s ease; will-change: transform; }
+  .chat-zeile.wisch.zieht .zeile-vorn { transition: none; }
+  .wisch-knopf { position: absolute; top: 0; right: 0; bottom: 0; width: 96px; border: 0; background: #e5484d; color: #fff; font: inherit; font-size: 14px; font-weight: 650; cursor: pointer; }
+  .emoji-wahl { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+  .emoji-wahl button { width: 44px; height: 44px; border-radius: 12px; border: 1px solid var(--trenner); background: var(--karte-bg); font-size: 22px; cursor: pointer; transition: transform 0.15s; }
+  .emoji-wahl button.aktiv { border-color: var(--tinte); box-shadow: 0 0 0 2px var(--tinte); transform: scale(1.06); }
+  [data-stil="mission"] .emoji-wahl button { border-radius: 4px; }
+  .status-knopf { display: flex; align-items: center; gap: 8px; width: 100%; border: 1px solid var(--trenner); background: var(--karte-bg); color: var(--text); border-radius: 14px; padding: 12px 14px; font: inherit; font-size: 16px; font-weight: 650; cursor: pointer; text-align: left; }
+  .status-knopf #status-knopf-text { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .status-knopf small { font-size: 12px; font-weight: 500; color: var(--text-leise); white-space: nowrap; }
+  .status-knopf.leer #status-knopf-text { color: var(--text-leise); font-weight: 600; }
+  [data-stil="mission"] .status-knopf { border-radius: 4px; font-family: var(--mono); font-size: 14px; }
+  [data-stil="abenteuer"] .status-knopf { border-style: dashed; }
   .steckbrief { position: fixed; inset: 0; z-index: 60; display: none; }
   .steckbrief.offen { display: block; }
   .sb-hinten { position: absolute; inset: 0; background: rgba(0, 0, 0, 0.38); animation: sbHinten 0.25s ease both; }
@@ -1073,10 +1095,10 @@
 <section class="seite" id="seite-chat">
   <div class="seite-kopf"><h1>Chats</h1><button class="knopf-gross" id="gruppe-neu-knopf">+ Gruppe</button></div>
   <ul class="chat-liste" id="chat-liste"></ul>
-  <p class="hinweis-band">Einzelchat: Person auf der Karte antippen · Gedrückt halten: löschen oder verlassen</p>
+  <p class="hinweis-band">Einzelchat: im Steckbrief auf „Nachricht“ tippen · Nach links wischen: löschen oder verlassen · Gedrückt halten: mehr</p>
 </section>
 <section class="seite" id="seite-unterhaltung">
-  <div class="gespraech-kopf"><button class="zurueck" id="gespraech-zurueck" aria-label="Zurück zu den Chats">‹</button><div class="titel"><b id="gespraech-name"></b><span id="gespraech-unter"></span></div><button class="knopf-leise uebersetzen-knopf" id="uebersetzen" aria-pressed="false">🌐 Übersetzen</button></div>
+  <div class="gespraech-kopf"><button class="zurueck" id="gespraech-zurueck" aria-label="Zurück zu den Chats">‹</button><div class="gespraech-bild" id="gespraech-bild" aria-hidden="true"></div><div class="titel"><b id="gespraech-name"></b><span id="gespraech-unter"></span></div><button class="knopf-leise uebersetzen-knopf" id="uebersetzen" aria-pressed="false">🌐 Übersetzen</button><button class="glocke" id="chat-glocke" aria-label="Mitteilungen für diesen Chat"></button></div>
   <div class="verlauf" id="verlauf"></div>
   <div class="eingabe">
     <button class="runder nur-proto" title="Foto, Ort oder Unterkunft teilen">＋</button>
@@ -1089,6 +1111,8 @@
   <div class="seite-kopf"><h1>Neue Gruppe</h1><button class="knopf-leise" data-zurueck="chat">Abbrechen</button></div>
   <div class="kasten formular">
     <label>Name der Gruppe<input id="gruppe-name" placeholder="z. B. Portugal im Januar"></label>
+    <div style="font-size:13px;font-weight:600;color:var(--text-leise);margin-bottom:8px">Emoji der Gruppe</div>
+    <div class="emoji-wahl" id="gruppe-emoji" role="radiogroup" aria-label="Emoji der Gruppe"></div>
     <div style="font-size:13px;font-weight:600;color:var(--text-leise);margin-bottom:8px">Wer ist dabei?</div>
     <div class="chips" id="gruppe-leute" style="flex-wrap:wrap;margin:0;padding:0"></div>
   </div>
@@ -1188,9 +1212,9 @@
   </div>
   <h2>Status</h2>
   <div class="kasten">
-    <div class="status-chips" id="status-chips"></div>
+    <button class="status-knopf" id="status-knopf"><span id="status-knopf-text"></span><small id="status-knopf-zeit"></small><span class="einst-pfeil">›</span></button>
     <div class="status-eigen" id="status-eigen"><input id="status-text" maxlength="24" placeholder="Was machst du gerade?" autocomplete="off"><button class="knopf-gross" id="status-ok">Fertig</button></div>
-    <p class="hinweis-band" style="margin:10px 0 0;text-align:left">Freunde sehen deinen Status, wenn sie dich antippen, und in „Wer ist wo?“. Nochmal antippen entfernt ihn.</p>
+    <p class="hinweis-band" style="margin:10px 0 0;text-align:left">Freunde sehen deinen Status in „Wer ist wo?“ und im Steckbrief. Er gilt 24 Stunden, danach setzt du ihn einfach neu.</p>
     <div class="nur-echt">
       <span class="einst-unter" style="margin-top:16px">Dein Ort</span>
       <div class="zeile-einst" style="border:0;padding-top:4px"><div id="mein-ort"></div><button class="knopf-leise" id="ort-gps">📍 Aktualisieren</button></div>
@@ -1233,6 +1257,11 @@
   </div>
   <h2 class="nur-proto">Mitteilungen</h2>
   <div class="kasten nur-proto" id="mitteilungen"></div>
+  <h2 class="nur-echt">Mitteilungen</h2>
+  <div class="kasten nur-echt" id="mitteilungen-echt">
+    <div class="zeile-einst"><div>💬 Neue Chat-Nachrichten<small id="push-zustand">Push aufs Handy</small></div><button class="schalter" id="push-schalter" aria-label="Push für neue Chat-Nachrichten"></button></div>
+    <p class="hinweis-band" style="margin:8px 0 0;text-align:left" id="push-hinweis">Einzelne Chats schaltest du im Chat mit der Glocke stumm. Einmal im Monat fragt Ahoi per Push, ob du noch am selben Ort bist.</p>
+  </div>
   <h2 class="nur-echt" id="verwaltung-titel" hidden>Verwaltung</h2>
   <div class="kasten einst-gruppe nur-echt" id="verwaltung-kasten" hidden>
     <button class="einst-zeile" id="verwaltung-zeile"><span class="einst-symbol sym-blau"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5 5 6.5v5c0 4.3 3 7.6 7 9 4-1.4 7-4.7 7-9v-5l-7-3Z"/><path d="m9 12 2 2 4-4"/></svg></span><span class="einst-name">Freigaben, Mitglieder, Feedback</span><span class="einst-wert"><span class="zaehler" id="wartende-zahl"></span></span><span class="einst-pfeil">›</span></button>

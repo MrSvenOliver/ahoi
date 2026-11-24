@@ -25,7 +25,11 @@ Object.assign(leute.find(p => p.id === "kim"), { status: "treffen", laender: 16 
 const STATUS_VORLAGEN = { treffen: "☕ Lust auf Treffen", angekommen: "🌱 Neu angekommen", unterkunft: "🔍 Suche Unterkunft", mitreisende: "👥 Suche Mitreisende", arbeit: "💻 Arbeitsphase", sport: "🏄 Sport", abenteuer: "🧗 Abenteuer", basis: "🏡 An meiner Basis", ruhe: "🔕 Nicht stören" };
 const statusAusDb = v => !v ? null : STATUS_VORLAGEN[v] ? v : { text: v };
 if (ECHT) leute.forEach(p => p.status = statusAusDb(p.statusRoh));
-else try { const g = localStorage.getItem("ahoi-status"); leute[0].status = g === null ? "sport" : JSON.parse(g); } catch (e) { leute[0].status = "sport"; }
+else try {
+  const g = localStorage.getItem("ahoi-status"), am = +localStorage.getItem("ahoi-status-am") || 0;
+  leute[0].status = g === null ? "sport" : Date.now() - am > 864e5 && am ? null : JSON.parse(g);
+  leute[0].statusAm = g === null ? Date.now() : am || Date.now();
+} catch (e) { leute[0].status = "sport"; }
 const statusText = p => !p.status ? "" : STATUS_VORLAGEN[p.status] ? t(STATUS_VORLAGEN[p.status]) : (p.status.text || "");
 const ich = () => leute.find(p => p.id === "du");
 if (!ECHT) leute.forEach(p => p.ort = t(p.ort));
@@ -889,6 +893,13 @@ const spracheName = code => new Intl.DisplayNames([SPRACHE], { type: "language" 
 const UNBEKANNT = { id: "?", name: "?", farbe: "#9a9a9a", ort: "", land: "", tz: "UTC" };
 const personOder = id => person(id) || UNBEKANNT;
 const chatName = c => c.art === "einzel" ? personOder(c.mit).name : c.name;
+// Bild eines Chats: Einzelchat = Profilbild der Person, Gruppe = ihr Emoji, „Alle“ = Weltkugel
+const GRUPPEN_EMOJIS = ["👥", "🏄", "🌴", "🏝️", "☕", "🍻", "🍜", "🧗", "🏔️", "⛵", "🚐", "🎉", "💻", "🌍", "🔥", "❤️"];
+const gruppenEmoji = c => c.emoji || (c.herkunft === "Idee" ? "🏠" : c.herkunft === "Treffer" ? "🧭" : "👥");
+function chatBild(c) {
+  if (c.art === "einzel") { const p = personOder(c.mit); return { stil: kopfStil(p), inhalt: kopfText(p), person: true }; }
+  return { stil: "", inhalt: c.art === "alle" ? "🌍" : gruppenEmoji(c), person: false };
+}
 const istFremd = n => n.lang && n.lang !== SPRACHE && n.ue && n.ue[SPRACHE];
 function vorschau(c) {
   const n = c.nachrichten[c.nachrichten.length - 1];
@@ -909,32 +920,97 @@ function chatPunkt() {
 function chatListeAufbauen() {
   const reihe = [...chats.filter(c => c.art === "alle"), ...chats.filter(c => c.art !== "alle")];
   document.getElementById("chat-liste").innerHTML = reihe.map(c => {
-    let bild;
-    if (c.art === "einzel") { const p = personOder(c.mit); bild = `<div class="bildchen person" style="background:${p.farbe}">${kuerzel(p.name)}</div>`; }
-    else bild = `<div class="bildchen">${c.art === "alle" ? "🌍" : c.herkunft === "Idee" ? "🏠" : c.herkunft === "Treffer" ? "🧭" : "👥"}</div>`;
+    const b = chatBild(c), bild = `<div class="bildchen${b.person ? " person" : ""}" style="${b.stil}">${b.inhalt}</div>`;
     const marke = c.art === "alle" ? '<span class="marke-klein">Beta</span>' : c.herkunft ? `<span class="marke-klein">${t("aus " + c.herkunft)}</span>` : "";
-    return `<li class="chat-zeile" data-id="${c.id}">${bild}<div class="mitte"><b>${ohneHtml(chatName(c))} ${marke}${c.stumm ? " 🔕" : ""}</b><span>${ohneHtml(vorschau(c))}</span></div>${c.ungelesen ? `<div class="ungelesen">${c.ungelesen}</div>` : ""}</li>`;
+    // Nach links wischen: Einzelchat löschen (nur bei dir) oder Gruppe verlassen; „Alle“ bleibt
+    const wisch = c.art === "alle" ? "" : `<button class="wisch-knopf" tabindex="-1">${c.art === "gruppe" ? t("Verlassen") : t("Löschen")}</button>`;
+    return `<li class="chat-zeile wisch" data-id="${c.id}">${wisch}<div class="zeile-vorn">${bild}<div class="mitte"><b>${ohneHtml(chatName(c))} ${marke}${c.stumm ? " 🔕" : ""}</b><span>${ohneHtml(vorschau(c))}</span></div>${c.ungelesen ? `<div class="ungelesen">${c.ungelesen}</div>` : ""}</div></li>`;
   }).join("");
   document.querySelectorAll(".chat-zeile").forEach(z => {
-    const c = chats.find(x => x.id === z.dataset.id);
-    let timer = null, lang = false;
-    z.addEventListener("pointerdown", () => { lang = false; timer = setTimeout(() => { lang = true; chatAktionen(c); }, 550); });
-    ["pointerup", "pointerleave", "pointercancel", "pointermove"].forEach(ev => z.addEventListener(ev, e => { if (ev !== "pointermove" || Math.abs(e.movementY) > 3) clearTimeout(timer); }));
+    const c = chats.find(x => x.id === z.dataset.id), vorn = z.querySelector(".zeile-vorn"), knopf = z.querySelector(".wisch-knopf");
+    let timer = null, lang = false, startX = 0, startY = 0, dx = 0, zieht = false, offen = false;
+    const setzen = x => { vorn.style.transform = x ? `translateX(${x}px)` : ""; };
+    const zu = () => { offen = false; setzen(0); };
+    z.addEventListener("pointerdown", e => {
+      lang = false; zieht = false; startX = e.clientX; startY = e.clientY; dx = 0;
+      document.querySelectorAll(".chat-zeile.wisch").forEach(x => { if (x !== z) x.querySelector(".zeile-vorn").style.transform = ""; });
+      timer = setTimeout(() => { if (!zieht) { lang = true; chatAktionen(c); } }, 550);
+    });
+    z.addEventListener("pointermove", e => {
+      if (e.buttons === 0 && e.pointerType === "mouse") return;
+      const mx = e.clientX - startX, my = e.clientY - startY;
+      if (Math.abs(my) > 6 || Math.abs(mx) > 6) clearTimeout(timer);
+      if (!knopf || (!zieht && (Math.abs(mx) < 8 || Math.abs(my) > Math.abs(mx)))) return;
+      zieht = true; z.classList.add("zieht");
+      dx = Math.max(-130, Math.min(0, (offen ? -96 : 0) + mx)); setzen(dx);
+    });
+    const loslassen = () => {
+      clearTimeout(timer);
+      if (!zieht) return;
+      z.classList.remove("zieht");
+      if (dx < -170) { zu(); return knopf.click(); }
+      offen = dx < -48; setzen(offen ? -96 : 0);
+      setTimeout(() => { zieht = false; }, 50);
+    };
+    ["pointerup", "pointercancel"].forEach(ev => z.addEventListener(ev, loslassen));
+    z.addEventListener("pointerleave", () => clearTimeout(timer));
     z.addEventListener("contextmenu", e => { e.preventDefault(); clearTimeout(timer); lang = true; chatAktionen(c); });
-    z.addEventListener("click", () => { if (!lang) gespraechOeffnen(c); });
+    vorn.addEventListener("click", () => { if (zieht) return; if (offen) return zu(); if (!lang) gespraechOeffnen(c); });
+    if (knopf) knopf.onclick = () => {
+      if (c.art === "gruppe") return fragen(t("Gruppe „{name}“ verlassen?", { name: chatName(c) }), [[t("Gruppe verlassen"), () => { gruppeVerlassen(c); chatListeAufbauen(); }, true]]);
+      chats.splice(chats.indexOf(c), 1); if (ECHT) chatAusblenden(c);
+      hinweis(t("Nur bei dir gelöscht – {name} sieht den Chat weiter", { name: personOder(c.mit).name }));
+      chatListeAufbauen();
+    };
   });
   chatPunkt();
 }
 function chatAktionen(c) {
   const blatt = document.getElementById("aktion-blatt");
   document.getElementById("aktion-titel").textContent = chatName(c);
-  const knoepfe = c.art === "alle" ? [[t(c.stumm ? "🔔 Wieder einschalten" : "🔕 Stummschalten"), () => { c.stumm = !c.stumm; }]]
-    : c.art === "gruppe" ? [[t("🔕 Stummschalten"), () => { c.stumm = !c.stumm; }], [t("Gruppe verlassen"), () => gruppeVerlassen(c), true]]
+  const stummKnopf = [t(c.stumm ? "🔔 Wieder einschalten" : "🔕 Stummschalten"), () => chatStummSetzen(c, !c.stumm)];
+  const knoepfe = c.art === "alle" ? [stummKnopf]
+    : c.art === "gruppe" ? [stummKnopf, [t("😀 Emoji ändern"), () => gruppenEmojiAendern(c)], [t("Gruppe verlassen"), () => gruppeVerlassen(c), true]]
     : [[t("Chat löschen (nur bei dir)"), () => { chats.splice(chats.indexOf(c), 1); if (ECHT) chatAusblenden(c); hinweis(t("Nur bei dir gelöscht – {name} sieht den Chat weiter", { name: person(c.mit).name })); }, true]];
   const box = document.getElementById("aktion-knoepfe"); box.innerHTML = "";
   knoepfe.forEach(([t, f, gefahr]) => { const b = document.createElement("button"); b.className = "knopf-leise" + (gefahr ? " gefahr" : ""); b.textContent = t; b.onclick = () => { blatt.classList.remove("offen"); f(); chatListeAufbauen(); }; box.appendChild(b); });
   blatt.classList.add("offen");
 }
+function gruppenEmojiAendern(c) {
+  const blatt = document.getElementById("aktion-blatt");
+  document.getElementById("aktion-titel").textContent = t("Emoji für „{name}“", { name: chatName(c) });
+  const box = document.getElementById("aktion-knoepfe"); box.innerHTML = '<div class="emoji-wahl" style="justify-content:center"></div>';
+  emojiWahlAufbauen(box.firstChild, gruppenEmoji(c), async e => {
+    blatt.classList.remove("offen");
+    if (ECHT) { const { error } = await SB.rpc("chat_emoji_setzen", { c: c.id, emoji: e }); if (error) return hinweis(t("Das hat nicht geklappt")); }
+    c.emoji = e; chatListeAufbauen();
+    if (aktuellerChat === c) document.getElementById("gespraech-bild").innerHTML = e;
+  });
+  setTimeout(() => blatt.classList.add("offen"), 30);
+}
+// Stumm: im Prototyp nur auf dem Gerät, in der echten App in der Datenbank (dann kommt für diesen Chat kein Push)
+async function chatStummSetzen(c, stumm) {
+  if (ECHT) {
+    const { error } = stumm ? await SB.from("chat_stumm").insert({ chat: c.id }) : await SB.from("chat_stumm").delete().eq("chat", c.id).eq("person", ECHT_DATEN.uid);
+    if (error && !/duplicate/.test(error.message)) return hinweis(t("Das hat nicht geklappt"));
+  }
+  c.stumm = stumm; glockeSetzen(); chatListeAufbauen();
+  hinweis(stumm ? t("🔕 Stumm: für „{name}“ kommen keine Mitteilungen", { name: chatName(c) }) : t("🔔 Mitteilungen für „{name}“ an", { name: chatName(c) }));
+}
+// Glocke im Chat: Ist Push auf diesem Gerät noch aus, schaltet sie Push ein; sonst schaltet sie diesen Chat stumm oder wieder laut
+function glockeSetzen() {
+  const g = document.getElementById("chat-glocke"), c = aktuellerChat; if (!c) return;
+  const pushAn = ECHT ? PUSH.an : true;
+  g.textContent = !pushAn || c.stumm ? "🔕" : "🔔";
+  g.classList.toggle("aus", !pushAn || !!c.stumm);
+  g.title = !pushAn ? t("Push für neue Nachrichten einschalten") : c.stumm ? t("Mitteilungen für diesen Chat einschalten") : t("Diesen Chat stummschalten");
+  g.setAttribute("aria-label", g.title);
+}
+document.getElementById("chat-glocke").onclick = () => {
+  const c = aktuellerChat; if (!c) return;
+  if (ECHT && !PUSH.an) return pushEinschalten();
+  chatStummSetzen(c, !c.stumm);
+};
 document.getElementById("aktion-abbrechen").onclick = () => document.getElementById("aktion-blatt").classList.remove("offen");
 document.getElementById("aktion-blatt").onclick = e => { if (e.target.id === "aktion-blatt") e.target.classList.remove("offen"); };
 function gruppeVerlassen(c) {
@@ -946,6 +1022,9 @@ function gruppeVerlassen(c) {
 function gespraechOeffnen(c) {
   aktuellerChat = c; c.ungelesen = 0;
   document.getElementById("gespraech-name").textContent = chatName(c);
+  const kb = chatBild(c), kopfBild = document.getElementById("gespraech-bild");
+  kopfBild.setAttribute("style", kb.stil); kopfBild.innerHTML = kb.inhalt;
+  glockeSetzen();
   const p = c.art === "einzel" && personOder(c.mit);
   document.getElementById("gespraech-unter").textContent = c.art === "alle" ? t("Alle Mitglieder · nur in der Beta") : c.art === "gruppe" ? c.mitglieder.map(id => id === "du" ? t("Du") : personOder(id).name).join(", ") : p.ort ? `${flagge(p.land)} ${p.ort} · ${uhrzeit(p.tz)}${t(" Uhr")}` : "";
   if (ECHT) chatGelesen(c);
@@ -996,8 +1075,14 @@ document.getElementById("chat-text").addEventListener("focus", () => document.do
 document.getElementById("chat-text").addEventListener("blur", () => document.documentElement.classList.remove("tippt"));
 // Neue Gruppe
 const gruppeAuswahl = new Set();
+let gruppeEmojiWahl = "👥";
+function emojiWahlAufbauen(box, aktiv, beiWahl) {
+  box.innerHTML = GRUPPEN_EMOJIS.map(e => `<button type="button" role="radio" aria-checked="${e === aktiv}" class="${e === aktiv ? "aktiv" : ""}">${e}</button>`).join("");
+  box.querySelectorAll("button").forEach(b => b.onclick = () => { box.querySelectorAll("button").forEach(x => { x.classList.remove("aktiv"); x.setAttribute("aria-checked", "false"); }); b.classList.add("aktiv"); b.setAttribute("aria-checked", "true"); beiWahl(b.textContent); });
+}
 document.getElementById("gruppe-neu-knopf").onclick = () => {
   gruppeAuswahl.clear(); document.getElementById("gruppe-name").value = "";
+  gruppeEmojiWahl = "👥"; emojiWahlAufbauen(document.getElementById("gruppe-emoji"), gruppeEmojiWahl, e => { gruppeEmojiWahl = e; });
   document.getElementById("gruppe-leute").innerHTML = leute.filter(p => p.id !== "du").map(p => `<button data-id="${p.id}">${p.name}</button>`).join("");
   document.querySelectorAll("#gruppe-leute button").forEach(b => b.onclick = () => { b.classList.toggle("aktiv"); gruppeAuswahl.has(b.dataset.id) ? gruppeAuswahl.delete(b.dataset.id) : gruppeAuswahl.add(b.dataset.id); });
   seiteZeigen("gruppe-neu");
@@ -1005,8 +1090,8 @@ document.getElementById("gruppe-neu-knopf").onclick = () => {
 document.getElementById("gruppe-erstellen").onclick = () => {
   if (!gruppeAuswahl.size) return hinweis("Bitte mindestens eine Person auswählen");
   const name = document.getElementById("gruppe-name").value.trim() || [...gruppeAuswahl].map(id => person(id).name).join(", ");
-  if (ECHT) return gruppeErstellenEcht(name, [...gruppeAuswahl]);
-  const c = { id: "g-" + Date.now(), art: "gruppe", name, mitglieder: ["du", ...gruppeAuswahl], nachrichten: [{ system: t("<b>Du</b> hast die Gruppe erstellt") }] };
+  if (ECHT) return gruppeErstellenEcht(name, [...gruppeAuswahl], gruppeEmojiWahl);
+  const c = { id: "g-" + Date.now(), art: "gruppe", name, emoji: gruppeEmojiWahl, mitglieder: ["du", ...gruppeAuswahl], nachrichten: [{ system: t("<b>Du</b> hast die Gruppe erstellt") }] };
   chats.splice(1, 0, c); gespraechOeffnen(c);
 };
 // Automatische Gruppe, sobald man bei einer Idee dabei ist
@@ -1235,23 +1320,39 @@ document.getElementById("sprache-zeile").onclick = () => {
 };
 
 // ---------- Status ----------
-function statusAufbauen() {
-  const du = ich(), eigen = du.status && !STATUS_VORLAGEN[du.status];
-  document.getElementById("mein-status-anzeige").textContent = statusText(du) || t("Kein Status");
-  document.getElementById("status-chips").innerHTML = Object.keys(STATUS_VORLAGEN).map(k => `<button data-k="${k}" class="${du.status === k ? "aktiv" : ""}">${t(STATUS_VORLAGEN[k])}</button>`).join("") +
-    `<button data-k="__eigen" class="${eigen ? "aktiv" : ""}">${eigen ? "✏️ " + ohneHtml(du.status.text) : t("✏️ Eigener")}</button>`;
-  document.querySelectorAll("#status-chips button").forEach(b => b.onclick = () => {
-    const k = b.dataset.k;
-    if (k === "__eigen") { const box = document.getElementById("status-eigen"); box.classList.toggle("offen"); document.getElementById("status-text").value = eigen ? du.status.text : ""; if (box.classList.contains("offen")) document.getElementById("status-text").focus(); return; }
-    statusSetzen(du.status === k ? null : k);
-  });
+// Ein Knopf zeigt den aktuellen Status; Tippen öffnet die Auswahl. Ein Status gilt 24 Stunden (danach zeigt ihn niemand mehr).
+const STATUS_DAUER = 864e5;
+function statusRest(du) {
+  const am = ECHT ? (ECHT_DATEN.profil.status_am ? new Date(ECHT_DATEN.profil.status_am).getTime() : Date.now()) : du.statusAm || Date.now();
+  return Math.max(0, am + STATUS_DAUER - Date.now());
 }
+function statusAufbauen() {
+  const du = ich(), text = statusText(du), k = document.getElementById("status-knopf");
+  document.getElementById("mein-status-anzeige").textContent = text || t("Kein Status");
+  document.getElementById("status-knopf-text").textContent = text || t("＋ Status setzen");
+  const rest = text ? statusRest(du) : 0, std = Math.ceil(rest / 36e5);
+  document.getElementById("status-knopf-zeit").textContent = !text ? "" : std <= 1 ? t("noch unter 1 Std.") : t("noch {n} Std.", { n: std });
+  k.classList.toggle("leer", !text);
+}
+function statusWahl() {
+  const du = ich(), eigen = du.status && !STATUS_VORLAGEN[du.status];
+  const blatt = document.getElementById("aktion-blatt");
+  document.getElementById("aktion-titel").textContent = t("Was steht bei dir an?");
+  const box = document.getElementById("aktion-knoepfe"); box.innerHTML = "";
+  const knopf = (text, aktiv, f, gefahr) => { const b = document.createElement("button"); b.className = "knopf-leise" + (aktiv ? " aktiv" : "") + (gefahr ? " gefahr" : ""); b.textContent = text; b.onclick = () => { blatt.classList.remove("offen"); f(); }; box.appendChild(b); };
+  Object.keys(STATUS_VORLAGEN).forEach(k => knopf(t(STATUS_VORLAGEN[k]) + (du.status === k ? "  ✓" : ""), du.status === k, () => statusSetzen(k)));
+  knopf(eigen ? "✏️ " + du.status.text + "  ✓" : t("✏️ Eigener"), eigen, () => { const e = document.getElementById("status-eigen"); e.classList.add("offen"); document.getElementById("status-text").value = eigen ? du.status.text : ""; document.getElementById("status-text").focus(); });
+  if (du.status) knopf(t("Status entfernen"), false, () => statusSetzen(null), true);
+  blatt.classList.add("offen");
+}
+document.getElementById("status-knopf").onclick = statusWahl;
 function statusSetzen(wert) {
-  ich().status = wert;
-  if (ECHT) SB.from("profile").update({ status: wert && wert.text ? wert.text : wert }).eq("id", ECHT_DATEN.uid).then(r => { if (r.error) hinweis(t("Speichern hat nicht geklappt")); });
-  else try { localStorage.setItem("ahoi-status", JSON.stringify(wert)); } catch (e) {}
+  ich().status = wert; ich().statusAm = Date.now();
+  if (ECHT) { ECHT_DATEN.profil.status_am = wert ? new Date().toISOString() : null; SB.from("profile").update({ status: wert && wert.text ? wert.text : wert }).eq("id", ECHT_DATEN.uid).then(r => { if (r.error) hinweis(t("Speichern hat nicht geklappt")); }); }
+  else try { localStorage.setItem("ahoi-status", JSON.stringify(wert)); localStorage.setItem("ahoi-status-am", String(Date.now())); } catch (e) {}
   document.getElementById("status-eigen").classList.remove("offen");
   statusAufbauen(); listeAufbauen();
+  if (wert) hinweis(t("Status gesetzt · gilt 24 Stunden"));
 }
 document.getElementById("status-ok").onclick = () => { const v = document.getElementById("status-text").value.trim(); statusSetzen(v ? { text: v } : null); };
 document.getElementById("status-text").addEventListener("keydown", e => { if (e.key === "Enter") document.getElementById("status-ok").click(); });
@@ -1828,15 +1929,17 @@ let chatsGeladen = false;
 async function chatsLaden() {
   if (!ECHT || familieModus || ECHT_DATEN.profil.art === "familie") return;
   const [k, m, n] = await Promise.all([
-    SB.from("chat").select("id, art, name, erstellt_am"), SB.from("chat_mitglied").select("chat, person"),
+    SB.from("chat").select("id, art, name, emoji, erstellt_am"), SB.from("chat_mitglied").select("chat, person"),
     SB.from("nachricht").select("id, chat, von, text, system, am").order("id", { ascending: false }).limit(800)
   ]);
   if (k.error || m.error || n.error) return;
+  const st = await SB.from("chat_stumm").select("chat");
+  const stumm = new Set(st.error ? [] : st.data.map(x => x.chat));
   const neu = k.data.map(x => {
     const mit = m.data.filter(y => y.chat === x.id).map(y => idVon(y.person));
     const nachrichten = n.data.filter(y => y.chat === x.id).reverse().map(nachrichtAusDb);
     const gelesen = chatStand.gelesen[x.id] || 0;
-    return { id: x.id, art: x.art, name: x.art === "alle" ? t("Alle") : x.name, mitglieder: mit, mit: x.art === "einzel" ? mit.find(id => id !== "du") : null, nachrichten, erstellt: x.erstellt_am,
+    return { id: x.id, art: x.art, name: x.art === "alle" ? t("Alle") : x.name, emoji: x.emoji, stumm: stumm.has(x.id), mitglieder: mit, mit: x.art === "einzel" ? mit.find(id => id !== "du") : null, nachrichten, erstellt: x.erstellt_am,
       ungelesen: nachrichten.filter(y => y.id > gelesen && y.von !== "du" && !y.system).length };
   }).filter(c => !(c.art === "einzel" && c.id in chatStand.weg && !c.nachrichten.some(y => y.id > chatStand.weg[c.id])));
   // Reihenfolge: „Alle“ zuerst, dann nach letzter Nachricht
@@ -1882,8 +1985,8 @@ async function einzelChatEcht(id) {
   if (!c) { c = { id: data, art: "einzel", mit: id, mitglieder: ["du", id], nachrichten: [] }; chats.splice(1, 0, c); }
   gespraechOeffnen(c);
 }
-async function gruppeErstellenEcht(name, ids) {
-  const { data, error } = await SB.rpc("gruppe_erstellen", { name, leute: ids.map(id => person(id)?.uid).filter(Boolean) });
+async function gruppeErstellenEcht(name, ids, emoji) {
+  const { data, error } = await SB.rpc("gruppe_erstellen", { name, leute: ids.map(id => person(id)?.uid).filter(Boolean), emoji: emoji || null });
   if (error) return hinweis(t("Das hat nicht geklappt"));
   await chatsLaden();
   const c = chats.find(x => x.id === data); if (c) gespraechOeffnen(c); else seiteZeigen("chat");
@@ -1894,9 +1997,102 @@ async function chatVerlassenEcht(c) {
   hinweis(t("Du hast die Gruppe verlassen")); await chatsLaden(); seiteZeigen("chat");
 }
 
+// ---------- Push-Mitteilungen (echte App) ----------
+// Funktioniert auf dem iPhone nur, wenn Ahoi auf dem Home-Bildschirm liegt (ab iOS 16.4). Die Schlüssel kommen vom Server.
+const PUSH = { an: false, chat: true, geht: "serviceWorker" in navigator && "PushManager" in window && "Notification" in window };
+const alsApp = () => window.navigator.standalone === true || matchMedia("(display-mode: standalone)").matches;
+const istIphone = () => /iPhone|iPad|iPod/.test(navigator.userAgent);
+const b64 = s => { const p = "=".repeat((4 - (s.length % 4)) % 4), roh = atob((s + p).replace(/-/g, "+").replace(/_/g, "/")); return Uint8Array.from([...roh].map(c => c.charCodeAt(0))); };
+async function pushPruefen() {
+  if (!ECHT || !PUSH.geht) return pushAnzeigen();
+  try {
+    const reg = await navigator.serviceWorker.getRegistration();
+    const sub = reg && await reg.pushManager.getSubscription();
+    PUSH.an = !!sub && Notification.permission === "granted" && PUSH.chat;
+    if (sub) await SB.from("push_abo").upsert({ endpunkt: sub.endpoint, p256dh: sub.toJSON().keys.p256dh, auth: sub.toJSON().keys.auth, geraet: navigator.userAgent.slice(0, 120) });
+  } catch (e) {}
+  pushAnzeigen();
+}
+function pushAnzeigen() {
+  const s = document.getElementById("push-schalter"), z = document.getElementById("push-zustand");
+  if (s) { s.classList.toggle("an", PUSH.an); s.setAttribute("aria-pressed", PUSH.an ? "true" : "false"); }
+  if (z) z.textContent = !PUSH.geht ? (istIphone() && !alsApp() ? t("Erst Ahoi zum Home-Bildschirm hinzufügen") : t("Auf diesem Gerät nicht möglich")) : PUSH.an ? t("An auf diesem Gerät") : Notification.permission === "denied" ? t("In den Einstellungen des Handys blockiert") : t("Push aufs Handy");
+  glockeSetzen();
+}
+async function pushEinschalten() {
+  if (!ECHT) return hinweis(t("Im Prototyp gibt es keine Push-Mitteilungen"));
+  if (!PUSH.geht) return hinweis(istIphone() && !alsApp() ? t("Auf dem iPhone: Ahoi über Teilen → „Zum Home-Bildschirm“ hinzufügen und von dort öffnen") : t("Dieses Gerät kann keine Push-Mitteilungen"));
+  try {
+    const erlaubt = await Notification.requestPermission();
+    if (erlaubt !== "granted") { pushAnzeigen(); return hinweis(t("Mitteilungen sind am Handy nicht erlaubt")); }
+    let { data: schluessel } = await SB.rpc("push_schluessel_oeffentlich");
+    if (!schluessel) { await fetch(SB_URL + "/functions/v1/push", { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" }).catch(() => {}); ({ data: schluessel } = await SB.rpc("push_schluessel_oeffentlich")); }
+    if (!schluessel) return hinweis(t("Push ist gerade nicht erreichbar"));
+    const reg = await navigator.serviceWorker.ready;
+    const sub = (await reg.pushManager.getSubscription()) || await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: b64(schluessel) });
+    const k = sub.toJSON().keys;
+    const a = await SB.from("push_abo").upsert({ endpunkt: sub.endpoint, p256dh: k.p256dh, auth: k.auth, geraet: navigator.userAgent.slice(0, 120) });
+    if (a.error) throw a.error;
+    await SB.from("profile").update({ push_chat: true }).eq("id", ECHT_DATEN.uid);
+    PUSH.chat = true; PUSH.an = true; pushAnzeigen();
+    hinweis(t("🔔 Push ist an: neue Nachrichten kommen aufs Handy"));
+  } catch (e) { hinweis(t("Push hat nicht geklappt")); pushAnzeigen(); }
+}
+async function pushAusschalten() {
+  await SB.from("profile").update({ push_chat: false }).eq("id", ECHT_DATEN.uid);
+  PUSH.chat = false; PUSH.an = false; pushAnzeigen();
+  hinweis(t("🔕 Keine Push-Mitteilungen mehr für Chats"));
+}
+document.getElementById("push-schalter").onclick = () => PUSH.an ? pushAusschalten() : pushEinschalten();
+// Aus einer Mitteilung geöffnet: Chat oder Ort-Frage direkt zeigen
+function pushZiel(url) {
+  const q = new URL(url, location.href).searchParams;
+  if (q.get("chat")) { const c = chats.find(x => x.id === q.get("chat")); if (c) gespraechOeffnen(c); else chatsLaden().then(() => { const c2 = chats.find(x => x.id === q.get("chat")); if (c2) gespraechOeffnen(c2); }); }
+  if (q.get("ort") === "frage") ortNachfragen(true);
+}
+if ("serviceWorker" in navigator) navigator.serviceWorker.addEventListener("message", e => { if (e.data && e.data.ziel) pushZiel(e.data.ziel); });
+
+// ---------- Ort-Nachfrage beim Öffnen ----------
+// 1. Sagt der Reiseplan, dass du heute woanders bist: „Laut deinem Reiseplan bist du jetzt in Košice. Stimmt das?“
+// 2. Sonst, wenn der Ort seit 30 Tagen nicht neu war: „Bist du noch in Águilas?“ (je Ort höchstens einmal am Tag)
+async function ortNachfragen(sofort) {
+  if (!ECHT || familieModus || ECHT_DATEN.profil.geist) return;
+  if (document.getElementById("aktion-blatt").classList.contains("offen")) return setTimeout(() => ortNachfragen(sofort), 1500);
+  const du = ich(), heute = new Date().toISOString().slice(0, 10);
+  let gefragt = {}; try { gefragt = JSON.parse(localStorage.getItem("ahoi-ortfrage") || "{}"); } catch (e) {}
+  const merken = k => { gefragt[k] = heute; try { localStorage.setItem("ahoi-ortfrage", JSON.stringify(gefragt)); } catch (e) {} };
+  const reise = reisen.find(r => r.wer[0] === "du" && r.von && r.von <= heute && r.bis >= heute);
+  const woanders = reise && (reise.lat == null ? reise.land !== du.land : du.lat == null || entfernungKm(du.lat, du.lon, reise.lat, reise.lon) > GLEICH_KM);
+  const zumOrt = () => { seiteZeigen("profil"); setTimeout(() => { document.getElementById("ort-suche").scrollIntoView({ behavior: ruhig ? "auto" : "smooth", block: "center" }); document.getElementById("ort-suche").focus(); }, 350); };
+  const bestaetigen = async () => { const { error } = await SB.rpc("ort_bestaetigen"); if (!error) { du.stand = new Date().toISOString(); hinweis(t("Danke! Ort bestätigt")); listeAufbauen(); } };
+  if (woanders) {
+    const k = "reise|" + reise.ziel + "|" + reise.von;
+    if (!sofort && gefragt[k] === heute) return nachbarnFragen();
+    merken(k);
+    return fragen(t("Laut deinem Reiseplan bist du jetzt in {ort}. Stimmt das?", { ort: reise.ziel }), [
+      [reise.lat != null ? t("Ja, ich bin in {ort}", { ort: reise.ziel }) : t("Ja, Ort in {land} wählen", { land: landName(reise.land) }), () => reise.lat != null ? neuerOrt({ ort: reise.ziel, land: reise.land, lat: reise.lat, lon: reise.lon }) : zumOrt()],
+      ...(du.ort ? [[t("Nein, noch in {ort}", { ort: du.ort }), bestaetigen]] : []),
+      [t("Ich bin woanders"), zumOrt]
+    ]);
+  }
+  if (du.ort && (sofort || ortAlterTage(du) >= 30)) {
+    const k = "noch|" + du.ort;
+    if (!sofort && gefragt[k] === heute) return nachbarnFragen();
+    merken(k);
+    return fragen(t("Bist du noch in {ort}?", { ort: du.ort }), [[t("Ja, noch hier"), bestaetigen], [t("Nein, ich bin weitergezogen"), zumOrt]]);
+  }
+  nachbarnFragen();
+}
+
 // ---------- Neu in Ahoi: nach jedem App-Update einmal eine kurze Übersicht ----------
 // Bei jedem Update oben einen Eintrag ergänzen (neueste zuerst). Wer neu dabei ist, sieht nur den neuesten.
 const NEUIGKEITEN = [
+  { id: "2026-11-24-push", punkte: [
+    "🔔 Push für neue Nachrichten: einschalten unter Profil → Mitteilungen oder mit der Glocke im Chat.",
+    "💬 Chats zeigen das Profilbild. Nach links wischen löscht einen Chat, Gruppen bekommen ein eigenes Emoji.",
+    "☕ Status mit einem Tipp setzen. Er gilt 24 Stunden.",
+    "📍 Sagt dein Reiseplan, dass du woanders bist, fragt Ahoi kurz nach."
+  ] },
   { id: "2026-11-23-treffer", punkte: [
     "🧭 Treffer stimmen genauer: „gleichzeitig dort“ heißt jetzt dieselbe Stadt. Ist jemand nur in der Nähe, steht sein Ort mit Entfernung dabei.",
     "🏙️ Ortsnamen wie vor Ort: Prešov statt „Eperies“, Košice statt „Kaschau“.",
@@ -1944,7 +2140,7 @@ async function verbindungenLaden() {
   if (!ECHT || familieModus || ECHT_DATEN.profil.art === "familie") return;
   const uid = ECHT_DATEN.uid;
   const [lae, paare, mitgl, anfr, pio] = await Promise.all([
-    SB.from("profile").select("id, laender"), SB.from("paar").select("von, an, bestaetigt"),
+    SB.from("profile").select("id, laender, status_am, push_chat"), SB.from("paar").select("von, an, bestaetigt"),
     SB.from("reisegruppe_mitglied").select("person, gruppe"), SB.from("mitreise_anfrage").select("von, an"), SB.rpc("pioniere")
   ]);
   // Pionier: wer aus dem Freundeskreis als Erster in einem Land war (seit Beginn des Orte-Verlaufs)
@@ -1956,6 +2152,8 @@ async function verbindungenLaden() {
   if (!lae.error) {
     const proId = Object.fromEntries(lae.data.map(x => [x.id, (x.laender || []).map(staatVon).filter(Boolean)]));
     [...leute, ...(ECHT_DATEN.alle || [])].forEach(p => { const l = proId[p.uid]; if (l && p.id !== "du") { p.laenderListe = l; p.laender = l.filter(cc => STAATEN.has(cc)).length; } });
+    const ichRoh = lae.data.find(x => x.id === uid);
+    if (ichRoh) { ECHT_DATEN.profil.status_am = ichRoh.status_am; PUSH.chat = ichRoh.push_chat !== false; if (!PUSH.chat) PUSH.an = false; pushAnzeigen(); statusAufbauen(); }
     const meine = proId[uid] || [];
     if (!meine.length && besucht.length) besuchtSpeichern();
     else if (meine.length) { besucht = [...new Set(meine)]; try { localStorage.setItem(LAENDER_SCHLUESSEL, JSON.stringify(besucht)); } catch (e) {} if (ich().land && landDazu(ich().land)) {} stempelAufbauen(); }
@@ -2003,8 +2201,10 @@ function anfragenBeantworten() {
       [t("Ja, wir reisen zusammen"), () => anfrageAntworten("mitreisen_antworten", mid, true)],
       [t("Nein, nur am selben Ort"), () => anfrageAntworten("mitreisen_antworten", mid, false)]]);
   }
+  if (!ortGefragt) { ortGefragt = true; return ortNachfragen(); }
   nachbarnFragen();
 }
+let ortGefragt = false;
 async function anfrageAntworten(fn, id, ja) {
   const { data, error } = await SB.rpc(fn, { ziel: person(id).uid, ja });
   if (error) return hinweis(t("Das hat nicht geklappt"));
@@ -2046,6 +2246,7 @@ async function standortStill() {
     if (st.state !== "granted" || ECHT_DATEN.profil.geist) return;
     const o = await standortErmitteln();
     if (o.ort !== ECHT_DATEN.profil.ort || o.land !== ECHT_DATEN.profil.land) { await standortSpeichern(o); meinOrtZeigen(); await echtAktualisieren(); }
+    else if (!ECHT_DATEN.profil.standort_am || Date.now() - new Date(ECHT_DATEN.profil.standort_am) > 6 * 36e5) { await SB.rpc("ort_bestaetigen"); ECHT_DATEN.profil.standort_am = new Date().toISOString(); if (ich()) ich().stand = ECHT_DATEN.profil.standort_am; }
   } catch (e) {}
 }
 async function neuerOrt(o) {
@@ -2129,7 +2330,8 @@ function echtEinrichten() {
   if (p.art === "familie") return familieEchtStarten();
   familieListeAufbauen(); setTimeout(neuDabeiPruefen, 2500);
   verbindungenLaden().catch(() => {});
-  chatsLaden().then(chatVerbinden).catch(() => {});
+  chatsLaden().then(chatVerbinden).then(() => { if (/[?&](chat|ort)=/.test(location.search)) { pushZiel(location.href); history.replaceState(null, "", location.pathname); } }).catch(() => {});
+  setTimeout(pushPruefen, 1500);
   // Vorschau „So sieht sie es“: die Familie sieht nur dich
   document.getElementById("familie-start").onclick = () => { FAMILIE_SIEHT = ["du"]; document.getElementById("fam-kopf").textContent = t("So sieht deine Familie dich"); document.getElementById("familie-ende").textContent = t("Zurück"); familieSetzen(true); };
   // Bereiche, die noch nicht live sind

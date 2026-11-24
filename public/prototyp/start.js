@@ -302,6 +302,8 @@ function hinweisZugang(text) {
   const h = document.getElementById("hinweis"); h.textContent = text; h.classList.add("zeigen"); setTimeout(() => h.classList.remove("zeigen"), 2600);
 }
 async function abmelden() {
+  // Push für dieses Gerät abmelden, damit keine Mitteilungen der abgemeldeten Person mehr hier ankommen
+  try { const reg = await navigator.serviceWorker.getRegistration(); const sub = reg && await reg.pushManager.getSubscription(); if (sub) { await SB.from("push_abo").delete().eq("endpunkt", sub.endpoint); await sub.unsubscribe(); } } catch (e) {}
   try { await SB.auth.signOut(); } catch (e) {}
   location.replace(location.pathname);
 }

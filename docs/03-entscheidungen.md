@@ -2,6 +2,13 @@
 
 Jede Entscheidung mit Datum. Neue Einträge kommen oben dazu.
 
+## 24.11.2026
+- Chats: Einzelchats zeigen das Profilbild der Person (in der Liste und im Chat-Kopf); Gruppen bekommen ein eigenes Emoji (beim Erstellen wählen, später über „Emoji ändern“), keine Collage aus Profilbildern
+- Chat löschen durch Wischen nach links: Einzelchat „nur bei dir löschen“, Gruppe „verlassen“; „Alle“ lässt sich nicht löschen
+- Push-Mitteilungen für neue Chat-Nachrichten: Schalter unter Profil → Mitteilungen und eine Glocke im Chat (schaltet Push ein oder diesen Chat stumm); stumme Chats und „aus“ gelten auf dem Server; auf dem iPhone nur mit Ahoi auf dem Home-Bildschirm; die Push-Schlüssel erzeugt die Edge Function „push“ selbst
+- Status: nur noch ein Knopf mit dem aktuellen Status, die Auswahl öffnet sich beim Tippen; jeder Status gilt 24 Stunden und verschwindet dann für alle
+- Ort-Nachfrage: Beim Öffnen fragt Ahoi „Laut deinem Reiseplan bist du jetzt in Košice. Stimmt das?“, wenn eine heutige Reise woanders ist, sonst „Bist du noch in Águilas?“, wenn der Ort seit 30 Tagen nicht neu war; einmal im Monat dieselbe Frage per Push; bleibt man am selben Ort und GPS ist erlaubt, frischt die App den Zeitpunkt still auf
+
 ## 23.11.2026
 - Treffer: „gleichzeitig dort“ nur bei derselben Stadt (unter 15 km); bis 50 km „in der Nähe“ mit beiden Orten und Entfernung (Hoi An / Đà Nẵng); ganze Länder als „beide in Vietnam“; „kommt zu dir“ nur für Reisen in den nächsten 60 Tagen, „ist gerade dort“ nur für eigene Reisen in den nächsten 14 Tagen und bei aktuellem Ort
 - Ortsnamen: der Name vor Ort in lateinischer Schrift (Prešov statt „Eperies“); die Übersetzung nur, wenn man sie selbst tippt (Lissabon) oder der Ortsname nicht lateinisch ist (Tokio)
