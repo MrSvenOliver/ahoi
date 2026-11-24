@@ -1,6 +1,6 @@
 // Ahoi · Edge Function „push“
 // Verschickt Push-Mitteilungen: bei neuen Chat-Nachrichten (Aufruf aus der Datenbank, Trigger push_ausloesen)
-// und einmal täglich die Ort-Frage (Aufruf über pg_cron). Ohne Anmeldung erreichbar („Verify JWT“ aus):
+// und einmal täglich die Ort-Frage (Aufruf über pg_cron), dazu Svens Mitteilungen an alle (Tabelle rundruf). Ohne Anmeldung erreichbar („Verify JWT“ aus):
 // Sie verschickt nur, was in der Datenbank steht, jede Nachricht nur einmal und die Ort-Frage höchstens einmal im Monat.
 // Die Push-Schlüssel (VAPID) erzeugt sie beim ersten Aufruf selbst und legt sie in push_schluessel ab.
 // Datenbankzugriff direkt über SUPABASE_DB_URL (steht jeder Edge Function automatisch zur Verfügung).
@@ -91,6 +91,19 @@ async function ortFrage() {
   return raus;
 }
 
+async function rundrufe() {
+  // Fällige Mitteilungen an alle: erst als verschickt markieren, dann senden (so geht keine doppelt raus)
+  const faellig = await sql`update public.rundruf set raus = true where not raus and senden_am <= now() returning id, text`;
+  if (!faellig.length) return 0;
+  const alle = (await sql`select id from public.profile where freigegeben`).map((x) => x.id);
+  let raus = 0;
+  for (const r of faellig) {
+    const [kopf, ...rest] = String(r.text).trim().split("\n");
+    raus += await verschicken(alle, () => ({ title: kopf.trim(), body: rest.join(" ").trim(), url: `${APP}?rundruf=${r.id}`, tag: `rundruf-${r.id}` }));
+  }
+  return raus;
+}
+
 const CORS = { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Headers": "content-type, authorization, apikey, x-client-info", "Access-Control-Allow-Methods": "POST, OPTIONS" };
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: CORS });
@@ -101,6 +114,7 @@ Deno.serve(async (req) => {
     let raus = 0;
     if (Number.isInteger(body.nachricht)) raus = await chatNachricht(body.nachricht);
     else if (body.ortfrage) raus = await ortFrage();
+    else if (body.rundruf) raus = await rundrufe();
     return new Response(JSON.stringify({ ok: true, raus }), { headers: { "Content-Type": "application/json", ...CORS } });
   } catch (e) {
     return new Response(JSON.stringify({ ok: false, fehler: String(e) }), { status: 500, headers: { "Content-Type": "application/json", ...CORS } });

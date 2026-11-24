@@ -146,3 +146,5 @@ Jede Entscheidung mit Datum. Neue Einträge kommen oben dazu.
 - Paare: einer fragt an, der andere bestätigt
 - Ablage: Mac-Ordner Schreibtisch/Ahoi App (app + privat), GitHub "ahoi" öffentlich, GitHub "ahoi-backup" privat
 - 24.11.2026: Chat-Push nur noch „💬 Name“ (Person oder Gruppe), ohne Nachrichtentext. Das iPhone fügt bei Web-Apps immer eine Zeile „von Ahoi“ hinzu, die sich nicht entfernen lässt; so bleibt es bei zwei Zeilen.
+- 24.11.2026: Ort im Profil nur über „Aktualisieren“ (echte Ortung); die Stadtsuche erscheint nur, wenn die Ortung nicht erlaubt ist oder nichts findet (auch beim ersten Start). Treffer zeigen Monat und Jahr in der Überschrift und die Länderflagge vor dem Datum. Vom linken Rand nach rechts wischen = ein Schritt zurück.
+- 24.11.2026: Mitteilung an alle in der Verwaltung, sofort oder zu Datum und Uhrzeit geplant (SQL 11). Wer Push aus hat, sieht sie beim nächsten Öffnen. Fotos im Chat (SQL 12), auf dem Handy auf höchstens 1600 Pixel verkleinert. Sprachnachrichten vorerst nicht. „Ideen“ heißt jetzt „Wishlist“.

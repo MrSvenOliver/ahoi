@@ -22,6 +22,8 @@
 - `08-chat.sql`: Chat (Alle, Gruppen, Einzelchats) mit Realtime
 - `09-status-push-emoji.sql`: Status gilt 24 Stunden, Gruppen-Emoji, Push (Abos, stumme Chats, Trigger an die Edge Function, tägliche Ort-Frage über pg_cron)
 - `10-push-ort.sql`: eigener Schalter für die monatliche Nachfrage zum Ort
+- `11-mitteilung-an-alle.sql`: Mitteilung an alle (nur Admin), sofort oder geplant; pg_cron prüft alle 5 Minuten
+- `12-chat-fotos.sql`: Fotos im Chat (privater Speicher „chatfotos“, nur für Leute im Chat)
 - `functions/push/index.ts`: Edge Function „push“ (im Dashboard unter Edge Functions angelegt; „Verify JWT“ aus, weil die Datenbank sie ohne Anmeldung aufruft; sie erzeugt ihre Push-Schlüssel selbst)
 
 ## Betrieb
