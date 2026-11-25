@@ -840,4 +840,6 @@ const TEXTE = {
   "📅 Calendly im Profil: Trag deinen Link unter „Social Media und Webseite“ ein, dann können Freunde in deinem Steckbrief direkt einen Termin buchen.": ["📅 Calendly in your profile: add your link under “Social media and website” and friends can book a meeting right from your profile card.", "📅 Calendly v profile: pridaj svoj odkaz v „Sociálne siete a web“ a priatelia si môžu priamo v tvojom profile rezervovať termín."],
   "{name} entfernt": ["{name} removed", "{name} odstránené"],
   "✕ Links entfernen geht jetzt mit einem Tipp auf das ✕ neben dem Feld.": ["✕ Remove a link with one tap on the ✕ next to the field.", "✕ Odkaz odstrániš jedným ťuknutím na ✕ vedľa poľa."],
+  "Auf {seite} ansehen": ["View on {seite}", "Pozrieť na {seite}"],
+  "🏠 Wishlist: Zur Unterkunft geht es jetzt über einen eigenen Knopf in Airbnb-Pink (bei Booking.com in Blau), direkt mit euren Daten.": ["🏠 Wishlist: the place now opens via its own button in Airbnb pink (Booking.com in blue), with your dates already set.", "🏠 Wishlist: ubytovanie otvoríš vlastným tlačidlom v ružovej Airbnb (Booking.com v modrej), rovno s vašimi dátumami."],
 };

@@ -1238,6 +1238,8 @@ function ideenAufbauen() {
     const eigen = i.von === "du", vonDabei = i.vonDabei !== false, ichDabei = eigen ? vonDabei : i.dabei.includes("du");
     const wer = [...(vonDabei ? [i.von] : []), ...i.dabei], belegt = wer.length, frei = i.plaetze ? Math.max(0, i.plaetze - belegt) : 99;
     const proPerson = Math.round(i.preis / Math.max(1, belegt));
+    // Airbnb und Booking: deutlicher Knopf in der Farbe der Seite, öffnet die Unterkunft mit euren Daten
+    const quelle = `${i.quelle || ""} ${i.link || ""}`, marke = /airbnb|abnb\.me/i.test(quelle) ? ["airbnb", "Airbnb"] : /booking/i.test(quelle) ? ["booking", "Booking.com"] : null;
     // Echte Einträge: Titel aus der Vorschau, z. B. „Wohnung in Lissabon · ★4,9 · 2 Schlafzimmer“
     const teile = i.echt && i.titel ? i.titel.split(" · ") : null;
     const kopf = teile ? ohneHtml(teile[0]) : i.echt ? ohneHtml(i.ort) : t("{art} in {ort}", { art: i.art, ort: i.ort });
@@ -1265,8 +1267,9 @@ function ideenAufbauen() {
           ${i.gebucht ? `<button class="knopf-gross ist-dabei" disabled style="opacity:1">${t("✅ Gebucht · steht in Reisen")}</button>` : i.echt && eigen && !i.eigenWahl ? `<button class="knopf-gross ist-dabei" disabled style="opacity:1">${t("✓ Du bist dabei")}</button>` : `<button class="knopf-gross dabei-knopf ${ichDabei ? "ist-dabei" : ""}" data-n="${n}" ${!frei && !ichDabei ? "disabled" : ""}>${t(ichDabei ? "✓ Du bist dabei" : frei ? "🙋 Ich wäre dabei" : "Leider voll")}</button>`}
           ${chatKnopf}
         </div>
+        ${marke ? `<a class="knopf-gross marke-knopf marke-${marke[0]}" href="${ohneHtml(ansehenLink(i))}" target="_blank" rel="noopener">${t("Auf {seite} ansehen", { seite: marke[1] })} ↗</a>` : ""}
         <div class="aktionen" style="margin-top:8px">
-          <a class="knopf-leise" href="${ohneHtml(ansehenLink(i))}" target="_blank" rel="noopener" style="text-decoration:none;flex:1;text-align:center">${t(i.anreise ? "Preis ansehen ↗" : "Ansehen ↗")}</a>
+          ${marke ? "" : `<a class="knopf-leise" href="${ohneHtml(ansehenLink(i))}" target="_blank" rel="noopener" style="text-decoration:none;flex:1;text-align:center">${t(i.anreise ? "Preis ansehen ↗" : "Ansehen ↗")}</a>`}
           ${(ichDabei || eigen) && !i.gebucht && (!i.echt || i.anreise) ? `<button class="knopf-leise gebucht-knopf" data-n="${n}" style="flex:1">${t("✓ Gebucht")}</button>` : ""}
           ${i.echt && eigen ? `<button class="knopf-leise bearbeiten-knopf" data-n="${n}">✏️ ${t("Ändern")}</button><button class="knopf-leise idee-weg" data-n="${n}" aria-label="${t("Löschen")}">🗑</button>` : ""}
         </div>
@@ -2596,6 +2599,9 @@ async function ortNachfragen(sofort) {
 // ---------- Neu in Ahoi: nach jedem App-Update einmal eine kurze Übersicht ----------
 // Bei jedem Update oben einen Eintrag ergänzen (neueste zuerst). Wer neu dabei ist, sieht nur den neuesten.
 const NEUIGKEITEN = [
+  { id: "2026-11-25-airbnb", punkte: [
+    "🏠 Wishlist: Zur Unterkunft geht es jetzt über einen eigenen Knopf in Airbnb-Pink (bei Booking.com in Blau), direkt mit euren Daten."
+  ] },
   { id: "2026-11-25-reisen", punkte: [
     "✈️ Wer in der Wishlist zusagt, hat die Reise jetzt automatisch in „Reisen“, für alle sichtbar. Neue Daten wandern mit, beim Absagen fragt Ahoi, ob die Reise auch weg soll.",
     "📅 Calendly im Profil: Trag deinen Link unter „Social Media und Webseite“ ein, dann können Freunde in deinem Steckbrief direkt einen Termin buchen.",
