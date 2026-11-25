@@ -2,6 +2,9 @@
 
 Jede Entscheidung mit Datum. Neue Einträge kommen oben dazu.
 
+## 25.11.2026
+- Wishlist hat einen zweiten Reiter „🏨 Hilton“: Hotels zur Inspiration, ohne Daten und ohne Kosten. Alle Mitglieder können Hotels teilen (Link von hilton.com, Name, Ort, bis zu 5 Highlights), sortiert nach Ländern mit Länderfilter, ❤️ für Favoriten. Ändern und löschen kann, wer geteilt hat, und der Admin. Knopf „Auf hilton.com ansehen“ in Hilton-Blau (#002f61). Tabellen `hilton` und `hilton_herz` (SQL 23).
+
 ## 24.11.2026
 - Mitteilungen: zwei getrennte Schalter, „💬 Neue Chat-Nachrichten“ und „📍 Nachfrage zu deinem Ort“ (höchstens einmal im Monat); der Service Worker meldet sich jetzt auch in der echten App an (vorher fehlte er dort, deshalb ging Push nicht einzuschalten)
 - Chats: Einzelchats zeigen das Profilbild der Person (in der Liste und im Chat-Kopf); Gruppen bekommen ein eigenes Emoji (beim Erstellen wählen, später über „Emoji ändern“), keine Collage aus Profilbildern

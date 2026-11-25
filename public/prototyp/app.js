@@ -739,7 +739,7 @@ function stilWechseln(neu) {
   stilLaden();
 }
 // ---------- Bereiche wechseln ----------
-const seiten = ["reisen", "reise-neu", "chat", "unterhaltung", "gruppe-neu", "ideen", "idee-neu", "tipp-neu", "profil", "meine-laender", "laender", "feedback", "verwaltung", "konto", "links", "freunde"];
+const seiten = ["reisen", "reise-neu", "hilton-neu", "chat", "unterhaltung", "gruppe-neu", "ideen", "idee-neu", "tipp-neu", "profil", "meine-laender", "laender", "feedback", "verwaltung", "konto", "links", "freunde"];
 const TAB_VON = { "reise-neu": "reisen", "idee-neu": "ideen", "tipp-neu": "ideen", "unterhaltung": "chat", "gruppe-neu": "chat" };
 function seiteZeigen(name) {
   for (const s of seiten) document.getElementById("seite-" + s).classList.toggle("offen", s === name);
@@ -1276,13 +1276,15 @@ function anteilBetrag(i, x) {
   return i.preis ? Math.round(nachZimmer ? i.preis * x.z / Math.max(1, zimmer) : i.preis * x.p / Math.max(1, personen)) : 0;
 }
 function ideenAufbauen() {
-  if (!TIPPS_AN) ideenReiter = "unterkunft";
-  document.getElementById("ideen-reiter").hidden = !TIPPS_AN;
+  if (!TIPPS_AN && ideenReiter === "tipps") ideenReiter = "unterkunft";
+  document.getElementById("reiter-tipps").hidden = !TIPPS_AN;
   document.querySelectorAll("#ideen-reiter button").forEach(b => b.classList.toggle("aktiv", b.dataset.r === ideenReiter));
   document.getElementById("bereich-unterkunft").style.display = ideenReiter === "unterkunft" ? "" : "none";
+  document.getElementById("bereich-hilton").style.display = ideenReiter === "hilton" ? "" : "none";
   document.getElementById("bereich-tipps").style.display = ideenReiter === "tipps" ? "" : "none";
-  document.getElementById("idee-neu").textContent = t(ideenReiter === "tipps" ? "+ Tipp" : "+ Teilen");
+  document.getElementById("idee-neu").textContent = t(ideenReiter === "tipps" ? "+ Tipp" : ideenReiter === "hilton" ? "+ Hotel" : "+ Teilen");
   if (ideenReiter === "tipps") tippsAufbauen();
+  if (ideenReiter === "hilton") return hiltonAufbauen();
   const laender = ["alle", ...new Set(ideen.map(i => i.land).filter(Boolean))];
   document.getElementById("ideen-filter").innerHTML = laender.map(l => `<button data-l="${l}" class="${l === ideenFilter ? "aktiv" : ""}">${l === "alle" ? t("Alle|Filter") : flagge(l) + " " + new Intl.DisplayNames([SPRACHE], { type: "region" }).of(l)}</button>`).join("");
   document.querySelectorAll("#ideen-filter button").forEach(b => b.onclick = () => { ideenFilter = b.dataset.l; ideenAufbauen(); });
@@ -1368,13 +1370,14 @@ document.getElementById("mitteilungen").innerHTML = [["Neue Chat-Nachricht", "Be
 document.querySelectorAll("#mitteilungen .schalter").forEach(b => b.onclick = () => b.classList.toggle("an"));
 
 document.getElementById("idee-neu").onclick = () => {
+  if (ideenReiter === "hilton") return hiltonFormOeffnen(null);
   if (ideenReiter !== "tipps") return seiteZeigen("idee-neu");
   document.getElementById("tipp-ort").value = tippsOrt || ich().ort; document.getElementById("tipp-text").value = "";
   document.getElementById("tipp-arten").innerHTML = Object.keys(TIPP_ARTEN).map((k, i) => `<button data-a="${k}" class="${i === 0 ? "aktiv" : ""}">${t(TIPP_ARTEN[k])}</button>`).join("");
   document.querySelectorAll("#tipp-arten button").forEach(b => b.onclick = () => document.querySelectorAll("#tipp-arten button").forEach(x => x.classList.toggle("aktiv", x === b)));
   seiteZeigen("tipp-neu");
 };
-document.querySelectorAll("#ideen-reiter button").forEach(b => b.onclick = () => { ideenReiter = b.dataset.r; ideenAufbauen(); });
+document.querySelectorAll("#ideen-reiter button").forEach(b => b.onclick = () => { ideenReiter = b.dataset.r; ideenAufbauen(); if (ECHT && ideenReiter === "hilton") hiltonLaden().catch(() => {}); });
 let tippOrtWahl = null;
 document.getElementById("tipp-ort").addEventListener("input", () => { tippOrtWahl = null; });
 ortSucheVerbinden(document.getElementById("tipp-ort"), document.getElementById("tipp-orte"), o => { tippOrtWahl = o; document.getElementById("tipp-ort").value = o.ort; document.getElementById("tipp-orte").innerHTML = ""; });
@@ -1505,6 +1508,122 @@ document.querySelectorAll("#sicht-wahl button").forEach(b => b.onclick = () => {
   d.querySelectorAll(".chips button").forEach(x => x.onclick = () => x.classList.toggle("aktiv"));
 });
 document.getElementById("idee-speichern").onclick = e => { if (ECHT) return wunschSpeichern(e.target); hinweis(t("Im Prototyp wird nichts geteilt")); seiteZeigen("ideen"); };
+// ---------- Wishlist „🏨 Hilton“: Inspiration ohne Daten, sortiert nach Ländern ----------
+// Alle Mitglieder teilen Hilton-Hotels mit bis zu 5 Highlights; ändern/löschen kann, wer geteilt hat, und Sven (Admin).
+const hotels = ECHT ? [] : [
+  { id: "h-ams", von: "lea", name: "Waldorf Astoria Amsterdam", ort: "Amsterdam", land: "NL", link: "https://www.hilton.com/en/hotels/amswawa-waldorf-astoria-amsterdam/", bild: null, herzen: 3, herzIch: false,
+    highlights: ["Sechs Grachtenpaläste aus dem 17. Jahrhundert an der Herengracht", "Guerlain Spa mit Indoor-Pool", "Afternoon Tea in der Peacock Alley", "Restaurant Spectrum", "Fahrräder zum Ausleihen"] },
+  { id: "h-mle", von: "du", name: "Conrad Maldives Rangali Island", ort: "Rangali", land: "MV", link: "https://www.hilton.com/en/search/?query=Conrad%20Maldives%20Rangali%20Island", bild: null, herzen: 5, herzIch: true,
+    highlights: ["Ithaa: Restaurant fünf Meter unter dem Meer", "Wasservillen über der Lagune", "Zwei Inseln, verbunden durch eine Brücke"] }
+];
+let hiltonFilter = "alle", hotelBearbeiten = null, hotelOrt = null, hotelBild = null;
+const hotelLand = l => l ? landName(l) : t("Ohne Land");
+const ichAdmin = () => ECHT && !!(ECHT_DATEN.profil && ECHT_DATEN.profil.ist_admin);
+async function hiltonLaden() {
+  if (!ECHT || familieModus || ECHT_DATEN.profil.art === "familie") return;
+  const [h, z] = await Promise.all([SB.from("hilton").select("*"), SB.from("hilton_herz").select("hotel, person")]);
+  if (h.error || z.error) return;
+  hotels.splice(0, hotels.length, ...h.data.map(x => ({ id: x.id, von: idVon(x.von), name: x.name, ort: x.ort, land: x.land, lat: x.lat, lon: x.lon, link: x.link, bild: x.bild_url,
+    highlights: x.highlights || [], herzen: z.data.filter(y => y.hotel === x.id).length, herzIch: z.data.some(y => y.hotel === x.id && y.person === ECHT_DATEN.uid) })).filter(x => person(x.von)));
+  if (ideenReiter === "hilton" && document.getElementById("seite-ideen").classList.contains("offen")) hiltonAufbauen();
+}
+function hiltonAufbauen() {
+  const nachLand = (a, b) => (!a - !b) || hotelLand(a).localeCompare(hotelLand(b), LOC);
+  const laender = [...new Set(hotels.map(h => h.land || ""))].sort(nachLand);
+  if (hiltonFilter !== "alle" && !laender.includes(hiltonFilter)) hiltonFilter = "alle";
+  document.getElementById("hilton-filter").innerHTML = ["alle", ...laender].map(l => `<button data-l="${l}" class="${l === hiltonFilter ? "aktiv" : ""}">${l === "alle" ? t("Alle|Filter") : (l ? flagge(l) + " " : "") + hotelLand(l)}</button>`).join("");
+  document.querySelectorAll("#hilton-filter button").forEach(b => b.onclick = () => { hiltonFilter = b.dataset.l; hiltonAufbauen(); });
+  const liste = hotels.filter(h => hiltonFilter === "alle" || (h.land || "") === hiltonFilter)
+    .sort((a, b) => nachLand(a.land || "", b.land || "") || (a.ort || "").localeCompare(b.ort || "", LOC) || a.name.localeCompare(b.name, LOC));
+  let land = null, html = "";
+  for (const h of liste) {
+    if ((h.land || "") !== land) { land = h.land || ""; html += `<h2 class="hilton-land">${land ? flagge(land) + " " : ""}${ohneHtml(hotelLand(land))}</h2>`; }
+    const eigen = h.von === "du", f = farbeVon(h.id), p = person(h.von);
+    const bildStil = h.bild ? `background:var(--trenner) center / cover url('${String(h.bild).replace(/['"()\\]/g, c => encodeURIComponent(c))}')` : `background:linear-gradient(135deg, #002f61cc, ${f})`;
+    html += `<div class="kasten idee hotel">
+      <div class="bild" style="${bildStil}"><span class="quelle">Hilton</span><button class="herzen hotel-herz${h.herzIch ? " an" : ""}" data-h="${h.id}">❤️ ${h.herzen}</button></div>
+      <div class="inhalt">
+        <b>${ohneHtml(h.name)} ${h.land ? flagge(h.land) : ""}</b>
+        ${h.ort ? `<span class="ort">${ohneHtml(h.ort)}</span>` : ""}
+        <div class="geteilt">${p ? ava(p) : ""}<span><b>${eigen ? t("✓ Dein Vorschlag") : ohneHtml(p ? p.name : "")}</b>${eigen ? "" : t("hat das geteilt")}</span></div>
+        ${h.highlights.length ? `<ol class="top5">${h.highlights.map(x => `<li>${ohneHtml(x)}</li>`).join("")}</ol>` : ""}
+        <a class="knopf-gross marke-knopf marke-hilton" href="${ohneHtml(h.link)}" target="_blank" rel="noopener">${t("Auf {seite} ansehen", { seite: "hilton.com" })} ↗</a>
+        ${eigen || ichAdmin() ? `<div class="aktionen" style="margin-top:8px"><button class="knopf-leise hotel-aendern" data-h="${h.id}" style="flex:1">✏️ ${t("Ändern")}</button><button class="knopf-leise hotel-weg" data-h="${h.id}" aria-label="${t("Löschen")}">🗑</button></div>` : ""}
+      </div></div>`;
+  }
+  document.getElementById("hilton-liste").innerHTML = html || `<p class="hinweis-band">${t("Noch keine Hilton-Hotels. Teile eins, das du liebst, mit „+ Hotel“.")}</p>`;
+  const hotel = b => hotels.find(h => h.id === b.dataset.h);
+  document.querySelectorAll(".hotel-herz").forEach(b => b.onclick = async () => {
+    const h = hotel(b); if (!h) return;
+    if (ECHT) { const r = h.herzIch ? await SB.from("hilton_herz").delete().eq("hotel", h.id).eq("person", ECHT_DATEN.uid) : await SB.from("hilton_herz").insert({ hotel: h.id }); if (r.error) return hinweis(t("Das hat nicht geklappt")); }
+    h.herzIch = !h.herzIch; h.herzen += h.herzIch ? 1 : -1; hiltonAufbauen();
+  });
+  document.querySelectorAll(".hotel-aendern").forEach(b => b.onclick = () => hiltonFormOeffnen(hotel(b)));
+  document.querySelectorAll(".hotel-weg").forEach(b => b.onclick = () => fragen(t("Von der Wishlist löschen?"), [[t("Löschen"), async () => {
+    const h = hotel(b); if (!h) return;
+    if (ECHT) { const { error } = await SB.from("hilton").delete().eq("id", h.id); if (error) return hinweis(t("Das hat nicht geklappt")); }
+    hotels.splice(hotels.indexOf(h), 1); hiltonAufbauen();
+  }, true]]));
+}
+const HILTON_BEISPIELE = ["z. B. Lage direkt am Strand", "z. B. Executive Lounge mit Dachterrasse", "z. B. Spa mit Pool", "", ""];
+function hiltonFormOeffnen(h) {
+  hotelBearbeiten = h ? h.id : null; hotelBild = h ? h.bild : null;
+  hotelOrt = h && (h.ort || h.land) ? { ort: h.ort, land: h.land, lat: h.lat ?? null, lon: h.lon ?? null } : null;
+  document.getElementById("hilton-titel").textContent = t(h ? "Hotel ändern" : "Hilton-Hotel teilen");
+  document.getElementById("hilton-speichern").textContent = t(h ? "Speichern" : "Teilen");
+  document.getElementById("hilton-link").value = h ? h.link : "";
+  document.getElementById("hilton-name").value = h ? h.name : "";
+  document.getElementById("hilton-ort").value = h ? (h.ort || "") : ""; document.getElementById("hilton-orte").innerHTML = "";
+  document.getElementById("hilton-punkte").innerHTML = HILTON_BEISPIELE.map((b, k) => `<input maxlength="90" data-k="${k}" placeholder="${ohneHtml(b ? t(b) : (k + 1) + ".")}" value="${ohneHtml(h && h.highlights[k] || "")}" autocomplete="off">`).join("");
+  hotelVorschauZeigen();
+  seiteZeigen("hilton-neu");
+}
+function hotelVorschauZeigen(text) {
+  const box = document.getElementById("hilton-vorschau");
+  if (!hotelBild && !text) { box.style.display = "none"; return; }
+  box.style.display = "flex";
+  box.innerHTML = `<div class="vb" style="${hotelBild ? `background-image:url('${hotelBild.replace(/'/g, "%27")}')` : ""}"></div><div><b>${ohneHtml(document.getElementById("hilton-name").value || "Hilton")}</b><small>${text || ""}</small></div>`;
+}
+async function hotelLinkPruefen() {
+  const link = linkAus(document.getElementById("hilton-link").value); if (!link) return;
+  if (!ECHT) return hotelVorschauZeigen(t("Im Prototyp ohne Vorschau"));
+  hotelVorschauZeigen(t("Vorschau wird geladen …"));
+  let v = null;
+  try { const r = await SB.functions.invoke("vorschau", { body: { url: link } }); v = r.data && r.data.ok ? r.data : null; } catch (e) {}
+  if (linkAus(document.getElementById("hilton-link").value) !== link) return;
+  if (v && v.bild) hotelBild = v.bild;
+  const name = document.getElementById("hilton-name");
+  if (v && v.titel && !name.value.trim()) name.value = v.titel.split(/\s[|–-]\s/)[0].replace(/\s*-\s*Hilton.*$/i, "").trim();
+  hotelVorschauZeigen(v ? (v.bild ? t("Bild und Titel übernommen") : t("Kein Bild gefunden")) : t("Keine Vorschau, Name bitte selbst eintragen"));
+}
+document.getElementById("hilton-einfuegen").onclick = async () => {
+  const feld = document.getElementById("hilton-link"), v = await zwischenablageLesen(), link = linkAus(v);
+  if (link) { feld.value = link; return hotelLinkPruefen(); }
+  feld.focus(); hinweis(t("Tippe lange ins Link-Feld und wähle „Einfügen“"));
+};
+document.getElementById("hilton-link").addEventListener("input", () => { clearTimeout(hotelLinkPruefen.uhr); hotelLinkPruefen.uhr = setTimeout(hotelLinkPruefen, 500); });
+document.getElementById("hilton-name").addEventListener("input", () => { const b = document.querySelector("#hilton-vorschau b"); if (b) b.textContent = document.getElementById("hilton-name").value || "Hilton"; });
+ortSucheVerbinden(document.getElementById("hilton-ort"), document.getElementById("hilton-orte"), o => { hotelOrt = o; document.getElementById("hilton-ort").value = o.ort; document.getElementById("hilton-orte").innerHTML = ""; });
+document.getElementById("hilton-speichern").onclick = async e => {
+  const link = linkAus(document.getElementById("hilton-link").value), name = document.getElementById("hilton-name").value.trim();
+  if (!link) return hinweis(t("Bitte einen Link einfügen"));
+  if (!name) return hinweis(t("Bitte den Namen des Hotels eintragen"));
+  const ortText = document.getElementById("hilton-ort").value.trim();
+  if (ortText && (!hotelOrt || hotelOrt.ort !== ortText)) return hinweis(t("Bitte den Ort aus der Liste wählen"));
+  const highlights = [...document.querySelectorAll("#hilton-punkte input")].map(f => f.value.trim()).filter(Boolean).slice(0, 5);
+  const daten = { link, name, bild_url: hotelBild || null, ort: ortText ? hotelOrt.ort : null, land: ortText ? hotelOrt.land : null, lat: ortText ? hotelOrt.lat : null, lon: ortText ? hotelOrt.lon : null, highlights };
+  if (ECHT) {
+    beschaeftigt(e.target, true);
+    const { error } = hotelBearbeiten ? await SB.from("hilton").update(daten).eq("id", hotelBearbeiten) : await SB.from("hilton").insert(daten);
+    beschaeftigt(e.target, false);
+    if (error) return hinweis(t("Speichern hat nicht geklappt"));
+    await hiltonLaden();
+  } else {
+    const neu = { id: hotelBearbeiten || "h-" + Date.now(), von: "du", herzen: 0, herzIch: false, ...daten, bild: daten.bild_url };
+    const k = hotels.findIndex(h => h.id === neu.id); if (k >= 0) hotels[k] = { ...hotels[k], ...neu }; else hotels.push(neu);
+  }
+  ideenReiter = "hilton"; hiltonFilter = "alle"; seiteZeigen("ideen"); hinweis(t(hotelBearbeiten ? "Gespeichert" : "Auf der Wishlist geteilt"));
+};
 // „Ich wäre dabei“: kurz Personen und Schlafzimmer wählen (vorausgefüllt mit 1 und 1), bei mehr Personen: wer kommt mit?
 function dabeiBlatt(x, schonDabei, speichern, absagen) {
   const mein = anteil(x, "du"), w = schonDabei ? { p: mein.p, z: mein.z, b: mein.b.map(e => ({ ...e })) } : { p: 1, z: 1, b: [] };
@@ -2746,6 +2865,9 @@ async function ortNachfragen(sofort) {
 // Nur große, wichtige Neuerungen mit gross: true zeigen (entschieden 25.11.2026); kleine Änderungen und Fehlerbehebungen
 // bekommen keinen Eintrag. Neueste zuerst. Wer neu dabei ist, sieht nur die neueste große Neuerung.
 const NEUIGKEITEN = [
+  { id: "2026-11-25-hilton", gross: true, punkte: [
+    "🏨 Wishlist hat jetzt „Hilton“: Hotels, die ihr liebt, mit den Top 5, sortiert nach Ländern. Ohne Daten, nur zur Inspiration. Teilen mit „+ Hotel“."
+  ] },
   { id: "2026-11-25-belegung", gross: true, punkte: [
     "👥 Wishlist: Sag zu mit Begleitung (Freund aus Ahoi oder Gast mit Namen). „📋 Belegung & Kosten“ zeigt allen, wer welche Zimmer hat, was noch frei ist und wer wie viel zahlt."
   ] },
@@ -3108,7 +3230,7 @@ function echtEinrichten() {
   freundeLaden().catch(() => {});
   try { const qr = localStorage.getItem("ahoi-einladung"); localStorage.removeItem("ahoi-einladung"); if (qr && /^q[0-9a-f]{32}$/.test(qr)) setTimeout(() => qrVerbinden(qr), 2500); } catch (e) {}
   // Wishlist: Beispieldaten weg, echte laden
-  ideen.length = 0; tipps.length = 0; wishlistLaden().catch(() => {});
+  ideen.length = 0; tipps.length = 0; hotels.length = 0; wishlistLaden().catch(() => {}); hiltonLaden().catch(() => {});
   // Bereiche, die noch nicht live sind
   for (const [seite, [symbol, titel, text]] of Object.entries(BALD))
     document.getElementById("seite-" + seite).innerHTML = `<div class="seite-kopf"><h1>${t(titel)}</h1></div><div class="bald"><div style="font-size:44px">${symbol}</div><b>${t("Kommt bald")}</b>${t(text)}<p><a href="prototyp/">${t("Im Prototyp schon ansehen")}</a></p></div>`;

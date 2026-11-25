@@ -1039,6 +1039,16 @@
   .ueb-betrag { text-align: right; white-space: nowrap; }
   .ueb-frei b:first-child { color: var(--text-leise); }
   .ueb-summe { border-bottom: 0; }
+  /* Hilton-Inspiration */
+  .hilton-land { margin: 18px 4px 8px; font-size: 15px; }
+  .hotel .bild { height: 150px; }
+  .hotel .top5 { margin: 10px 0 4px; padding: 0; list-style: none; counter-reset: top; }
+  .hotel .top5 li { counter-increment: top; display: flex; gap: 10px; align-items: baseline; padding: 4px 0; font-size: 14px; line-height: 1.35; }
+  .hotel .top5 li::before { content: counter(top); flex: none; width: 20px; height: 20px; border-radius: 50%; background: var(--trenner); font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; }
+  .hilton-einfuegen { background: #002f61 !important; color: #fff !important; }
+  .marke-hilton { background: #002f61 !important; box-shadow: 0 6px 16px rgba(0, 47, 97, .25); }
+  [data-stil="mission"] .hotel .top5 li::before { border-radius: 2px; }
+  #hilton-punkte input { display: block; width: 100%; margin-top: 6px; border: 1px solid var(--trenner); background: var(--flaeche); color: var(--text); border-radius: 12px; padding: 12px; font: inherit; font-size: 16px; box-sizing: border-box; }
   .reise-marke { white-space: nowrap; font-weight: 600; }
   .wunsch-daten { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; text-align: left; }
   .wunsch-daten label { font-size: 13px; font-weight: 600; color: var(--text-leise); display: flex; flex-direction: column; gap: 4px; }
@@ -1235,17 +1245,43 @@
 <!-- Ideen -->
 <section class="seite" id="seite-ideen">
   <div class="seite-kopf"><h1>Wishlist</h1><button class="knopf-gross" id="idee-neu">+ Teilen</button></div>
-  <div class="segmente reiter" id="ideen-reiter" hidden><button class="aktiv" data-r="unterkunft">Unterkünfte</button><button data-r="tipps">Tipps</button></div>
+  <div class="segmente reiter" id="ideen-reiter"><button class="aktiv" data-r="unterkunft">🏡 Unterkünfte</button><button data-r="hilton">🏨 Hilton</button><button data-r="tipps" id="reiter-tipps">Tipps</button></div>
   <div id="bereich-unterkunft">
     <div class="chips" id="ideen-filter"></div>
     <div id="ideen-liste"></div>
     <p class="hinweis-band">Einträge mit Zeitraum verschwinden nach dem Abreisetag von selbst</p>
+  </div>
+  <div id="bereich-hilton" style="display:none">
+    <div class="chips" id="hilton-filter"></div>
+    <div id="hilton-liste"></div>
+    <p class="hinweis-band">Hilton-Hotels, die wir lieben · Inspiration ohne Daten, sortiert nach Ländern</p>
   </div>
   <div id="bereich-tipps" style="display:none">
     <div class="chips" id="tipps-filter"></div>
     <div id="tipps-liste"></div>
     <p class="hinweis-band">Tipps von Freunden für Freunde · Daumen hoch zeigt, was sich bewährt hat</p>
   </div>
+</section>
+
+<!-- Hilton-Hotel teilen -->
+<section class="seite" id="seite-hilton-neu">
+  <div class="seite-kopf"><h1 id="hilton-titel">Hilton-Hotel teilen</h1><button class="knopf-leise" data-zurueck="ideen">Abbrechen</button></div>
+  <div class="kasten schritte">
+    <div><span>1</span>Hotel auf hilton.com oder in der Hilton-App öffnen</div>
+    <div><span>2</span><b>Teilen ⬆︎</b> → <b>Link kopieren</b></div>
+    <div><span>3</span>Hier auf den großen Knopf tippen</div>
+  </div>
+  <button class="knopf-riesig hilton-einfuegen" id="hilton-einfuegen">📋 Link einfügen</button>
+  <div class="kasten idee-vorschau" id="hilton-vorschau" style="display:none"></div>
+  <div class="kasten formular">
+    <label>Link<input id="hilton-link" placeholder="https://www.hilton.com/…" inputmode="url" autocomplete="off"></label>
+    <label>Name des Hotels<input id="hilton-name" maxlength="120" placeholder="z. B. Waldorf Astoria Amsterdam" autocomplete="off"></label>
+    <label>Wo ist das?<input id="hilton-ort" placeholder="Stadt suchen" autocomplete="off"></label>
+    <div class="ort-treffer" id="hilton-orte"></div>
+    <span class="einst-unter" style="margin-top:6px">Top 5 (freiwillig)</span>
+    <div id="hilton-punkte"></div>
+  </div>
+  <button class="knopf-gross" style="width:100%" id="hilton-speichern">Teilen</button>
 </section>
 
 <!-- Idee teilen -->
