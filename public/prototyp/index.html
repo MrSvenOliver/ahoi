@@ -1047,7 +1047,7 @@
   .hotel .top5 li::before { content: counter(top); flex: none; width: 20px; height: 20px; border-radius: 50%; background: var(--trenner); font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; }
   .fehler-eintrag .fb-text { font-family: ui-monospace, Menlo, monospace; font-size: 13px; word-break: break-word; }
   .fehler-eintrag small { display: block; color: var(--text-leise); margin-top: 6px; word-break: break-word; }
-  /* Wishlist kompakt: Bild klein links, Zahlen in einer Zeile, Knöpfe in zwei Reihen (eine Unterkunft ≈ ein Drittel des Bildschirms) */
+  /* Wishlist kompakt: Bild klein links, Zahlen in einer festen Zeile, ein Hauptknopf, der Seiten-Knopf, darunter leise Textlinks */
   .idee.kompakt .idee-kopf { display: flex; gap: 12px; padding: 12px 12px 0; align-items: flex-start; }
   .idee.kompakt .idee-kopf .bild { width: 92px; height: 92px; flex: none; border-radius: 14px; font-size: 26px; }
   .idee.kompakt .idee-kopf .bild .gebucht { left: auto; top: auto; right: 6px; bottom: 6px; transform: none; padding: 2px 5px; font-size: 13px; border-radius: 8px; }
@@ -1055,32 +1055,53 @@
   .idee.kompakt .titel-zeile { display: flex; gap: 8px; align-items: flex-start; }
   .idee.kompakt .titel-zeile b { flex: 1; min-width: 0; font-size: 15px; line-height: 1.25; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
   .idee.kompakt .titel-zeile .herzen { flex: none; background: var(--trenner); border-radius: 10px; padding: 2px 7px; font-size: 12px; font-weight: 700; color: #c0582f; border: 0; cursor: pointer; }
-  .idee.kompakt .ort, .idee.kompakt .extra { display: block; font-size: 12.5px; color: var(--text-leise); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .idee.kompakt .ort, .idee.kompakt .extra { display: block; font-size: 12.5px; color: var(--text-leise); margin-top: 2px; }
+  .idee.kompakt .ort .zus { white-space: nowrap; }
   .idee.kompakt .geteilt { margin: 6px 0 0; gap: 7px; font-size: 12.5px; }
   .idee.kompakt .geteilt .klein-ava { width: 22px; height: 22px; font-size: 9px; }
   .idee.kompakt .geteilt b { display: inline; font-size: 12.5px !important; margin-right: 4px; }
   .idee.kompakt .geteilt span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
   .idee.kompakt .inhalt { padding: 10px 12px 12px; }
-  .idee.kompakt .zahlen { display: flex !important; flex-wrap: wrap; gap: 6px; margin: 0 0 8px; }
-  .idee.kompakt .zahlen div { flex: none; padding: 4px 9px; border-radius: 10px; display: flex; gap: 5px; align-items: baseline; }
-  .idee.kompakt .zahlen b { display: inline; font-size: 13px; }
-  .idee.kompakt .zahlen small { font-size: 11.5px; }
-  .idee.kompakt .rechner { margin: 0 0 8px; font-size: 12.5px; }
+  .idee.kompakt .zahlen { gap: 6px; margin: 0 0 8px; }
+  .idee.kompakt .zahlen div { padding: 6px 4px; border-radius: 10px; }
+  .idee.kompakt .zahlen b { font-size: 14px; white-space: nowrap; }
+  .idee.kompakt .zahlen small { font-size: 11px; white-space: nowrap; }
+  .idee.kompakt .rechner { margin: 0 0 8px; font-size: 12.5px; line-height: 1.5; }
   .idee.kompakt .rechner b { font-size: 12.5px; }
+  .idee.kompakt .rechner .seg { white-space: nowrap; }
   .idee.kompakt .dabei-leiste { display: flex; align-items: center; margin-bottom: 8px; }
   .idee.kompakt .dabei-gesichter { margin-bottom: 0; }
   .idee.kompakt .dabei-gesichter .klein-ava { width: 24px; height: 24px; font-size: 9px; }
-  .idee.kompakt .dabei-leiste:not(:has(.klein-ava)):not(:has(.dabei-zahl)) { display: none; }
-  .idee.kompakt .aktionen { gap: 6px; }
-  .idee.kompakt .aktionen .knopf-gross, .idee.kompakt .aktionen .knopf-leise { padding: 9px 12px; font-size: 13.5px; }
-  .idee.kompakt .aktionen.zweite { margin-top: 6px; }
-  .idee.kompakt .aktionen .marke-knopf { flex: 1; width: auto; margin-top: 0; min-width: 0; white-space: nowrap; }
-  .idee.kompakt .aktionen .uebersicht-knopf { display: inline-block; width: auto; margin-top: 0; flex: none; }
-  .idee.kompakt .aktionen.zweite > * { flex: 1 1 0; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-left: 8px; padding-right: 8px; }
-  .idee.kompakt .aktionen.zweite > .bearbeiten-knopf, .idee.kompakt .aktionen.zweite > .idee-weg { flex: none; }
-  [data-stil="mission"] .idee.kompakt .aktionen.zweite > * { letter-spacing: 0.04em; font-size: 12px; }
   .idee.kompakt .dabei-zahl { margin-left: 14px; font-size: 12.5px; }
+  .idee.kompakt .dabei-leiste:not(:has(.klein-ava)):not(:has(.dabei-zahl)) { display: none; }
+  .idee.kompakt .aktionen { gap: 8px; flex-wrap: nowrap; }
+  .idee.kompakt .aktionen .knopf-gross, .idee.kompakt .aktionen .knopf-leise { padding: 10px 14px; font-size: 14px; white-space: nowrap; }
+  .idee.kompakt .aktionen .knopf-leise { flex: none; }
+  .idee.kompakt .marke-knopf { padding: 10px 14px; font-size: 14px; margin-top: 8px; }
+  .idee.kompakt .ansehen-leise { color: var(--text) !important; }
+  .text-links { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 0 14px; margin-top: 6px; }
+  .text-knopf { background: none; border: 0; padding: 6px 8px; font: inherit; font-size: 13px; font-weight: 600; color: var(--text-leise); cursor: pointer; white-space: nowrap; }
+  .text-knopf.weg { color: #c0582f; }
+  .text-knopf[disabled] { opacity: 0.4; }
+  .text-links .punkt { display: none; }
   [data-stil="mission"] .idee.kompakt .idee-kopf .bild, [data-stil="mission"] .idee.kompakt .titel-zeile .herzen { border-radius: 2px; }
+  [data-stil="mission"] .text-knopf { text-transform: uppercase; letter-spacing: 0.06em; font-size: 11.5px; }
+  /* Hilton: Kategorie, Lounge und Preis als kleine Marken */
+  .hotel-marken { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 5px; }
+  .hotel-marke { font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 8px; background: var(--trenner); color: var(--text); white-space: nowrap; }
+  .hotel-marke.kat-luxury { background: #1d1d1f; color: #e8d8a8; }
+  .hotel-marke.kat-premium { background: #002f61; color: #fff; }
+  .hotel-marke.kat-classic { background: rgba(0, 47, 97, 0.12); color: #002f61; }
+  .hotel-marke.kat-budget { background: rgba(79, 138, 91, 0.16); color: #3f7a4c; }
+  .hotel-marke.lounge { background: rgba(176, 132, 40, 0.16); color: #8a6414; }
+  .hotel-marke.preis-top { background: rgba(214, 69, 43, 0.14); color: #b23a22; }
+  .hotel-marke.preis-gut { background: rgba(79, 138, 91, 0.16); color: #3f7a4c; }
+  [data-stil="mission"] .hotel-marke { border-radius: 2px; }
+  [data-stil="mission"] .hotel-marke.kat-classic, [data-stil="mission"] .hotel-marke.lounge { color: #e8d8a8; }
+  .hotel-status { font-size: 14px; color: var(--text-leise); padding: 6px 0 2px; }
+  .hotel-status.fehler { color: #c0582f; }
+  .hotel .top5 { margin: 2px 0 4px; }
+  .hotel .top5 li { font-size: 13.5px; padding: 3px 0; }
   .hilton-einfuegen { background: #002f61 !important; color: #fff !important; }
   .marke-hilton { background: #002f61 !important; box-shadow: 0 6px 16px rgba(0, 47, 97, .25); }
   [data-stil="mission"] .hotel .top5 li::before { border-radius: 2px; }
@@ -1302,18 +1323,12 @@
 <!-- Hilton-Hotel teilen -->
 <section class="seite" id="seite-hilton-neu">
   <div class="seite-kopf"><h1 id="hilton-titel">Hilton-Hotel teilen</h1><button class="knopf-leise" data-zurueck="ideen">Abbrechen</button></div>
-  <p class="hinweis-band" style="text-align:left;margin-top:0">Name und Ort reichen. Ohne Link zeigt der Knopf die Hilton-Hotels in dieser Stadt.</p>
-  <div class="kasten idee-vorschau" id="hilton-vorschau" style="display:none"></div>
   <div class="kasten formular">
-    <label>Name des Hotels<input id="hilton-name" maxlength="120" placeholder="z. B. Waldorf Astoria Amsterdam" autocomplete="off"></label>
-    <label>Wo ist das?<input id="hilton-ort" placeholder="Stadt suchen" autocomplete="off"></label>
-    <div class="ort-treffer" id="hilton-orte"></div>
-    <label class="foto-wahl"><span id="hilton-foto-text">📷 Foto dazulegen (freiwillig, z. B. Screenshot aus der Hilton-App)</span><input type="file" id="hilton-foto" accept="image/*" hidden></label>
-    <span class="einst-unter" style="margin-top:6px">Top 5 (freiwillig)</span>
-    <div id="hilton-punkte"></div>
-    <label style="margin-top:10px">Link (freiwillig)<input id="hilton-link" placeholder="https://www.hilton.com/…" inputmode="url" autocomplete="off"></label>
+    <label>Name des Hotels<input id="hilton-name" maxlength="120" placeholder="z. B. DoubleTree by Hilton Kuala Lumpur" autocomplete="off"></label>
+    <label>Ort<input id="hilton-ort" maxlength="120" placeholder="z. B. Kuala Lumpur" autocomplete="off"></label>
   </div>
-  <button class="knopf-gross" style="width:100%" id="hilton-speichern">Teilen</button>
+  <p class="hinweis-band" style="text-align:left">Ahoi sucht das Hotel danach auf hilton.com und trägt Foto, Kategorie, Executive Lounge, ungefähren Preis und die Top 5 ein.</p>
+  <button class="knopf-gross" style="width:100%" id="hilton-speichern">Hinzufügen</button>
 </section>
 
 <!-- Idee teilen -->

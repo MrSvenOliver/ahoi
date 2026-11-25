@@ -1323,18 +1323,19 @@ function ideenAufbauen() {
       </div></div>
       <div class="inhalt">
         ${zahlen}
-        ${i.preis ? `<div class="rechner">💶 ${i.preis.toLocaleString(LOC)} € ${t("gesamt")}${belegt ? (nachZimmer ? ` · <b>${t("{n} € pro Zimmer", { n: proZimmer.toLocaleString(LOC) })}</b>` : ` · <b>${t("{n} € pro Person", { n: proPerson.toLocaleString(LOC) })}</b> ${t("bei {n}", { n: belegt })}`) : ""}${meinAnteil && (nachZimmer || anteil(i, "du").p > 1) ? ` · ${t("du: {n} €", { n: meinAnteil.toLocaleString(LOC) })}` : ""}</div>` : ""}
+        ${i.preis ? `<div class="rechner">${[`💶 ${i.preis.toLocaleString(LOC)} € ${t("gesamt")}`,
+          belegt ? (nachZimmer ? `<b>${t("{n} € pro Zimmer", { n: proZimmer.toLocaleString(LOC) })}</b>` : `<b>${t("{n} € pro Person", { n: proPerson.toLocaleString(LOC) })}</b> ${t("bei {n}", { n: belegt })}`) : "",
+          meinAnteil && (nachZimmer || anteil(i, "du").p > 1) ? t("du: {n} €", { n: meinAnteil.toLocaleString(LOC) }) : ""].filter(Boolean).map(s => `<span class="seg">${s.replace(/ €/g, "&nbsp;€")}</span>`).join(" · ")}</div>` : ""}
         <div class="dabei-leiste"><div class="dabei-gesichter">${[...new Set([...wer, ...mitreisende(i)])].map(id => person(id) ? ava(person(id)) : "").join("")}${(() => { const g = parteien(i).reduce((n, x) => n + x.b.filter(e => !e.id).length + Math.max(0, x.p - 1 - x.b.length), 0); return g ? `<div class="klein-ava gast-ava">+${g}</div>` : ""; })()}</div>${belegt ? `<span class="dabei-zahl">👤 ${belegt} · 🛏 ${zimmerBelegt}</span>` : ""}</div>
         <div class="aktionen">
           ${i.gebucht ? `<button class="knopf-gross ist-dabei" disabled style="opacity:1">${t("✅ Gebucht · steht in Reisen")}</button>` : i.echt && eigen && !i.eigenWahl ? `<button class="knopf-gross ist-dabei" disabled style="opacity:1">${t("✓ Du bist dabei")}</button>` : mitWem && !ichSelbst ? `<button class="knopf-gross ist-dabei mit-knopf" data-n="${n}">${t("✓ Dabei mit {name}", { name: ohneHtml(person(mitWem.id).name) })}</button>` : `<button class="knopf-gross dabei-knopf ${ichDabei ? "ist-dabei" : ""}" data-n="${n}" ${!frei && !ichDabei ? "disabled" : ""}>${t(ichDabei ? "✓ Du bist dabei" : frei ? "🙋 Ich wäre dabei" : "Leider voll")}</button>`}
           ${chatKnopf}
-          ${belegt || i.preis ? `<button class="knopf-leise uebersicht-knopf" data-n="${n}" aria-label="${t("Belegung & Kosten")}" title="${t("Belegung & Kosten")}">📋</button>` : ""}
         </div>
-        <div class="aktionen zweite">
-          ${marke ? `<a class="knopf-gross marke-knopf marke-${marke[0]}" href="${ohneHtml(ansehenLink(i))}" target="_blank" rel="noopener">${t("Auf {seite} ansehen", { seite: marke[1] })} ↗</a>` : `<a class="knopf-leise" href="${ohneHtml(ansehenLink(i))}" target="_blank" rel="noopener" style="text-decoration:none;flex:1;text-align:center">${t(i.anreise ? "Preis ansehen ↗" : "Ansehen ↗")}</a>`}
-          ${(ichDabei || eigen) && !i.gebucht && (!i.echt || i.anreise) ? `<button class="knopf-leise gebucht-knopf" data-n="${n}" style="flex:1">${t("Als gebucht markieren")}</button>` : ""}
-          ${i.echt && eigen ? `<button class="knopf-leise bearbeiten-knopf" data-n="${n}">✏️ ${t("Ändern")}</button><button class="knopf-leise idee-weg" data-n="${n}" aria-label="${t("Löschen")}">🗑</button>` : ""}
-        </div>
+        ${marke ? `<a class="knopf-gross marke-knopf marke-${marke[0]}" href="${ohneHtml(ansehenLink(i))}" target="_blank" rel="noopener">${t("Auf {seite} ansehen", { seite: marke[1] })} ↗</a>` : `<a class="knopf-leise marke-knopf ansehen-leise" href="${ohneHtml(ansehenLink(i))}" target="_blank" rel="noopener">${t(i.anreise ? "Preis ansehen ↗" : "Ansehen ↗")}</a>`}
+        <div class="text-links">${[belegt || i.preis ? `<button class="text-knopf uebersicht-knopf" data-n="${n}">${t("Belegung & Kosten")}</button>` : "",
+          (ichDabei || eigen) && !i.gebucht && (!i.echt || i.anreise) ? `<button class="text-knopf gebucht-knopf" data-n="${n}">${t("Als gebucht markieren")}</button>` : "",
+          i.echt && eigen ? `<button class="text-knopf bearbeiten-knopf" data-n="${n}">${t("Ändern")}</button>` : "",
+          i.echt && eigen ? `<button class="text-knopf weg idee-weg" data-n="${n}">${t("Löschen")}</button>` : ""].filter(Boolean).join('<span class="punkt">·</span>')}</div>
       </div></div>`;
   }).join("") || (ECHT ? `<p class="hinweis-band">${t("Noch nichts auf der Wishlist. Teile eine Unterkunft, die dir gefällt, mit „+ Teilen“.")}</p>` : "");
   if (ECHT) return wishlistKnoepfe();
@@ -1511,49 +1512,101 @@ document.querySelectorAll("#sicht-wahl button").forEach(b => b.onclick = () => {
 });
 document.getElementById("idee-speichern").onclick = e => { if (ECHT) return wunschSpeichern(e.target); hinweis(t("Im Prototyp wird nichts geteilt")); seiteZeigen("ideen"); };
 // ---------- Wishlist „🏨 Hilton“: Inspiration ohne Daten, sortiert nach Ländern ----------
-// Alle Mitglieder teilen Hilton-Hotels mit bis zu 5 Highlights; ändern/löschen kann, wer geteilt hat, und Sven (Admin).
+// Mitglieder geben nur Name und Ort ein. Die Edge Function „hilton“ recherchiert im Hintergrund (hilton.com, Foto,
+// Kategorie, Executive Lounge, ungefährer Zimmerpreis, Top 5 auf DE/EN/SK). Ändern, neu recherchieren, löschen:
+// wer geteilt hat und Sven (Admin).
+const KATEGORIEN = { luxury: "Luxury", premium: "Premium", classic: "Classic", budget: "Budget" };
 const hotels = ECHT ? [] : [
-  { id: "h-ams", von: "lea", name: "Waldorf Astoria Amsterdam", ort: "Amsterdam", land: "NL", link: "https://www.hilton.com/en/hotels/amswawa-waldorf-astoria-amsterdam/", bild: null, herzen: 3, herzIch: false,
-    highlights: ["Sechs Grachtenpaläste aus dem 17. Jahrhundert an der Herengracht", "Guerlain Spa mit Indoor-Pool", "Afternoon Tea in der Peacock Alley", "Restaurant Spectrum", "Fahrräder zum Ausleihen"] },
-  { id: "h-mle", von: "du", name: "Conrad Maldives Rangali Island", ort: "Rangali", land: "MV", link: null, bild: null, herzen: 5, herzIch: true,
-    highlights: ["Ithaa: Restaurant fünf Meter unter dem Meer", "Wasservillen über der Lagune", "Zwei Inseln, verbunden durch eine Brücke"] }
+  { id: "h-ams", von: "lea", name: "Waldorf Astoria Amsterdam", ort: "Amsterdam", land: "NL", link: "https://www.hilton.com/en/hotels/amswawa-waldorf-astoria-amsterdam/", bild: null,
+    status: "fertig", kategorie: "luxury", lounge: null, preis: 650, herzen: 3, herzIch: false,
+    texte: { de: ["Sechs Grachtenpaläste aus dem 17. Jahrhundert an der Herengracht", "Guerlain Spa mit Indoor-Pool", "Afternoon Tea in der Peacock Alley", "Restaurant Spectrum", "Mitten im Grachtengürtel"],
+      en: ["Six 17th-century canal palaces on the Herengracht", "Guerlain Spa with indoor pool", "Afternoon tea in Peacock Alley", "Spectrum restaurant", "Right in the canal ring"],
+      sk: ["Šesť palácov zo 17. storočia na Herengracht", "Guerlain Spa s krytým bazénom", "Popoludňajší čaj v Peacock Alley", "Reštaurácia Spectrum", "Priamo v okruhu kanálov"] } },
+  { id: "h-krk", von: "du", name: "Hampton by Hilton Kraków", ort: "Krakau", land: "PL", link: null, bild: null,
+    status: "fertig", kategorie: "budget", lounge: false, preis: 72, herzen: 2, herzIch: true,
+    texte: { de: ["Frühstück inklusive", "Zu Fuß in die Altstadt", "Modernes, ruhiges Design"], en: ["Breakfast included", "Walk to the old town", "Modern, quiet design"], sk: ["Raňajky v cene", "Pešo do starého mesta", "Moderný, tichý dizajn"] } },
+  { id: "h-kul", von: "lea", name: "DoubleTree by Hilton Kuala Lumpur", ort: "Kuala Lumpur", land: "MY", link: null, bild: null,
+    status: "fertig", kategorie: "classic", lounge: true, preis: 58, herzen: 4, herzIch: false,
+    texte: { de: ["Executive Lounge: Zugang mit Diamond, mit Gold oft per Upgrade", "Pool mit Blick auf die Skyline", "Direkt an der Mall Intermark", "Warme Cookies beim Check-in"],
+      en: ["Executive Lounge: access with Diamond, often with Gold via upgrade", "Pool with skyline view", "Connected to Intermark mall", "Warm cookies at check-in"],
+      sk: ["Executive Lounge: prístup s Diamond, s Gold často cez upgrade", "Bazén s výhľadom na panorámu", "Priamo pri nákupnom centre Intermark", "Teplé sušienky pri príchode"] } }
 ];
-let hiltonFilter = "alle", hotelBearbeiten = null, hotelOrt = null, hotelBild = null;
+let hiltonFilter = "alle", hotelBearbeiten = null, hiltonUhr = null, hiltonRunden = 0;
 const hotelLand = l => l ? landName(l) : t("Ohne Land");
 const ichAdmin = () => ECHT && !!(ECHT_DATEN.profil && ECHT_DATEN.profil.ist_admin);
+// Recherche hängt länger als 3 Minuten: als Fehler zeigen, damit man es nochmal versuchen kann
+const hotelStatus = h => h.status === "recherche" && h.recherche_am && Date.now() - new Date(h.recherche_am).getTime() > 180000 ? "fehler" : h.status;
 async function hiltonLaden() {
   if (!ECHT || familieModus || ECHT_DATEN.profil.art === "familie") return;
   const [h, z] = await Promise.all([SB.from("hilton").select("*"), SB.from("hilton_herz").select("hotel, person")]);
   if (h.error || z.error) return;
   const fotos = h.data.filter(x => x.foto).map(x => x.foto), urls = {};
   if (fotos.length) { const r = await SB.storage.from("wunschbilder").createSignedUrls(fotos, 86400); (r.data || []).forEach(x => { if (x.signedUrl) urls[x.path] = x.signedUrl; }); }
-  hotels.splice(0, hotels.length, ...h.data.map(x => ({ id: x.id, von: idVon(x.von), name: x.name, ort: x.ort, land: x.land, lat: x.lat, lon: x.lon, link: x.link, foto: x.foto, bild: urls[x.foto] || x.bild_url,
-    highlights: x.highlights || [], herzen: z.data.filter(y => y.hotel === x.id).length, herzIch: z.data.some(y => y.hotel === x.id && y.person === ECHT_DATEN.uid) })).filter(x => person(x.von)));
+  hotels.splice(0, hotels.length, ...h.data.map(x => ({ id: x.id, von: idVon(x.von), name: x.name, ort: x.ort || x.ort_eingabe, ortEingabe: x.ort_eingabe || x.ort, land: x.land,
+    link: x.link, foto: x.foto, bild: urls[x.foto] || x.bild_url, status: x.status, recherche_am: x.recherche_am, grund: x.notiz,
+    kategorie: x.kategorie, lounge: x.lounge, preis: x.preis_ca, texte: x.texte || { de: x.highlights || [] },
+    herzen: z.data.filter(y => y.hotel === x.id).length, herzIch: z.data.some(y => y.hotel === x.id && y.person === ECHT_DATEN.uid) })).filter(x => person(x.von)));
   if (ideenReiter === "hilton" && document.getElementById("seite-ideen").classList.contains("offen")) hiltonAufbauen();
+  hiltonNachschauen();
+}
+// Solange recherchiert wird: alle 5 Sekunden neu laden (höchstens 5 Minuten)
+function hiltonNachschauen() {
+  clearTimeout(hiltonUhr);
+  if (!ECHT || !hotels.some(h => hotelStatus(h) === "recherche") || ++hiltonRunden > 60) return;
+  hiltonUhr = setTimeout(() => hiltonLaden().catch(() => {}), 5000);
+}
+async function hotelRecherche(id) {
+  hiltonRunden = 0;
+  if (!ECHT) {
+    const h = hotels.find(x => x.id === id); if (!h) return;
+    h.status = "recherche"; hiltonAufbauen();
+    return setTimeout(() => {
+      const n = h.name.toLowerCase();
+      h.kategorie = /waldorf|conrad|lxr/.test(n) ? "luxury" : /hampton|tru |home2|spark/.test(n) ? "budget" : /doubletree|garden inn|tapestry|embassy/.test(n) ? "classic" : "premium";
+      h.texte = { de: [t("Im Prototyp ohne echte Recherche")], en: [t("Im Prototyp ohne echte Recherche")], sk: [t("Im Prototyp ohne echte Recherche")] };
+      h.status = "fertig"; if (ideenReiter === "hilton") hiltonAufbauen();
+    }, 2500);
+  }
+  const { data, error } = await SB.functions.invoke("hilton", { body: { hotel: id } });
+  if (error || !data || !data.ok) hinweis(t(data && data.grund === "limit" ? "Heute sind schon genug Hotels recherchiert worden. Morgen geht es weiter." : "Die Recherche hat nicht geklappt"));
+  await hiltonLaden();
 }
 function hiltonAufbauen() {
   const nachLand = (a, b) => (!a - !b) || hotelLand(a).localeCompare(hotelLand(b), LOC);
   const laender = [...new Set(hotels.map(h => h.land || ""))].sort(nachLand);
-  if (hiltonFilter !== "alle" && !laender.includes(hiltonFilter)) hiltonFilter = "alle";
-  document.getElementById("hilton-filter").innerHTML = ["alle", ...laender].map(l => `<button data-l="${l}" class="${l === hiltonFilter ? "aktiv" : ""}">${l === "alle" ? t("Alle|Filter") : (l ? flagge(l) + " " : "") + hotelLand(l)}</button>`).join("");
+  if (!["alle", "lounge"].includes(hiltonFilter) && !laender.includes(hiltonFilter)) hiltonFilter = "alle";
+  const chips = [["alle", t("Alle|Filter")], ...(hotels.some(h => h.lounge) ? [["lounge", "🍸 " + t("Lounge")]] : []), ...laender.map(l => [l, (l ? flagge(l) + " " : "") + hotelLand(l)])];
+  document.getElementById("hilton-filter").innerHTML = chips.map(([l, n]) => `<button data-l="${l}" class="${l === hiltonFilter ? "aktiv" : ""}">${n}</button>`).join("");
   document.querySelectorAll("#hilton-filter button").forEach(b => b.onclick = () => { hiltonFilter = b.dataset.l; hiltonAufbauen(); });
-  const liste = hotels.filter(h => hiltonFilter === "alle" || (h.land || "") === hiltonFilter)
+  const liste = hotels.filter(h => hiltonFilter === "alle" || (hiltonFilter === "lounge" ? h.lounge : (h.land || "") === hiltonFilter))
     .sort((a, b) => nachLand(a.land || "", b.land || "") || (a.ort || "").localeCompare(b.ort || "", LOC) || a.name.localeCompare(b.name, LOC));
   let land = null, html = "";
   for (const h of liste) {
     if ((h.land || "") !== land) { land = h.land || ""; html += `<h2 class="hilton-land">${land ? flagge(land) + " " : ""}${ohneHtml(hotelLand(land))}</h2>`; }
-    const eigen = h.von === "du", f = farbeVon(h.id), p = person(h.von);
-    const bildStil = h.bild ? `background:var(--trenner) center / cover url('${String(h.bild).replace(/['"()\\]/g, c => encodeURIComponent(c))}')` : `background:linear-gradient(135deg, #002f61cc, ${f})`;
-    html += `<div class="kasten idee hotel">
-      <div class="bild" style="${bildStil}"><span class="quelle">Hilton</span><button class="herzen hotel-herz${h.herzIch ? " an" : ""}" data-h="${h.id}">❤️ ${h.herzen}</button></div>
-      <div class="inhalt">
-        <b>${ohneHtml(h.name)} ${h.land ? flagge(h.land) : ""}</b>
-        ${h.ort ? `<span class="ort">${ohneHtml(h.ort)}</span>` : ""}
-        <div class="geteilt">${p ? ava(p) : ""}<span><b>${eigen ? t("✓ Dein Vorschlag") : ohneHtml(p ? p.name : "")}</b>${eigen ? "" : t("hat das geteilt")}</span></div>
-        ${h.highlights.length ? `<ol class="top5">${h.highlights.map(x => `<li>${ohneHtml(x)}</li>`).join("")}</ol>` : ""}
-        <a class="knopf-gross marke-knopf marke-hilton" href="${ohneHtml(hiltonAdresse(h))}" target="_blank" rel="noopener">${t("Auf {seite} ansehen", { seite: "hilton.com" })} ↗</a>
-        ${eigen || ichAdmin() ? `<div class="aktionen" style="margin-top:8px"><button class="knopf-leise hotel-aendern" data-h="${h.id}" style="flex:1">✏️ ${t("Ändern")}</button><button class="knopf-leise hotel-weg" data-h="${h.id}" aria-label="${t("Löschen")}">🗑</button></div>` : ""}
-      </div></div>`;
+    const eigen = h.von === "du", p = person(h.von), status = hotelStatus(h), darf = eigen || ichAdmin();
+    const bildStil = h.bild ? `background:var(--trenner) center / cover url('${String(h.bild).replace(/['"()\\]/g, c => encodeURIComponent(c))}')` : `background:linear-gradient(135deg, #002f61, ${farbeVon(h.id)})`;
+    const punkte = (h.texte && (h.texte[SPRACHE] || h.texte.de)) || [];
+    const preisMarke = h.preis && h.preis < 60 ? `<span class="hotel-marke preis-top">🔥 ${t("Top-Preis")}</span>` : h.preis && h.preis < 100 ? `<span class="hotel-marke preis-gut">💶 ${t("Preiswert")}</span>` : "";
+    const marken = [h.kategorie ? `<span class="hotel-marke kat-${h.kategorie}">${KATEGORIEN[h.kategorie]}</span>` : "", h.lounge ? `<span class="hotel-marke lounge">🍸 ${t("Lounge")}</span>` : "", preisMarke].join("");
+    const zeile = [ohneHtml(h.ort || ""), h.preis ? t("ca. {n} € / Nacht", { n: h.preis.toLocaleString(LOC) }) : ""].filter(Boolean).map(x => `<span class="zus">${x}</span>`).join(" · ");
+    const inhalt = status === "recherche" ? `<div class="hotel-status">🔎 ${t("Ahoi sucht das Hotel auf hilton.com …")}</div>`
+      : status === "fehler" ? `<div class="hotel-status fehler">⚠️ ${t("Nicht gefunden. Prüfe Name und Ort und versuch es nochmal.")}</div>`
+      : `${punkte.length ? `<ol class="top5">${punkte.map(x => `<li>${ohneHtml(x)}</li>`).join("")}</ol>` : ""}
+        <a class="knopf-gross marke-knopf marke-hilton" href="${ohneHtml(hiltonAdresse(h))}" target="_blank" rel="noopener">${t("Auf {seite} ansehen", { seite: "hilton.com" })} ↗</a>`;
+    const links = darf ? [`<button class="text-knopf hotel-aendern" data-h="${h.id}">${t("Ändern")}</button>`,
+      status !== "recherche" ? `<button class="text-knopf hotel-neu" data-h="${h.id}">${t(status === "fehler" ? "Nochmal versuchen" : "Neu recherchieren")}</button>` : "",
+      `<button class="text-knopf weg hotel-weg" data-h="${h.id}">${t("Löschen")}</button>`].filter(Boolean).join('<span class="punkt">·</span>') : "";
+    html += `<div class="kasten idee kompakt hotel">
+      <div class="idee-kopf">
+        <div class="bild" style="${bildStil}">${h.bild ? "" : "🏨"}</div>
+        <div class="kopf-text">
+          <div class="titel-zeile"><b>${ohneHtml(h.name)} ${h.land ? flagge(h.land) : ""}</b><button class="herzen hotel-herz${h.herzIch ? " an" : ""}" data-h="${h.id}">❤️ ${h.herzen}</button></div>
+          <span class="ort">${zeile}</span>
+          ${marken ? `<div class="hotel-marken">${marken}</div>` : ""}
+          <div class="geteilt">${p ? ava(p) : ""}<span><b>${eigen ? t("✓ Dein Vorschlag") : ohneHtml(p ? p.name : "")}</b>${eigen ? "" : t("hat das geteilt")}</span></div>
+        </div>
+      </div>
+      <div class="inhalt">${inhalt}${links ? `<div class="text-links">${links}</div>` : ""}</div></div>`;
   }
   document.getElementById("hilton-liste").innerHTML = html || `<p class="hinweis-band">${t("Noch keine Hilton-Hotels. Teile eins, das du liebst, mit „+ Hotel“.")}</p>`;
   const hotel = b => hotels.find(h => h.id === b.dataset.h);
@@ -1563,6 +1616,7 @@ function hiltonAufbauen() {
     h.herzIch = !h.herzIch; h.herzen += h.herzIch ? 1 : -1; hiltonAufbauen();
   });
   document.querySelectorAll(".hotel-aendern").forEach(b => b.onclick = () => hiltonFormOeffnen(hotel(b)));
+  document.querySelectorAll(".hotel-neu").forEach(b => b.onclick = () => { b.disabled = true; hotelRecherche(b.dataset.h); });
   document.querySelectorAll(".hotel-weg").forEach(b => b.onclick = () => fragen(t("Von der Wishlist löschen?"), [[t("Löschen"), async () => {
     const h = hotel(b); if (!h) return;
     if (ECHT) { const { error } = await SB.from("hilton").delete().eq("id", h.id); if (error) return hinweis(t("Das hat nicht geklappt")); if (h.foto) SB.storage.from("wunschbilder").remove([h.foto]).catch(() => {}); }
@@ -1571,86 +1625,33 @@ function hiltonAufbauen() {
 }
 // Ohne Link: Hilton-Suche nach der Stadt (die Hilton-Suche versteht nur Orte, das Hotel steht dann in der Liste)
 const hiltonAdresse = h => h.link || `https://www.hilton.com/${SPRACHE === "de" ? "de" : "en"}/search/?query=${encodeURIComponent([h.ort, h.land ? landName(h.land) : ""].filter(Boolean).join(", ") || h.name)}`;
-let hotelFoto = null;
-const HILTON_BEISPIELE = ["z. B. Lage direkt am Strand", "z. B. Executive Lounge mit Dachterrasse", "z. B. Spa mit Pool", "", ""];
 function hiltonFormOeffnen(h) {
-  hotelBearbeiten = h ? h.id : null; hotelBild = h ? h.bild : null; hotelFoto = null;
-  document.getElementById("hilton-foto").value = ""; document.getElementById("hilton-foto-text").textContent = t("📷 Foto dazulegen (freiwillig, z. B. Screenshot aus der Hilton-App)");
-  hotelOrt = h && (h.ort || h.land) ? { ort: h.ort, land: h.land, lat: h.lat ?? null, lon: h.lon ?? null } : null;
+  hotelBearbeiten = h ? h.id : null;
   document.getElementById("hilton-titel").textContent = t(h ? "Hotel ändern" : "Hilton-Hotel teilen");
-  document.getElementById("hilton-speichern").textContent = t(h ? "Speichern" : "Teilen");
-  document.getElementById("hilton-link").value = h ? (h.link || "") : "";
+  document.getElementById("hilton-speichern").textContent = t(h ? "Speichern und neu recherchieren" : "Hinzufügen");
   document.getElementById("hilton-name").value = h ? h.name : "";
-  document.getElementById("hilton-ort").value = h ? (h.ort || "") : ""; document.getElementById("hilton-orte").innerHTML = "";
-  document.getElementById("hilton-punkte").innerHTML = HILTON_BEISPIELE.map((b, k) => `<input maxlength="90" data-k="${k}" placeholder="${ohneHtml(b ? t(b) : (k + 1) + ".")}" value="${ohneHtml(h && h.highlights[k] || "")}" autocomplete="off">`).join("");
-  hotelVorschauZeigen();
+  document.getElementById("hilton-ort").value = h ? (h.ortEingabe || h.ort || "") : "";
   seiteZeigen("hilton-neu");
 }
-function hotelVorschauZeigen(text) {
-  const box = document.getElementById("hilton-vorschau");
-  if (!hotelBild && !hotelFoto && !text) { box.style.display = "none"; return; }
-  box.style.display = "flex";
-  const bild = hotelFoto ? URL.createObjectURL(hotelFoto) : hotelBild;
-  box.innerHTML = `<div class="vb" style="${bild ? `background-image:url('${bild.replace(/'/g, "%27")}')` : ""}"></div><div><b>${ohneHtml(document.getElementById("hilton-name").value || "Hilton")}</b><small>${text || ""}</small></div>`;
-}
-async function hotelLinkPruefen() {
-  const link = linkAus(document.getElementById("hilton-link").value); if (!link) return;
-  if (!ECHT || hotelFoto) return hotelVorschauZeigen(hotelFoto ? "" : t("Im Prototyp ohne Vorschau"));
-  hotelVorschauZeigen(t("Vorschau wird geladen …"));
-  let v = null;
-  try { const r = await SB.functions.invoke("vorschau", { body: { url: link } }); v = r.data && r.data.ok ? r.data : null; } catch (e) {}
-  if (linkAus(document.getElementById("hilton-link").value) !== link) return;
-  if (v && v.bild) hotelBild = v.bild;
-  const name = document.getElementById("hilton-name");
-  if (v && v.titel && !name.value.trim()) name.value = v.titel.split(/\s[|–-]\s/)[0].replace(/\s*-\s*Hilton.*$/i, "").trim();
-  hotelVorschauZeigen(v ? (v.bild ? t("Bild und Titel übernommen") : t("Kein Bild gefunden")) : t("Keine Vorschau, Name bitte selbst eintragen"));
-}
-document.getElementById("hilton-foto").addEventListener("change", e => {
-  hotelFoto = e.target.files[0] || null;
-  document.getElementById("hilton-foto-text").textContent = hotelFoto ? "📷 " + t("Foto gewählt") : t("📷 Foto dazulegen (freiwillig, z. B. Screenshot aus der Hilton-App)");
-  hotelVorschauZeigen("");
-});
-document.getElementById("hilton-link").addEventListener("input", () => { clearTimeout(hotelLinkPruefen.uhr); hotelLinkPruefen.uhr = setTimeout(hotelLinkPruefen, 500); });
-document.getElementById("hilton-name").addEventListener("input", () => { const b = document.querySelector("#hilton-vorschau b"); if (b) b.textContent = document.getElementById("hilton-name").value || "Hilton"; });
-ortSucheVerbinden(document.getElementById("hilton-ort"), document.getElementById("hilton-orte"), o => { hotelOrt = o; document.getElementById("hilton-ort").value = o.ort; document.getElementById("hilton-orte").innerHTML = ""; });
 document.getElementById("hilton-speichern").onclick = async e => {
-  const linkRoh = document.getElementById("hilton-link").value.trim(), link = linkAus(linkRoh), name = document.getElementById("hilton-name").value.trim();
+  const name = document.getElementById("hilton-name").value.trim(), ort = document.getElementById("hilton-ort").value.trim();
   if (!name) return hinweis(t("Bitte den Namen des Hotels eintragen"));
-  if (linkRoh && !link) return hinweis(t("Der Link stimmt nicht. Feld leeren oder einen Link einfügen"));
-  const ortText = document.getElementById("hilton-ort").value.trim();
-  if (!ortText || !hotelOrt || hotelOrt.ort !== ortText) return hinweis(t("Bitte den Ort aus der Liste wählen"));
-  const highlights = [...document.querySelectorAll("#hilton-punkte input")].map(f => f.value.trim()).filter(Boolean).slice(0, 5);
-  const alt = hotelBearbeiten ? hotels.find(h => h.id === hotelBearbeiten) : null;
-  const daten = { link: link || null, name, bild_url: hotelFoto ? null : (link ? hotelBild || null : null) || (alt && !alt.foto ? alt.bild || null : null), ort: hotelOrt.ort, land: hotelOrt.land, lat: hotelOrt.lat, lon: hotelOrt.lon, highlights };
-  if (ECHT && daten.bild_url && daten.bild_url.includes("/object/sign/")) daten.bild_url = null;
+  if (!ort) return hinweis(t("Bitte den Ort eintragen"));
+  let id = hotelBearbeiten;
   if (ECHT) {
     beschaeftigt(e.target, true);
-    let foto = null;
-    try {
-      if (hotelFoto) {
-        const b = await createImageBitmap(hotelFoto).catch(() => new Promise((ok, nein) => { const i = new Image(); i.onload = () => ok(i); i.onerror = nein; i.src = URL.createObjectURL(hotelFoto); }));
-        const f = Math.min(1, 1600 / Math.max(b.width, b.height)), cv = document.createElement("canvas");
-        cv.width = Math.round(b.width * f); cv.height = Math.round(b.height * f); cv.getContext("2d").drawImage(b, 0, 0, cv.width, cv.height);
-        const blob = await new Promise(ok => cv.toBlob(ok, "image/jpeg", 0.8));
-        foto = `${ECHT_DATEN.uid}/${crypto.randomUUID()}.jpg`;
-        const up = await SB.storage.from("wunschbilder").upload(foto, blob, { contentType: "image/jpeg" });
-        if (up.error) throw up.error;
-        daten.foto = foto;
-      }
-      const { error } = hotelBearbeiten ? await SB.from("hilton").update(daten).eq("id", hotelBearbeiten) : await SB.from("hilton").insert(daten);
-      if (error) throw error;
-      if (foto && alt && alt.foto) SB.storage.from("wunschbilder").remove([alt.foto]).catch(() => {});
-    } catch (x) {
-      if (foto) SB.storage.from("wunschbilder").remove([foto]).catch(() => {});
-      beschaeftigt(e.target, false); return hinweis(t("Speichern hat nicht geklappt"));
-    }
+    const r = id ? await SB.from("hilton").update({ name, ort_eingabe: ort }).eq("id", id).select("id").single() : await SB.from("hilton").insert({ name, ort_eingabe: ort }).select("id").single();
     beschaeftigt(e.target, false);
-    await hiltonLaden();
+    if (r.error) return hinweis(t("Speichern hat nicht geklappt"));
+    id = r.data.id;
   } else {
-    const neu = { id: hotelBearbeiten || "h-" + Date.now(), von: "du", herzen: alt ? alt.herzen : 0, herzIch: alt ? alt.herzIch : false, ...daten, bild: hotelFoto ? URL.createObjectURL(hotelFoto) : daten.bild_url };
-    const k = hotels.findIndex(h => h.id === neu.id); if (k >= 0) hotels[k] = { ...hotels[k], ...neu }; else hotels.push(neu);
+    const alt = id && hotels.find(h => h.id === id);
+    if (alt) Object.assign(alt, { name, ort, ortEingabe: ort });
+    else { id = "h-" + Date.now(); hotels.push({ id, von: "du", name, ort, ortEingabe: ort, land: null, link: null, bild: null, status: "recherche", herzen: 0, herzIch: false, texte: {} }); }
   }
-  ideenReiter = "hilton"; hiltonFilter = "alle"; seiteZeigen("ideen"); hinweis(t(hotelBearbeiten ? "Gespeichert" : "Auf der Wishlist geteilt"));
+  ideenReiter = "hilton"; hiltonFilter = "alle"; seiteZeigen("ideen");
+  hinweis(t("Ahoi sucht das Hotel auf hilton.com …"));
+  hotelRecherche(id);
 };
 // „Ich wäre dabei“: kurz Personen und Schlafzimmer wählen (vorausgefüllt mit 1 und 1), bei mehr Personen: wer kommt mit?
 function dabeiBlatt(x, schonDabei, speichern, absagen) {
