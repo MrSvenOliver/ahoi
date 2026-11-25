@@ -107,7 +107,9 @@ const ZAEHLWOERTER = {
   laender: { de: ["Land", "Länder"], en: ["country", "countries"], sk: ["krajina", "krajiny", "krajín"] },
   tage: { de: ["Tag", "Tage"], en: ["day", "days"], sk: ["deň", "dni", "dní"] },
   zimmer: { de: ["Zimmer", "Zimmer"], en: ["room", "rooms"], sk: ["izba", "izby", "izieb"] },
-  personen: { de: ["Person", "Personen"], en: ["person", "people"], sk: ["osoba", "osoby", "osôb"] }
+  personen: { de: ["Person", "Personen"], en: ["person", "people"], sk: ["osoba", "osoby", "osôb"] },
+  betten: { de: ["Bett", "Betten"], en: ["bed", "beds"], sk: ["posteľ", "postele", "postelí"] },
+  plaetze: { de: ["Platz", "Plätze"], en: ["spot", "spots"], sk: ["miesto", "miesta", "miest"] }
 };
 function anzahl(n, art) {
   const w = ZAEHLWOERTER[art][SPRACHE] || ZAEHLWOERTER[art].de;
@@ -1253,6 +1255,21 @@ const anteil = (i, id) => Object.assign({ p: 1, z: 1, b: [] }, i.anteile && i.an
 const parteien = i => [...(i.vonDabei !== false ? [i.von] : []), ...i.dabei].map(id => ({ id, ...anteil(i, id) }));
 const begleitName = e => e.id ? ((person(e.id) || {}).name || t("Gast")) : (e.name || t("Gast"));
 const mitreisende = i => parteien(i).flatMap(x => x.b.filter(e => e.id).map(e => e.id));
+// Verfügbarkeit: Zimmer sind die Einheit. Plätze und Betten sinken anteilig mit den belegten Zimmern
+// (11 Plätze, 7 Betten, 5 Zimmer; 2 Zimmer belegt → 3/5 frei → 6 Plätze und 4 Betten frei, abgerundet).
+// Ohne Zimmerzahl zählen Plätze nach Personen, Betten nur als Gesamtzahl.
+function verfuegbar(i) {
+  const ps = parteien(i), personen = ps.reduce((n, y) => n + y.p, 0), zimmerBelegt = ps.reduce((n, y) => n + y.z, 0);
+  const kz = i.echt ? wunschZahlen(i) : { zimmer: parseInt(i.zimmer) || null, betten: parseInt(i.betten) || null };
+  const ges = { z: kz.zimmer || null, b: kz.betten || null, p: i.plaetze || i.gaeste || null };
+  const zFrei = ges.z ? Math.max(0, ges.z - zimmerBelegt) : null, anteilFrei = ges.z ? zFrei / ges.z : null;
+  return {
+    personen, zimmerBelegt, ges,
+    z: zFrei,
+    p: ges.p ? Math.max(0, Math.min(ges.p - personen, anteilFrei != null ? Math.floor(ges.p * anteilFrei) : ges.p)) : null,
+    b: ges.b && anteilFrei != null ? Math.floor(ges.b * anteilFrei) : null
+  };
+}
 // Betrag einer Zusage: pro Zimmer, wenn jemand mehr oder weniger Zimmer als Personen belegt, sonst pro Person
 function anteilBetrag(i, x) {
   const ps = parteien(i), personen = ps.reduce((n, y) => n + y.p, 0), zimmer = ps.reduce((n, y) => n + y.z, 0), nachZimmer = ps.some(y => y.p !== y.z);
@@ -1274,7 +1291,8 @@ function ideenAufbauen() {
     if (i.abreise && i.abreise < new Date().toISOString().slice(0, 10)) return "";
     const eigen = i.von === "du", vonDabei = i.vonDabei !== false, ichSelbst = eigen ? vonDabei : i.dabei.includes("du");
     const mitWem = parteien(i).find(x => x.b.some(e => e.id === "du")), ichDabei = ichSelbst || !!mitWem;
-    const wer = [...(vonDabei ? [i.von] : []), ...i.dabei], belegt = wer.reduce((n, id) => n + anteil(i, id).p, 0), frei = i.plaetze ? Math.max(0, i.plaetze - belegt) : 99;
+    const verf = verfuegbar(i);
+    const wer = [...(vonDabei ? [i.von] : []), ...i.dabei], belegt = wer.reduce((n, id) => n + anteil(i, id).p, 0), frei = verf.p ?? (verf.z ?? 99);
     // Preis: pro Person; belegt jemand mehr oder weniger Zimmer als Personen, wird pro Zimmer geteilt
     const zimmerBelegt = wer.reduce((n, id) => n + anteil(i, id).z, 0), nachZimmer = wer.some(id => anteil(i, id).p !== anteil(i, id).z);
     const proPerson = Math.round(i.preis / Math.max(1, belegt)), proZimmer = Math.round(i.preis / Math.max(1, zimmerBelegt));
@@ -1285,12 +1303,10 @@ function ideenAufbauen() {
     const teile = i.echt && i.titel ? i.titel.split(" · ") : null;
     const kopf = teile ? ohneHtml(teile[0]) : i.echt ? ohneHtml(i.ort) : t("{art} in {ort}", { art: i.art, ort: i.ort });
     const bildStil = i.bild ? `background:var(--trenner) center / cover url('${String(i.bild).replace(/['"()\\]/g, c => encodeURIComponent(c))}')` : `background:${i.farbe}`;
-    // Verfügbarkeit: Zimmer frei von gesamt (ein belegtes Zimmer ist weg, egal ob 1 oder 2 Personen), Betten laut Airbnb, Plätze frei
-    const kz = i.echt ? wunschZahlen(i) : { zimmer: parseInt(i.zimmer) || null, betten: null, rest: "" };
-    const plaetzeGesamt = i.plaetze || i.gaeste || null, zimmerFrei = kz.zimmer ? Math.max(0, kz.zimmer - zimmerBelegt) : null;
-    const zellen = [kz.zimmer && [`🛏 ${zimmerFrei}/${kz.zimmer}`, t("Zimmer frei"), !zimmerFrei],
-      kz.betten && [`🛌 ${kz.betten}`, t(kz.betten === 1 ? "Bett" : "Betten")],
-      plaetzeGesamt && [`👥 ${Math.max(0, plaetzeGesamt - belegt)}/${plaetzeGesamt}`, t("Plätze frei"), belegt >= plaetzeGesamt]].filter(Boolean);
+    // Verfügbarkeit: frei von gesamt für Zimmer, Betten und Plätze (Betten ohne Zimmerzahl nur als Gesamtzahl)
+    const zellen = [verf.ges.z && [`🛏 ${verf.z}/${verf.ges.z}`, t("Zimmer frei"), !verf.z],
+      verf.ges.b && (verf.b != null ? [`🛌 ${verf.b}/${verf.ges.b}`, t("Betten frei"), !verf.b] : [`🛌 ${verf.ges.b}`, t(verf.ges.b === 1 ? "Bett" : "Betten")]),
+      verf.ges.p && [`👥 ${verf.p}/${verf.ges.p}`, t("Plätze frei"), !verf.p]].filter(Boolean);
     const zahlen = zellen.length ? `<div class="zahlen" style="grid-template-columns:repeat(${zellen.length},1fr)">${zellen.map(([w, l, voll]) => `<div class="${voll ? "voll" : ""}"><b>${w}</b><small>${l}</small></div>`).join("")}</div>` : "";
     const chatKnopf = !i.echt ? `<button class="knopf-leise">💬 ${i.kommentare}</button>` : (i.chat && (eigen || ichDabei)) ? `<button class="knopf-leise idee-chat" data-n="${n}">💬 ${t("Gruppe")}</button>` : eigen ? "" : `<button class="knopf-leise idee-chat" data-n="${n}">💬 ${ohneHtml(person(i.von).name)}</button>`;
     return `
@@ -1299,7 +1315,7 @@ function ideenAufbauen() {
       <div class="inhalt">
         <b>${kopf} ${i.land ? flagge(i.land) : ""}</b>
         <span class="ort">${[i.echt && teile && !teile[0].includes(i.ort) ? ohneHtml(i.ort) : "", i.bewertung ? "★ " + i.bewertung : "", i.anreise ? kurz(i.anreise) + "–" + kurz(i.abreise) : i.zeitraum].filter(Boolean).join(" · ")}</span>
-        ${kz && kz.rest ? `<span class="extra">${ohneHtml(kz.rest)}</span>` : ""}
+        ${i.echt && wunschZahlen(i).rest ? `<span class="extra">${ohneHtml(wunschZahlen(i).rest)}</span>` : ""}
         <div class="geteilt">${ava(person(i.von))}<span><b>${eigen ? t("✓ Dein Vorschlag") : person(i.von).name}</b>${i.notiz ? "„" + ohneHtml(i.notiz) + "“" : eigen ? "" : t("hat das geteilt")}</span></div>
         ${zahlen}
         ${i.preis ? `<div class="rechner">💶 ${i.preis.toLocaleString(LOC)} € ${t("gesamt")}${belegt ? (nachZimmer ? ` · <b>${t("{n} € pro Zimmer", { n: proZimmer.toLocaleString(LOC) })}</b>` : ` · <b>${t("{n} € pro Person", { n: proPerson.toLocaleString(LOC) })}</b> ${t("bei {n}", { n: belegt })}`) : ""}${meinAnteil && (nachZimmer || anteil(i, "du").p > 1) ? ` · ${t("du: {n} €", { n: meinAnteil.toLocaleString(LOC) })}` : ""}</div>` : ""}
@@ -1494,7 +1510,9 @@ function dabeiBlatt(x, schonDabei, speichern, absagen) {
   const mein = anteil(x, "du"), w = schonDabei ? { p: mein.p, z: mein.z, b: mein.b.map(e => ({ ...e })) } : { p: 1, z: 1, b: [] };
   const andere = parteien(x).filter(y => y.id !== "du");
   const hausZimmer = x.echt ? wunschZahlen(x).zimmer : parseInt(x.zimmer) || null;
-  const max = { p: x.plaetze ? Math.max(1, x.plaetze - andere.reduce((n, y) => n + y.p, 0)) : 10, z: hausZimmer ? Math.max(1, hausZimmer - andere.reduce((n, y) => n + y.z, 0)) : 10 };
+  const ohneMich = { ...x, anteile: { ...x.anteile, du: undefined }, vonDabei: x.von === "du" ? false : x.vonDabei, dabei: x.dabei.filter(id => id !== "du") };
+  const vf = verfuegbar(ohneMich);
+  const max = { p: vf.p != null ? Math.max(1, vf.p) : 10, z: vf.z != null ? Math.max(1, vf.z) : (hausZimmer || 10) };
   // Mitglieder, die mitkommen können: nicht schon selbst dabei oder bei jemand anderem
   const vergeben = new Set([...andere.map(y => y.id), ...andere.flatMap(y => y.b.filter(e => e.id).map(e => e.id))]);
   const waehlbar = leute.filter(p => p.id !== "du" && !vergeben.has(p.id) && (!ECHT || p.art !== "familie"));
@@ -1537,10 +1555,10 @@ function uebersichtZeigen(i) {
     const betrag = anteilBetrag(i, x);
     return `<div class="ueb-zeile"><div><b>${namen.map(ohneHtml).join(" + ")}</b><small>🛏 ${anzahl(x.z, "zimmer")} · 👤 ${anzahl(x.p, "personen")}${x.p === 1 && x.z >= 1 ? " · " + t("allein") : ""}</small></div>${i.preis ? `<div class="ueb-betrag"><b>${betrag.toLocaleString(LOC)} €</b>${x.p > 1 ? `<small>${t("je {n} €", { n: Math.round(betrag / x.p).toLocaleString(LOC) })}</small>` : ""}</div>` : ""}</div>`;
   };
-  const frei = kz.zimmer != null ? Math.max(0, kz.zimmer - zimmer) : null;
+  const v = verfuegbar(i), frei = v.z;
   fragen(t("Belegung & Kosten"), []); document.getElementById("aktion-abbrechen").textContent = t("Schließen");
   document.getElementById("aktion-titel").innerHTML = `${t("Belegung & Kosten")}<div class="ueb">${ps.map(zeile).join("") || `<p class="aktion-text">${t("Noch niemand ist dabei")}</p>`}
-    ${frei != null ? `<div class="ueb-zeile ueb-frei"><div><b>${t("Noch frei")}</b><small>${kz.betten ? t("{n} Betten insgesamt", { n: kz.betten }) : ""}</small></div><div class="ueb-betrag"><b>🛏 ${frei}</b><small>${t("von {n} Zimmern", { n: kz.zimmer })}</small></div></div>` : ""}
+    ${frei != null ? `<div class="ueb-zeile ueb-frei"><div><b>${t("Noch frei")}</b><small>${[v.b != null ? `🛌 ${anzahl(v.b, "betten")}` : v.ges.b ? t("{n} Betten insgesamt", { n: v.ges.b }) : "", v.p != null ? `👥 ${anzahl(v.p, "plaetze")}` : ""].filter(Boolean).join(" · ")}</small></div><div class="ueb-betrag"><b>🛏 ${frei}</b><small>${t("von {n} Zimmern", { n: v.ges.z })}</small></div></div>` : ""}
     ${i.preis ? `<div class="ueb-zeile ueb-summe"><div><b>${t("Gesamt")}</b><small>${personen ? t(nachZimmer ? "geteilt pro Zimmer ({n} belegt)" : "geteilt pro Person ({n} dabei)", { n: nachZimmer ? zimmer : personen }) : ""}</small></div><div class="ueb-betrag"><b>${i.preis.toLocaleString(LOC)} €</b></div></div>` : ""}</div>`;
 }
 function wishlistInfoKnoepfe() {

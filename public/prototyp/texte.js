@@ -884,4 +884,5 @@ const TEXTE = {
   "geteilt pro Zimmer ({n} belegt)": ["split per room ({n} taken)", "delené na izbu ({n} obsadených)"],
   "geteilt pro Person ({n} dabei)": ["split per person ({n} going)", "delené na osobu ({n} ide)"],
   "👥 Wishlist: Sag zu mit Begleitung (Freund aus Ahoi oder Gast mit Namen). „📋 Belegung & Kosten“ zeigt allen, wer welche Zimmer hat, was noch frei ist und wer wie viel zahlt.": ["👥 Wishlist: say you are in with company (a friend on Ahoi or a guest by name). “📋 Rooms & costs” shows everyone who has which rooms, what is still free and who pays how much.", "👥 Wishlist: prihlás sa so spoločnosťou (priateľ z Ahoi alebo hosť s menom). „📋 Obsadenie a náklady“ ukáže všetkým, kto má ktoré izby, čo je ešte voľné a kto koľko platí."],
+  "Betten frei": ["beds free", "postele voľné"],
 };
