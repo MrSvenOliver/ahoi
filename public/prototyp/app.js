@@ -1824,13 +1824,13 @@ function wishlistKnoepfe() {
       const { error } = await SB.rpc("wunsch_loeschen", { w: x.id, reisen_weg: reisenWeg });
       if (error) return hinweis(t("Das hat nicht geklappt"));
       if (x.foto) SB.storage.from("wunschbilder").remove([x.foto]).catch(() => {});
-      hinweis(t(!reise ? "Von der Wishlist gelöscht" : reisenWeg ? (andere.length ? "Gelöscht, die Reise ist für alle abgesagt" : "Unterkunft und Reise gelöscht") : "Unterkunft gelöscht, die Reise bleibt"));
+      hinweis(t(!reise ? "Von der Wishlist gelöscht" : reisenWeg ? (andere.length ? "Reise für alle abgesagt" : "Reise abgesagt") : "Aus der Wishlist genommen, die Reise findet statt"));
       await wishlistLaden(); reisenLaden();
     };
     const frage = t("„{titel}“ löschen?", { titel }) + (zeile2 ? "\n" + zeile2 : "");
     fragen(frage, reise ? [
-      [t(andere.length ? "Unterkunft löschen, Reisen behalten" : "Nur die Unterkunft löschen"), () => loeschen(false)],
-      [t(andere.length ? "Reise für alle absagen" : "Unterkunft und Reise löschen"), () => loeschen(true), true]
+      [t("Nur aus der Wishlist nehmen, Reise findet statt"), () => loeschen(false)],
+      [t(andere.length ? "Reise absagen, für alle" : "Reise absagen"), () => loeschen(true), true]
     ] : [[t("Löschen"), () => loeschen(true), true]]);
   });
 }

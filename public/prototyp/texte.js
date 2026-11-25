@@ -948,4 +948,10 @@ const TEXTE = {
   "Nur die Unterkunft löschen": ["Delete only the stay", "Vymazať len ubytovanie"],
   "Reise für alle absagen": ["Cancel the trip for everyone", "Zrušiť cestu pre všetkých"],
   "Unterkunft und Reise löschen": ["Delete stay and trip", "Vymazať ubytovanie aj cestu"],
+  "Nur aus der Wishlist nehmen, Reise findet statt": ["Only remove from wishlist, trip goes ahead", "Len odstrániť z wishlistu, cesta sa koná"],
+  "Reise absagen, für alle": ["Cancel trip, for everyone", "Zrušiť cestu pre všetkých"],
+  "Reise absagen": ["Cancel trip", "Zrušiť cestu"],
+  "Reise für alle abgesagt": ["Trip cancelled for everyone", "Cesta zrušená pre všetkých"],
+  "Reise abgesagt": ["Trip cancelled", "Cesta zrušená"],
+  "Aus der Wishlist genommen, die Reise findet statt": ["Removed from wishlist, the trip goes ahead", "Odstránené z wishlistu, cesta sa koná"],
 };
