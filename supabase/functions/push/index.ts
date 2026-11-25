@@ -178,7 +178,8 @@ async function fehlerEreignis(id: string) {
 async function hiltonEreignis(id: string) {
   const [h] = await sql`select h.id, h.name, coalesce(h.ort_eingabe, h.ort) as ort, h.von, h.recherche_am from public.hilton h where h.id = ${id} and h.status = 'recherche'`;
   if (!h || !(await erstesMal(`hilton:${h.id}:${new Date(h.recherche_am || 0).getTime()}`))) return 0;
-  const admins = (await sql`select id from public.profile where ist_admin`).map((x) => x.id).filter((x) => x !== h.von);
+  // auch bei eigenen Einträgen des Admins: die Mitteilung ist die Erinnerung, Claude „Hilton nachtragen“ zu schreiben
+  const admins = (await sql`select id from public.profile where ist_admin`).map((x) => x.id);
   const name = h.von ? await nameVon(h.von) : "?";
   return verschicken(admins, (s) => ({ title: text(s, "hilton"), body: [h.name, h.ort, name].filter(Boolean).join(" · "), url: `${APP}?hilton=1`, tag: `hilton-${h.id}` }));
 }
