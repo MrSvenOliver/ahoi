@@ -130,6 +130,8 @@ async function profilLaden() {
   const { data, error } = await SB.from("wer_ist_wo").select("*").eq("id", ECHT_DATEN.uid).maybeSingle();
   if (error) throw error;
   ECHT_DATEN.profil = data;
+  // Mitteilungen kommen in der Sprache, die die App gerade zeigt
+  if (data && data.sprache !== SPRACHE) SB.from("profile").update({ sprache: SPRACHE }).eq("id", ECHT_DATEN.uid).then(() => { data.sprache = SPRACHE; }, () => {});
   return data;
 }
 // Alle sichtbaren Mitglieder; ohne Standort (oder im Geistermodus) erscheinen sie nicht auf der Karte

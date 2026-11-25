@@ -11,24 +11,37 @@ import postgres from "npm:postgres@3.4.5";
 const sql = postgres(Deno.env.get("SUPABASE_DB_URL")!, { max: 2, prepare: false });
 const APP = "https://mrsvenoliver.github.io/ahoi/";
 
+// Mitteilungen: Oberzeile kurz (eine Zeile), Unterzeile mit einer kurzen Info. iPhone zeigt dazwischen immer „from Ahoi“.
 const TEXTE: Record<string, Record<string, string>> = {
   de: {
-    alle: "Alle", noch: "Bist du noch in {ort}?", nochText: "Tippe kurz, damit deine Freunde wissen, wo du bist.", plan: "Laut deinem Reiseplan bist du jetzt in {ort}", planText: "Stimmt das? Tippe, um deinen Ort zu bestätigen.",
-    wunschNeu: "🏡 {name} teilt eine Unterkunft in {ort}", wunschDabei: "🙋 {name} ist dabei: {ort}", wunschGebucht: "✅ Gebucht: {ort}", wunschPreis: "💶 Neuer Preis für {ort}: {pp} € pro Person",
-    reise: "✈️ {name} reist nach {ort} · {zeit}", treffer: "📍 Treffer: {name} ist auch in {ort} · {zeit}", kommt: "📍 {name} kommt nach {ort} · {zeit}",
-    naehe: "🧭 {name} ist in deiner Nähe: {ort}", neu: "👋 Neu bei Ahoi: {name}", anfrage: "🤝 {name} möchte sich mit dir verbinden",
+    noch: "📍 Noch in {ort}?", nochText: "Kurz tippen zum Bestätigen", plan: "📍 Jetzt in {ort}?", planText: "So steht es in deinem Reiseplan",
+    wunschNeu: "🏡 {name} teilt eine Unterkunft", wunschDabei: "🙋 {name} ist dabei", dabeiText: "{ort} · {n} dabei",
+    wunschGebucht: "✅ Gebucht: {ort}", gebuchtText: "{zeit} · steht in deinen Reisen", wunschPreis: "💶 Preis für {ort}", preisText: "{pp} € pro Person · {n} dabei",
+    wunschZeit: "📅 Neue Daten: {ort}", zeitText: "{zeit} · {naechte}", nacht: "1 Nacht", naechte: "{n} Nächte",
+    reise: "✈️ {name} reist nach {ort}", treffer: "📍 Treffer mit {name}", kommt: "📍 {name} kommt nach {ort}", kommtText: "{zeit} · du bist gerade dort",
+    naehe: "🧭 {name} ist in der Nähe", naeheText: "{ort} · {km} km von dir", naeheGleich: "{ort} · am selben Ort",
+    neu: "👋 {name} ist neu bei Ahoi", neuText: "Gerade in {ort}", neuHallo: "Sag Hallo im Chat",
+    anfrage: "🤝 {name} möchte sich verbinden", anfrageText: "Kurz tippen zum Bestätigen",
   },
   en: {
-    alle: "Everyone", noch: "Still in {ort}?", nochText: "Tap so your friends know where you are.", plan: "According to your travel plan you're in {ort} now", planText: "Is that right? Tap to confirm your location.",
-    wunschNeu: "🏡 {name} shares a place in {ort}", wunschDabei: "🙋 {name} is in: {ort}", wunschGebucht: "✅ Booked: {ort}", wunschPreis: "💶 New price for {ort}: {pp} € per person",
-    reise: "✈️ {name} is going to {ort} · {zeit}", treffer: "📍 Match: {name} is in {ort} too · {zeit}", kommt: "📍 {name} is coming to {ort} · {zeit}",
-    naehe: "🧭 {name} is near you: {ort}", neu: "👋 New on Ahoi: {name}", anfrage: "🤝 {name} wants to connect with you",
+    noch: "📍 Still in {ort}?", nochText: "Tap to confirm", plan: "📍 In {ort} now?", planText: "That's what your travel plan says",
+    wunschNeu: "🏡 {name} shared a place", wunschDabei: "🙋 {name} is in", dabeiText: "{ort} · {n} going",
+    wunschGebucht: "✅ Booked: {ort}", gebuchtText: "{zeit} · now in your trips", wunschPreis: "💶 Price for {ort}", preisText: "{pp} € per person · {n} going",
+    wunschZeit: "📅 New dates: {ort}", zeitText: "{zeit} · {naechte}", nacht: "1 night", naechte: "{n} nights",
+    reise: "✈️ {name} is going to {ort}", treffer: "📍 Match with {name}", kommt: "📍 {name} is coming to {ort}", kommtText: "{zeit} · you're there now",
+    naehe: "🧭 {name} is nearby", naeheText: "{ort} · {km} km away", naeheGleich: "{ort} · same place",
+    neu: "👋 {name} joined Ahoi", neuText: "Now in {ort}", neuHallo: "Say hello in the chat",
+    anfrage: "🤝 {name} wants to connect", anfrageText: "Tap to confirm",
   },
   sk: {
-    alle: "Všetci", noch: "Si ešte v {ort}?", nochText: "Ťukni, aby priatelia vedeli, kde si.", plan: "Podľa tvojho plánu ciest si teraz v {ort}", planText: "Je to tak? Ťukni a potvrď svoju polohu.",
-    wunschNeu: "🏡 {name} zdieľa ubytovanie v {ort}", wunschDabei: "🙋 {name} ide tiež: {ort}", wunschGebucht: "✅ Rezervované: {ort}", wunschPreis: "💶 Nová cena za {ort}: {pp} € na osobu",
-    reise: "✈️ {name} cestuje do {ort} · {zeit}", treffer: "📍 Zhoda: {name} je tiež v {ort} · {zeit}", kommt: "📍 {name} príde do {ort} · {zeit}",
-    naehe: "🧭 {name} je blízko teba: {ort}", neu: "👋 Nový v Ahoi: {name}", anfrage: "🤝 {name} sa chce s tebou spojiť",
+    noch: "📍 Stále v {ort}?", nochText: "Ťukni a potvrď", plan: "📍 Teraz v {ort}?", planText: "Tak to stojí v tvojom pláne ciest",
+    wunschNeu: "🏡 {name} zdieľa ubytovanie", wunschDabei: "🙋 {name} ide tiež", dabeiText: "{ort} · prihlásení: {n}",
+    wunschGebucht: "✅ Rezervované: {ort}", gebuchtText: "{zeit} · už je v tvojich cestách", wunschPreis: "💶 Cena za {ort}", preisText: "{pp} € na osobu · prihlásení: {n}",
+    wunschZeit: "📅 Nové dátumy: {ort}", zeitText: "{zeit} · {naechte}", nacht: "1 noc", naechte: "{n} nocí", naechte24: "{n} noci",
+    reise: "✈️ {name} cestuje do {ort}", treffer: "📍 Zhoda: {name}", kommt: "📍 {name} príde do {ort}", kommtText: "{zeit} · si práve tam",
+    naehe: "🧭 {name} je nablízku", naeheText: "{ort} · {km} km od teba", naeheGleich: "{ort} · na rovnakom mieste",
+    neu: "👋 {name} je teraz v Ahoi", neuText: "Práve v {ort}", neuHallo: "Pozdrav v chate",
+    anfrage: "🤝 {name} sa chce spojiť", anfrageText: "Ťukni a potvrď",
   },
 };
 const ORT_LOC: Record<string, string> = { de: "de-DE", en: "en-GB", sk: "sk-SK" };
@@ -41,6 +54,11 @@ function text(sprache: string | null, k: string, w: Werte | string = {}) {
 }
 const tag = (d: Date | string, sprache: string | null) => new Date(d).toLocaleDateString(ORT_LOC[sprache || "de"] || "de-DE", { day: "numeric", month: "numeric", timeZone: "UTC" });
 const zeitraum = (von: Date | string, bis: Date | string, sprache: string | null) => `${tag(von, sprache)}–${tag(bis, sprache)}`;
+function naechte(von: Date | string, bis: Date | string, sprache: string | null) {
+  const n = Math.round((new Date(bis).getTime() - new Date(von).getTime()) / 864e5);
+  if (n === 1) return text(sprache, "nacht");
+  return text(sprache, sprache === "sk" && n >= 2 && n <= 4 ? "naechte24" : "naechte", { n });
+}
 
 async function schluessel() {
   const [da] = await sql`select oeffentlich, privat from public.push_schluessel where id = 1`;
@@ -83,13 +101,13 @@ async function senden(personId: string, inhalt: Inhalt) {
   return raus;
 }
 // An mehrere Personen: jede in ihrer Sprache; in der Ruhezeit in die Warteschlange (gleicher tag ersetzt ältere)
-async function verschicken(personen: string[], inhalt: (sprache: string | null) => Inhalt) {
+async function verschicken(personen: string[], inhalt: (sprache: string | null, person: string) => Inhalt) {
   if (!personen.length) return 0;
   const leute = await sql`select p.id, p.sprache, p.zeitzone, p.push_ruhe from public.profile p
                           where p.id = any(${personen}::uuid[]) and exists (select 1 from public.push_abo a where a.person = p.id)`;
   let raus = 0;
   for (const p of leute) {
-    const i = inhalt(p.sprache), warten = p.push_ruhe ? ruheMinuten(p.zeitzone) : 0;
+    const i = inhalt(p.sprache, p.id), warten = p.push_ruhe ? ruheMinuten(p.zeitzone) : 0;
     if (warten > 0) {
       await sql`insert into public.push_warten (person, tag, inhalt, ab) values (${p.id}, ${i.tag}, ${sql.json(i)}, now() + ${warten + " minutes"}::interval)
                 on conflict (person, tag) do update set inhalt = excluded.inhalt, ab = excluded.ab`;
@@ -131,30 +149,37 @@ async function chatNachricht(id: number) {
 
 // ---------- Wishlist ----------
 async function wunschEreignis(art: string, wunschId: string, wer: string | null) {
-  const [w] = await sql`select id, von, ort, preis, gebucht from public.wunsch where id = ${wunschId}`;
+  const [w] = await sql`select id, von, ort, preis, gebucht, anreise, abreise, ersteller_dabei from public.wunsch where id = ${wunschId}`;
   if (!w) return 0;
   const url = `${APP}?wishlist=1`;
+  const zeit = (s: string | null) => w.anreise && w.abreise ? zeitraum(w.anreise, w.abreise, s) : "";
+  const [{ n }] = await sql`select count(*)::int + ${w.ersteller_dabei ? 1 : 0} as n from public.wunsch_dabei where wunsch = ${w.id}`;
   if (art === "wunsch_neu") {
     if (!(await erstesMal(`wunsch_neu:${w.id}`))) return 0;
     const an = await sql`select id from public.profile where freigegeben and art = 'nomade' and push_wunsch_neu and id <> ${w.von}`;
     const name = await nameVon(w.von);
-    return verschicken(an.map((x) => x.id), (s) => ({ title: text(s, "wunschNeu", { name, ort: w.ort }), body: "", url, tag: `wunsch-${w.id}` }));
+    return verschicken(an.map((x) => x.id), (s) => ({ title: text(s, "wunschNeu", { name }), body: [w.ort, zeit(s)].filter(Boolean).join(" · "), url, tag: `wunsch-${w.id}` }));
   }
   if (art === "wunsch_dabei") {
     if (!wer || !(await sql`select 1 from public.wunsch_dabei where wunsch = ${w.id} and person = ${wer}`).length) return 0;
     if (!(await erstesMal(`wunsch_dabei:${w.id}:${wer}`))) return 0;
     const an = await sql`select id from public.profile where id = ${w.von} and push_wunsch_dabei`;
     const name = await nameVon(wer);
-    return verschicken(an.map((x) => x.id), (s) => ({ title: text(s, "wunschDabei", { name, ort: w.ort }), body: "", url, tag: `wunsch-${w.id}` }));
+    return verschicken(an.map((x) => x.id), (s) => ({ title: text(s, "wunschDabei", { name }), body: text(s, "dabeiText", { ort: w.ort, n }), url, tag: `wunsch-${w.id}` }));
   }
-  // Gebucht oder neuer Preis: an alle, die dabei sind (und die Person, die geteilt hat), außer wer es geändert hat
+  // Gebucht, neuer Preis oder neue Daten: an alle, die dabei sind (und die Person, die geteilt hat), außer wer es geändert hat
   if (art === "wunsch_gebucht" && !w.gebucht) return 0;
-  if (!(await erstesMal(art === "wunsch_gebucht" ? `wunsch_gebucht:${w.id}` : `wunsch_preis:${w.id}:${w.preis}`))) return 0;
+  if (art === "wunsch_zeit" && !(w.anreise && w.abreise)) return 0;
+  const einmal = art === "wunsch_gebucht" ? `wunsch_gebucht:${w.id}` : art === "wunsch_zeit" ? `wunsch_zeit:${w.id}:${zeit("de")}` : `wunsch_preis:${w.id}:${w.preis}`;
+  if (!(await erstesMal(einmal))) return 0;
   const an = await sql`select p.id from public.profile p where p.push_wunsch_update and p.id is distinct from ${wer}
                        and (p.id = ${w.von} or p.id in (select person from public.wunsch_dabei where wunsch = ${w.id}))`;
-  const [{ n }] = await sql`select count(*)::int + 1 as n from public.wunsch_dabei where wunsch = ${w.id}`;
-  const pp = w.preis ? Math.round(w.preis / n) : 0;
-  return verschicken(an.map((x) => x.id), (s) => ({ title: art === "wunsch_gebucht" ? text(s, "wunschGebucht", w.ort) : text(s, "wunschPreis", { ort: w.ort, pp: pp.toLocaleString(ORT_LOC[s || "de"]) }), body: "", url, tag: `wunsch-${w.id}` }));
+  const pp = w.preis ? Math.round(w.preis / Math.max(1, n)) : 0;
+  return verschicken(an.map((x) => x.id), (s) => art === "wunsch_gebucht"
+    ? { title: text(s, "wunschGebucht", w.ort), body: text(s, "gebuchtText", { zeit: zeit(s) }), url, tag: `wunsch-${w.id}` }
+    : art === "wunsch_zeit"
+    ? { title: text(s, "wunschZeit", w.ort), body: text(s, "zeitText", { zeit: zeit(s), naechte: naechte(w.anreise, w.abreise, s) }), url, tag: `wunsch-${w.id}` }
+    : { title: text(s, "wunschPreis", w.ort), body: text(s, "preisText", { pp: pp.toLocaleString(ORT_LOC[s || "de"]), n }), url, tag: `wunsch-${w.id}` });
 }
 
 // ---------- Reisen und Treffer ----------
@@ -169,7 +194,7 @@ async function reiseEreignis(reiseId: string) {
   const ids = freunde.map((x) => x.id);
   if (ids.length) {
     const an = await sql`select id from public.profile where id = any(${ids}::uuid[]) and push_reise`;
-    raus += await verschicken(an.map((x) => x.id), (s) => ({ title: text(s, "reise", { name, ort: r.ort, zeit: zeitraum(r.ankunft, r.abreise, s) }), body: "", url, tag: `reise-${r.id}` }));
+    raus += await verschicken(an.map((x) => x.id), (s) => ({ title: text(s, "reise", { name, ort: r.ort }), body: zeitraum(r.ankunft, r.abreise, s), url, tag: `reise-${r.id}` }));
   }
   if (r.lat == null) return raus;
   // Treffer: andere sind zur gleichen Zeit am gleichen Ort (unter 15 km); zusammen gebuchte Reisen zählen nicht
@@ -181,9 +206,9 @@ async function reiseEreignis(reiseId: string) {
     if (!(await erstesMal(`treffer:${[r.von, t.von].sort().join(":")}:${r.ort}:${t.von_d.toISOString().slice(0, 10)}`))) continue;
     const andere = await nameVon(t.von);
     const an1 = await sql`select id from public.profile where id = ${t.von} and push_treffer`;
-    raus += await verschicken(an1.map((x) => x.id), (s) => ({ title: text(s, "treffer", { name, ort: r.ort, zeit: zeitraum(t.von_d, t.bis_d, s) }), body: "", url, tag: `treffer-${r.id}` }));
+    raus += await verschicken(an1.map((x) => x.id), (s) => ({ title: text(s, "treffer", { name }), body: `${r.ort} · ${zeitraum(t.von_d, t.bis_d, s)}`, url, tag: `treffer-${r.id}` }));
     const an2 = await sql`select id from public.profile where id = ${r.von} and push_treffer`;
-    raus += await verschicken(an2.map((x) => x.id), (s) => ({ title: text(s, "treffer", { name: andere, ort: r.ort, zeit: zeitraum(t.von_d, t.bis_d, s) }), body: "", url, tag: `treffer-${r.id}-${t.von}` }));
+    raus += await verschicken(an2.map((x) => x.id), (s) => ({ title: text(s, "treffer", { name: andere }), body: `${r.ort} · ${zeitraum(t.von_d, t.bis_d, s)}`, url, tag: `treffer-${r.id}-${t.von}` }));
   }
   // Kommt zu dir: jemand ist gerade dort (Ort aktuell, unter 15 km) und die Reise beginnt in den nächsten 60 Tagen
   if (new Date(r.ankunft).getTime() - Date.now() < 60 * 864e5) {
@@ -191,7 +216,7 @@ async function reiseEreignis(reiseId: string) {
       and lat is not null and standort_am > now() - interval '30 days' and public.abstand_km(lat, lon, ${r.lat}, ${r.lon}) < 15`;
     for (const p of dort) {
       if (!(await erstesMal(`kommt:${r.id}:${p.id}`))) continue;
-      raus += await verschicken([p.id], (s) => ({ title: text(s, "kommt", { name, ort: r.ort, zeit: zeitraum(r.ankunft, r.abreise, s) }), body: "", url, tag: `kommt-${r.id}` }));
+      raus += await verschicken([p.id], (s) => ({ title: text(s, "kommt", { name, ort: r.ort }), body: text(s, "kommtText", { zeit: zeitraum(r.ankunft, r.abreise, s) }), url, tag: `kommt-${r.id}` }));
     }
   }
   return raus;
@@ -201,26 +226,28 @@ async function reiseEreignis(reiseId: string) {
 async function ortEreignis(personId: string) {
   const [p] = await sql`select id, name, ort, lat, lon from public.profile where id = ${personId} and freigegeben and not geist and lat is not null`;
   if (!p || !(await erstesMal(`ort:${p.id}:${p.ort}:${new Date().toISOString().slice(0, 10)}`))) return 0;
-  const an = await sql`select q.id from public.profile q
+  const an = await sql`select q.id, public.abstand_km(q.lat, q.lon, ${p.lat}, ${p.lon}) as km from public.profile q
     where q.id <> ${p.id} and q.freigegeben and q.art = 'nomade' and q.push_naehe and not q.geist and q.lat is not null
       and q.standort_am > now() - interval '30 days' and public.abstand_km(q.lat, q.lon, ${p.lat}, ${p.lon}) < 50
       and exists (select 1 from public.freundschaft f where f.a = least(q.id, ${p.id}::uuid) and f.b = greatest(q.id, ${p.id}::uuid))`;
-  return verschicken(an.map((x) => x.id), (s) => ({ title: text(s, "naehe", { name: p.name, ort: p.ort }), body: "", url: APP, tag: `naehe-${p.id}` }));
+  const km = new Map(an.map((x) => [x.id, Math.round(Number(x.km))]));
+  return verschicken(an.map((x) => x.id), (s, wer) => ({ title: text(s, "naehe", { name: p.name }),
+    body: (km.get(wer) ?? 0) < 1 ? text(s, "naeheGleich", { ort: p.ort }) : text(s, "naeheText", { ort: p.ort, km: km.get(wer)! }), url: APP, tag: `naehe-${p.id}` }));
 }
 
 // ---------- Neue Leute und Anfragen ----------
 async function neuDabei(personId: string) {
-  const [p] = await sql`select id, name from public.profile where id = ${personId} and freigegeben and art = 'nomade'`;
+  const [p] = await sql`select id, name, ort, geist from public.profile where id = ${personId} and freigegeben and art = 'nomade'`;
   if (!p || !(await erstesMal(`neu:${p.id}`))) return 0;
   const an = await sql`select id from public.profile where freigegeben and art = 'nomade' and push_leute and id <> ${p.id}`;
-  return verschicken(an.map((x) => x.id), (s) => ({ title: text(s, "neu", { name: p.name }), body: "", url: APP, tag: `neu-${p.id}` }));
+  return verschicken(an.map((x) => x.id), (s) => ({ title: text(s, "neu", { name: p.name }), body: p.ort && !p.geist ? text(s, "neuText", { ort: p.ort }) : text(s, "neuHallo"), url: APP, tag: `neu-${p.id}` }));
 }
 async function anfrage(von: string, an: string) {
   if (!(await sql`select 1 from public.freund_anfrage where von = ${von} and an = ${an}`).length) return 0;
   if (!(await erstesMal(`anfrage:${von}:${an}:${new Date().toISOString().slice(0, 10)}`))) return 0;
   const ziel = await sql`select id from public.profile where id = ${an} and push_leute`;
   const name = await nameVon(von);
-  return verschicken(ziel.map((x) => x.id), (s) => ({ title: text(s, "anfrage", { name }), body: "", url: `${APP}?freunde=1`, tag: `anfrage-${von}` }));
+  return verschicken(ziel.map((x) => x.id), (s) => ({ title: text(s, "anfrage", { name }), body: text(s, "anfrageText"), url: `${APP}?freunde=1`, tag: `anfrage-${von}` }));
 }
 
 // ---------- Ort-Frage (täglich über pg_cron) ----------
@@ -275,7 +302,7 @@ Deno.serve(async (req) => {
     else if (b.ortfrage) raus = await ortFrage();
     else if (b.rundruf) raus = await rundrufe();
     else if (b.warten) raus = await wartendeSenden();
-    else if (["wunsch_neu", "wunsch_dabei", "wunsch_gebucht", "wunsch_preis"].includes(b.ereignis) && uuid(b.wunsch)) raus = await wunschEreignis(b.ereignis, b.wunsch, uuid(b.wer));
+    else if (["wunsch_neu", "wunsch_dabei", "wunsch_gebucht", "wunsch_preis", "wunsch_zeit"].includes(b.ereignis) && uuid(b.wunsch)) raus = await wunschEreignis(b.ereignis, b.wunsch, uuid(b.wer));
     else if (b.ereignis === "reise" && uuid(b.reise)) raus = await reiseEreignis(b.reise);
     else if (b.ereignis === "ort" && uuid(b.person)) raus = await ortEreignis(b.person);
     else if (b.ereignis === "neu_dabei" && uuid(b.person)) raus = await neuDabei(b.person);

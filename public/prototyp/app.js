@@ -1234,8 +1234,9 @@ function ideenAufbauen() {
   document.getElementById("ideen-liste").innerHTML = ideen.map((i, n) => {
     if (ideenFilter !== "alle" && i.land !== ideenFilter) return "";
     if (i.abreise && i.abreise < new Date().toISOString().slice(0, 10)) return "";
-    const belegt = 1 + i.dabei.length, frei = i.plaetze ? Math.max(0, i.plaetze - belegt) : 99, ichDabei = i.dabei.includes("du"), eigen = i.von === "du";
-    const proPerson = Math.round(i.preis / belegt);
+    const eigen = i.von === "du", vonDabei = i.vonDabei !== false, ichDabei = eigen ? vonDabei : i.dabei.includes("du");
+    const wer = [...(vonDabei ? [i.von] : []), ...i.dabei], belegt = wer.length, frei = i.plaetze ? Math.max(0, i.plaetze - belegt) : 99;
+    const proPerson = Math.round(i.preis / Math.max(1, belegt));
     // Echte Einträge: Titel aus der Vorschau, z. B. „Wohnung in Lissabon · ★4,9 · 2 Schlafzimmer“
     const teile = i.echt && i.titel ? i.titel.split(" · ") : null;
     const kopf = teile ? ohneHtml(teile[0]) : i.echt ? ohneHtml(i.ort) : t("{art} in {ort}", { art: i.art, ort: i.ort });
@@ -1255,18 +1256,18 @@ function ideenAufbauen() {
         <b>${kopf} ${i.land ? flagge(i.land) : ""}</b>
         <span class="ort">${[i.echt && teile && !teile[0].includes(i.ort) ? ohneHtml(i.ort) : "", i.bewertung ? "★ " + i.bewertung : "", i.anreise ? kurz(i.anreise) + "–" + kurz(i.abreise) : i.zeitraum].filter(Boolean).join(" · ")}</span>
         ${kz && kz.rest ? `<span class="extra">${ohneHtml(kz.rest)}</span>` : ""}
-        <div class="geteilt">${ava(person(i.von))}<span><b>${eigen ? t("Du") : person(i.von).name}</b>${i.notiz ? "„" + ohneHtml(i.notiz) + "“" : t("hat das geteilt")}</span></div>
+        <div class="geteilt">${ava(person(i.von))}<span><b>${eigen ? t("✓ Dein Vorschlag") : person(i.von).name}</b>${i.notiz ? "„" + ohneHtml(i.notiz) + "“" : eigen ? "" : t("hat das geteilt")}</span></div>
         ${zahlen}
-        ${i.preis ? `<div class="rechner">💶 ${i.preis.toLocaleString(LOC)} € ${t("gesamt")} · <b>${t("{n} € pro Person", { n: proPerson.toLocaleString(LOC) })}</b> ${t("bei {n}", { n: belegt })}</div>` : ""}
-        <div class="dabei-leiste"><div class="dabei-gesichter">${[i.von, ...i.dabei].map(id => ava(person(id))).join("")}</div></div>
+        ${i.preis ? `<div class="rechner">💶 ${i.preis.toLocaleString(LOC)} € ${t("gesamt")}${belegt ? ` · <b>${t("{n} € pro Person", { n: proPerson.toLocaleString(LOC) })}</b> ${t("bei {n}", { n: belegt })}` : ""}</div>` : ""}
+        <div class="dabei-leiste"><div class="dabei-gesichter">${wer.map(id => ava(person(id))).join("")}</div></div>
         <div class="aktionen">
-          ${i.gebucht ? `<button class="knopf-gross ist-dabei" disabled style="opacity:1">${t("✅ Gebucht · steht in Reisen")}</button>` : i.echt && eigen ? `<button class="knopf-gross ist-dabei" disabled style="opacity:1">${t("✓ Dein Vorschlag · du bist dabei")}</button>` : `<button class="knopf-gross dabei-knopf ${ichDabei ? "ist-dabei" : ""}" data-n="${n}" ${!frei && !ichDabei ? "disabled" : ""}>${t(ichDabei ? "✓ Du bist dabei" : frei ? "🙋 Ich wäre dabei" : "Leider voll")}</button>`}
+          ${i.gebucht ? `<button class="knopf-gross ist-dabei" disabled style="opacity:1">${t("✅ Gebucht · steht in Reisen")}</button>` : `<button class="knopf-gross dabei-knopf ${ichDabei ? "ist-dabei" : ""}" data-n="${n}" ${!frei && !ichDabei ? "disabled" : ""}>${t(ichDabei ? "✓ Du bist dabei" : frei ? "🙋 Ich wäre dabei" : "Leider voll")}</button>`}
           ${chatKnopf}
         </div>
         <div class="aktionen" style="margin-top:8px">
           <a class="knopf-leise" href="${ohneHtml(ansehenLink(i))}" target="_blank" rel="noopener" style="text-decoration:none;flex:1;text-align:center">${t(i.anreise ? "Preis ansehen ↗" : "Ansehen ↗")}</a>
           ${(ichDabei || eigen) && !i.gebucht && (!i.echt || i.anreise) ? `<button class="knopf-leise gebucht-knopf" data-n="${n}" style="flex:1">${t("✓ Gebucht")}</button>` : ""}
-          ${i.echt && eigen ? `<button class="knopf-leise preis-knopf" data-n="${n}">💶 ${t(i.preis ? "Preis ändern" : "Preis eintragen")}</button><button class="knopf-leise idee-weg" data-n="${n}" aria-label="${t("Löschen")}">🗑</button>` : ""}
+          ${i.echt && eigen ? `<button class="knopf-leise bearbeiten-knopf" data-n="${n}">✏️ ${t("Ändern")}</button><button class="knopf-leise idee-weg" data-n="${n}" aria-label="${t("Löschen")}">🗑</button>` : ""}
         </div>
       </div></div>`;
   }).join("") || (ECHT ? `<p class="hinweis-band">${t("Noch nichts auf der Wishlist. Teile eine Unterkunft, die dir gefällt, mit „+ Teilen“.")}</p>` : "");
@@ -1274,6 +1275,7 @@ function ideenAufbauen() {
   document.querySelectorAll(".herzen").forEach(b => b.onclick = () => { ideen[b.dataset.n].herzen++; ideenAufbauen(); });
   document.querySelectorAll(".dabei-knopf").forEach(b => b.onclick = () => {
     const i = ideen[b.dataset.n], k = i.dabei.indexOf("du");
+    if (i.von === "du") { i.vonDabei = i.vonDabei === false; return ideenAufbauen(); }
     if (k >= 0) { i.dabei.splice(k, 1); ideeGruppe(i, false); }
     else { i.dabei.push("du"); ideeGruppe(i, true); hinweis(t("{name} wird benachrichtigt · Gruppe im Chat", { name: person(i.von).name })); }
     ideenAufbauen();
@@ -1447,7 +1449,7 @@ async function wishlistLaden() {
       return { id: x.id, echt: true, von: idVon(x.von), titel: x.titel, ort: x.ort, land: x.land, lat: x.lat, lon: x.lon, link: x.link, quelle: x.quelle || quelleVon(x.link),
         bild: x.foto ? wunschBilder[x.foto] : x.bild_url, notiz: x.notiz || "", anreise: x.anreise, abreise: x.abreise, preis: x.preis, plaetze: x.plaetze, gaeste: x.gaeste, foto: x.foto,
         dabei: d.data.filter(y => y.wunsch === x.id).map(y => idVon(y.person)), herzen: herz.length, herzIch: herz.some(y => y.person === ECHT_DATEN.uid),
-        gebucht: x.gebucht, chat: x.chat, farbe: `linear-gradient(135deg, ${f}66, ${f})` };
+        vonDabei: x.ersteller_dabei !== false, gebucht: x.gebucht, chat: x.chat, farbe: `linear-gradient(135deg, ${f}66, ${f})` };
     }).filter(i => person(i.von) && !(i.abreise && i.abreise < new Date().toISOString().slice(0, 10) && !i.gebucht)));
   }
   if (!tp.error && !td.error) tipps.splice(0, tipps.length, ...tp.data.map(x => ({ id: x.id, echt: true, von: idVon(x.von), ort: x.ort, land: x.land, art: x.art, text: x.text, daumen: td.data.filter(y => y.tipp === x.id).map(y => idVon(y.person)) })).filter(x => person(x.von)));
@@ -1461,16 +1463,17 @@ function wishlistKnoepfe() {
     x.herzIch = !x.herzIch; x.herzen += x.herzIch ? 1 : -1; ideenAufbauen();
   });
   document.querySelectorAll(".dabei-knopf").forEach(b => b.onclick = async () => {
-    const x = i(b), ja = !x.dabei.includes("du");
+    const x = i(b), eigen = x.von === "du", ja = eigen ? x.vonDabei === false : !x.dabei.includes("du");
     beschaeftigt(b, true);
     const { error } = await SB.rpc("wunsch_dabei_setzen", { w: x.id, ja });
     beschaeftigt(b, false);
     if (error) return hinweis(/voll/i.test(error.message) ? t("Leider voll") : t("Das hat nicht geklappt"));
-    hinweis(ja ? t("Du bist dabei · {name} sieht das in eurer Gruppe im Chat", { name: person(x.von).name }) : t("Du bist nicht mehr dabei"));
+    hinweis(ja ? (eigen ? t("Du bist dabei") : t("Du bist dabei · {name} sieht das in eurer Gruppe im Chat", { name: person(x.von).name })) : t("Du bist nicht mehr dabei"));
     await wishlistLaden(); chatsLaden().catch(() => {});
   });
   document.querySelectorAll(".gebucht-knopf").forEach(b => b.onclick = () => {
-    const x = i(b), wer = [x.von, ...x.dabei].map(id => id === "du" ? t("dich") : person(id).name).join(", ");
+    const x = i(b), wer = [...(x.vonDabei !== false ? [x.von] : []), ...x.dabei].map(id => id === "du" ? t("dich") : person(id).name).join(", ");
+    if (!wer) return hinweis(t("Noch niemand ist dabei"));
     fragen(t("Gebucht? Die Reise wird eingetragen für {wer}.", { wer }), [[t("✓ Ja, gebucht"), async () => {
       const { error } = await SB.rpc("wunsch_gebucht", { w: x.id });
       if (error) return hinweis(t("Das hat nicht geklappt"));
@@ -1482,16 +1485,34 @@ function wishlistKnoepfe() {
     if (x.chat && (x.von === "du" || x.dabei.includes("du"))) { await chatsLaden(); const c = chats.find(y => y.id === x.chat); if (c) return gespraechOeffnen(c); }
     einzelChat(x.von);
   });
-  document.querySelectorAll(".preis-knopf").forEach(b => b.onclick = () => {
-    const x = i(b);
-    fragen(t("Gesamtpreis"), [[t("Speichern"), async () => {
-      const roh = (document.getElementById("preis-feld") || {}).value || "", preis = parseInt(roh.replace(/\D/g, "")) || null;
-      const { error } = await SB.from("wunsch").update({ preis }).eq("id", x.id);
+  // Wer geteilt hat, kann Zeitraum und Gesamtpreis jederzeit ändern
+  document.querySelectorAll(".bearbeiten-knopf").forEach(b => b.onclick = () => {
+    const x = i(b), heute = new Date().toISOString().slice(0, 10);
+    const naechteText = () => {
+      const an = document.getElementById("wunsch-an").value, ab = document.getElementById("wunsch-ab").value;
+      const n = an && ab ? Math.round((new Date(ab) - new Date(an)) / 864e5) : 0;
+      document.getElementById("wunsch-naechte").textContent = n > 0 ? (n === 1 ? t("1 Nacht") : t("{n} Nächte", { n })) : an || ab ? t("Abreise muss nach der Anreise sein") : "";
+    };
+    fragen(t("Ändern"), [[t("Speichern"), async () => {
+      const an = document.getElementById("wunsch-an").value || null, ab = document.getElementById("wunsch-ab").value || null;
+      const roh = document.getElementById("preis-feld").value || "", preis = parseInt(roh.replace(/\D/g, "")) || null;
+      if (!an !== !ab || (an && ab <= an)) return hinweis(t("Bitte An- und Abreise prüfen"));
+      const { error } = await SB.from("wunsch").update({ anreise: an, abreise: ab, preis }).eq("id", x.id);
       if (error) return hinweis(t("Speichern hat nicht geklappt"));
-      x.preis = preis; ideenAufbauen(); hinweis(t("Gespeichert"));
+      Object.assign(x, { anreise: an, abreise: ab, preis }); ideenAufbauen(); hinweis(t("Gespeichert"));
     }]]);
-    document.getElementById("aktion-titel").innerHTML = `${t("Gesamtpreis")}<small class="aktion-text">${t("Der Preis für den ganzen Aufenthalt, so wie Airbnb ihn bei deinen Daten anzeigt. Ahoi teilt ihn durch alle, die dabei sind.")}</small><input id="preis-feld" class="ort-suche" inputmode="numeric" placeholder="€" value="${x.preis || ""}" autocomplete="off">`;
-    setTimeout(() => document.getElementById("preis-feld").focus(), 50);
+    document.getElementById("aktion-titel").innerHTML = `${t("Ändern")}<small class="aktion-text">${t("Alle, die dabei sind, bekommen Bescheid.")}</small>
+      <div class="wunsch-daten"><label>${t("Anreise")}<input type="date" id="wunsch-an" min="${heute}" value="${x.anreise || ""}"></label><label>${t("Abreise")}<input type="date" id="wunsch-ab" min="${heute}" value="${x.abreise || ""}"></label></div>
+      <small class="aktion-text" id="wunsch-naechte"></small>
+      <span class="einst-unter" style="margin-top:10px">${t("Gesamtpreis")}</span>
+      <small class="aktion-text">${t("Der Preis für den ganzen Aufenthalt, so wie Airbnb ihn bei deinen Daten anzeigt. Ahoi teilt ihn durch alle, die dabei sind.")}</small>
+      <input id="preis-feld" class="ort-suche" inputmode="numeric" placeholder="€" value="${x.preis || ""}" autocomplete="off">`;
+    ["wunsch-an", "wunsch-ab"].forEach(id => document.getElementById(id).addEventListener("change", () => {
+      const an = document.getElementById("wunsch-an"), ab = document.getElementById("wunsch-ab");
+      if (id === "wunsch-an" && an.value) { ab.min = an.value; if (ab.value && ab.value <= an.value) ab.value = ""; }
+      naechteText();
+    }));
+    naechteText();
   });
   document.querySelectorAll(".idee-weg").forEach(b => b.onclick = () => fragen(t("Von der Wishlist löschen?"), [[t("Löschen"), async () => {
     const x = i(b); const { error } = await SB.from("wunsch").delete().eq("id", x.id);
@@ -2536,6 +2557,10 @@ async function ortNachfragen(sofort) {
 // ---------- Neu in Ahoi: nach jedem App-Update einmal eine kurze Übersicht ----------
 // Bei jedem Update oben einen Eintrag ergänzen (neueste zuerst). Wer neu dabei ist, sieht nur den neuesten.
 const NEUIGKEITEN = [
+  { id: "2026-11-25-wishlist", punkte: [
+    "🏡 Wishlist: Wer etwas teilt, kann jetzt selbst wählen, ob er dabei ist, und Daten und Preis jederzeit über „✏️ Ändern“ anpassen.",
+    "🔔 Mitteilungen sind kürzer und kommen in der Sprache, die du in Ahoi eingestellt hast."
+  ] },
   { id: "2026-11-24-chat", punkte: [
     "💬 Den großen Chat „Alle“ gibt es nicht mehr, nur noch Einzelchats und Gruppen.",
     "🔔 Push für Chats: aus, nur Einzelchats, nur Gruppen oder alles. Die Mitteilungen sind jetzt übersichtlicher in Bereiche getrennt."
