@@ -874,7 +874,7 @@ function reisenAufbauen() {
     if (!ps.length) continue;
     const gesichter = ps.slice(0, 2).map((p, i) => `<div class="klein-ava" style="left:${ps.length > 1 ? i * 20 : 10}px;z-index:${2 - i};${kopfStil(p)}">${kopfText(p)}</div>`).join("");
     const naechte = r.von ? Math.round((datum(r.bis) - datum(r.von)) / 864e5) : null;
-    // Laufender Aufenthalt: leicht hinterlegt, rechts „noch X Tage“
+    // Laufender Aufenthalt: leicht hinterlegt, rechts „noch X Nächte“ (gezählt wie bei allen Reisen in Nächten)
     const heuteT = new Date().toISOString().slice(0, 10), aktuell = r.von && r.von <= heuteT && r.bis >= heuteT;
     const rest = aktuell ? Math.round((datum(r.bis) - datum(heuteT)) / 864e5) : 0;
     html += `<div class="kasten reise${r.vielleicht ? " vielleicht" : ""}${aktuell ? " aktuell" : ""}${r.wer[0] === "du" ? " eigen" : ""}" data-n="${reisen.indexOf(r)}">
@@ -882,7 +882,7 @@ function reisenAufbauen() {
       <div class="text"><span class="wer">${ps.map(p => p.name).join(" & ")}</span>
         <span class="ziel">${r.land ? flagge(r.land) : "📍"}&nbsp;&nbsp;${ohneHtml(r.ziel)}</span>
         <span class="wann">${r.von ? kurz(r.von) + " – " + kurz(r.bis) : t("irgendwann im {m}", { m: datum(r.monat + "-01").toLocaleDateString(LOC, { month: "long" }) })}${wunschMarke(r)}</span></div>
-      <div class="art">${r.vielleicht ? '<span class="vielleicht-text">' + t("Vielleicht") + '</span>' : aktuell ? (rest ? `<small>${t("noch")}</small><b>${rest}</b><small>${anzahl(rest, "tage").replace(/^\d+ /, "")}</small>` : `<small>${t("heute")}</small><b>✈︎</b><small>${t("Abreise")}</small>`) : `<b>${naechte}</b><small>${t(naechte === 1 ? "Nacht" : "Nächte")}</small>`}</div></div>`;
+      <div class="art">${r.vielleicht ? '<span class="vielleicht-text">' + t("Vielleicht") + '</span>' : aktuell ? (rest ? `<small>${t("noch")}</small><b>${rest}</b><small>${t(rest === 1 ? "Nacht" : "Nächte")}</small>` : `<small>${t("heute")}</small><b>✈︎</b><small>${t("Abreise")}</small>`) : `<b>${naechte}</b><small>${t(naechte === 1 ? "Nacht" : "Nächte")}</small>`}</div></div>`;
   }
   document.getElementById("reise-liste").innerHTML = html || (ECHT ? `<div class="bald"><div style="font-size:44px">✈️</div><b>${t("Noch keine Reisen")}</b>${t("Trag deine nächste Reise ein. Wenn Freunde zur selben Zeit am selben Ort sind, zeigt Ahoi euch einen Treffer.")}</div>` : "");
   document.querySelectorAll("#reise-liste .reise.eigen").forEach(k => k.onclick = () => {
@@ -2379,9 +2379,9 @@ function trefferAufbauen() {
       reise: () => ["📍", t("{namen} am selben Ort", { namen: wer }), t(beide, { ort }), false],
       nah: () => ["🧭", t("{namen} in der Nähe", { namen: wer }), t("du in {ort}, {namen} in {ort2} · {km}", { ort, namen: wer, ort2, km: km(x.km) }), true],
       land: () => ["🌍", t("{namen} im selben Land", { namen: wer }), t(x.wer.length > 1 ? "ihr alle in {ort}, wo genau ist noch offen" : "ihr beide in {ort}, wo genau ist noch offen", { ort }), true],
-      kommt: () => ["📍", t("{namen} kommt zu dir", { namen: wer }), t(beide, { ort }), false],
-      "kommt-nah": () => ["🧭", t("{namen} kommt in deine Nähe", { namen: wer }), t("du in {ort}, {namen} in {ort2} · {km}", { ort: ort2, namen: wer, ort2: ort, km: km(x.km) }), true],
-      dort: () => ["📍", t("{namen} ist dort, wo du hinreist", { namen: wer }), t(beide, { ort }), false]
+      kommt: () => ["📍", t("{namen} am selben Ort", { namen: wer }), t(beide, { ort }), false],
+      "kommt-nah": () => ["🧭", t("{namen} in der Nähe", { namen: wer }), t("du in {ort}, {namen} in {ort2} · {km}", { ort: ort2, namen: wer, ort2: ort, km: km(x.km) }), true],
+      dort: () => ["📍", t("{namen} am selben Ort", { namen: wer }), t(beide, { ort }), false]
     };
     const [symbol, kopf, wo, leise] = (muster[x.art] || muster.dort)();
     // Farben: 📍 selber Ort kräftig grün, 🧭 in der Nähe zartes Pastellgrün, 🌍 selbes Land neutral

@@ -12,14 +12,15 @@ const sql = postgres(Deno.env.get("SUPABASE_DB_URL")!, { max: 2, prepare: false 
 const APP = "https://mrsvenoliver.github.io/ahoi/";
 
 // Mitteilungen: Oberzeile kurz (eine Zeile), Unterzeile mit einer kurzen Info. iPhone zeigt dazwischen immer „from Ahoi“.
+// Treffer wie in der App nur mit drei Überschriften: 📍 am selben Ort, 🧭 in der Nähe, 🌍 im selben Land.
 const TEXTE: Record<string, Record<string, string>> = {
   de: {
     noch: "📍 Noch in {ort}?", nochText: "Kurz tippen zum Bestätigen", plan: "📍 Jetzt in {ort}?", planText: "So steht es in deinem Reiseplan",
     wunschNeu: "🏡 {name} teilt eine Unterkunft", wunschDabei: "🙋 {name} ist dabei", dabeiText: "{ort} · {n} dabei",
     wunschGebucht: "✅ Gebucht: {ort}", gebuchtText: "{zeit} · steht in deinen Reisen", wunschPreis: "💶 Preis für {ort}", preisText: "{pp} € pro Person · {n} dabei", preisZimmerText: "{pp} € pro Zimmer · {n} dabei",
     wunschZeit: "📅 Neue Daten: {ort}", zeitText: "{zeit} · {naechte}", nacht: "1 Nacht", naechte: "{n} Nächte",
-    reise: "✈️ {name} reist nach {ort}", treffer: "📍 Treffer mit {name}", kommt: "📍 {name} kommt nach {ort}", kommtText: "{zeit} · du bist gerade dort",
-    naehe: "🧭 {name} ist in der Nähe", naeheText: "{ort} · {km} km von dir", naeheGleich: "{ort} · am selben Ort",
+    reise: "✈️ {name} reist nach {ort}", treffer: "📍 {name} am selben Ort", kommt: "📍 {name} am selben Ort", kommtText: "{zeit} · du bist gerade dort",
+    naehe: "🧭 {name} in der Nähe", naeheText: "{ort} · {km} km von dir", naeheGleich: "{ort} · am selben Ort",
     neu: "👋 {name} ist neu bei Ahoi", neuText: "Gerade in {ort}", neuHallo: "Sag Hallo im Chat",
     anfrage: "🤝 {name} möchte sich verbinden", anfrageText: "Kurz tippen zum Bestätigen",
   },
@@ -28,8 +29,8 @@ const TEXTE: Record<string, Record<string, string>> = {
     wunschNeu: "🏡 {name} shared a place", wunschDabei: "🙋 {name} is in", dabeiText: "{ort} · {n} going",
     wunschGebucht: "✅ Booked: {ort}", gebuchtText: "{zeit} · now in your trips", wunschPreis: "💶 Price for {ort}", preisText: "{pp} € per person · {n} going", preisZimmerText: "{pp} € per room · {n} going",
     wunschZeit: "📅 New dates: {ort}", zeitText: "{zeit} · {naechte}", nacht: "1 night", naechte: "{n} nights",
-    reise: "✈️ {name} is going to {ort}", treffer: "📍 Match with {name}", kommt: "📍 {name} is coming to {ort}", kommtText: "{zeit} · you're there now",
-    naehe: "🧭 {name} is nearby", naeheText: "{ort} · {km} km away", naeheGleich: "{ort} · same place",
+    reise: "✈️ {name} is going to {ort}", treffer: "📍 {name} in the same place", kommt: "📍 {name} in the same place", kommtText: "{zeit} · you're there now",
+    naehe: "🧭 {name} nearby", naeheText: "{ort} · {km} km away", naeheGleich: "{ort} · same place",
     neu: "👋 {name} joined Ahoi", neuText: "Now in {ort}", neuHallo: "Say hello in the chat",
     anfrage: "🤝 {name} wants to connect", anfrageText: "Tap to confirm",
   },
@@ -38,7 +39,7 @@ const TEXTE: Record<string, Record<string, string>> = {
     wunschNeu: "🏡 {name} zdieľa ubytovanie", wunschDabei: "🙋 {name} ide tiež", dabeiText: "{ort} · prihlásení: {n}",
     wunschGebucht: "✅ Rezervované: {ort}", gebuchtText: "{zeit} · už je v tvojich cestách", wunschPreis: "💶 Cena za {ort}", preisText: "{pp} € na osobu · prihlásení: {n}", preisZimmerText: "{pp} € za izbu · prihlásení: {n}",
     wunschZeit: "📅 Nové dátumy: {ort}", zeitText: "{zeit} · {naechte}", nacht: "1 noc", naechte: "{n} nocí", naechte24: "{n} noci",
-    reise: "✈️ {name} cestuje do {ort}", treffer: "📍 Zhoda: {name}", kommt: "📍 {name} príde do {ort}", kommtText: "{zeit} · si práve tam",
+    reise: "✈️ {name} cestuje do {ort}", treffer: "📍 {name} na rovnakom mieste", kommt: "📍 {name} na rovnakom mieste", kommtText: "{zeit} · si práve tam",
     naehe: "🧭 {name} je nablízku", naeheText: "{ort} · {km} km od teba", naeheGleich: "{ort} · na rovnakom mieste",
     neu: "👋 {name} je teraz v Ahoi", neuText: "Práve v {ort}", neuHallo: "Pozdrav v chate",
     anfrage: "🤝 {name} sa chce spojiť", anfrageText: "Ťukni a potvrď",
@@ -221,7 +222,7 @@ async function reiseEreignis(reiseId: string) {
       and lat is not null and standort_am > now() - interval '30 days' and public.abstand_km(lat, lon, ${r.lat}, ${r.lon}) < 15`;
     for (const p of dort) {
       if (!(await erstesMal(`kommt:${r.id}:${p.id}`))) continue;
-      raus += await verschicken([p.id], (s) => ({ title: text(s, "kommt", { name, ort: r.ort }), body: text(s, "kommtText", { zeit: zeitraum(r.ankunft, r.abreise, s) }), url, tag: `kommt-${r.id}` }));
+      raus += await verschicken([p.id], (s) => ({ title: text(s, "kommt", { name, ort: r.ort }), body: `${r.ort} · ${zeitraum(r.ankunft, r.abreise, s)}`, url, tag: `kommt-${r.id}` }));
     }
   }
   return raus;
