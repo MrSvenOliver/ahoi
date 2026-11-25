@@ -3,6 +3,11 @@
 Jede Entscheidung mit Datum. Neue Einträge kommen oben dazu.
 
 ## 25.11.2026
+- Fehler in der App werden automatisch gemeldet (SQL 24): gleiche Fehler nur hochgezählt, höchstens 20 neue pro Person und Tag, Netzwerk-Aussetzer zählen nicht; Sven sieht sie in der Verwaltung unter „Fehler in der App“ (abhaken mit „✓ Erledigt“) und bekommt bei jedem neuen Fehler eine Mitteilung „🐞 Fehler in Ahoi“.
+- Schneller laden: Skripte mit Stand im Namen kommen direkt vom Handy (neuer Stand = neuer Name), Ländergrenzen und Weltkarte sofort aus dem Speicher und im Hintergrund aktualisiert; die echte App lädt app.js parallel zu Supabase. Beim erneuten Öffnen 5 statt 9 Anfragen ans Netz.
+- Wer als Ahoi-Mitglied zu einer Unterkunft mitgenommen wird, bekommt eine Mitteilung „🏡 {Name} nimmt dich mit“ (Schalter „Updates zu Unterkünften“), jede Person einmal pro Unterkunft.
+- Hilton ohne Link (die Hilton-App hat keinen Teilen-Link): Name und Ort reichen, Foto freiwillig (z. B. Screenshot), Link freiwillig; ohne Link sucht „Auf hilton.com ansehen“ nach Name und Ort.
+- Wishlist-Karten kompakt: Bild klein links neben Titel, Ort und wer geteilt hat; Zimmer/Plätze als kleine Felder in einer Zeile; „📋“ statt breitem Knopf; Airbnb-Knopf und „Als gebucht markieren“ nebeneinander. Eine Karte ist etwa 290 statt 540 Pixel hoch, zwei passen auf den Bildschirm.
 - Wishlist hat einen zweiten Reiter „🏨 Hilton“: Hotels zur Inspiration, ohne Daten und ohne Kosten. Alle Mitglieder können Hotels teilen (Link von hilton.com, Name, Ort, bis zu 5 Highlights), sortiert nach Ländern mit Länderfilter, ❤️ für Favoriten. Ändern und löschen kann, wer geteilt hat, und der Admin. Knopf „Auf hilton.com ansehen“ in Hilton-Blau (#002f61). Tabellen `hilton` und `hilton_herz` (SQL 23).
 
 ## 24.11.2026

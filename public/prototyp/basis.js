@@ -2,6 +2,29 @@
 // Echte App: mrsvenoliver.github.io/ahoi/ · Prototyp mit Beispieldaten: …/ahoi/prototyp/
 const ECHT = !/\/prototyp\//.test(location.pathname);
 document.documentElement.classList.toggle("echt", ECHT);
+// Fehler in der App sammeln; die echte App schickt sie nach der Anmeldung an Sven (fehlerSenden in start.js).
+// Gleiche Fehler nur einmal, höchstens 10 pro Sitzung; Netzwerk-Aussetzer zählen nicht.
+const APP_FEHLER = [];
+function fehlerStelle(stack) {
+  return String(stack || "").split("\n").map(z => (/([\w.-]+\.(?:js|html))(?:\?[^:\s)]*)?:(\d+):(\d+)/.exec(z) || []).slice(1).join(":")).filter(Boolean).slice(0, 3).join(" < ");
+}
+function fehlerMerken(meldung, stelle) {
+  meldung = String(meldung || "").replace(/\s+/g, " ").trim();
+  if (!meldung || /^Script error\.?$|ResizeObserver loop|AbortError|Load failed|NetworkError|Failed to fetch|network connection was lost|Importing a module script failed/i.test(meldung)) return;
+  const k = meldung + "|" + (stelle || "");
+  if (APP_FEHLER.length >= 10 || APP_FEHLER.some(f => f.k === k)) return;
+  APP_FEHLER.push({ k, meldung: meldung.slice(0, 500), stelle: String(stelle || "").slice(0, 300), raus: false });
+  if (typeof fehlerSenden === "function") fehlerSenden();
+}
+window.addEventListener("error", e => {
+  if (!e.message) return;
+  fehlerMerken(e.message, fehlerStelle(e.error && e.error.stack) || (e.filename ? `${e.filename.split("/").pop().split("?")[0]}:${e.lineno}:${e.colno}` : ""));
+});
+window.addEventListener("unhandledrejection", e => {
+  const r = e.reason;
+  if (r && typeof r === "object" && "code" in r && !(r instanceof Error)) return; // Antworten von Supabase, keine Programmfehler
+  fehlerMerken(r && (r.message || String(r)), fehlerStelle(r && r.stack));
+});
 // App-Sprachen: Deutsch, Englisch, Slowakisch. Standard ist die iPhone-Sprache, im Profil änderbar.
 const SPRACHEN = { de: "Deutsch", en: "English", sk: "Slovenčina" };
 // Echte App und Prototyp merken sich die Sprache getrennt (sie liegen unter derselben Adresse)

@@ -1312,24 +1312,26 @@ function ideenAufbauen() {
     const zahlen = zellen.length ? `<div class="zahlen" style="grid-template-columns:repeat(${zellen.length},1fr)">${zellen.map(([w, l, voll]) => `<div class="${voll ? "voll" : ""}"><b>${w}</b><small>${l}</small></div>`).join("")}</div>` : "";
     const chatKnopf = !i.echt ? `<button class="knopf-leise">💬 ${i.kommentare}</button>` : (i.chat && (eigen || ichDabei)) ? `<button class="knopf-leise idee-chat" data-n="${n}">💬 ${t("Gruppe")}</button>` : eigen ? "" : `<button class="knopf-leise idee-chat" data-n="${n}">💬 ${ohneHtml(person(i.von).name)}</button>`;
     return `
-    <div class="kasten idee">
-      <div class="bild" style="${bildStil}"><span class="quelle">${ohneHtml(i.quelle || "")}</span>${i.echt ? "" : `<span class="sicht">${i.sicht}</span>`}${i.gebucht ? '<span class="gebucht">' + t("✅ Gebucht") + '</span>' : ""}<button class="herzen${i.herzIch ? " an" : ""}" data-n="${n}">❤️ ${i.herzen}</button></div>
-      <div class="inhalt">
-        <b>${kopf} ${i.land ? flagge(i.land) : ""}</b>
+    <div class="kasten idee kompakt">
+      <div class="idee-kopf">
+      <div class="bild" style="${bildStil}">${i.gebucht ? '<span class="gebucht">✅</span>' : ""}</div>
+      <div class="kopf-text">
+        <div class="titel-zeile"><b>${kopf} ${i.land ? flagge(i.land) : ""}</b><button class="herzen${i.herzIch ? " an" : ""}" data-n="${n}">❤️ ${i.herzen}</button></div>
         <span class="ort">${[i.echt && teile && !teile[0].includes(i.ort) ? ohneHtml(i.ort) : "", i.bewertung ? "★ " + i.bewertung : "", i.anreise ? kurz(i.anreise) + "–" + kurz(i.abreise) : i.zeitraum].filter(Boolean).join(" · ")}</span>
         ${i.echt && wunschZahlen(i).rest ? `<span class="extra">${ohneHtml(wunschZahlen(i).rest)}</span>` : ""}
         <div class="geteilt">${ava(person(i.von))}<span><b>${eigen ? t("✓ Dein Vorschlag") : person(i.von).name}</b>${i.notiz ? "„" + ohneHtml(i.notiz) + "“" : eigen ? "" : t("hat das geteilt")}</span></div>
+      </div></div>
+      <div class="inhalt">
         ${zahlen}
         ${i.preis ? `<div class="rechner">💶 ${i.preis.toLocaleString(LOC)} € ${t("gesamt")}${belegt ? (nachZimmer ? ` · <b>${t("{n} € pro Zimmer", { n: proZimmer.toLocaleString(LOC) })}</b>` : ` · <b>${t("{n} € pro Person", { n: proPerson.toLocaleString(LOC) })}</b> ${t("bei {n}", { n: belegt })}`) : ""}${meinAnteil && (nachZimmer || anteil(i, "du").p > 1) ? ` · ${t("du: {n} €", { n: meinAnteil.toLocaleString(LOC) })}` : ""}</div>` : ""}
         <div class="dabei-leiste"><div class="dabei-gesichter">${[...new Set([...wer, ...mitreisende(i)])].map(id => person(id) ? ava(person(id)) : "").join("")}${(() => { const g = parteien(i).reduce((n, x) => n + x.b.filter(e => !e.id).length + Math.max(0, x.p - 1 - x.b.length), 0); return g ? `<div class="klein-ava gast-ava">+${g}</div>` : ""; })()}</div>${belegt ? `<span class="dabei-zahl">👤 ${belegt} · 🛏 ${zimmerBelegt}</span>` : ""}</div>
         <div class="aktionen">
           ${i.gebucht ? `<button class="knopf-gross ist-dabei" disabled style="opacity:1">${t("✅ Gebucht · steht in Reisen")}</button>` : i.echt && eigen && !i.eigenWahl ? `<button class="knopf-gross ist-dabei" disabled style="opacity:1">${t("✓ Du bist dabei")}</button>` : mitWem && !ichSelbst ? `<button class="knopf-gross ist-dabei mit-knopf" data-n="${n}">${t("✓ Dabei mit {name}", { name: ohneHtml(person(mitWem.id).name) })}</button>` : `<button class="knopf-gross dabei-knopf ${ichDabei ? "ist-dabei" : ""}" data-n="${n}" ${!frei && !ichDabei ? "disabled" : ""}>${t(ichDabei ? "✓ Du bist dabei" : frei ? "🙋 Ich wäre dabei" : "Leider voll")}</button>`}
           ${chatKnopf}
+          ${belegt || i.preis ? `<button class="knopf-leise uebersicht-knopf" data-n="${n}" aria-label="${t("Belegung & Kosten")}" title="${t("Belegung & Kosten")}">📋</button>` : ""}
         </div>
-        ${belegt || i.preis ? `<button class="knopf-leise uebersicht-knopf" data-n="${n}">📋 ${t("Belegung & Kosten")}</button>` : ""}
-        ${marke ? `<a class="knopf-gross marke-knopf marke-${marke[0]}" href="${ohneHtml(ansehenLink(i))}" target="_blank" rel="noopener">${t("Auf {seite} ansehen", { seite: marke[1] })} ↗</a>` : ""}
-        <div class="aktionen" style="margin-top:8px">
-          ${marke ? "" : `<a class="knopf-leise" href="${ohneHtml(ansehenLink(i))}" target="_blank" rel="noopener" style="text-decoration:none;flex:1;text-align:center">${t(i.anreise ? "Preis ansehen ↗" : "Ansehen ↗")}</a>`}
+        <div class="aktionen zweite">
+          ${marke ? `<a class="knopf-gross marke-knopf marke-${marke[0]}" href="${ohneHtml(ansehenLink(i))}" target="_blank" rel="noopener">${t("Auf {seite} ansehen", { seite: marke[1] })} ↗</a>` : `<a class="knopf-leise" href="${ohneHtml(ansehenLink(i))}" target="_blank" rel="noopener" style="text-decoration:none;flex:1;text-align:center">${t(i.anreise ? "Preis ansehen ↗" : "Ansehen ↗")}</a>`}
           ${(ichDabei || eigen) && !i.gebucht && (!i.echt || i.anreise) ? `<button class="knopf-leise gebucht-knopf" data-n="${n}" style="flex:1">${t("Als gebucht markieren")}</button>` : ""}
           ${i.echt && eigen ? `<button class="knopf-leise bearbeiten-knopf" data-n="${n}">✏️ ${t("Ändern")}</button><button class="knopf-leise idee-weg" data-n="${n}" aria-label="${t("Löschen")}">🗑</button>` : ""}
         </div>
@@ -1513,7 +1515,7 @@ document.getElementById("idee-speichern").onclick = e => { if (ECHT) return wuns
 const hotels = ECHT ? [] : [
   { id: "h-ams", von: "lea", name: "Waldorf Astoria Amsterdam", ort: "Amsterdam", land: "NL", link: "https://www.hilton.com/en/hotels/amswawa-waldorf-astoria-amsterdam/", bild: null, herzen: 3, herzIch: false,
     highlights: ["Sechs Grachtenpaläste aus dem 17. Jahrhundert an der Herengracht", "Guerlain Spa mit Indoor-Pool", "Afternoon Tea in der Peacock Alley", "Restaurant Spectrum", "Fahrräder zum Ausleihen"] },
-  { id: "h-mle", von: "du", name: "Conrad Maldives Rangali Island", ort: "Rangali", land: "MV", link: "https://www.hilton.com/en/search/?query=Conrad%20Maldives%20Rangali%20Island", bild: null, herzen: 5, herzIch: true,
+  { id: "h-mle", von: "du", name: "Conrad Maldives Rangali Island", ort: "Rangali", land: "MV", link: null, bild: null, herzen: 5, herzIch: true,
     highlights: ["Ithaa: Restaurant fünf Meter unter dem Meer", "Wasservillen über der Lagune", "Zwei Inseln, verbunden durch eine Brücke"] }
 ];
 let hiltonFilter = "alle", hotelBearbeiten = null, hotelOrt = null, hotelBild = null;
@@ -1523,7 +1525,9 @@ async function hiltonLaden() {
   if (!ECHT || familieModus || ECHT_DATEN.profil.art === "familie") return;
   const [h, z] = await Promise.all([SB.from("hilton").select("*"), SB.from("hilton_herz").select("hotel, person")]);
   if (h.error || z.error) return;
-  hotels.splice(0, hotels.length, ...h.data.map(x => ({ id: x.id, von: idVon(x.von), name: x.name, ort: x.ort, land: x.land, lat: x.lat, lon: x.lon, link: x.link, bild: x.bild_url,
+  const fotos = h.data.filter(x => x.foto).map(x => x.foto), urls = {};
+  if (fotos.length) { const r = await SB.storage.from("wunschbilder").createSignedUrls(fotos, 86400); (r.data || []).forEach(x => { if (x.signedUrl) urls[x.path] = x.signedUrl; }); }
+  hotels.splice(0, hotels.length, ...h.data.map(x => ({ id: x.id, von: idVon(x.von), name: x.name, ort: x.ort, land: x.land, lat: x.lat, lon: x.lon, link: x.link, foto: x.foto, bild: urls[x.foto] || x.bild_url,
     highlights: x.highlights || [], herzen: z.data.filter(y => y.hotel === x.id).length, herzIch: z.data.some(y => y.hotel === x.id && y.person === ECHT_DATEN.uid) })).filter(x => person(x.von)));
   if (ideenReiter === "hilton" && document.getElementById("seite-ideen").classList.contains("offen")) hiltonAufbauen();
 }
@@ -1547,7 +1551,7 @@ function hiltonAufbauen() {
         ${h.ort ? `<span class="ort">${ohneHtml(h.ort)}</span>` : ""}
         <div class="geteilt">${p ? ava(p) : ""}<span><b>${eigen ? t("✓ Dein Vorschlag") : ohneHtml(p ? p.name : "")}</b>${eigen ? "" : t("hat das geteilt")}</span></div>
         ${h.highlights.length ? `<ol class="top5">${h.highlights.map(x => `<li>${ohneHtml(x)}</li>`).join("")}</ol>` : ""}
-        <a class="knopf-gross marke-knopf marke-hilton" href="${ohneHtml(h.link)}" target="_blank" rel="noopener">${t("Auf {seite} ansehen", { seite: "hilton.com" })} ↗</a>
+        <a class="knopf-gross marke-knopf marke-hilton" href="${ohneHtml(hiltonAdresse(h))}" target="_blank" rel="noopener">${t("Auf {seite} ansehen", { seite: "hilton.com" })} ↗</a>
         ${eigen || ichAdmin() ? `<div class="aktionen" style="margin-top:8px"><button class="knopf-leise hotel-aendern" data-h="${h.id}" style="flex:1">✏️ ${t("Ändern")}</button><button class="knopf-leise hotel-weg" data-h="${h.id}" aria-label="${t("Löschen")}">🗑</button></div>` : ""}
       </div></div>`;
   }
@@ -1561,17 +1565,21 @@ function hiltonAufbauen() {
   document.querySelectorAll(".hotel-aendern").forEach(b => b.onclick = () => hiltonFormOeffnen(hotel(b)));
   document.querySelectorAll(".hotel-weg").forEach(b => b.onclick = () => fragen(t("Von der Wishlist löschen?"), [[t("Löschen"), async () => {
     const h = hotel(b); if (!h) return;
-    if (ECHT) { const { error } = await SB.from("hilton").delete().eq("id", h.id); if (error) return hinweis(t("Das hat nicht geklappt")); }
+    if (ECHT) { const { error } = await SB.from("hilton").delete().eq("id", h.id); if (error) return hinweis(t("Das hat nicht geklappt")); if (h.foto) SB.storage.from("wunschbilder").remove([h.foto]).catch(() => {}); }
     hotels.splice(hotels.indexOf(h), 1); hiltonAufbauen();
   }, true]]));
 }
+// Ohne Link: Hilton-Suche nach Name und Ort (deutsche Seite für Deutsch, sonst englisch)
+const hiltonAdresse = h => h.link || `https://www.hilton.com/${SPRACHE === "de" ? "de" : "en"}/search/?query=${encodeURIComponent([h.name, h.ort].filter(Boolean).join(" "))}`;
+let hotelFoto = null;
 const HILTON_BEISPIELE = ["z. B. Lage direkt am Strand", "z. B. Executive Lounge mit Dachterrasse", "z. B. Spa mit Pool", "", ""];
 function hiltonFormOeffnen(h) {
-  hotelBearbeiten = h ? h.id : null; hotelBild = h ? h.bild : null;
+  hotelBearbeiten = h ? h.id : null; hotelBild = h ? h.bild : null; hotelFoto = null;
+  document.getElementById("hilton-foto").value = ""; document.getElementById("hilton-foto-text").textContent = t("📷 Foto dazulegen (freiwillig, z. B. Screenshot aus der Hilton-App)");
   hotelOrt = h && (h.ort || h.land) ? { ort: h.ort, land: h.land, lat: h.lat ?? null, lon: h.lon ?? null } : null;
   document.getElementById("hilton-titel").textContent = t(h ? "Hotel ändern" : "Hilton-Hotel teilen");
   document.getElementById("hilton-speichern").textContent = t(h ? "Speichern" : "Teilen");
-  document.getElementById("hilton-link").value = h ? h.link : "";
+  document.getElementById("hilton-link").value = h ? (h.link || "") : "";
   document.getElementById("hilton-name").value = h ? h.name : "";
   document.getElementById("hilton-ort").value = h ? (h.ort || "") : ""; document.getElementById("hilton-orte").innerHTML = "";
   document.getElementById("hilton-punkte").innerHTML = HILTON_BEISPIELE.map((b, k) => `<input maxlength="90" data-k="${k}" placeholder="${ohneHtml(b ? t(b) : (k + 1) + ".")}" value="${ohneHtml(h && h.highlights[k] || "")}" autocomplete="off">`).join("");
@@ -1580,13 +1588,14 @@ function hiltonFormOeffnen(h) {
 }
 function hotelVorschauZeigen(text) {
   const box = document.getElementById("hilton-vorschau");
-  if (!hotelBild && !text) { box.style.display = "none"; return; }
+  if (!hotelBild && !hotelFoto && !text) { box.style.display = "none"; return; }
   box.style.display = "flex";
-  box.innerHTML = `<div class="vb" style="${hotelBild ? `background-image:url('${hotelBild.replace(/'/g, "%27")}')` : ""}"></div><div><b>${ohneHtml(document.getElementById("hilton-name").value || "Hilton")}</b><small>${text || ""}</small></div>`;
+  const bild = hotelFoto ? URL.createObjectURL(hotelFoto) : hotelBild;
+  box.innerHTML = `<div class="vb" style="${bild ? `background-image:url('${bild.replace(/'/g, "%27")}')` : ""}"></div><div><b>${ohneHtml(document.getElementById("hilton-name").value || "Hilton")}</b><small>${text || ""}</small></div>`;
 }
 async function hotelLinkPruefen() {
   const link = linkAus(document.getElementById("hilton-link").value); if (!link) return;
-  if (!ECHT) return hotelVorschauZeigen(t("Im Prototyp ohne Vorschau"));
+  if (!ECHT || hotelFoto) return hotelVorschauZeigen(hotelFoto ? "" : t("Im Prototyp ohne Vorschau"));
   hotelVorschauZeigen(t("Vorschau wird geladen …"));
   let v = null;
   try { const r = await SB.functions.invoke("vorschau", { body: { url: link } }); v = r.data && r.data.ok ? r.data : null; } catch (e) {}
@@ -1596,30 +1605,49 @@ async function hotelLinkPruefen() {
   if (v && v.titel && !name.value.trim()) name.value = v.titel.split(/\s[|–-]\s/)[0].replace(/\s*-\s*Hilton.*$/i, "").trim();
   hotelVorschauZeigen(v ? (v.bild ? t("Bild und Titel übernommen") : t("Kein Bild gefunden")) : t("Keine Vorschau, Name bitte selbst eintragen"));
 }
-document.getElementById("hilton-einfuegen").onclick = async () => {
-  const feld = document.getElementById("hilton-link"), v = await zwischenablageLesen(), link = linkAus(v);
-  if (link) { feld.value = link; return hotelLinkPruefen(); }
-  feld.focus(); hinweis(t("Tippe lange ins Link-Feld und wähle „Einfügen“"));
-};
+document.getElementById("hilton-foto").addEventListener("change", e => {
+  hotelFoto = e.target.files[0] || null;
+  document.getElementById("hilton-foto-text").textContent = hotelFoto ? "📷 " + t("Foto gewählt") : t("📷 Foto dazulegen (freiwillig, z. B. Screenshot aus der Hilton-App)");
+  hotelVorschauZeigen("");
+});
 document.getElementById("hilton-link").addEventListener("input", () => { clearTimeout(hotelLinkPruefen.uhr); hotelLinkPruefen.uhr = setTimeout(hotelLinkPruefen, 500); });
 document.getElementById("hilton-name").addEventListener("input", () => { const b = document.querySelector("#hilton-vorschau b"); if (b) b.textContent = document.getElementById("hilton-name").value || "Hilton"; });
 ortSucheVerbinden(document.getElementById("hilton-ort"), document.getElementById("hilton-orte"), o => { hotelOrt = o; document.getElementById("hilton-ort").value = o.ort; document.getElementById("hilton-orte").innerHTML = ""; });
 document.getElementById("hilton-speichern").onclick = async e => {
-  const link = linkAus(document.getElementById("hilton-link").value), name = document.getElementById("hilton-name").value.trim();
-  if (!link) return hinweis(t("Bitte einen Link einfügen"));
+  const linkRoh = document.getElementById("hilton-link").value.trim(), link = linkAus(linkRoh), name = document.getElementById("hilton-name").value.trim();
   if (!name) return hinweis(t("Bitte den Namen des Hotels eintragen"));
+  if (linkRoh && !link) return hinweis(t("Der Link stimmt nicht. Feld leeren oder einen Link einfügen"));
   const ortText = document.getElementById("hilton-ort").value.trim();
-  if (ortText && (!hotelOrt || hotelOrt.ort !== ortText)) return hinweis(t("Bitte den Ort aus der Liste wählen"));
+  if (!ortText || !hotelOrt || hotelOrt.ort !== ortText) return hinweis(t("Bitte den Ort aus der Liste wählen"));
   const highlights = [...document.querySelectorAll("#hilton-punkte input")].map(f => f.value.trim()).filter(Boolean).slice(0, 5);
-  const daten = { link, name, bild_url: hotelBild || null, ort: ortText ? hotelOrt.ort : null, land: ortText ? hotelOrt.land : null, lat: ortText ? hotelOrt.lat : null, lon: ortText ? hotelOrt.lon : null, highlights };
+  const alt = hotelBearbeiten ? hotels.find(h => h.id === hotelBearbeiten) : null;
+  const daten = { link: link || null, name, bild_url: hotelFoto ? null : (link ? hotelBild || null : null) || (alt && !alt.foto ? alt.bild || null : null), ort: hotelOrt.ort, land: hotelOrt.land, lat: hotelOrt.lat, lon: hotelOrt.lon, highlights };
+  if (ECHT && daten.bild_url && daten.bild_url.includes("/object/sign/")) daten.bild_url = null;
   if (ECHT) {
     beschaeftigt(e.target, true);
-    const { error } = hotelBearbeiten ? await SB.from("hilton").update(daten).eq("id", hotelBearbeiten) : await SB.from("hilton").insert(daten);
+    let foto = null;
+    try {
+      if (hotelFoto) {
+        const b = await createImageBitmap(hotelFoto).catch(() => new Promise((ok, nein) => { const i = new Image(); i.onload = () => ok(i); i.onerror = nein; i.src = URL.createObjectURL(hotelFoto); }));
+        const f = Math.min(1, 1600 / Math.max(b.width, b.height)), cv = document.createElement("canvas");
+        cv.width = Math.round(b.width * f); cv.height = Math.round(b.height * f); cv.getContext("2d").drawImage(b, 0, 0, cv.width, cv.height);
+        const blob = await new Promise(ok => cv.toBlob(ok, "image/jpeg", 0.8));
+        foto = `${ECHT_DATEN.uid}/${crypto.randomUUID()}.jpg`;
+        const up = await SB.storage.from("wunschbilder").upload(foto, blob, { contentType: "image/jpeg" });
+        if (up.error) throw up.error;
+        daten.foto = foto;
+      }
+      const { error } = hotelBearbeiten ? await SB.from("hilton").update(daten).eq("id", hotelBearbeiten) : await SB.from("hilton").insert(daten);
+      if (error) throw error;
+      if (foto && alt && alt.foto) SB.storage.from("wunschbilder").remove([alt.foto]).catch(() => {});
+    } catch (x) {
+      if (foto) SB.storage.from("wunschbilder").remove([foto]).catch(() => {});
+      beschaeftigt(e.target, false); return hinweis(t("Speichern hat nicht geklappt"));
+    }
     beschaeftigt(e.target, false);
-    if (error) return hinweis(t("Speichern hat nicht geklappt"));
     await hiltonLaden();
   } else {
-    const neu = { id: hotelBearbeiten || "h-" + Date.now(), von: "du", herzen: 0, herzIch: false, ...daten, bild: daten.bild_url };
+    const neu = { id: hotelBearbeiten || "h-" + Date.now(), von: "du", herzen: alt ? alt.herzen : 0, herzIch: alt ? alt.herzIch : false, ...daten, bild: hotelFoto ? URL.createObjectURL(hotelFoto) : daten.bild_url };
     const k = hotels.findIndex(h => h.id === neu.id); if (k >= 0) hotels[k] = { ...hotels[k], ...neu }; else hotels.push(neu);
   }
   ideenReiter = "hilton"; hiltonFilter = "alle"; seiteZeigen("ideen"); hinweis(t(hotelBearbeiten ? "Gespeichert" : "Auf der Wishlist geteilt"));
@@ -2571,6 +2599,25 @@ async function feedbackListeAufbauen() {
   });
 }
 
+// Fehler, die in der App passiert sind (automatisch gemeldet): offen oben, „✓ Erledigt“ blendet sie aus
+async function fehlerListeAufbauen() {
+  const box = document.getElementById("fehler-liste");
+  const { data, error } = await SB.from("app_fehler").select("*").eq("erledigt", false).order("zuletzt", { ascending: false }).limit(50);
+  if (error) { box.innerHTML = ""; return; }
+  const name = id => ((mitgliederDaten.find(m => m.id === id) || {}).name) || "?";
+  const zeit = iso => new Date(iso).toLocaleString(LOC, { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+  box.innerHTML = data.length ? data.map(f => `<div class="kasten fb-eintrag fehler-eintrag"><div class="fb-kopf"><span>🐞 ${ohneHtml(name(f.von))}${f.anzahl > 1 ? ` · ${t("{n}× passiert", { n: f.anzahl })}` : ""}</span><span>${zeit(f.zuletzt)}</span></div>
+    <div class="fb-text">${ohneHtml(f.meldung)}</div><small>${ohneHtml([f.stelle, f.version ? versionText(f.version) : "", f.geraet].filter(Boolean).join(" · "))}</small>
+    <div class="aktionen" style="margin-top:8px"><button class="knopf-leise" data-fehler="${f.id}" style="flex:1">✓ ${t("Erledigt")}</button></div></div>`).join("")
+    : `<p class="hinweis-band" style="text-align:left">${t("Keine offenen Fehler.")}</p>`;
+  box.querySelectorAll("[data-fehler]").forEach(b => b.onclick = async () => {
+    b.disabled = true;
+    const { error } = await SB.from("app_fehler").update({ erledigt: true }).eq("id", b.dataset.fehler);
+    if (error) { b.disabled = false; return hinweis(t("Das hat nicht geklappt")); }
+    fehlerListeAufbauen(); verwaltungLaden().catch(() => {});
+  });
+}
+
 // ---------- Neu dabei: kurzer Hinweis, wenn ein Nomade dazugekommen ist ----------
 function neuDabeiPruefen() {
   if (!ECHT || familieModus) return;
@@ -2825,6 +2872,8 @@ function pushZiel(url) {
   const q = new URL(url, location.href).searchParams;
   if (q.get("chat")) { const c = chats.find(x => x.id === q.get("chat")); if (c) gespraechOeffnen(c); else chatsLaden().then(() => { const c2 = chats.find(x => x.id === q.get("chat")); if (c2) gespraechOeffnen(c2); }); }
   if (q.get("ort") === "frage") ortNachfragen(true);
+  if (q.get("wishlist")) { ideenReiter = "unterkunft"; seiteZeigen("ideen"); }
+  if (q.get("verwaltung") && ECHT && ECHT_DATEN.profil && ECHT_DATEN.profil.ist_admin) { seiteZeigen("verwaltung"); verwaltungAufbauen(); }
   if (q.get("rundruf")) try { localStorage.setItem("ahoi-rundruf", Math.max(+q.get("rundruf"), +localStorage.getItem("ahoi-rundruf") || 0)); } catch (e) {}
 }
 if ("serviceWorker" in navigator) navigator.serviceWorker.addEventListener("message", e => { if (e.data && e.data.ziel) pushZiel(e.data.ziel); });
@@ -3122,8 +3171,9 @@ async function verwaltungLaden() {
   const { data, error } = await SB.from("profile").select("id,name,freigegeben,ist_admin,eingeladen_von,erstellt_am,gratis,art").order("erstellt_am");
   if (error) throw error;
   mitgliederDaten = data;
-  const offen = await SB.from("feedback").select("id", { count: "exact", head: true }).eq("erledigt", false);
-  const zahl = data.filter(x => !x.freigegeben).length + (offen.count || 0);
+  const [offen, fehler] = await Promise.all([SB.from("feedback").select("id", { count: "exact", head: true }).eq("erledigt", false),
+    SB.from("app_fehler").select("id", { count: "exact", head: true }).eq("erledigt", false)]);
+  const zahl = data.filter(x => !x.freigegeben).length + (offen.count || 0) + (fehler.count || 0);
   document.getElementById("wartende-zahl").textContent = zahl || "";
   return data;
 }
@@ -3174,7 +3224,7 @@ async function rundrufZeigen() {
 }
 async function verwaltungAufbauen() {
   try { await verwaltungLaden(); } catch (e) { return hinweis(t("Laden hat nicht geklappt")); }
-  feedbackListeAufbauen(); rundrufListe();
+  feedbackListeAufbauen(); fehlerListeAufbauen(); rundrufListe();
   const nameVon = id => (mitgliederDaten.find(x => x.id === id) || {}).name || "?";
   const tag = iso => new Date(iso).toLocaleDateString(LOC, { day: "numeric", month: "short" });
   const wartende = mitgliederDaten.filter(x => !x.freigegeben), mitglieder = mitgliederDaten.filter(x => x.freigegeben);
@@ -3221,7 +3271,7 @@ function echtEinrichten() {
   if (p.art === "familie") return familieEchtStarten();
   familieListeAufbauen(); setTimeout(neuDabeiPruefen, 2500);
   verbindungenLaden().catch(() => {});
-  chatsLaden().then(chatVerbinden).then(() => { if (/[?&](chat|ort|rundruf)=/.test(location.search)) { pushZiel(location.href); history.replaceState(null, "", location.pathname); } }).catch(() => {});
+  chatsLaden().then(chatVerbinden).then(() => { if (/[?&](chat|ort|rundruf|wishlist|verwaltung)=/.test(location.search)) { pushZiel(location.href); history.replaceState(null, "", location.pathname); } }).catch(() => {});
   setTimeout(pushPruefen, 1500); setTimeout(rundrufZeigen, 6000);
   // Vorschau „So sieht sie es“: die Familie sieht nur dich
   document.getElementById("familie-start").onclick = () => { FAMILIE_SIEHT = ["du"]; document.getElementById("fam-kopf").textContent = t("So sieht deine Familie dich"); document.getElementById("familie-ende").textContent = t("Zurück"); familieSetzen(true); };

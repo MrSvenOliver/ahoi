@@ -1045,6 +1045,42 @@
   .hotel .top5 { margin: 10px 0 4px; padding: 0; list-style: none; counter-reset: top; }
   .hotel .top5 li { counter-increment: top; display: flex; gap: 10px; align-items: baseline; padding: 4px 0; font-size: 14px; line-height: 1.35; }
   .hotel .top5 li::before { content: counter(top); flex: none; width: 20px; height: 20px; border-radius: 50%; background: var(--trenner); font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; }
+  .fehler-eintrag .fb-text { font-family: ui-monospace, Menlo, monospace; font-size: 13px; word-break: break-word; }
+  .fehler-eintrag small { display: block; color: var(--text-leise); margin-top: 6px; word-break: break-word; }
+  /* Wishlist kompakt: Bild klein links, Zahlen in einer Zeile, Knöpfe in zwei Reihen (eine Unterkunft ≈ ein Drittel des Bildschirms) */
+  .idee.kompakt .idee-kopf { display: flex; gap: 12px; padding: 12px 12px 0; align-items: flex-start; }
+  .idee.kompakt .idee-kopf .bild { width: 92px; height: 92px; flex: none; border-radius: 14px; font-size: 26px; }
+  .idee.kompakt .idee-kopf .bild .gebucht { left: auto; top: auto; right: 6px; bottom: 6px; transform: none; padding: 2px 5px; font-size: 13px; border-radius: 8px; }
+  .idee.kompakt .kopf-text { flex: 1; min-width: 0; }
+  .idee.kompakt .titel-zeile { display: flex; gap: 8px; align-items: flex-start; }
+  .idee.kompakt .titel-zeile b { flex: 1; min-width: 0; font-size: 15px; line-height: 1.25; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .idee.kompakt .titel-zeile .herzen { flex: none; background: var(--trenner); border-radius: 10px; padding: 2px 7px; font-size: 12px; font-weight: 700; color: #c0582f; border: 0; cursor: pointer; }
+  .idee.kompakt .ort, .idee.kompakt .extra { display: block; font-size: 12.5px; color: var(--text-leise); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .idee.kompakt .geteilt { margin: 6px 0 0; gap: 7px; font-size: 12.5px; }
+  .idee.kompakt .geteilt .klein-ava { width: 22px; height: 22px; font-size: 9px; }
+  .idee.kompakt .geteilt b { display: inline; font-size: 12.5px !important; margin-right: 4px; }
+  .idee.kompakt .geteilt span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+  .idee.kompakt .inhalt { padding: 10px 12px 12px; }
+  .idee.kompakt .zahlen { display: flex !important; flex-wrap: wrap; gap: 6px; margin: 0 0 8px; }
+  .idee.kompakt .zahlen div { flex: none; padding: 4px 9px; border-radius: 10px; display: flex; gap: 5px; align-items: baseline; }
+  .idee.kompakt .zahlen b { display: inline; font-size: 13px; }
+  .idee.kompakt .zahlen small { font-size: 11.5px; }
+  .idee.kompakt .rechner { margin: 0 0 8px; font-size: 12.5px; }
+  .idee.kompakt .rechner b { font-size: 12.5px; }
+  .idee.kompakt .dabei-leiste { display: flex; align-items: center; margin-bottom: 8px; }
+  .idee.kompakt .dabei-gesichter { margin-bottom: 0; }
+  .idee.kompakt .dabei-gesichter .klein-ava { width: 24px; height: 24px; font-size: 9px; }
+  .idee.kompakt .dabei-leiste:not(:has(.klein-ava)):not(:has(.dabei-zahl)) { display: none; }
+  .idee.kompakt .aktionen { gap: 6px; }
+  .idee.kompakt .aktionen .knopf-gross, .idee.kompakt .aktionen .knopf-leise { padding: 9px 12px; font-size: 13.5px; }
+  .idee.kompakt .aktionen.zweite { margin-top: 6px; }
+  .idee.kompakt .aktionen .marke-knopf { flex: 1; width: auto; margin-top: 0; min-width: 0; white-space: nowrap; }
+  .idee.kompakt .aktionen .uebersicht-knopf { display: inline-block; width: auto; margin-top: 0; flex: none; }
+  .idee.kompakt .aktionen.zweite > * { flex: 1 1 0; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-left: 8px; padding-right: 8px; }
+  .idee.kompakt .aktionen.zweite > .bearbeiten-knopf, .idee.kompakt .aktionen.zweite > .idee-weg { flex: none; }
+  [data-stil="mission"] .idee.kompakt .aktionen.zweite > * { letter-spacing: 0.04em; font-size: 12px; }
+  .idee.kompakt .dabei-zahl { margin-left: 14px; font-size: 12.5px; }
+  [data-stil="mission"] .idee.kompakt .idee-kopf .bild, [data-stil="mission"] .idee.kompakt .titel-zeile .herzen { border-radius: 2px; }
   .hilton-einfuegen { background: #002f61 !important; color: #fff !important; }
   .marke-hilton { background: #002f61 !important; box-shadow: 0 6px 16px rgba(0, 47, 97, .25); }
   [data-stil="mission"] .hotel .top5 li::before { border-radius: 2px; }
@@ -1266,20 +1302,16 @@
 <!-- Hilton-Hotel teilen -->
 <section class="seite" id="seite-hilton-neu">
   <div class="seite-kopf"><h1 id="hilton-titel">Hilton-Hotel teilen</h1><button class="knopf-leise" data-zurueck="ideen">Abbrechen</button></div>
-  <div class="kasten schritte">
-    <div><span>1</span>Hotel auf hilton.com oder in der Hilton-App öffnen</div>
-    <div><span>2</span><b>Teilen ⬆︎</b> → <b>Link kopieren</b></div>
-    <div><span>3</span>Hier auf den großen Knopf tippen</div>
-  </div>
-  <button class="knopf-riesig hilton-einfuegen" id="hilton-einfuegen">📋 Link einfügen</button>
+  <p class="hinweis-band" style="text-align:left;margin-top:0">Name und Ort reichen. Ohne Link sucht der Knopf das Hotel auf hilton.com.</p>
   <div class="kasten idee-vorschau" id="hilton-vorschau" style="display:none"></div>
   <div class="kasten formular">
-    <label>Link<input id="hilton-link" placeholder="https://www.hilton.com/…" inputmode="url" autocomplete="off"></label>
     <label>Name des Hotels<input id="hilton-name" maxlength="120" placeholder="z. B. Waldorf Astoria Amsterdam" autocomplete="off"></label>
     <label>Wo ist das?<input id="hilton-ort" placeholder="Stadt suchen" autocomplete="off"></label>
     <div class="ort-treffer" id="hilton-orte"></div>
+    <label class="foto-wahl"><span id="hilton-foto-text">📷 Foto dazulegen (freiwillig, z. B. Screenshot aus der Hilton-App)</span><input type="file" id="hilton-foto" accept="image/*" hidden></label>
     <span class="einst-unter" style="margin-top:6px">Top 5 (freiwillig)</span>
     <div id="hilton-punkte"></div>
+    <label style="margin-top:10px">Link (freiwillig)<input id="hilton-link" placeholder="https://www.hilton.com/…" inputmode="url" autocomplete="off"></label>
   </div>
   <button class="knopf-gross" style="width:100%" id="hilton-speichern">Teilen</button>
 </section>
@@ -1461,6 +1493,8 @@
     <p class="hinweis-band" style="margin:8px 0 0;text-align:left">Die erste Zeile ist die Überschrift. Ohne Datum geht sie sofort raus. Wer Push aus hat, sieht sie beim nächsten Öffnen von Ahoi.</p>
     <div id="rundruf-liste"></div>
   </div>
+  <h2>Fehler in der App</h2>
+  <div id="fehler-liste"></div>
   <h2>Feedback</h2>
   <div id="feedback-liste"></div>
   <p class="hinweis-band">Passwort vergessen? Neues Startpasswort setzen und der Person sagen. Sie kann es danach im Profil ändern.</p>

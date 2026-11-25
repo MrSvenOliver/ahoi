@@ -906,4 +906,12 @@ const TEXTE = {
   "+ Hotel": ["+ Hotel", "+ Hotel"],
   "Link": ["Link", "Odkaz"],
   "🏨 Wishlist hat jetzt „Hilton“: Hotels, die ihr liebt, mit den Top 5, sortiert nach Ländern. Ohne Daten, nur zur Inspiration. Teilen mit „+ Hotel“.": ["🏨 The Wishlist now has “Hilton”: hotels you love with their top 5, sorted by country. No dates, just inspiration. Share with “+ Hotel”.", "🏨 Wishlist má teraz „Hilton“: hotely, ktoré milujete, s top 5, podľa krajín. Bez dátumov, len inšpirácia. Zdieľaj cez „+ Hotel“."],
+  "Fehler in der App": ["Errors in the app", "Chyby v aplikácii"],
+  "{n}× passiert": ["happened {n}×", "stalo sa {n}×"],
+  "Keine offenen Fehler.": ["No open errors.", "Žiadne otvorené chyby."],
+  "📷 Foto dazulegen (freiwillig, z. B. Screenshot aus der Hilton-App)": ["📷 Add a photo (optional, e.g. a screenshot from the Hilton app)", "📷 Pridať fotku (nepovinné, napr. snímka z aplikácie Hilton)"],
+  "Foto gewählt": ["Photo selected", "Fotka vybraná"],
+  "Der Link stimmt nicht. Feld leeren oder einen Link einfügen": ["The link isn't valid. Clear the field or paste a link", "Odkaz nie je platný. Vymaž pole alebo vlož odkaz"],
+  "Name und Ort reichen. Ohne Link sucht der Knopf das Hotel auf hilton.com.": ["Name and place are enough. Without a link, the button searches for the hotel on hilton.com.", "Stačí názov a miesto. Bez odkazu tlačidlo vyhľadá hotel na hilton.com."],
+  "Link (freiwillig)": ["Link (optional)", "Odkaz (nepovinné)"],
 };

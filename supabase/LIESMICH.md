@@ -35,6 +35,7 @@
 - `21-wishlist-zimmer.sql`: Wer dabei ist, gibt Personen und Schlafzimmer an (`wunsch_dabei.personen/zimmer`, `wunsch.ersteller_personen/zimmer`); Plätze zählen Personen; danach die Edge Function „push“ neu veröffentlichen
 - `22-wishlist-begleitung.sql`: Begleitung bei Zusagen (`begleitung`, `ersteller_begleitung`: Ahoi-Mitglied voll dabei mit Reise und Chat, oder Gast mit Namen); Reise für die Person, die teilt, gleich beim Anlegen
 - `23-hilton.sql`: Wishlist-Reiter „Hilton“ (Tabellen `hilton` und `hilton_herz`): alle Mitglieder teilen Hilton-Hotels mit bis zu 5 Highlights, ohne Daten; ändern/löschen nur, wer geteilt hat, oder Admin
+- `24-fehler-mitgenommen.sql`: Fehler aus der App (`app_fehler`, nur über `fehler_melden`, lesen nur Admin), Push „nimmt dich mit“ für Begleitung, Hilton ohne Pflicht-Link und mit eigenem Foto (`hilton.foto`); danach die Edge Function „push“ neu veröffentlichen
 - `functions/vorschau/index.ts`: Edge Function „vorschau“ (Titel und Bild eines geteilten Links; „Verify JWT“ an, nur für angemeldete Mitglieder)
 - `functions/push/index.ts`: Edge Function „push“ (im Dashboard unter Edge Functions angelegt; „Verify JWT“ aus, weil die Datenbank sie ohne Anmeldung aufruft; sie erzeugt ihre Push-Schlüssel selbst)
 

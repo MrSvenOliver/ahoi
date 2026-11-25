@@ -16,33 +16,36 @@ const APP = "https://mrsvenoliver.github.io/ahoi/";
 const TEXTE: Record<string, Record<string, string>> = {
   de: {
     noch: "📍 Noch in {ort}?", nochText: "Kurz tippen zum Bestätigen", plan: "📍 Jetzt in {ort}?", planText: "So steht es in deinem Reiseplan",
-    wunschNeu: "🏡 {name} teilt eine Unterkunft", wunschDabei: "🙋 {name} ist dabei", dabeiText: "{ort} · {n} dabei",
+    wunschNeu: "🏡 {name} teilt eine Unterkunft", wunschDabei: "🙋 {name} ist dabei", dabeiText: "{ort} · {n} dabei", wunschMit: "🏡 {name} nimmt dich mit", mitText: "{ort} · steht in deinen Reisen",
     wunschGebucht: "✅ Gebucht: {ort}", gebuchtText: "{zeit} · steht in deinen Reisen", wunschPreis: "💶 Preis für {ort}", preisText: "{pp} € pro Person · {n} dabei", preisZimmerText: "{pp} € pro Zimmer · {n} dabei",
     wunschZeit: "📅 Neue Daten: {ort}", zeitText: "{zeit} · {naechte}", nacht: "1 Nacht", naechte: "{n} Nächte",
     reise: "✈️ {name} reist nach {ort}", treffer: "📍 {name} am selben Ort", kommt: "📍 {name} am selben Ort", kommtText: "{zeit} · du bist gerade dort",
     naehe: "🧭 {name} in der Nähe", naeheText: "{ort} · {km} km von dir", naeheGleich: "{ort} · am selben Ort",
     neu: "👋 {name} ist neu bei Ahoi", neuText: "Gerade in {ort}", neuHallo: "Sag Hallo im Chat",
     anfrage: "🤝 {name} möchte sich verbinden", anfrageText: "Kurz tippen zum Bestätigen",
+    fehler: "🐞 Fehler in Ahoi",
   },
   en: {
     noch: "📍 Still in {ort}?", nochText: "Tap to confirm", plan: "📍 In {ort} now?", planText: "That's what your travel plan says",
-    wunschNeu: "🏡 {name} shared a place", wunschDabei: "🙋 {name} is in", dabeiText: "{ort} · {n} going",
+    wunschNeu: "🏡 {name} shared a place", wunschDabei: "🙋 {name} is in", dabeiText: "{ort} · {n} going", wunschMit: "🏡 {name} is taking you along", mitText: "{ort} · now in your trips",
     wunschGebucht: "✅ Booked: {ort}", gebuchtText: "{zeit} · now in your trips", wunschPreis: "💶 Price for {ort}", preisText: "{pp} € per person · {n} going", preisZimmerText: "{pp} € per room · {n} going",
     wunschZeit: "📅 New dates: {ort}", zeitText: "{zeit} · {naechte}", nacht: "1 night", naechte: "{n} nights",
     reise: "✈️ {name} is going to {ort}", treffer: "📍 {name} in the same place", kommt: "📍 {name} in the same place", kommtText: "{zeit} · you're there now",
     naehe: "🧭 {name} nearby", naeheText: "{ort} · {km} km away", naeheGleich: "{ort} · same place",
     neu: "👋 {name} joined Ahoi", neuText: "Now in {ort}", neuHallo: "Say hello in the chat",
     anfrage: "🤝 {name} wants to connect", anfrageText: "Tap to confirm",
+    fehler: "🐞 Error in Ahoi",
   },
   sk: {
     noch: "📍 Stále v {ort}?", nochText: "Ťukni a potvrď", plan: "📍 Teraz v {ort}?", planText: "Tak to stojí v tvojom pláne ciest",
-    wunschNeu: "🏡 {name} zdieľa ubytovanie", wunschDabei: "🙋 {name} ide tiež", dabeiText: "{ort} · prihlásení: {n}",
+    wunschNeu: "🏡 {name} zdieľa ubytovanie", wunschDabei: "🙋 {name} ide tiež", dabeiText: "{ort} · prihlásení: {n}", wunschMit: "🏡 {name} ťa berie so sebou", mitText: "{ort} · už je v tvojich cestách",
     wunschGebucht: "✅ Rezervované: {ort}", gebuchtText: "{zeit} · už je v tvojich cestách", wunschPreis: "💶 Cena za {ort}", preisText: "{pp} € na osobu · prihlásení: {n}", preisZimmerText: "{pp} € za izbu · prihlásení: {n}",
     wunschZeit: "📅 Nové dátumy: {ort}", zeitText: "{zeit} · {naechte}", nacht: "1 noc", naechte: "{n} nocí", naechte24: "{n} noci",
     reise: "✈️ {name} cestuje do {ort}", treffer: "📍 {name} na rovnakom mieste", kommt: "📍 {name} na rovnakom mieste", kommtText: "{zeit} · si práve tam",
     naehe: "🧭 {name} je nablízku", naeheText: "{ort} · {km} km od teba", naeheGleich: "{ort} · na rovnakom mieste",
     neu: "👋 {name} je teraz v Ahoi", neuText: "Práve v {ort}", neuHallo: "Pozdrav v chate",
     anfrage: "🤝 {name} sa chce spojiť", anfrageText: "Ťukni a potvrď",
+    fehler: "🐞 Chyba v Ahoi",
   },
 };
 const ORT_LOC: Record<string, string> = { de: "de-DE", en: "en-GB", sk: "sk-SK" };
@@ -149,6 +152,28 @@ async function chatNachricht(id: number) {
 }
 
 // ---------- Wishlist ----------
+// Als Begleitung mitgenommen: nur, wenn die Person dort wirklich als Begleitung steht; jede Person einmal pro Unterkunft
+async function wunschMit(wunschId: string, wer: string, an: string) {
+  const [w] = await sql`select x.id, x.ort, x.anreise, x.abreise from public.wunsch x where x.id = ${wunschId} and (
+      (x.von = ${wer} and x.ersteller_dabei and ${an}::uuid in (select public.begleitung_ids(x.ersteller_begleitung)))
+      or ${an}::uuid in (select public.begleitung_ids(d.begleitung) from public.wunsch_dabei d where d.wunsch = x.id and d.person = ${wer}))`;
+  if (!w || !(await erstesMal(`wunsch_mit:${w.id}:${an}`))) return 0;
+  const ziel = await sql`select id from public.profile where id = ${an} and push_wunsch_update`;
+  const name = await nameVon(wer);
+  return verschicken(ziel.map((x) => x.id), (s) => ({ title: text(s, "wunschMit", { name }),
+    body: w.anreise && w.abreise ? `${w.ort} · ${zeitraum(w.anreise, w.abreise, s)}` : text(s, "mitText", w.ort), url: `${APP}?wishlist=1`, tag: `wunsch-${w.id}` }));
+}
+
+// ---------- Fehler aus der App: neue Meldung an den Admin ----------
+async function fehlerEreignis(id: string) {
+  const [f] = await sql`select f.id, f.meldung, f.von from public.app_fehler f where f.id = ${id} and f.anzahl = 1 and not f.erledigt`;
+  if (!f || !(await erstesMal(`fehler:${f.id}`))) return 0;
+  const admins = await sql`select id from public.profile where ist_admin`;
+  const name = f.von ? await nameVon(f.von) : "?";
+  const kurz = String(f.meldung).replace(/\s+/g, " ").slice(0, 90);
+  return verschicken(admins.map((x) => x.id), (s) => ({ title: text(s, "fehler"), body: `${name} · ${kurz}`, url: `${APP}?verwaltung=1`, tag: `fehler-${f.id}` }));
+}
+
 async function wunschEreignis(art: string, wunschId: string, wer: string | null) {
   const [w] = await sql`select id, von, ort, preis, gebucht, anreise, abreise, ersteller_dabei, ersteller_personen, ersteller_zimmer from public.wunsch where id = ${wunschId}`;
   if (!w) return 0;
@@ -309,6 +334,8 @@ Deno.serve(async (req) => {
     else if (b.rundruf) raus = await rundrufe();
     else if (b.warten) raus = await wartendeSenden();
     else if (["wunsch_neu", "wunsch_dabei", "wunsch_gebucht", "wunsch_preis", "wunsch_zeit"].includes(b.ereignis) && uuid(b.wunsch)) raus = await wunschEreignis(b.ereignis, b.wunsch, uuid(b.wer));
+    else if (b.ereignis === "wunsch_mit" && uuid(b.wunsch) && uuid(b.wer) && uuid(b.an)) raus = await wunschMit(b.wunsch, b.wer, b.an);
+    else if (b.ereignis === "fehler" && uuid(b.fehler)) raus = await fehlerEreignis(b.fehler);
     else if (b.ereignis === "reise" && uuid(b.reise)) raus = await reiseEreignis(b.reise);
     else if (b.ereignis === "ort" && uuid(b.person)) raus = await ortEreignis(b.person);
     else if (b.ereignis === "neu_dabei" && uuid(b.person)) raus = await neuDabei(b.person);

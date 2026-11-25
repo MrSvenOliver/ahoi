@@ -9,7 +9,19 @@ function skriptLaden(src) {
 }
 // Stand der Veröffentlichung: hängt an jeder Datei, damit das iPhone nie alte und neue Dateien mischt
 const STAND = "__VERSION__";
-function appLaden() { return skriptLaden("app.js?v=" + STAND); }
+function appLaden() { return skriptLaden("app.js?v=" + STAND).then(() => { fehlerSenden(); }); }
+// Gesammelte Fehler an Sven (Verwaltung → „Fehler in der App“); nur echte App, nur angemeldet
+async function fehlerSenden() {
+  if (!ECHT || !SB || !ECHT_DATEN || !ECHT_DATEN.uid || fehlerSenden.laeuft) return;
+  fehlerSenden.laeuft = true;
+  const geraet = `${document.documentElement.dataset.stil} · ${SPRACHE} · ${navigator.userAgent.replace(/^Mozilla\/5\.0 /, "").slice(0, 150)}`;
+  for (const f of APP_FEHLER.filter(x => !x.raus)) {
+    f.raus = true;
+    try { await SB.rpc("fehler_melden", { m_text: f.meldung, m_stelle: f.stelle || null, m_version: STAND, m_geraet: geraet }); } catch (e) {}
+  }
+  fehlerSenden.laeuft = false;
+  if (APP_FEHLER.some(x => !x.raus)) fehlerSenden();
+}
 
 // ---------- Zugangs-Bildschirme ----------
 const zugang = () => document.getElementById("zugang");
@@ -201,6 +213,8 @@ function ersterStart() {
 
 async function echtStarten() {
   document.getElementById("start").classList.remove("weg");
+  // app.js schon parallel holen, während Supabase lädt und die Anmeldung geprüft wird
+  const vorab = document.createElement("link"); vorab.rel = "preload"; vorab.as = "script"; vorab.href = "app.js?v=" + STAND; document.head.appendChild(vorab);
   try { await skriptLaden("supabase.js?v=" + STAND); } catch (e) { zeige("anmelden"); return fehlerZeigen("anmelden", t("Keine Verbindung. Bitte Internet prüfen.")); }
   SB = supabase.createClient(SB_URL, SB_KEY, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: false, storageKey: "ahoi-anmeldung" } });
   ECHT_DATEN = { uid: null, profil: null, leute: [] };
