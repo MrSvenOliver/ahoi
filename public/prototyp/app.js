@@ -1173,7 +1173,7 @@ tipps.forEach(x => x.ort = t(x.ort));
 // „Preis ansehen“: öffnet die Unterkunft mit Zeitraum und Personenzahl; aktueller Preis und Verfügbarkeit kommen immer von der Seite selbst.
 // Im Prototyp gibt es keine echten Inserat-Links, deshalb die Suche am Ort.
 function ansehenLink(i) {
-  const leuteZahl = Math.max(1, (i.vonDabei === false ? 0 : 1) + i.dabei.length);
+  const leuteZahl = Math.max(1, [...(i.vonDabei === false ? [] : [i.von]), ...i.dabei].reduce((n, id) => n + anteil(i, id).p, 0));
   if (i.echt && !/airbnb\./i.test(i.link)) return i.link;
   if (i.quelle === "booking.com") { const u = new URL("https://www.booking.com/searchresults.html"); u.searchParams.set("ss", i.ort); u.searchParams.set("group_adults", leuteZahl); if (i.anreise) { u.searchParams.set("checkin", i.anreise); u.searchParams.set("checkout", i.abreise); } return u.href; }
   const echt = !!i.link, u = new URL(i.link || `https://www.airbnb.de/s/${encodeURIComponent(i.ort)}/homes`);
@@ -1221,6 +1221,8 @@ function tippsAufbauen() {
 }
 // Ortstipps sind vorerst ausgeblendet (Entscheidung 24.11.2026); Daten und Code bleiben für später
 const TIPPS_AN = false;
+// Wer wie viele Personen und Schlafzimmer belegt (Standard: 1 und 1)
+const anteil = (i, id) => (i.anteile && i.anteile[id]) || { p: 1, z: 1 };
 function ideenAufbauen() {
   if (!TIPPS_AN) ideenReiter = "unterkunft";
   document.getElementById("ideen-reiter").hidden = !TIPPS_AN;
@@ -1236,8 +1238,11 @@ function ideenAufbauen() {
     if (ideenFilter !== "alle" && i.land !== ideenFilter) return "";
     if (i.abreise && i.abreise < new Date().toISOString().slice(0, 10)) return "";
     const eigen = i.von === "du", vonDabei = i.vonDabei !== false, ichDabei = eigen ? vonDabei : i.dabei.includes("du");
-    const wer = [...(vonDabei ? [i.von] : []), ...i.dabei], belegt = wer.length, frei = i.plaetze ? Math.max(0, i.plaetze - belegt) : 99;
-    const proPerson = Math.round(i.preis / Math.max(1, belegt));
+    const wer = [...(vonDabei ? [i.von] : []), ...i.dabei], belegt = wer.reduce((n, id) => n + anteil(i, id).p, 0), frei = i.plaetze ? Math.max(0, i.plaetze - belegt) : 99;
+    // Preis: pro Person; belegt jemand mehr oder weniger Zimmer als Personen, wird pro Zimmer geteilt
+    const zimmerBelegt = wer.reduce((n, id) => n + anteil(i, id).z, 0), nachZimmer = wer.some(id => anteil(i, id).p !== anteil(i, id).z);
+    const proPerson = Math.round(i.preis / Math.max(1, belegt)), proZimmer = Math.round(i.preis / Math.max(1, zimmerBelegt));
+    const meinAnteil = ichDabei && i.preis ? Math.round(nachZimmer ? i.preis * anteil(i, "du").z / Math.max(1, zimmerBelegt) : i.preis * anteil(i, "du").p / Math.max(1, belegt)) : 0;
     // Airbnb und Booking: deutlicher Knopf in der Farbe der Seite, öffnet die Unterkunft mit euren Daten
     const quelle = `${i.quelle || ""} ${i.link || ""}`, marke = /airbnb|abnb\.me/i.test(quelle) ? ["airbnb", "Airbnb"] : /booking/i.test(quelle) ? ["booking", "Booking.com"] : null;
     // Echte Einträge: Titel aus der Vorschau, z. B. „Wohnung in Lissabon · ★4,9 · 2 Schlafzimmer“
@@ -1261,8 +1266,8 @@ function ideenAufbauen() {
         ${kz && kz.rest ? `<span class="extra">${ohneHtml(kz.rest)}</span>` : ""}
         <div class="geteilt">${ava(person(i.von))}<span><b>${eigen ? t("✓ Dein Vorschlag") : person(i.von).name}</b>${i.notiz ? "„" + ohneHtml(i.notiz) + "“" : eigen ? "" : t("hat das geteilt")}</span></div>
         ${zahlen}
-        ${i.preis ? `<div class="rechner">💶 ${i.preis.toLocaleString(LOC)} € ${t("gesamt")}${belegt ? ` · <b>${t("{n} € pro Person", { n: proPerson.toLocaleString(LOC) })}</b> ${t("bei {n}", { n: belegt })}` : ""}</div>` : ""}
-        <div class="dabei-leiste"><div class="dabei-gesichter">${wer.map(id => ava(person(id))).join("")}</div></div>
+        ${i.preis ? `<div class="rechner">💶 ${i.preis.toLocaleString(LOC)} € ${t("gesamt")}${belegt ? (nachZimmer ? ` · <b>${t("{n} € pro Zimmer", { n: proZimmer.toLocaleString(LOC) })}</b>` : ` · <b>${t("{n} € pro Person", { n: proPerson.toLocaleString(LOC) })}</b> ${t("bei {n}", { n: belegt })}`) : ""}${meinAnteil && (nachZimmer || anteil(i, "du").p > 1) ? ` · ${t("du: {n} €", { n: meinAnteil.toLocaleString(LOC) })}` : ""}</div>` : ""}
+        <div class="dabei-leiste"><div class="dabei-gesichter">${wer.map(id => ava(person(id))).join("")}</div>${belegt !== wer.length || nachZimmer ? `<span class="dabei-zahl">👤 ${belegt} · 🛏 ${zimmerBelegt}</span>` : ""}</div>
         <div class="aktionen">
           ${i.gebucht ? `<button class="knopf-gross ist-dabei" disabled style="opacity:1">${t("✅ Gebucht · steht in Reisen")}</button>` : i.echt && eigen && !i.eigenWahl ? `<button class="knopf-gross ist-dabei" disabled style="opacity:1">${t("✓ Du bist dabei")}</button>` : `<button class="knopf-gross dabei-knopf ${ichDabei ? "ist-dabei" : ""}" data-n="${n}" ${!frei && !ichDabei ? "disabled" : ""}>${t(ichDabei ? "✓ Du bist dabei" : frei ? "🙋 Ich wäre dabei" : "Leider voll")}</button>`}
           ${chatKnopf}
@@ -1270,7 +1275,7 @@ function ideenAufbauen() {
         ${marke ? `<a class="knopf-gross marke-knopf marke-${marke[0]}" href="${ohneHtml(ansehenLink(i))}" target="_blank" rel="noopener">${t("Auf {seite} ansehen", { seite: marke[1] })} ↗</a>` : ""}
         <div class="aktionen" style="margin-top:8px">
           ${marke ? "" : `<a class="knopf-leise" href="${ohneHtml(ansehenLink(i))}" target="_blank" rel="noopener" style="text-decoration:none;flex:1;text-align:center">${t(i.anreise ? "Preis ansehen ↗" : "Ansehen ↗")}</a>`}
-          ${(ichDabei || eigen) && !i.gebucht && (!i.echt || i.anreise) ? `<button class="knopf-leise gebucht-knopf" data-n="${n}" style="flex:1">${t("✓ Gebucht")}</button>` : ""}
+          ${(ichDabei || eigen) && !i.gebucht && (!i.echt || i.anreise) ? `<button class="knopf-leise gebucht-knopf" data-n="${n}" style="flex:1">${t("Als gebucht markieren")}</button>` : ""}
           ${i.echt && eigen ? `<button class="knopf-leise bearbeiten-knopf" data-n="${n}">✏️ ${t("Ändern")}</button><button class="knopf-leise idee-weg" data-n="${n}" aria-label="${t("Löschen")}">🗑</button>` : ""}
         </div>
       </div></div>`;
@@ -1278,9 +1283,12 @@ function ideenAufbauen() {
   if (ECHT) return wishlistKnoepfe();
   document.querySelectorAll(".herzen").forEach(b => b.onclick = () => { ideen[b.dataset.n].herzen++; ideenAufbauen(); });
   document.querySelectorAll(".dabei-knopf").forEach(b => b.onclick = () => {
-    const i = ideen[b.dataset.n], k = i.dabei.indexOf("du"), eigen = i.von === "du", ja = eigen ? i.vonDabei === false : k < 0;
+    const i = ideen[b.dataset.n], k = i.dabei.indexOf("du"), eigen = i.von === "du", schonDabei = eigen ? i.vonDabei !== false : k >= 0;
+    let ja = !schonDabei;
     const meine = () => reisen.findIndex(r => r.wunsch === i.id && r.wer.includes("du"));
-    const fertig = reiseWeg => {
+    const fertig = (reiseWeg, werte) => {
+      if (werte) { i.anteile = i.anteile || {}; i.anteile.du = werte; }
+      if (ja && schonDabei) { ideenAufbauen(); return hinweis(t("Gespeichert")); }
       if (eigen) i.vonDabei = ja;
       else if (ja) { i.dabei.push("du"); ideeGruppe(i, true); } else { i.dabei.splice(i.dabei.indexOf("du"), 1); ideeGruppe(i, false); }
       const r = meine();
@@ -1290,8 +1298,12 @@ function ideenAufbauen() {
       hinweis(ja ? (i.anreise ? t("Du bist dabei · steht auch in deinen Reisen") : eigen ? t("Du bist dabei") : t("{name} wird benachrichtigt · Gruppe im Chat", { name: person(i.von).name }))
         : reiseWeg ? t("Du bist nicht mehr dabei · auch aus Reisen entfernt") : t("Du bist nicht mehr dabei"));
     };
-    if (!ja && meine() >= 0) return fragen(t("Du bist nicht mehr dabei. Auch aus deinen Reisen nehmen?"), [[t("Ja, aus Reisen nehmen"), () => fertig(true), true], [t("Nein, Reise behalten"), () => fertig(false)]]);
-    fertig(false);
+    const austreten = () => {
+      ja = false;
+      if (meine() >= 0) return fragen(t("Du bist nicht mehr dabei. Auch aus deinen Reisen nehmen?"), [[t("Ja, aus Reisen nehmen"), () => fertig(true), true], [t("Nein, Reise behalten"), () => fertig(false)]]);
+      fertig(false);
+    };
+    dabeiBlatt(i, schonDabei, w => { ja = true; fertig(false, w); }, austreten);
   });
   document.querySelectorAll(".gebucht-knopf").forEach(b => b.onclick = () => gebuchtMelden(ideen[b.dataset.n]));
 }
@@ -1400,7 +1412,7 @@ document.getElementById("idee-foto").addEventListener("change", e => {
 function ideeFormularLeeren() {
   ["idee-link", "idee-ort", "idee-notiz", "idee-an", "idee-ab", "idee-preis"].forEach(id => document.getElementById(id).value = "");
   document.getElementById("idee-vorschau").style.display = "none"; document.getElementById("idee-orte").innerHTML = "";
-  ideeVorschau = null; ideeOrt = null; ideeFoto = null; plaetze = null; plaetzeZeigen();
+  ideeVorschau = null; ideeOrt = null; ideeFoto = null; plaetze = null; plaetzeZeigen(); ichDabeiMit.p = 1; ichDabeiMit.z = 1; ichDabeiZeigen();
   document.getElementById("idee-foto").value = ""; document.getElementById("idee-foto-text").textContent = t("📷 Eigenes Foto dazulegen (freiwillig)");
 }
 async function wunschSpeichern(knopf) {
@@ -1424,7 +1436,7 @@ async function wunschSpeichern(knopf) {
       if (up.error) throw up.error;
     }
     const { error } = await SB.from("wunsch").insert({ link, titel: ideeVorschau && ideeVorschau.titel || null, bild_url: ideeVorschau && ideeVorschau.bild || null, gaeste: ideeVorschau && ideeVorschau.gaeste || null, foto, quelle: quelleVon(link),
-      ort: ideeOrt.ort, land: ideeOrt.land, lat: ideeOrt.lat, lon: ideeOrt.lon, anreise: an, abreise: ab, preis, plaetze, notiz: document.getElementById("idee-notiz").value.trim() || null });
+      ort: ideeOrt.ort, land: ideeOrt.land, lat: ideeOrt.lat, lon: ideeOrt.lon, anreise: an, abreise: ab, preis, plaetze, ersteller_personen: ichDabeiMit.p, ersteller_zimmer: ichDabeiMit.z, notiz: document.getElementById("idee-notiz").value.trim() || null });
     if (error) { if (foto) SB.storage.from("wunschbilder").remove([foto]).catch(() => {}); throw error; }
     ideeFormularLeeren(); ideenReiter = "unterkunft"; seiteZeigen("ideen"); await wishlistLaden(); hinweis(t("Auf der Wishlist geteilt"));
   } catch (e) { hinweis(t("Teilen hat nicht geklappt")); }
@@ -1439,6 +1451,33 @@ document.querySelectorAll("#sicht-wahl button").forEach(b => b.onclick = () => {
   d.querySelectorAll(".chips button").forEach(x => x.onclick = () => x.classList.toggle("aktiv"));
 });
 document.getElementById("idee-speichern").onclick = e => { if (ECHT) return wunschSpeichern(e.target); hinweis(t("Im Prototyp wird nichts geteilt")); seiteZeigen("ideen"); };
+// „Ich wäre dabei“: kurz Personen und Schlafzimmer wählen (vorausgefüllt mit 1 und 1)
+function dabeiBlatt(x, schonDabei, speichern, absagen) {
+  const mein = anteil(x, "du"), w = schonDabei ? { p: mein.p, z: mein.z } : { p: 1, z: 1 };
+  const andere = [...(x.vonDabei !== false && x.von !== "du" ? [x.von] : []), ...x.dabei.filter(id => id !== "du")];
+  const hausZimmer = x.echt ? wunschZahlen(x).zimmer : parseInt(x.zimmer) || null;
+  const max = { p: x.plaetze ? Math.max(1, x.plaetze - andere.reduce((n, id) => n + anteil(x, id).p, 0)) : 10, z: hausZimmer ? Math.max(1, hausZimmer - andere.reduce((n, id) => n + anteil(x, id).z, 0)) : 10 };
+  const titel = t(schonDabei ? "Du bist dabei" : "Dabei mit");
+  fragen(titel, [[t(schonDabei ? "Speichern" : "🙋 Ich bin dabei"), () => speichern(w)], ...(schonDabei ? [[t("Absagen"), absagen, true]] : [])]);
+  document.getElementById("aktion-titel").innerHTML = `${titel}<div class="dabei-wahl">${zaehlerZeile("p", "👤 " + t("Personen"), t("mit dir"), w.p)}${zaehlerZeile("z", "🛏 " + t("Schlafzimmer"), "", w.z)}</div>`;
+  zaehlerBinden(document.getElementById("aktion-titel"), w, max);
+}
+const zaehlerZeile = (k, name, klein, wert) => `<div class="zeile-einst"><div>${name}${klein ? `<small>${klein}</small>` : ""}</div><span class="zaehler"><button type="button" data-k="${k}" data-d="-1" aria-label="−">−</button><b data-zahl="${k}">${wert}</b><button type="button" data-k="${k}" data-d="1" aria-label="+">+</button></span></div>`;
+function zaehlerBinden(box, w, max) {
+  box.querySelectorAll(".zaehler button[data-k]").forEach(b => b.onclick = e => {
+    e.preventDefault(); const k = b.dataset.k;
+    w[k] = Math.min(max[k] || 10, Math.max(1, w[k] + +b.dataset.d));
+    box.querySelector(`[data-zahl="${k}"]`).textContent = w[k];
+  });
+}
+// Teilen: Du bist dabei mit … Personen und … Schlafzimmern
+const ichDabeiMit = { p: 1, z: 1 };
+function ichDabeiZeigen() {
+  const box = document.getElementById("idee-dabei");
+  box.innerHTML = `<b class="es-frage">${t("Du bist dabei mit")}</b>${zaehlerZeile("p", "👤 " + t("Personen"), t("mit dir"), ichDabeiMit.p)}${zaehlerZeile("z", "🛏 " + t("Schlafzimmer"), "", ichDabeiMit.z)}`;
+  zaehlerBinden(box, ichDabeiMit, { p: 10, z: 10 });
+}
+ichDabeiZeigen();
 // Airbnb-Titel zerlegen: „Tiny home in Mickleton · ★4.9 · 1 bedroom · 1 bed · 1 bath“ (auch deutsch)
 function wunschZahlen(i) {
   const teile = (i.titel || "").split(" · ").slice(1), zahl = re => { for (const x of teile) { const m = x.match(re); if (m) return +m[1]; } return null; };
@@ -1451,7 +1490,7 @@ const wunschBilder = {};
 async function wishlistLaden() {
   if (!ECHT || familieModus || ECHT_DATEN.profil.art === "familie") return;
   const [w, d, h, tp, td] = await Promise.all([
-    SB.from("wunsch").select("*").order("erstellt_am", { ascending: false }), SB.from("wunsch_dabei").select("wunsch, person"), SB.from("wunsch_herz").select("wunsch, person"),
+    SB.from("wunsch").select("*").order("erstellt_am", { ascending: false }), SB.from("wunsch_dabei").select("*"), SB.from("wunsch_herz").select("wunsch, person"),
     SB.from("tipp").select("*").order("erstellt_am", { ascending: false }), SB.from("tipp_daumen").select("tipp, person")
   ]);
   if (!w.error && !d.error && !h.error) {
@@ -1462,6 +1501,7 @@ async function wishlistLaden() {
       return { id: x.id, echt: true, von: idVon(x.von), titel: x.titel, ort: x.ort, land: x.land, lat: x.lat, lon: x.lon, link: x.link, quelle: x.quelle || quelleVon(x.link),
         bild: x.foto ? wunschBilder[x.foto] : x.bild_url, notiz: x.notiz || "", anreise: x.anreise, abreise: x.abreise, preis: x.preis, plaetze: x.plaetze, gaeste: x.gaeste, foto: x.foto,
         dabei: d.data.filter(y => y.wunsch === x.id).map(y => idVon(y.person)), herzen: herz.length, herzIch: herz.some(y => y.person === ECHT_DATEN.uid),
+        anteile: Object.fromEntries([[idVon(x.von), { p: x.ersteller_personen || 1, z: x.ersteller_zimmer || 1 }], ...d.data.filter(y => y.wunsch === x.id).map(y => [idVon(y.person), { p: y.personen || 1, z: y.zimmer || 1 }])]),
         vonDabei: x.ersteller_dabei !== false, eigenWahl: "ersteller_dabei" in x, gebucht: x.gebucht, chat: x.chat, farbe: `linear-gradient(135deg, ${f}66, ${f})` };
     }).filter(i => person(i.von) && !(i.abreise && i.abreise < new Date().toISOString().slice(0, 10) && !i.gebucht)));
   }
@@ -1477,26 +1517,30 @@ function wishlistKnoepfe() {
     x.herzIch = !x.herzIch; x.herzen += x.herzIch ? 1 : -1; ideenAufbauen();
   });
   document.querySelectorAll(".dabei-knopf").forEach(b => b.onclick = async () => {
-    const x = i(b), eigen = x.von === "du", ja = eigen ? x.vonDabei === false : !x.dabei.includes("du");
+    const x = i(b), eigen = x.von === "du", schonDabei = eigen ? x.vonDabei !== false : x.dabei.includes("du");
+    let ja = !schonDabei, werte = null;
     const los = async reiseWeg => {
       beschaeftigt(b, true);
-      // reise_weg gibt es erst mit SQL 20 (erkennbar an ersteller_dabei)
-      const { error } = await SB.rpc("wunsch_dabei_setzen", x.eigenWahl ? { w: x.id, ja, reise_weg: !!reiseWeg } : { w: x.id, ja });
+      const { error } = await SB.rpc("wunsch_dabei_setzen", { w: x.id, ja, reise_weg: !!reiseWeg, ...(werte ? { personen_zahl: werte.p, zimmer_zahl: werte.z } : {}) });
       beschaeftigt(b, false);
       if (error) return hinweis(/voll/i.test(error.message) ? t("Leider voll") : t("Das hat nicht geklappt"));
-      hinweis(ja ? (x.anreise && x.eigenWahl ? t("Du bist dabei · steht auch in deinen Reisen") : eigen ? t("Du bist dabei") : t("Du bist dabei · {name} sieht das in eurer Gruppe im Chat", { name: person(x.von).name }))
+      hinweis(ja && schonDabei ? t("Gespeichert") : ja ? (x.anreise ? t("Du bist dabei · steht auch in deinen Reisen") : eigen ? t("Du bist dabei") : t("Du bist dabei · {name} sieht das in eurer Gruppe im Chat", { name: person(x.von).name }))
         : reiseWeg ? t("Du bist nicht mehr dabei · auch aus Reisen entfernt") : t("Du bist nicht mehr dabei"));
       await wishlistLaden(); reisenLaden(); chatsLaden().catch(() => {});
     };
     // Austreten: Reise in „Reisen“ mit löschen oder behalten?
-    if (!ja && reisen.some(r => r.wunsch === x.id && r.wer[0] === "du"))
-      return fragen(t("Du bist nicht mehr dabei. Auch aus deinen Reisen nehmen?"), [[t("Ja, aus Reisen nehmen"), () => los(true), true], [t("Nein, Reise behalten"), () => los(false)]]);
-    los(false);
+    const austreten = () => {
+      ja = false; werte = null;
+      if (reisen.some(r => r.wunsch === x.id && r.wer[0] === "du"))
+        return fragen(t("Du bist nicht mehr dabei. Auch aus deinen Reisen nehmen?"), [[t("Ja, aus Reisen nehmen"), () => los(true), true], [t("Nein, Reise behalten"), () => los(false)]]);
+      los(false);
+    };
+    dabeiBlatt(x, schonDabei, w => { ja = true; werte = w; los(false); }, austreten);
   });
   document.querySelectorAll(".gebucht-knopf").forEach(b => b.onclick = () => {
     const x = i(b), wer = [...(x.vonDabei !== false ? [x.von] : []), ...x.dabei].map(id => id === "du" ? t("dich") : person(id).name).join(", ");
     if (!wer) return hinweis(t("Noch niemand ist dabei"));
-    fragen(t("Gebucht? Die Reise wird eingetragen für {wer}.", { wer }), [[t("✓ Ja, gebucht"), async () => {
+    fragen(t("Habt ihr gebucht? Dann steht es für {wer} als gebucht.", { wer }), [[t("✓ Ja, gebucht"), async () => {
       const { error } = await SB.rpc("wunsch_gebucht", { w: x.id });
       if (error) return hinweis(t("Das hat nicht geklappt"));
       hinweis(t("In Reisen eingetragen für {wer}", { wer })); await wishlistLaden(); reisenLaden();
@@ -2258,7 +2302,9 @@ function trefferAufbauen() {
       dort: () => ["📍", t("{namen} ist dort, wo du hinreist", { namen: wer }), t(beide, { ort }), false]
     };
     const [symbol, kopf, wo, leise] = (muster[x.art] || muster.dort)();
-    return `<div class="kasten treffer${leise ? " leise" : ""}"><b>${symbol} ${kopf} <small class="treffer-wann">(${monatSpanne(x.von, x.bis)})</small></b><span>${x.land ? flagge(x.land) + " " : ""}${zeit} · ${wo}</span></div>`;
+    // Farben: 📍 selber Ort kräftig grün, 🧭 in der Nähe zartes Pastellgrün, 🌍 selbes Land neutral
+    const farbe = symbol === "📍" ? " voll" : symbol === "🧭" ? " nah" : leise ? " leise" : "";
+    return `<div class="kasten treffer${farbe}"><b>${symbol} ${kopf} <small class="treffer-wann">(${monatSpanne(x.von, x.bis)})</small></b><span>${x.land ? flagge(x.land) + " " : ""}${zeit} · ${wo}</span></div>`;
   }).join("");
 }
 
@@ -2599,6 +2645,11 @@ async function ortNachfragen(sofort) {
 // ---------- Neu in Ahoi: nach jedem App-Update einmal eine kurze Übersicht ----------
 // Bei jedem Update oben einen Eintrag ergänzen (neueste zuerst). Wer neu dabei ist, sieht nur den neuesten.
 const NEUIGKEITEN = [
+  { id: "2026-11-25-zimmer", punkte: [
+    "🛏 Wishlist: Beim Teilen und bei „Ich wäre dabei“ gibst du kurz an, wie viele Personen und Schlafzimmer. Wer mehr Zimmer belegt, zahlt entsprechend mehr.",
+    "☐ „Als gebucht markieren“: Erst wenn wirklich gebucht ist, wird der Eintrag grün mit ✅.",
+    "📍 Treffer in Reisen: selber Ort in Grün, in der Nähe in zartem Grün."
+  ] },
   { id: "2026-11-25-airbnb", punkte: [
     "🏠 Wishlist: Zur Unterkunft geht es jetzt über einen eigenen Knopf in Airbnb-Pink (bei Booking.com in Blau), direkt mit euren Daten."
   ] },

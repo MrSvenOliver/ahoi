@@ -16,7 +16,7 @@ const TEXTE: Record<string, Record<string, string>> = {
   de: {
     noch: "📍 Noch in {ort}?", nochText: "Kurz tippen zum Bestätigen", plan: "📍 Jetzt in {ort}?", planText: "So steht es in deinem Reiseplan",
     wunschNeu: "🏡 {name} teilt eine Unterkunft", wunschDabei: "🙋 {name} ist dabei", dabeiText: "{ort} · {n} dabei",
-    wunschGebucht: "✅ Gebucht: {ort}", gebuchtText: "{zeit} · steht in deinen Reisen", wunschPreis: "💶 Preis für {ort}", preisText: "{pp} € pro Person · {n} dabei",
+    wunschGebucht: "✅ Gebucht: {ort}", gebuchtText: "{zeit} · steht in deinen Reisen", wunschPreis: "💶 Preis für {ort}", preisText: "{pp} € pro Person · {n} dabei", preisZimmerText: "{pp} € pro Zimmer · {n} dabei",
     wunschZeit: "📅 Neue Daten: {ort}", zeitText: "{zeit} · {naechte}", nacht: "1 Nacht", naechte: "{n} Nächte",
     reise: "✈️ {name} reist nach {ort}", treffer: "📍 Treffer mit {name}", kommt: "📍 {name} kommt nach {ort}", kommtText: "{zeit} · du bist gerade dort",
     naehe: "🧭 {name} ist in der Nähe", naeheText: "{ort} · {km} km von dir", naeheGleich: "{ort} · am selben Ort",
@@ -26,7 +26,7 @@ const TEXTE: Record<string, Record<string, string>> = {
   en: {
     noch: "📍 Still in {ort}?", nochText: "Tap to confirm", plan: "📍 In {ort} now?", planText: "That's what your travel plan says",
     wunschNeu: "🏡 {name} shared a place", wunschDabei: "🙋 {name} is in", dabeiText: "{ort} · {n} going",
-    wunschGebucht: "✅ Booked: {ort}", gebuchtText: "{zeit} · now in your trips", wunschPreis: "💶 Price for {ort}", preisText: "{pp} € per person · {n} going",
+    wunschGebucht: "✅ Booked: {ort}", gebuchtText: "{zeit} · now in your trips", wunschPreis: "💶 Price for {ort}", preisText: "{pp} € per person · {n} going", preisZimmerText: "{pp} € per room · {n} going",
     wunschZeit: "📅 New dates: {ort}", zeitText: "{zeit} · {naechte}", nacht: "1 night", naechte: "{n} nights",
     reise: "✈️ {name} is going to {ort}", treffer: "📍 Match with {name}", kommt: "📍 {name} is coming to {ort}", kommtText: "{zeit} · you're there now",
     naehe: "🧭 {name} is nearby", naeheText: "{ort} · {km} km away", naeheGleich: "{ort} · same place",
@@ -36,7 +36,7 @@ const TEXTE: Record<string, Record<string, string>> = {
   sk: {
     noch: "📍 Stále v {ort}?", nochText: "Ťukni a potvrď", plan: "📍 Teraz v {ort}?", planText: "Tak to stojí v tvojom pláne ciest",
     wunschNeu: "🏡 {name} zdieľa ubytovanie", wunschDabei: "🙋 {name} ide tiež", dabeiText: "{ort} · prihlásení: {n}",
-    wunschGebucht: "✅ Rezervované: {ort}", gebuchtText: "{zeit} · už je v tvojich cestách", wunschPreis: "💶 Cena za {ort}", preisText: "{pp} € na osobu · prihlásení: {n}",
+    wunschGebucht: "✅ Rezervované: {ort}", gebuchtText: "{zeit} · už je v tvojich cestách", wunschPreis: "💶 Cena za {ort}", preisText: "{pp} € na osobu · prihlásení: {n}", preisZimmerText: "{pp} € za izbu · prihlásení: {n}",
     wunschZeit: "📅 Nové dátumy: {ort}", zeitText: "{zeit} · {naechte}", nacht: "1 noc", naechte: "{n} nocí", naechte24: "{n} noci",
     reise: "✈️ {name} cestuje do {ort}", treffer: "📍 Zhoda: {name}", kommt: "📍 {name} príde do {ort}", kommtText: "{zeit} · si práve tam",
     naehe: "🧭 {name} je nablízku", naeheText: "{ort} · {km} km od teba", naeheGleich: "{ort} · na rovnakom mieste",
@@ -149,11 +149,15 @@ async function chatNachricht(id: number) {
 
 // ---------- Wishlist ----------
 async function wunschEreignis(art: string, wunschId: string, wer: string | null) {
-  const [w] = await sql`select id, von, ort, preis, gebucht, anreise, abreise, ersteller_dabei from public.wunsch where id = ${wunschId}`;
+  const [w] = await sql`select id, von, ort, preis, gebucht, anreise, abreise, ersteller_dabei, ersteller_personen, ersteller_zimmer from public.wunsch where id = ${wunschId}`;
   if (!w) return 0;
   const url = `${APP}?wishlist=1`;
   const zeit = (s: string | null) => w.anreise && w.abreise ? zeitraum(w.anreise, w.abreise, s) : "";
-  const [{ n }] = await sql`select count(*)::int + ${w.ersteller_dabei ? 1 : 0} as n from public.wunsch_dabei where wunsch = ${w.id}`;
+  // Personen und Zimmer: wer mehr Zimmer belegt als Personen (oder umgekehrt), teilt den Preis pro Zimmer
+  const [{ n, z, ungleich }] = await sql`select coalesce(sum(personen), 0)::int + ${w.ersteller_dabei ? w.ersteller_personen : 0} as n,
+      coalesce(sum(zimmer), 0)::int + ${w.ersteller_dabei ? w.ersteller_zimmer : 0} as z,
+      coalesce(bool_or(personen <> zimmer), false) or ${w.ersteller_dabei && w.ersteller_personen !== w.ersteller_zimmer} as ungleich
+    from public.wunsch_dabei where wunsch = ${w.id}`;
   if (art === "wunsch_neu") {
     if (!(await erstesMal(`wunsch_neu:${w.id}`))) return 0;
     const an = await sql`select id from public.profile where freigegeben and art = 'nomade' and push_wunsch_neu and id <> ${w.von}`;
@@ -174,12 +178,12 @@ async function wunschEreignis(art: string, wunschId: string, wer: string | null)
   if (!(await erstesMal(einmal))) return 0;
   const an = await sql`select p.id from public.profile p where p.push_wunsch_update and p.id is distinct from ${wer}
                        and (p.id = ${w.von} or p.id in (select person from public.wunsch_dabei where wunsch = ${w.id}))`;
-  const pp = w.preis ? Math.round(w.preis / Math.max(1, n)) : 0;
+  const pp = w.preis ? Math.round(w.preis / Math.max(1, ungleich ? z : n)) : 0;
   return verschicken(an.map((x) => x.id), (s) => art === "wunsch_gebucht"
     ? { title: text(s, "wunschGebucht", w.ort), body: text(s, "gebuchtText", { zeit: zeit(s) }), url, tag: `wunsch-${w.id}` }
     : art === "wunsch_zeit"
     ? { title: text(s, "wunschZeit", w.ort), body: text(s, "zeitText", { zeit: zeit(s), naechte: naechte(w.anreise, w.abreise, s) }), url, tag: `wunsch-${w.id}` }
-    : { title: text(s, "wunschPreis", w.ort), body: text(s, "preisText", { pp: pp.toLocaleString(ORT_LOC[s || "de"]), n }), url, tag: `wunsch-${w.id}` });
+    : { title: text(s, "wunschPreis", w.ort), body: text(s, ungleich ? "preisZimmerText" : "preisText", { pp: pp.toLocaleString(ORT_LOC[s || "de"]), n }), url, tag: `wunsch-${w.id}` });
 }
 
 // ---------- Reisen und Treffer ----------

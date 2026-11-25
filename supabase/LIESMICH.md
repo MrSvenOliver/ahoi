@@ -32,6 +32,7 @@
 - `18-kreise-ohne-alle.sql`: Chat „Alle“ endgültig gelöscht; Freundeskreise in der Datenbank (Tabelle `kreis`, nur für die Person sichtbar, der der Kreis gehört)
 - `19-ohne-kreise.sql`: Freundeskreise wieder entfernt (Tabelle `kreis` gelöscht)
 - `20-wishlist-dabei-daten.sql`: Wer etwas auf die Wishlist stellt, kann selbst dabei sein oder nicht (`ersteller_dabei`); Zeitraum änderbar mit Push „Neue Daten“; Zusage = Reise in „Reisen“ (`reise.wunsch`, wandert bei neuen Daten mit); Profil-Link Calendly; danach die Edge Function „push“ neu veröffentlichen
+- `21-wishlist-zimmer.sql`: Wer dabei ist, gibt Personen und Schlafzimmer an (`wunsch_dabei.personen/zimmer`, `wunsch.ersteller_personen/zimmer`); Plätze zählen Personen; danach die Edge Function „push“ neu veröffentlichen
 - `functions/vorschau/index.ts`: Edge Function „vorschau“ (Titel und Bild eines geteilten Links; „Verify JWT“ an, nur für angemeldete Mitglieder)
 - `functions/push/index.ts`: Edge Function „push“ (im Dashboard unter Edge Functions angelegt; „Verify JWT“ aus, weil die Datenbank sie ohne Anmeldung aufruft; sie erzeugt ihre Push-Schlüssel selbst)
 
