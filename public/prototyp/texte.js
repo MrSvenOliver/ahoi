@@ -859,4 +859,11 @@ const TEXTE = {
   "(Februar 2027)": ["(February 2027)", "(február 2027)"],
   "🇵🇹 13.2. – 20.2. · du in Lissabon, Alex in Ericeira · 35 km": ["🇵🇹 13 Feb – 20 Feb · you in Lisbon, Alex in Ericeira · 35 km", "🇵🇹 13.2. – 20.2. · ty v Lisabone, Alex v Ericeire · 35 km"],
   "Monat wählen": ["Choose a month", "Vyber mesiac"],
+  "Die Abreise liegt in der Vergangenheit": ["Departure is in the past", "Odchod je v minulosti"],
+  "noch": ["still", "ešte"],
+  "heute": ["today", "dnes"],
+  "✏️ Bearbeiten": ["✏️ Edit", "✏️ Upraviť"],
+  "Reise bearbeiten": ["Edit trip", "Upraviť cestu"],
+  "Tag": ["day", "deň"],
+  "Tage": ["days", "dni"],
 };

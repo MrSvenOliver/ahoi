@@ -104,7 +104,8 @@ const kopfText = p => p.bild ? "" : kuerzel(p.echterName || p.name);
 // Einzahl und Mehrzahl (Slowakisch hat eine eigene Form für 2–4)
 const ZAEHLWOERTER = {
   freunde: { de: ["Freund", "Freunde"], en: ["friend", "friends"], sk: ["priateľ", "priatelia", "priateľov"] },
-  laender: { de: ["Land", "Länder"], en: ["country", "countries"], sk: ["krajina", "krajiny", "krajín"] }
+  laender: { de: ["Land", "Länder"], en: ["country", "countries"], sk: ["krajina", "krajiny", "krajín"] },
+  tage: { de: ["Tag", "Tage"], en: ["day", "days"], sk: ["deň", "dni", "dní"] }
 };
 function anzahl(n, art) {
   const w = ZAEHLWOERTER[art][SPRACHE] || ZAEHLWOERTER[art].de;
@@ -795,13 +796,14 @@ document.getElementById("reise-neu").onclick = () => seiteZeigen("reise-neu");
 document.getElementById("reise-an").addEventListener("change", e => { const ab = document.getElementById("reise-ab"); ab.min = e.target.value; if (ab.value && ab.value < e.target.value) ab.value = e.target.value; });
 // Reise eintragen: Ort aus der Suche, feste Daten oder ein Vielleicht mit Monat
 let reiseOrt = null;
+let reiseBearbeiten = null; // Reise, die gerade bearbeitet wird (sonst neue Reise)
 function reiseFormularLeeren() {
-  reiseOrt = null;
+  reiseOrt = null; reiseBearbeiten = null; document.querySelector("#seite-reise-neu h1").textContent = t("Reise");
   ["reise-ort", "reise-an", "reise-ab"].forEach(id => document.getElementById(id).value = "");
   document.getElementById("reise-gewaehlt").textContent = ""; document.getElementById("reise-orte").innerHTML = "";
   document.getElementById("reise-vielleicht").classList.remove("an"); reiseArtZeigen();
   const heute = new Date().toISOString().slice(0, 10);
-  document.getElementById("reise-an").min = heute; document.getElementById("reise-ab").min = heute;
+  document.getElementById("reise-an").removeAttribute("min"); document.getElementById("reise-ab").min = heute;
   // Monat als Liste der nächsten 24 Monate mit Jahr („April 2027“); die iPhone-Monatsauswahl ließ vergangene Monate zu
   const jetzt = new Date(), monate = Array.from({ length: 24 }, (_, k) => new Date(Date.UTC(jetzt.getFullYear(), jetzt.getMonth() + k, 1)));
   document.getElementById("reise-monat").innerHTML = `<option value="">${t("Monat wählen")}</option>` + monate.map(d => `<option value="${d.toISOString().slice(0, 7)}">${d.toLocaleDateString(LOC, { month: "long", year: "numeric", timeZone: "UTC" })}</option>`).join("");
@@ -826,9 +828,11 @@ document.getElementById("reise-speichern").onclick = async e => {
     daten.ankunft = document.getElementById("reise-an").value; daten.abreise = document.getElementById("reise-ab").value;
     if (!daten.ankunft || !daten.abreise) return hinweis(t("Bitte Ankunft und Abreise wählen"));
     if (daten.abreise < daten.ankunft) return hinweis(t("Die Abreise liegt vor der Ankunft"));
+    if (daten.abreise < new Date().toISOString().slice(0, 10)) return hinweis(t("Die Abreise liegt in der Vergangenheit"));
   }
+  if (reiseBearbeiten) { if (viel) { daten.ankunft = null; daten.abreise = null; } else daten.monat = null; daten.wunsch = null; }
   beschaeftigt(e.target, true);
-  const { error } = await SB.from("reise").insert(daten);
+  const { error } = reiseBearbeiten ? await SB.from("reise").update(daten).eq("id", reiseBearbeiten) : await SB.from("reise").insert(daten);
   beschaeftigt(e.target, false);
   if (error) return hinweis(t("Speichern hat nicht geklappt"));
   hinweis(t("Reise gespeichert")); seiteZeigen("reisen"); reisenLaden();
@@ -844,6 +848,8 @@ const reisen = ECHT ? [] : [
   { wer: ["alex"], ziel: "Marrakesch", land: "MA", von: "2026-12-03", bis: "2026-12-14" },
   { wer: ["sam"], ziel: "Wien", land: "AT", von: "2026-12-10", bis: "2026-12-12" },
   { wer: ["mia"], ziel: "Oaxaca", land: "MX", von: "2026-12-20", bis: "2027-01-05" },
+  // Beispiel für einen laufenden Aufenthalt (immer rund um heute)
+  { wer: ["du"], ziel: "Málaga", land: "ES", lat: 36.7213, lon: -4.4214, von: new Date(Date.now() - 6 * 864e5).toISOString().slice(0, 10), bis: new Date(Date.now() + 9 * 864e5).toISOString().slice(0, 10) },
   { wer: ["du"], ziel: "Lissabon", land: "PT", von: "2027-01-10", bis: "2027-01-15" },
   { wer: ["lea", "nico"], ziel: "Lissabon", land: "PT", von: "2027-01-08", bis: "2027-01-20" },
   { wer: ["jonas", "ben"], ziel: "Vietnam", land: "VN", monat: "2027-02", vielleicht: true },
@@ -866,22 +872,38 @@ function reisenAufbauen() {
     if (!ps.length) continue;
     const gesichter = ps.slice(0, 2).map((p, i) => `<div class="klein-ava" style="left:${ps.length > 1 ? i * 20 : 10}px;z-index:${2 - i};${kopfStil(p)}">${kopfText(p)}</div>`).join("");
     const naechte = r.von ? Math.round((datum(r.bis) - datum(r.von)) / 864e5) : null;
-    html += `<div class="kasten reise${r.vielleicht ? " vielleicht" : ""}${ECHT && r.wer[0] === "du" ? " eigen" : ""}"${r.id ? ` data-reise="${r.id}"` : ""}>
+    // Laufender Aufenthalt: leicht hinterlegt, rechts „noch X Tage“
+    const heuteT = new Date().toISOString().slice(0, 10), aktuell = r.von && r.von <= heuteT && r.bis >= heuteT;
+    const rest = aktuell ? Math.round((datum(r.bis) - datum(heuteT)) / 864e5) : 0;
+    html += `<div class="kasten reise${r.vielleicht ? " vielleicht" : ""}${aktuell ? " aktuell" : ""}${r.wer[0] === "du" ? " eigen" : ""}" data-n="${reisen.indexOf(r)}">
       <div class="gesichter">${gesichter}</div>
       <div class="text"><span class="wer">${ps.map(p => p.name).join(" & ")}</span>
         <span class="ziel">${r.land ? flagge(r.land) : "📍"}&nbsp;&nbsp;${ohneHtml(r.ziel)}</span>
         <span class="wann">${r.von ? kurz(r.von) + " – " + kurz(r.bis) : t("irgendwann im {m}", { m: datum(r.monat + "-01").toLocaleDateString(LOC, { month: "long" }) })}${wunschMarke(r)}</span></div>
-      <div class="art">${r.vielleicht ? '<span class="vielleicht-text">' + t("Vielleicht") + '</span>' : `<b>${naechte}</b><small>${t(naechte === 1 ? "Nacht" : "Nächte")}</small>`}</div></div>`;
+      <div class="art">${r.vielleicht ? '<span class="vielleicht-text">' + t("Vielleicht") + '</span>' : aktuell ? (rest ? `<small>${t("noch")}</small><b>${rest}</b><small>${anzahl(rest, "tage").replace(/^\d+ /, "")}</small>` : `<small>${t("heute")}</small><b>✈︎</b><small>${t("Abreise")}</small>`) : `<b>${naechte}</b><small>${t(naechte === 1 ? "Nacht" : "Nächte")}</small>`}</div></div>`;
   }
   document.getElementById("reise-liste").innerHTML = html || (ECHT ? `<div class="bald"><div style="font-size:44px">✈️</div><b>${t("Noch keine Reisen")}</b>${t("Trag deine nächste Reise ein. Wenn Freunde zur selben Zeit am selben Ort sind, zeigt Ahoi euch einen Treffer.")}</div>` : "");
-  if (ECHT) document.querySelectorAll("#reise-liste .reise.eigen").forEach(k => k.onclick = () => {
-    const r = reisen.find(x => x.id === k.dataset.reise);
-    fragen(`${r.ziel} · ${r.von ? kurz(r.von) + " – " + kurz(r.bis) : monatName(r.monat)}`, [[t("Reise löschen"), async () => {
-      const { error } = await SB.from("reise").delete().eq("id", r.id);
-      if (error) return hinweis(t("Das hat nicht geklappt"));
-      hinweis(t("Reise gelöscht")); reisenLaden();
-    }, true]]);
+  document.querySelectorAll("#reise-liste .reise.eigen").forEach(k => k.onclick = () => {
+    const r = reisen[+k.dataset.n]; if (!r) return;
+    fragen(`${r.ziel} · ${r.von ? kurz(r.von) + " – " + kurz(r.bis) : monatName(r.monat)}`, [
+      [t("✏️ Bearbeiten"), () => reiseBearbeitenOeffnen(r)],
+      [t("Reise löschen"), async () => {
+        if (ECHT) { const { error } = await SB.from("reise").delete().eq("id", r.id); if (error) return hinweis(t("Das hat nicht geklappt")); }
+        else reisen.splice(reisen.indexOf(r), 1);
+        hinweis(t("Reise gelöscht")); ECHT ? reisenLaden() : reisenAufbauen();
+      }, true]]);
   });
+}
+// Eigene Reise bearbeiten: Formular mit Ort, Daten oder Monat vorausfüllen
+function reiseBearbeitenOeffnen(r) {
+  reiseFormularLeeren();
+  reiseBearbeiten = r.id || "proto"; document.querySelector("#seite-reise-neu h1").textContent = t("Reise bearbeiten");
+  reiseOrt = { ort: r.ziel, land: r.land, lat: r.lat ?? null, lon: r.lon ?? null };
+  document.getElementById("reise-gewaehlt").textContent = `${r.land ? flagge(r.land) : "📍"} ${r.ziel}`;
+  document.getElementById("reise-vielleicht").classList.toggle("an", !!r.vielleicht); reiseArtZeigen();
+  if (r.vielleicht) document.getElementById("reise-monat").value = r.monat || "";
+  else { document.getElementById("reise-an").value = r.von; document.getElementById("reise-ab").value = r.bis; }
+  seiteZeigen("reise-neu");
 }
 
 // ---------- Chat ----------

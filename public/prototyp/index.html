@@ -202,6 +202,18 @@
   .reise .art small { font-size: 10px; color: var(--text-leise); font-weight: 600; }
   .reise .art .vielleicht-text { font-size: 11px; font-weight: 700; color: var(--tinte); }
   .reise.vielleicht { border: 1.5px dashed var(--gold); background: transparent; }
+  /* Laufender Aufenthalt: zarter Ton je Stil, rechts „noch X Tage“ */
+  .reise.aktuell { background: #fbf1e3; border: 1px solid #ecd3b0; }
+  .reise.aktuell .art { background: rgba(192, 88, 47, 0.12); }
+  .reise.aktuell .art b { color: var(--tinte); }
+  [data-stil="modern"] .reise.aktuell { background: #eef5ff; border: 1px solid #cfe1ff; }
+  [data-stil="modern"] .reise.aktuell .art { background: rgba(10, 132, 255, 0.12); }
+  [data-stil="modern"] .reise.aktuell .art b, [data-stil="modern"] .reise.aktuell .art small { color: #0a6fd8; }
+  [data-stil="mission"] .reise.aktuell { background: var(--ecken), rgba(90, 200, 250, 0.13); border: 1px solid rgba(90, 200, 250, 0.7); }
+  [data-stil="mission"] .reise.aktuell .art { background: rgba(90, 200, 250, 0.14); }
+  [data-stil="mission"] .reise.aktuell .art b, [data-stil="mission"] .reise.aktuell .art small { color: #7fd6ff; }
+  [data-stil="abenteuer"] .reise.aktuell { background: rgba(232, 200, 130, 0.35); border: 1.5px solid #c9a25e; }
+  [data-stil="abenteuer"] .reise.aktuell .art { background: rgba(192, 140, 60, 0.2); }
   .reise.vielleicht .art { background: transparent; border: 1px dashed var(--gold); }
   .etikett { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 10px; border: 1px dashed var(--gold); color: var(--tinte); line-height: 1.4; }
   .formular label { display: block; font-size: 13px; font-weight: 600; color: var(--text-leise); margin-bottom: 12px; }
