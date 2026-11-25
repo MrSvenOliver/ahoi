@@ -1512,9 +1512,9 @@ document.querySelectorAll("#sicht-wahl button").forEach(b => b.onclick = () => {
 });
 document.getElementById("idee-speichern").onclick = e => { if (ECHT) return wunschSpeichern(e.target); hinweis(t("Im Prototyp wird nichts geteilt")); seiteZeigen("ideen"); };
 // ---------- Wishlist „🏨 Hilton“: Inspiration ohne Daten, sortiert nach Ländern ----------
-// Mitglieder geben nur Name und Ort ein. Die Edge Function „hilton“ recherchiert im Hintergrund (hilton.com, Foto,
-// Kategorie, Executive Lounge, ungefährer Zimmerpreis, Top 5 auf DE/EN/SK). Ändern, neu recherchieren, löschen:
-// wer geteilt hat und Sven (Admin).
+// Mitglieder geben nur Name und Ort ein. Das Hotel wartet dann auf die Recherche; Sven bekommt eine Mitteilung
+// und lässt Claude im Chat recherchieren (hilton.com, Foto, Kategorie, Executive Lounge, ungefährer Zimmerpreis,
+// Top 5 auf DE/EN/SK), Claude trägt alles in der Datenbank ein. Ändern, neu recherchieren, löschen: wer geteilt hat und Sven.
 const KATEGORIEN = { luxury: "Luxury", premium: "Premium", classic: "Classic", budget: "Budget" };
 const hotels = ECHT ? [] : [
   { id: "h-ams", von: "lea", name: "Waldorf Astoria Amsterdam", ort: "Amsterdam", land: "NL", link: "https://www.hilton.com/en/hotels/amswawa-waldorf-astoria-amsterdam/", bild: null,
@@ -1531,11 +1531,10 @@ const hotels = ECHT ? [] : [
       en: ["Executive Lounge: access with Diamond, often with Gold via upgrade", "Pool with skyline view", "Connected to Intermark mall", "Warm cookies at check-in"],
       sk: ["Executive Lounge: prístup s Diamond, s Gold často cez upgrade", "Bazén s výhľadom na panorámu", "Priamo pri nákupnom centre Intermark", "Teplé sušienky pri príchode"] } }
 ];
-let hiltonFilter = "alle", hotelBearbeiten = null, hiltonUhr = null, hiltonRunden = 0;
+let hiltonFilter = "alle", hotelBearbeiten = null;
 const hotelLand = l => l ? landName(l) : t("Ohne Land");
 const ichAdmin = () => ECHT && !!(ECHT_DATEN.profil && ECHT_DATEN.profil.ist_admin);
-// Recherche hängt länger als 3 Minuten: als Fehler zeigen, damit man es nochmal versuchen kann
-const hotelStatus = h => h.status === "recherche" && h.recherche_am && Date.now() - new Date(h.recherche_am).getTime() > 180000 ? "fehler" : h.status;
+const hotelStatus = h => h.status || "fertig";
 async function hiltonLaden() {
   if (!ECHT || familieModus || ECHT_DATEN.profil.art === "familie") return;
   const [h, z] = await Promise.all([SB.from("hilton").select("*"), SB.from("hilton_herz").select("hotel, person")]);
@@ -1547,29 +1546,13 @@ async function hiltonLaden() {
     kategorie: x.kategorie, lounge: x.lounge, preis: x.preis_ca, texte: x.texte || { de: x.highlights || [] },
     herzen: z.data.filter(y => y.hotel === x.id).length, herzIch: z.data.some(y => y.hotel === x.id && y.person === ECHT_DATEN.uid) })).filter(x => person(x.von)));
   if (ideenReiter === "hilton" && document.getElementById("seite-ideen").classList.contains("offen")) hiltonAufbauen();
-  hiltonNachschauen();
 }
-// Solange recherchiert wird: alle 5 Sekunden neu laden (höchstens 5 Minuten)
-function hiltonNachschauen() {
-  clearTimeout(hiltonUhr);
-  if (!ECHT || !hotels.some(h => hotelStatus(h) === "recherche") || ++hiltonRunden > 60) return;
-  hiltonUhr = setTimeout(() => hiltonLaden().catch(() => {}), 5000);
-}
+// Neu recherchieren lassen: Hotel wieder auf „wartet“, Sven bekommt eine Mitteilung
 async function hotelRecherche(id) {
-  hiltonRunden = 0;
-  if (!ECHT) {
-    const h = hotels.find(x => x.id === id); if (!h) return;
-    h.status = "recherche"; hiltonAufbauen();
-    return setTimeout(() => {
-      const n = h.name.toLowerCase();
-      h.kategorie = /waldorf|conrad|lxr/.test(n) ? "luxury" : /hampton|tru |home2|spark/.test(n) ? "budget" : /doubletree|garden inn|tapestry|embassy/.test(n) ? "classic" : "premium";
-      h.texte = { de: [t("Im Prototyp ohne echte Recherche")], en: [t("Im Prototyp ohne echte Recherche")], sk: [t("Im Prototyp ohne echte Recherche")] };
-      h.status = "fertig"; if (ideenReiter === "hilton") hiltonAufbauen();
-    }, 2500);
-  }
-  const { data, error } = await SB.functions.invoke("hilton", { body: { hotel: id } });
-  if (error || !data || !data.ok) hinweis(t(data && data.grund === "limit" ? "Heute sind schon genug Hotels recherchiert worden. Morgen geht es weiter." : "Die Recherche hat nicht geklappt"));
-  await hiltonLaden();
+  const h = hotels.find(x => x.id === id); if (!h) return;
+  if (ECHT) { const { error } = await SB.from("hilton").update({ status: "recherche" }).eq("id", id); if (error) return hinweis(t("Das hat nicht geklappt")); await hiltonLaden(); }
+  else { h.status = "recherche"; hiltonAufbauen(); }
+  hinweis(t("Danke! Das Hotel wird recherchiert"));
 }
 function hiltonAufbauen() {
   const nachLand = (a, b) => (!a - !b) || hotelLand(a).localeCompare(hotelLand(b), LOC);
@@ -1589,8 +1572,8 @@ function hiltonAufbauen() {
     const preisMarke = h.preis && h.preis < 60 ? `<span class="hotel-marke preis-top">🔥 ${t("Top-Preis")}</span>` : h.preis && h.preis < 100 ? `<span class="hotel-marke preis-gut">💶 ${t("Preiswert")}</span>` : "";
     const marken = [h.kategorie ? `<span class="hotel-marke kat-${h.kategorie}">${KATEGORIEN[h.kategorie]}</span>` : "", h.lounge ? `<span class="hotel-marke lounge">🍸 ${t("Lounge")}</span>` : "", preisMarke].join("");
     const zeile = [ohneHtml(h.ort || ""), h.preis ? t("ca. {n} € / Nacht", { n: h.preis.toLocaleString(LOC) }) : ""].filter(Boolean).map(x => `<span class="zus">${x}</span>`).join(" · ");
-    const inhalt = status === "recherche" ? `<div class="hotel-status">🔎 ${t("Ahoi sucht das Hotel auf hilton.com …")}</div>`
-      : status === "fehler" ? `<div class="hotel-status fehler">⚠️ ${t("Nicht gefunden. Prüfe Name und Ort und versuch es nochmal.")}</div>`
+    const inhalt = status === "recherche" ? `<div class="hotel-status">✨ ${t("Danke fürs Teilen! Das Hotel ist in Bearbeitung. Foto, Lounge, Preis und die Top 5 kommen bald dazu.")}</div>`
+      : status === "fehler" ? `<div class="hotel-status fehler">⚠️ ${t("Dieses Hotel haben wir nicht gefunden. Prüf bitte Name und Ort.")}</div>`
       : `${punkte.length ? `<ol class="top5">${punkte.map(x => `<li>${ohneHtml(x)}</li>`).join("")}</ol>` : ""}
         <a class="knopf-gross marke-knopf marke-hilton" href="${ohneHtml(hiltonAdresse(h))}" target="_blank" rel="noopener">${t("Auf {seite} ansehen", { seite: "hilton.com" })} ↗</a>`;
     const links = darf ? [`<button class="text-knopf hotel-aendern" data-h="${h.id}">${t("Ändern")}</button>`,
@@ -1646,12 +1629,12 @@ document.getElementById("hilton-speichern").onclick = async e => {
     id = r.data.id;
   } else {
     const alt = id && hotels.find(h => h.id === id);
-    if (alt) Object.assign(alt, { name, ort, ortEingabe: ort });
+    if (alt) Object.assign(alt, { name, ort, ortEingabe: ort, status: "recherche" });
     else { id = "h-" + Date.now(); hotels.push({ id, von: "du", name, ort, ortEingabe: ort, land: null, link: null, bild: null, status: "recherche", herzen: 0, herzIch: false, texte: {} }); }
   }
+  if (ECHT) await hiltonLaden();
   ideenReiter = "hilton"; hiltonFilter = "alle"; seiteZeigen("ideen");
-  hinweis(t("Ahoi sucht das Hotel auf hilton.com …"));
-  hotelRecherche(id);
+  hinweis(t("Danke! Das Hotel wird recherchiert"));
 };
 // „Ich wäre dabei“: kurz Personen und Schlafzimmer wählen (vorausgefüllt mit 1 und 1), bei mehr Personen: wer kommt mit?
 function dabeiBlatt(x, schonDabei, speichern, absagen) {
@@ -2874,6 +2857,7 @@ function pushZiel(url) {
   if (q.get("chat")) { const c = chats.find(x => x.id === q.get("chat")); if (c) gespraechOeffnen(c); else chatsLaden().then(() => { const c2 = chats.find(x => x.id === q.get("chat")); if (c2) gespraechOeffnen(c2); }); }
   if (q.get("ort") === "frage") ortNachfragen(true);
   if (q.get("wishlist")) { ideenReiter = "unterkunft"; seiteZeigen("ideen"); }
+  if (q.get("hilton")) { ideenReiter = "hilton"; seiteZeigen("ideen"); if (ECHT) hiltonLaden().catch(() => {}); }
   if (q.get("verwaltung") && ECHT && ECHT_DATEN.profil && ECHT_DATEN.profil.ist_admin) { seiteZeigen("verwaltung"); verwaltungAufbauen(); }
   if (q.get("rundruf")) try { localStorage.setItem("ahoi-rundruf", Math.max(+q.get("rundruf"), +localStorage.getItem("ahoi-rundruf") || 0)); } catch (e) {}
 }
@@ -3272,7 +3256,7 @@ function echtEinrichten() {
   if (p.art === "familie") return familieEchtStarten();
   familieListeAufbauen(); setTimeout(neuDabeiPruefen, 2500);
   verbindungenLaden().catch(() => {});
-  chatsLaden().then(chatVerbinden).then(() => { if (/[?&](chat|ort|rundruf|wishlist|verwaltung)=/.test(location.search)) { pushZiel(location.href); history.replaceState(null, "", location.pathname); } }).catch(() => {});
+  chatsLaden().then(chatVerbinden).then(() => { if (/[?&](chat|ort|rundruf|wishlist|verwaltung|hilton)=/.test(location.search)) { pushZiel(location.href); history.replaceState(null, "", location.pathname); } }).catch(() => {});
   setTimeout(pushPruefen, 1500); setTimeout(rundrufZeigen, 6000);
   // Vorschau „So sieht sie es“: die Familie sieht nur dich
   document.getElementById("familie-start").onclick = () => { FAMILIE_SIEHT = ["du"]; document.getElementById("fam-kopf").textContent = t("So sieht deine Familie dich"); document.getElementById("familie-ende").textContent = t("Zurück"); familieSetzen(true); };

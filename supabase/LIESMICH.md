@@ -36,8 +36,8 @@
 - `22-wishlist-begleitung.sql`: Begleitung bei Zusagen (`begleitung`, `ersteller_begleitung`: Ahoi-Mitglied voll dabei mit Reise und Chat, oder Gast mit Namen); Reise für die Person, die teilt, gleich beim Anlegen
 - `23-hilton.sql`: Wishlist-Reiter „Hilton“ (Tabellen `hilton` und `hilton_herz`): alle Mitglieder teilen Hilton-Hotels mit bis zu 5 Highlights, ohne Daten; ändern/löschen nur, wer geteilt hat, oder Admin
 - `24-fehler-mitgenommen.sql`: Fehler aus der App (`app_fehler`, nur über `fehler_melden`, lesen nur Admin), Push „nimmt dich mit“ für Begleitung, Hilton ohne Pflicht-Link und mit eigenem Foto (`hilton.foto`); danach die Edge Function „push“ neu veröffentlichen
-- `25-hilton-recherche.sql`: Hilton mit automatischer Recherche (Status, Kategorie, Lounge, Preis, Top 5 je Sprache); Mitglieder schreiben nur Name und Ort; danach die Edge Function „hilton“ anlegen
-- `functions/hilton/index.ts`: recherchiert ein Hilton-Hotel über die Claude-API mit Websuche („Verify JWT“ an, Secret `ANTHROPIC_API_KEY`, höchstens 30 pro Tag)
+- `25-hilton-recherche.sql`: Hilton mit automatischer Recherche (Status, Kategorie, Lounge, Preis, Top 5 je Sprache); Mitglieder schreiben nur Name und Ort; (die Edge Function „hilton“ wurde mit 26 wieder abgeschafft)
+- `26-hilton-chat.sql`: Hilton-Recherche über Claude im Chat: Mitglieder dürfen nur „neu recherchieren“ anfragen, geänderte Hotels warten wieder, Mitteilung „🏨 Hilton-Hotel wartet“ an den Admin; danach die Edge Function „push“ neu veröffentlichen
 - `functions/vorschau/index.ts`: Edge Function „vorschau“ (Titel und Bild eines geteilten Links; „Verify JWT“ an, nur für angemeldete Mitglieder)
 - `functions/push/index.ts`: Edge Function „push“ (im Dashboard unter Edge Functions angelegt; „Verify JWT“ aus, weil die Datenbank sie ohne Anmeldung aufruft; sie erzeugt ihre Push-Schlüssel selbst)
 

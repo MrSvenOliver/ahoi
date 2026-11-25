@@ -23,7 +23,7 @@ const TEXTE: Record<string, Record<string, string>> = {
     naehe: "🧭 {name} in der Nähe", naeheText: "{ort} · {km} km von dir", naeheGleich: "{ort} · am selben Ort",
     neu: "👋 {name} ist neu bei Ahoi", neuText: "Gerade in {ort}", neuHallo: "Sag Hallo im Chat",
     anfrage: "🤝 {name} möchte sich verbinden", anfrageText: "Kurz tippen zum Bestätigen",
-    fehler: "🐞 Fehler in Ahoi",
+    fehler: "🐞 Fehler in Ahoi", hilton: "🏨 Hilton-Hotel wartet",
   },
   en: {
     noch: "📍 Still in {ort}?", nochText: "Tap to confirm", plan: "📍 In {ort} now?", planText: "That's what your travel plan says",
@@ -34,7 +34,7 @@ const TEXTE: Record<string, Record<string, string>> = {
     naehe: "🧭 {name} nearby", naeheText: "{ort} · {km} km away", naeheGleich: "{ort} · same place",
     neu: "👋 {name} joined Ahoi", neuText: "Now in {ort}", neuHallo: "Say hello in the chat",
     anfrage: "🤝 {name} wants to connect", anfrageText: "Tap to confirm",
-    fehler: "🐞 Error in Ahoi",
+    fehler: "🐞 Error in Ahoi", hilton: "🏨 Hilton hotel waiting",
   },
   sk: {
     noch: "📍 Stále v {ort}?", nochText: "Ťukni a potvrď", plan: "📍 Teraz v {ort}?", planText: "Tak to stojí v tvojom pláne ciest",
@@ -45,7 +45,7 @@ const TEXTE: Record<string, Record<string, string>> = {
     naehe: "🧭 {name} je nablízku", naeheText: "{ort} · {km} km od teba", naeheGleich: "{ort} · na rovnakom mieste",
     neu: "👋 {name} je teraz v Ahoi", neuText: "Práve v {ort}", neuHallo: "Pozdrav v chate",
     anfrage: "🤝 {name} sa chce spojiť", anfrageText: "Ťukni a potvrď",
-    fehler: "🐞 Chyba v Ahoi",
+    fehler: "🐞 Chyba v Ahoi", hilton: "🏨 Hotel Hilton čaká",
   },
 };
 const ORT_LOC: Record<string, string> = { de: "de-DE", en: "en-GB", sk: "sk-SK" };
@@ -172,6 +172,15 @@ async function fehlerEreignis(id: string) {
   const name = f.von ? await nameVon(f.von) : "?";
   const kurz = String(f.meldung).replace(/\s+/g, " ").slice(0, 90);
   return verschicken(admins.map((x) => x.id), (s) => ({ title: text(s, "fehler"), body: `${name} · ${kurz}`, url: `${APP}?verwaltung=1`, tag: `fehler-${f.id}` }));
+}
+
+// ---------- Hilton: neues oder geändertes Hotel wartet auf die Recherche → Mitteilung an den Admin ----------
+async function hiltonEreignis(id: string) {
+  const [h] = await sql`select h.id, h.name, coalesce(h.ort_eingabe, h.ort) as ort, h.von, h.recherche_am from public.hilton h where h.id = ${id} and h.status = 'recherche'`;
+  if (!h || !(await erstesMal(`hilton:${h.id}:${new Date(h.recherche_am || 0).getTime()}`))) return 0;
+  const admins = (await sql`select id from public.profile where ist_admin`).map((x) => x.id).filter((x) => x !== h.von);
+  const name = h.von ? await nameVon(h.von) : "?";
+  return verschicken(admins, (s) => ({ title: text(s, "hilton"), body: [h.name, h.ort, name].filter(Boolean).join(" · "), url: `${APP}?hilton=1`, tag: `hilton-${h.id}` }));
 }
 
 async function wunschEreignis(art: string, wunschId: string, wer: string | null) {
@@ -336,6 +345,7 @@ Deno.serve(async (req) => {
     else if (["wunsch_neu", "wunsch_dabei", "wunsch_gebucht", "wunsch_preis", "wunsch_zeit"].includes(b.ereignis) && uuid(b.wunsch)) raus = await wunschEreignis(b.ereignis, b.wunsch, uuid(b.wer));
     else if (b.ereignis === "wunsch_mit" && uuid(b.wunsch) && uuid(b.wer) && uuid(b.an)) raus = await wunschMit(b.wunsch, b.wer, b.an);
     else if (b.ereignis === "fehler" && uuid(b.fehler)) raus = await fehlerEreignis(b.fehler);
+    else if (b.ereignis === "hilton" && uuid(b.hotel)) raus = await hiltonEreignis(b.hotel);
     else if (b.ereignis === "reise" && uuid(b.reise)) raus = await reiseEreignis(b.reise);
     else if (b.ereignis === "ort" && uuid(b.person)) raus = await ortEreignis(b.person);
     else if (b.ereignis === "neu_dabei" && uuid(b.person)) raus = await neuDabei(b.person);

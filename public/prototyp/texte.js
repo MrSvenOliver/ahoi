@@ -931,4 +931,8 @@ const TEXTE = {
   "z. B. DoubleTree by Hilton Kuala Lumpur": ["e.g. DoubleTree by Hilton Kuala Lumpur", "napr. DoubleTree by Hilton Kuala Lumpur"],
   "z. B. Kuala Lumpur": ["e.g. Kuala Lumpur", "napr. Kuala Lumpur"],
   "Ahoi sucht das Hotel danach auf hilton.com und trägt Foto, Kategorie, Executive Lounge, ungefähren Preis und die Top 5 ein.": ["Ahoi then looks up the hotel on hilton.com and adds a photo, category, executive lounge, approximate price and the top 5.", "Ahoi potom vyhľadá hotel na hilton.com a doplní fotku, kategóriu, executive lounge, približnú cenu a top 5."],
+  "Danke! Das Hotel wird recherchiert": ["Thanks! The hotel is being looked up", "Ďakujeme! Hotel sa vyhľadáva"],
+  "Danke fürs Teilen! Das Hotel ist in Bearbeitung. Foto, Lounge, Preis und die Top 5 kommen bald dazu.": ["Thanks for sharing! The hotel is being looked up. Photo, lounge, price and the top 5 will be added soon.", "Vďaka za zdieľanie! Hotel sa spracúva. Fotka, lounge, cena a top 5 čoskoro pribudnú."],
+  "Dieses Hotel haben wir nicht gefunden. Prüf bitte Name und Ort.": ["We couldn't find this hotel. Please check the name and place.", "Tento hotel sme nenašli. Skontroluj prosím názov a miesto."],
+  "Danach wird das Hotel recherchiert: Foto, Kategorie, Executive Lounge, ungefährer Preis und die Top 5 kommen dazu, sobald es fertig ist.": ["The hotel is looked up afterwards: photo, category, executive lounge, approximate price and the top 5 are added once it's done.", "Hotel sa potom vyhľadá: fotka, kategória, executive lounge, približná cena a top 5 pribudnú, keď bude hotový."],
 };
