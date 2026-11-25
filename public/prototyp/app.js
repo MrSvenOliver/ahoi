@@ -1569,8 +1569,8 @@ function hiltonAufbauen() {
     hotels.splice(hotels.indexOf(h), 1); hiltonAufbauen();
   }, true]]));
 }
-// Ohne Link: Hilton-Suche nach Name und Ort (deutsche Seite für Deutsch, sonst englisch)
-const hiltonAdresse = h => h.link || `https://www.hilton.com/${SPRACHE === "de" ? "de" : "en"}/search/?query=${encodeURIComponent([h.name, h.ort].filter(Boolean).join(" "))}`;
+// Ohne Link: Hilton-Suche nach der Stadt (die Hilton-Suche versteht nur Orte, das Hotel steht dann in der Liste)
+const hiltonAdresse = h => h.link || `https://www.hilton.com/${SPRACHE === "de" ? "de" : "en"}/search/?query=${encodeURIComponent([h.ort, h.land ? landName(h.land) : ""].filter(Boolean).join(", ") || h.name)}`;
 let hotelFoto = null;
 const HILTON_BEISPIELE = ["z. B. Lage direkt am Strand", "z. B. Executive Lounge mit Dachterrasse", "z. B. Spa mit Pool", "", ""];
 function hiltonFormOeffnen(h) {

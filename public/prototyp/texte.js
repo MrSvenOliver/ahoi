@@ -912,6 +912,6 @@ const TEXTE = {
   "📷 Foto dazulegen (freiwillig, z. B. Screenshot aus der Hilton-App)": ["📷 Add a photo (optional, e.g. a screenshot from the Hilton app)", "📷 Pridať fotku (nepovinné, napr. snímka z aplikácie Hilton)"],
   "Foto gewählt": ["Photo selected", "Fotka vybraná"],
   "Der Link stimmt nicht. Feld leeren oder einen Link einfügen": ["The link isn't valid. Clear the field or paste a link", "Odkaz nie je platný. Vymaž pole alebo vlož odkaz"],
-  "Name und Ort reichen. Ohne Link sucht der Knopf das Hotel auf hilton.com.": ["Name and place are enough. Without a link, the button searches for the hotel on hilton.com.", "Stačí názov a miesto. Bez odkazu tlačidlo vyhľadá hotel na hilton.com."],
+  "Name und Ort reichen. Ohne Link zeigt der Knopf die Hilton-Hotels in dieser Stadt.": ["Name and place are enough. Without a link, the button shows the Hilton hotels in that city.", "Stačí názov a miesto. Bez odkazu tlačidlo ukáže hotely Hilton v tomto meste."],
   "Link (freiwillig)": ["Link (optional)", "Odkaz (nepovinné)"],
 };
