@@ -836,4 +836,8 @@ const TEXTE = {
   "Ja, aus Reisen nehmen": ["Yes, remove from trips", "Áno, odstrániť z ciest"],
   "Nein, Reise behalten": ["No, keep the trip", "Nie, cestu ponechať"],
   "✈️ Wer in der Wishlist zusagt, hat die Reise jetzt automatisch in „Reisen“, für alle sichtbar. Neue Daten wandern mit, beim Absagen fragt Ahoi, ob die Reise auch weg soll.": ["✈️ If you say you're in on the Wishlist, the trip now shows up in “Trips” for everyone. New dates move along, and if you drop out, Ahoi asks whether to remove the trip too.", "✈️ Kto sa na Wishliste prihlási, má cestu automaticky v „Cestách“, viditeľnú pre všetkých. Nové dátumy sa presunú a pri odhlásení sa Ahoi spýta, či cestu odstrániť."],
+  "Termin buchen": ["Book a meeting", "Rezervovať termín"],
+  "📅 Calendly im Profil: Trag deinen Link unter „Social Media und Webseite“ ein, dann können Freunde in deinem Steckbrief direkt einen Termin buchen.": ["📅 Calendly in your profile: add your link under “Social media and website” and friends can book a meeting right from your profile card.", "📅 Calendly v profile: pridaj svoj odkaz v „Sociálne siete a web“ a priatelia si môžu priamo v tvojom profile rezervovať termín."],
+  "{name} entfernt": ["{name} removed", "{name} odstránené"],
+  "✕ Links entfernen geht jetzt mit einem Tipp auf das ✕ neben dem Feld.": ["✕ Remove a link with one tap on the ✕ next to the field.", "✕ Odkaz odstrániš jedným ťuknutím na ✕ vedľa poľa."],
 };

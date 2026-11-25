@@ -3,7 +3,7 @@ const leute = ECHT ? ECHT_DATEN.leute : [
   { id: "du",    name: "Du",    ort: "Málaga",      land: "ES", lat: 36.7213, lon: -4.4214,  tz: "Europe/Madrid",       farbe: "#7a5a3a" },
   { id: "alex",  name: "Alex",  ort: "Lissabon",    land: "PT", lat: 38.7223, lon: -9.1393,  tz: "Europe/Lisbon",       farbe: "#c0582f", paar: "p1" },
   { id: "sam",   name: "Sam",   ort: "Bratislava",  land: "SK", lat: 48.1486, lon: 17.1077,  tz: "Europe/Bratislava",   farbe: "#3f6b8a", paar: "p1" },
-  { id: "lea",   name: "Lea",   ort: "Canggu, Bali",land: "ID", lat: -8.6478, lon: 115.1385, tz: "Asia/Makassar",       farbe: "#6f8a3a", paar: "p2", links: { instagram: "lea.unterwegs", web: "https://example.com" } },
+  { id: "lea",   name: "Lea",   ort: "Canggu, Bali",land: "ID", lat: -8.6478, lon: 115.1385, tz: "Asia/Makassar",       farbe: "#6f8a3a", paar: "p2", links: { instagram: "lea.unterwegs", web: "https://example.com", calendly: "lea-unterwegs/30min" } },
   { id: "nico",  name: "Nico",  ort: "Canggu, Bali",land: "ID", lat: -8.6478, lon: 115.1385, tz: "Asia/Makassar",       farbe: "#4f7a6a", paar: "p2" },
   { id: "mia",   name: "Mia",   ort: "Mexiko-Stadt",land: "MX", lat: 19.4326, lon: -99.1332, tz: "America/Mexico_City", farbe: "#a8467a" },
   { id: "jonas", name: "Jonas", ort: "Chiang Mai",  land: "TH", lat: 18.7883, lon: 98.9853,  tz: "Asia/Bangkok",        farbe: "#b98a2e" },
@@ -1871,8 +1871,9 @@ async function steckbriefOeffnen(p) {
   const zahlen = laenderVon(p) ? `<div class="sb-zahlen"><div><b data-zahl="${zahl}">${zahl}</b><span>${t(zahl === 1 ? "Land" : "Länder")}</span></div><div><b>${kont}/7</b><span>${t("Kontinente")}</span></div><div><b>${pio ? pio + "×" : "–"}</b><span>${t("Pionier")}</span></div></div><div class="sb-karte">${karte}</div>` : "";
   const sortiert = laender.filter(cc => STAATEN.has(cc)).slice(0, 11);
   const stempel = sortiert.length ? `<div class="sb-stempel">${sortiert.map((cc, i) => `<span class="stempel-ink${i % 3 === 1 ? " eckig" : ""}" style="--i:${i};--r:${((i * 37) % 26) - 13}deg;--sf:${STEMPEL_FARBEN[i % STEMPEL_FARBEN.length]}">${flagge(cc)}<small>${cc}</small></span>`).join("")}${zahl > sortiert.length ? `<span class="stempel-mehr">+${zahl - sortiert.length}</span>` : ""}</div>` : "";
-  const linksHtml = Object.entries((selbst ? meineLinks : p.links) || {}).map(([k, v]) => { const u = linkZiel(k, v), a = LINK_ARTEN.find(x => x[0] === k); return u && a ? `<a href="${ohneHtml(u)}" target="_blank" rel="noopener">${a[1]}</a>` : ""; }).join("");
-  const knoepfe = (linksHtml ? `<div class="sb-links">${linksHtml}</div>` : "") + (selbst ? "" : `<div class="sb-knoepfe"><button class="knopf-leise" id="sb-karte-zeigen">📍 ${t("Auf der Karte")}</button><button class="knopf-leise" id="sb-nachricht">💬 ${t("Nachricht")}</button></div>`);
+  const alleLinks = (selbst ? meineLinks : p.links) || {}, termin = !selbst && linkZiel("calendly", alleLinks.calendly);
+  const linksHtml = Object.entries(alleLinks).map(([k, v]) => { if (k === "calendly" && termin) return ""; const u = linkZiel(k, v), a = LINK_ARTEN.find(x => x[0] === k); return u && a ? `<a href="${ohneHtml(u)}" target="_blank" rel="noopener">${a[1]}</a>` : ""; }).join("");
+  const knoepfe = (linksHtml ? `<div class="sb-links">${linksHtml}</div>` : "") + (termin ? `<a class="knopf-gross sb-termin" href="${ohneHtml(termin)}" target="_blank" rel="noopener">📅 ${t("Termin buchen")}</a>` : "") + (selbst ? "" : `<div class="sb-knoepfe"><button class="knopf-leise" id="sb-karte-zeigen">📍 ${t("Auf der Karte")}</button><button class="knopf-leise" id="sb-nachricht">💬 ${t("Nachricht")}</button></div>`);
   const blatt = document.getElementById("sb-blatt");
   blatt.style.setProperty("--sb-farbe", p.farbe || "#0a84ff");
   blatt.innerHTML = `<button class="sb-zu" id="sb-zu" aria-label="${t("Schließen")}">✕</button>
@@ -1902,29 +1903,42 @@ document.addEventListener("keydown", e => { if (e.key === "Escape") steckbriefZu
 document.getElementById("steckbrief-selbst").onclick = () => steckbriefOeffnen(ich());
 
 // ---------- Profil: Social Media und Webseite (freiwillig, klein im Steckbrief) ----------
-const LINK_ARTEN = [["instagram", "Instagram", "@name"], ["tiktok", "TikTok", "@name"], ["x", "X", "@name"], ["facebook", "Facebook", "Name oder Link"], ["linkedin", "LinkedIn", "Name oder Link"], ["web", "Webseite", "https://…"]];
+const LINK_ARTEN = [["instagram", "Instagram", "@name"], ["tiktok", "TikTok", "@name"], ["x", "X", "@name"], ["facebook", "Facebook", "Name oder Link"], ["linkedin", "LinkedIn", "Name oder Link"], ["calendly", "Calendly", "Name oder Link"], ["web", "Webseite", "https://…"]];
 function linkZiel(k, v) {
   v = String(v || "").trim(); if (!v) return null;
   if (/^https?:\/\//i.test(v)) return v.replace(/^http:/i, "https:");
   const n = encodeURIComponent(v.replace(/^@/, "").replace(/\s+/g, ""));
+  if (k === "calendly") return "https://calendly.com/" + v.replace(/^@/, "").replace(/\s+/g, "").replace(/^(www\.)?calendly\.com\//i, "").split("/").map(encodeURIComponent).join("/");
   return { instagram: `https://instagram.com/${n}`, tiktok: `https://www.tiktok.com/@${n}`, x: `https://x.com/${n}`, facebook: `https://facebook.com/${n}`, linkedin: `https://www.linkedin.com/in/${n}`, web: `https://${v.replace(/\s+/g, "")}` }[k] || null;
 }
 let meineLinks = {};
 function linksWertZeigen() { const n = Object.keys(meineLinks).length; document.getElementById("links-wert").textContent = n ? t("{n} eingetragen", { n }) : t("Freiwillig"); }
 function linksSeiteAufbauen() {
-  document.getElementById("links-felder").innerHTML = LINK_ARTEN.map(([k, name, ph]) => `<label>${name}<input data-link="${k}" maxlength="200" autocomplete="off" autocapitalize="off" spellcheck="false" inputmode="${k === "web" || k === "linkedin" || k === "facebook" ? "url" : "text"}" placeholder="${ohneHtml(t(ph))}" value="${ohneHtml(meineLinks[k] || "")}"></label>`).join("");
+  document.getElementById("links-felder").innerHTML = LINK_ARTEN.map(([k, name, ph]) => `<label>${name}<span class="link-feld"><input data-link="${k}" maxlength="200" autocomplete="off" autocapitalize="off" spellcheck="false" inputmode="${k === "web" || k === "linkedin" || k === "facebook" || k === "calendly" ? "url" : "text"}" placeholder="${ohneHtml(t(ph))}" value="${ohneHtml(meineLinks[k] || "")}"><button type="button" class="link-weg" data-weg="${k}" aria-label="${t("Entfernen")}"${meineLinks[k] ? "" : " hidden"}>✕</button></span></label>`).join("");
+  document.querySelectorAll("#links-felder [data-link]").forEach(f => f.addEventListener("input", () => { f.nextElementSibling.hidden = !f.value.trim(); }));
+  // ✕: Verbindung mit einem Tipp entfernen und gleich speichern
+  document.querySelectorAll("#links-felder .link-weg").forEach(b => b.onclick = async e => {
+    e.preventDefault();
+    const f = b.previousElementSibling, war = f.value, name = LINK_ARTEN.find(x => x[0] === b.dataset.weg)[1];
+    f.value = ""; b.hidden = true;
+    if (!meineLinks[b.dataset.weg]) return;
+    if (await linksSichern(b)) hinweis(t("{name} entfernt", { name })); else { f.value = war; b.hidden = false; }
+  });
 }
-document.getElementById("links-zeile").onclick = () => { linksSeiteAufbauen(); seiteZeigen("links"); };
-document.getElementById("links-speichern").onclick = async e => {
+async function linksSichern(knopf) {
   const neu = {};
   document.querySelectorAll("#links-felder [data-link]").forEach(f => { const v = f.value.trim(); if (v) neu[f.dataset.link] = v.slice(0, 200); });
   if (ECHT) {
-    beschaeftigt(e.target, true);
+    beschaeftigt(knopf, true);
     const { error } = await SB.from("profile").update({ links: neu }).eq("id", ECHT_DATEN.uid);
-    beschaeftigt(e.target, false);
-    if (error) return hinweis(t("Speichern hat nicht geklappt"));
+    beschaeftigt(knopf, false);
+    if (error) { hinweis(t("Speichern hat nicht geklappt")); return false; }
   } else { try { localStorage.setItem("ahoi-links", JSON.stringify(neu)); } catch (x) {} }
-  meineLinks = neu; linksWertZeigen(); seiteZeigen("profil"); hinweis(t("Gespeichert"));
+  meineLinks = neu; linksWertZeigen(); return true;
+}
+document.getElementById("links-zeile").onclick = () => { linksSeiteAufbauen(); seiteZeigen("links"); };
+document.getElementById("links-speichern").onclick = async e => {
+  if (await linksSichern(e.target)) { seiteZeigen("profil"); hinweis(t("Gespeichert")); }
 };
 if (!ECHT) { try { meineLinks = JSON.parse(localStorage.getItem("ahoi-links") || "{}"); } catch (e) {} }
 linksWertZeigen();
@@ -2583,7 +2597,9 @@ async function ortNachfragen(sofort) {
 // Bei jedem Update oben einen Eintrag ergänzen (neueste zuerst). Wer neu dabei ist, sieht nur den neuesten.
 const NEUIGKEITEN = [
   { id: "2026-11-25-reisen", punkte: [
-    "✈️ Wer in der Wishlist zusagt, hat die Reise jetzt automatisch in „Reisen“, für alle sichtbar. Neue Daten wandern mit, beim Absagen fragt Ahoi, ob die Reise auch weg soll."
+    "✈️ Wer in der Wishlist zusagt, hat die Reise jetzt automatisch in „Reisen“, für alle sichtbar. Neue Daten wandern mit, beim Absagen fragt Ahoi, ob die Reise auch weg soll.",
+    "📅 Calendly im Profil: Trag deinen Link unter „Social Media und Webseite“ ein, dann können Freunde in deinem Steckbrief direkt einen Termin buchen.",
+    "✕ Links entfernen geht jetzt mit einem Tipp auf das ✕ neben dem Feld."
   ] },
   { id: "2026-11-25-wishlist", punkte: [
     "🏡 Wishlist: Wer etwas teilt, kann jetzt selbst wählen, ob er dabei ist, und Daten und Preis jederzeit über „✏️ Ändern“ anpassen.",

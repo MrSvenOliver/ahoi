@@ -1000,6 +1000,11 @@
   .mit-symbol { display: flex; gap: 8px; align-items: flex-start; }
   .zeilen-symbol { flex: none; width: 22px; text-align: center; }
   .hinweis-band.eingerueckt { text-align: left; padding-left: 30px; }
+  .link-feld { position: relative; display: block; }
+  .link-feld input { padding-right: 46px; }
+  .link-weg { position: absolute; right: 6px; top: 50%; transform: translateY(calc(-50% + 3px)); width: 34px; height: 34px; border-radius: 50%; border: 0; background: var(--trenner); color: var(--text); font-size: 14px; cursor: pointer; }
+  [data-stil="mission"] .link-weg { border-radius: 2px; }
+  .sb-termin { display: block; width: 100%; margin-top: 10px; text-align: center; text-decoration: none; box-sizing: border-box; }
   .reise-marke { white-space: nowrap; font-weight: 600; }
   .wunsch-daten { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; text-align: left; }
   .wunsch-daten label { font-size: 13px; font-weight: 600; color: var(--text-leise); display: flex; flex-direction: column; gap: 4px; }

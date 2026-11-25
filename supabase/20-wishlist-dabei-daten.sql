@@ -148,3 +148,11 @@ do $$ declare w record; p uuid; begin
   end loop;
 end $$;
 alter table public.reise enable trigger push_reise;
+
+-- Profil-Links: Calendly dazu (Freunde buchen im Steckbrief direkt einen Termin)
+create or replace function public.links_ok(j jsonb) returns boolean
+language sql immutable set search_path = public as $$
+  select jsonb_typeof(j) = 'object' and coalesce((
+    select bool_and(k in ('instagram', 'facebook', 'tiktok', 'x', 'linkedin', 'calendly', 'web') and jsonb_typeof(v) = 'string' and char_length(v #>> '{}') between 1 and 200)
+    from jsonb_each(j) as e(k, v)), true);
+$$;
