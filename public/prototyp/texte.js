@@ -858,4 +858,5 @@ const TEXTE = {
   "🧭 Alex in der Nähe": ["🧭 Alex nearby", "🧭 Alex nablízku"],
   "(Februar 2027)": ["(February 2027)", "(február 2027)"],
   "🇵🇹 13.2. – 20.2. · du in Lissabon, Alex in Ericeira · 35 km": ["🇵🇹 13 Feb – 20 Feb · you in Lisbon, Alex in Ericeira · 35 km", "🇵🇹 13.2. – 20.2. · ty v Lisabone, Alex v Ericeire · 35 km"],
+  "Monat wählen": ["Choose a month", "Vyber mesiac"],
 };

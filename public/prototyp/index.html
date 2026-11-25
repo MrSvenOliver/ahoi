@@ -1013,6 +1013,8 @@
   .dabei-wahl .zeile-einst:last-child { border-bottom: 0; }
   #aktion-titel .dabei-wahl { font-weight: 400; font-size: 16px; }
   .dabei-zahl { font-size: 13px; color: var(--text-leise); margin-left: 8px; white-space: nowrap; }
+  .monat-wahl { display: block; width: 100%; margin-top: 6px; border: 1px solid var(--trenner); background: var(--flaeche); color: var(--text); border-radius: 12px; padding: 12px; font: inherit; font-size: 16px; -webkit-appearance: none; appearance: none; }
+  [data-stil="mission"] .monat-wahl { border-radius: 2px; }
   .reise-marke { white-space: nowrap; font-weight: 600; }
   .wunsch-daten { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; text-align: left; }
   .wunsch-daten label { font-size: 13px; font-weight: 600; color: var(--text-leise); display: flex; flex-direction: column; gap: 4px; }
@@ -1168,7 +1170,7 @@
     <div class="ort-treffer" id="reise-orte"></div>
     <p class="es-ort" id="reise-gewaehlt"></p>
     <div class="zwei" id="reise-daten"><label>Ankunft<input type="date" id="reise-an"></label><label>Abreise<input type="date" id="reise-ab"></label></div>
-    <label id="reise-monat-zeile" hidden>Ungefähr im Monat<input type="month" id="reise-monat"></label>
+    <label id="reise-monat-zeile" hidden>Ungefähr im Monat<select id="reise-monat" class="monat-wahl"></select></label>
     <div class="zeile-einst"><div>Nur ein Vielleicht<small>Noch nicht sicher, ohne genaue Daten</small></div><button class="schalter" id="reise-vielleicht"></button></div>
   </div>
   <button class="knopf-gross" style="width:100%" id="reise-speichern">Speichern</button>

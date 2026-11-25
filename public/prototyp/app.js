@@ -797,12 +797,14 @@ document.getElementById("reise-an").addEventListener("change", e => { const ab =
 let reiseOrt = null;
 function reiseFormularLeeren() {
   reiseOrt = null;
-  ["reise-ort", "reise-an", "reise-ab", "reise-monat"].forEach(id => document.getElementById(id).value = "");
+  ["reise-ort", "reise-an", "reise-ab"].forEach(id => document.getElementById(id).value = "");
   document.getElementById("reise-gewaehlt").textContent = ""; document.getElementById("reise-orte").innerHTML = "";
   document.getElementById("reise-vielleicht").classList.remove("an"); reiseArtZeigen();
   const heute = new Date().toISOString().slice(0, 10);
   document.getElementById("reise-an").min = heute; document.getElementById("reise-ab").min = heute;
-  document.getElementById("reise-monat").min = heute.slice(0, 7);
+  // Monat als Liste der nächsten 24 Monate mit Jahr („April 2027“); die iPhone-Monatsauswahl ließ vergangene Monate zu
+  const jetzt = new Date(), monate = Array.from({ length: 24 }, (_, k) => new Date(Date.UTC(jetzt.getFullYear(), jetzt.getMonth() + k, 1)));
+  document.getElementById("reise-monat").innerHTML = `<option value="">${t("Monat wählen")}</option>` + monate.map(d => `<option value="${d.toISOString().slice(0, 7)}">${d.toLocaleDateString(LOC, { month: "long", year: "numeric", timeZone: "UTC" })}</option>`).join("");
 }
 function reiseArtZeigen() {
   const viel = document.getElementById("reise-vielleicht").classList.contains("an");
@@ -819,7 +821,7 @@ document.getElementById("reise-speichern").onclick = async e => {
   if (!reiseOrt) return hinweis(t("Bitte einen Ort aus der Liste wählen"));
   const viel = document.getElementById("reise-vielleicht").classList.contains("an");
   const daten = { ort: reiseOrt.ort, land: reiseOrt.land, lat: reiseOrt.lat, lon: reiseOrt.lon, vielleicht: viel };
-  if (viel) { daten.monat = document.getElementById("reise-monat").value; if (!daten.monat) return hinweis(t("Bitte einen Monat wählen")); }
+  if (viel) { daten.monat = document.getElementById("reise-monat").value; if (!daten.monat || daten.monat < new Date().toISOString().slice(0, 7)) return hinweis(t("Bitte einen Monat wählen")); }
   else {
     daten.ankunft = document.getElementById("reise-an").value; daten.abreise = document.getElementById("reise-ab").value;
     if (!daten.ankunft || !daten.abreise) return hinweis(t("Bitte Ankunft und Abreise wählen"));
@@ -2643,20 +2645,18 @@ async function ortNachfragen(sofort) {
 }
 
 // ---------- Neu in Ahoi: nach jedem App-Update einmal eine kurze Übersicht ----------
-// Bei jedem Update oben einen Eintrag ergänzen (neueste zuerst). Wer neu dabei ist, sieht nur den neuesten.
+// Nur große, wichtige Neuerungen mit gross: true zeigen (entschieden 25.11.2026); kleine Änderungen und Fehlerbehebungen
+// bekommen keinen Eintrag. Neueste zuerst. Wer neu dabei ist, sieht nur die neueste große Neuerung.
 const NEUIGKEITEN = [
-  { id: "2026-11-25-zimmer", punkte: [
-    "🛏 Wishlist: Beim Teilen und bei „Ich wäre dabei“ gibst du kurz an, wie viele Personen und Schlafzimmer. Wer mehr Zimmer belegt, zahlt entsprechend mehr.",
-    "☐ „Als gebucht markieren“: Erst wenn wirklich gebucht ist, wird der Eintrag grün mit ✅.",
-    "📍 Treffer in Reisen: selber Ort in Grün, in der Nähe in zartem Grün."
+  { id: "2026-11-25-zimmer", gross: true, punkte: [
+    "🛏 Wishlist: Beim Teilen und bei „Ich wäre dabei“ gibst du kurz an, wie viele Personen und Schlafzimmer. Wer mehr Zimmer belegt, zahlt entsprechend mehr."
   ] },
   { id: "2026-11-25-airbnb", punkte: [
     "🏠 Wishlist: Zur Unterkunft geht es jetzt über einen eigenen Knopf in Airbnb-Pink (bei Booking.com in Blau), direkt mit euren Daten."
   ] },
-  { id: "2026-11-25-reisen", punkte: [
+  { id: "2026-11-25-reisen", gross: true, punkte: [
     "✈️ Wer in der Wishlist zusagt, hat die Reise jetzt automatisch in „Reisen“, für alle sichtbar. Neue Daten wandern mit, beim Absagen fragt Ahoi, ob die Reise auch weg soll.",
-    "📅 Calendly im Profil: Trag deinen Link unter „Social Media und Webseite“ ein, dann können Freunde in deinem Steckbrief direkt einen Termin buchen.",
-    "✕ Links entfernen geht jetzt mit einem Tipp auf das ✕ neben dem Feld."
+    "📅 Calendly im Profil: Trag deinen Link unter „Social Media und Webseite“ ein, dann können Freunde in deinem Steckbrief direkt einen Termin buchen."
   ] },
   { id: "2026-11-25-wishlist", punkte: [
     "🏡 Wishlist: Wer etwas teilt, kann jetzt selbst wählen, ob er dabei ist, und Daten und Preis jederzeit über „✏️ Ändern“ anpassen.",
@@ -2726,12 +2726,13 @@ function neuigkeitenZeigen() {
   if (blatt.classList.contains("offen")) return setTimeout(neuigkeitenZeigen, 1500);
   let gesehen = null; try { gesehen = localStorage.getItem("ahoi-neuigkeiten"); } catch (e) {}
   const bis = NEUIGKEITEN.findIndex(n => n.id === gesehen);
-  const neu = bis === -1 ? NEUIGKEITEN.slice(0, 1) : NEUIGKEITEN.slice(0, bis);
-  if (!neu.length) return;
+  const grosse = (bis === -1 ? NEUIGKEITEN : NEUIGKEITEN.slice(0, bis)).filter(n => n.gross);
+  const neu = bis === -1 ? grosse.slice(0, 1) : grosse;
   const merken = () => { try { localStorage.setItem("ahoi-neuigkeiten", NEUIGKEITEN[0].id); } catch (e) {} };
+  if (!neu.length) return merken();
   document.getElementById("aktion-titel").textContent = t("✨ Neu in Ahoi");
   const box = document.getElementById("aktion-knoepfe");
-  box.innerHTML = `<ul class="neu-liste">${neu.flatMap(n => n.punkte).slice(0, 6).map(x => `<li>${t(x)}</li>`).join("")}</ul>`;
+  box.innerHTML = `<ul class="neu-liste">${neu.flatMap(n => n.punkte).slice(0, 4).map(x => `<li>${t(x)}</li>`).join("")}</ul>`;
   const los = document.createElement("button"); los.className = "knopf-gross"; los.textContent = t("Los geht's");
   los.onclick = () => { merken(); blatt.classList.remove("offen"); };
   box.appendChild(los);
