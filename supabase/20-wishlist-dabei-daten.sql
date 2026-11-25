@@ -1,10 +1,31 @@
--- Ahoi · Beta · Wishlist: wer geteilt hat, muss nicht dabei sein; Zeitraum änderbar; Push bei neuen Daten
+-- Ahoi · Beta · Wishlist: wer geteilt hat, muss nicht dabei sein; Zeitraum änderbar; Push bei neuen Daten;
+-- wer dabei ist, hat die Reise automatisch in „Reisen“ (wandert bei neuen Daten mit)
 -- Einmal im Supabase-SQL-Editor ausführen (nach 19). Danach die Edge Function „push“ neu veröffentlichen.
 
 alter table public.wunsch add column if not exists ersteller_dabei boolean not null default true;
+alter table public.reise add column if not exists wunsch uuid references public.wunsch (id) on delete set null;
+create index if not exists reise_wunsch on public.reise (wunsch);
 
--- „Ich wäre dabei“ an/aus, auch für die Person, die geteilt hat
-create or replace function public.wunsch_dabei_setzen(w uuid, ja boolean) returns uuid
+-- Reise zu einem Wunsch für eine Person anlegen (oder eine gleiche, selbst eingetragene Reise verknüpfen); nur mit Zeitraum
+create or replace function public.wunsch_reise_setzen(w uuid, p uuid) returns void
+language plpgsql security definer set search_path = public as $$
+declare x wunsch;
+begin
+  select * into x from wunsch where id = w;
+  if not found or x.anreise is null or x.abreise is null then return; end if;
+  if exists (select 1 from reise where wunsch = w and von = p) then return; end if;
+  update reise set wunsch = w where id = (select r.id from reise r where r.von = p and r.wunsch is null and not r.vielleicht
+                                            and r.ort = x.ort and r.ankunft = x.anreise and r.abreise = x.abreise limit 1);
+  if not found then
+    insert into reise (von, ort, land, lat, lon, ankunft, abreise, wunsch) values (p, x.ort, x.land, x.lat, x.lon, x.anreise, x.abreise, w);
+  end if;
+end $$;
+revoke execute on function public.wunsch_reise_setzen(uuid, uuid) from public, anon, authenticated;
+
+-- „Ich wäre dabei“ an/aus, auch für die Person, die geteilt hat. Dabei = Reise in „Reisen“;
+-- beim Austreten entscheidet reise_weg, ob die Reise gelöscht wird oder als eigene Reise bleibt
+drop function if exists public.wunsch_dabei_setzen(uuid, boolean);
+create or replace function public.wunsch_dabei_setzen(w uuid, ja boolean, reise_weg boolean default false) returns uuid
 language plpgsql security definer set search_path = public as $$
 declare ich uuid := auth.uid(); x wunsch; belegt int;
 begin
@@ -15,6 +36,10 @@ begin
   if ja and x.plaetze is not null then
     select (case when x.ersteller_dabei and x.von <> ich then 1 else 0 end) + count(*) into belegt from wunsch_dabei where wunsch = w and person <> ich;
     if belegt >= x.plaetze then raise exception 'Leider voll'; end if;
+  end if;
+  if ja then perform public.wunsch_reise_setzen(w, ich);
+  elsif reise_weg then delete from reise where wunsch = w and von = ich;
+  else update reise set wunsch = null where wunsch = w and von = ich;
   end if;
   if x.von = ich then
     update wunsch set ersteller_dabei = ja where id = w;
@@ -46,16 +71,34 @@ begin
   if not (x.von = ich or exists (select 1 from wunsch_dabei where wunsch = w and person = ich)) then raise exception 'Nur wer dabei ist'; end if;
   if x.anreise is null or x.abreise is null then raise exception 'Zeitraum fehlt'; end if;
   for p in select x.von where x.ersteller_dabei union select person from wunsch_dabei where wunsch = w loop
-    if not exists (select 1 from reise r where r.von = p and r.ort = x.ort and r.ankunft = x.anreise and r.abreise = x.abreise) then
-      insert into reise (von, ort, land, lat, lon, ankunft, abreise) values (p, x.ort, x.land, x.lat, x.lon, x.anreise, x.abreise);
-      n := n + 1;
-    end if;
+    perform public.wunsch_reise_setzen(w, p);
+    n := n + 1;
   end loop;
   update wunsch set gebucht = true where id = w;
   return n;
 end $$;
-revoke execute on function public.wunsch_dabei_setzen(uuid, boolean), public.wunsch_gebucht(uuid) from public, anon;
-grant execute on function public.wunsch_dabei_setzen(uuid, boolean), public.wunsch_gebucht(uuid) to authenticated;
+revoke execute on function public.wunsch_dabei_setzen(uuid, boolean, boolean), public.wunsch_gebucht(uuid) from public, anon;
+grant execute on function public.wunsch_dabei_setzen(uuid, boolean, boolean), public.wunsch_gebucht(uuid) to authenticated;
+
+-- Neue Daten in der Wishlist: Reisen aller, die dabei sind, wandern mit (ohne Daten: Reisen weg)
+create or replace function public.wunsch_reisen_nachziehen() returns trigger
+language plpgsql security definer set search_path = public as $$
+declare p uuid;
+begin
+  if new.anreise is null or new.abreise is null then
+    delete from reise where wunsch = new.id;
+  else
+    update reise set ankunft = new.anreise, abreise = new.abreise where wunsch = new.id;
+    for p in select new.von where new.ersteller_dabei union select person from wunsch_dabei where wunsch = new.id loop
+      perform public.wunsch_reise_setzen(new.id, p);
+    end loop;
+  end if;
+  return new;
+end $$;
+revoke execute on function public.wunsch_reisen_nachziehen() from public, anon, authenticated;
+drop trigger if exists wunsch_reisen on public.wunsch;
+create trigger wunsch_reisen after update of anreise, abreise on public.wunsch for each row
+  when ((old.anreise, old.abreise) is distinct from (new.anreise, new.abreise)) execute function public.wunsch_reisen_nachziehen();
 
 -- Zeitraum nur sinnvoll: beide Daten oder keins, Abreise nach Anreise
 alter table public.wunsch drop constraint if exists wunsch_zeitraum_ok;
@@ -94,3 +137,14 @@ end $$;
 revoke execute on function public.push_bei_ereignis() from public, anon, authenticated;
 drop trigger if exists push_wunsch on public.wunsch;
 create trigger push_wunsch after insert or update of gebucht, preis, anreise, abreise on public.wunsch for each row execute function public.push_bei_ereignis();
+
+-- Einmalig: wer schon dabei ist, bekommt die Reise jetzt (ohne Push, damit nicht alles auf einmal klingelt)
+alter table public.reise disable trigger push_reise;
+do $$ declare w record; p uuid; begin
+  for w in select * from public.wunsch where not gebucht and anreise is not null and abreise >= current_date loop
+    for p in select w.von where w.ersteller_dabei union select person from public.wunsch_dabei where wunsch = w.id loop
+      perform public.wunsch_reise_setzen(w.id, p);
+    end loop;
+  end loop;
+end $$;
+alter table public.reise enable trigger push_reise;

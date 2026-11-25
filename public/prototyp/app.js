@@ -868,7 +868,7 @@ function reisenAufbauen() {
       <div class="gesichter">${gesichter}</div>
       <div class="text"><span class="wer">${ps.map(p => p.name).join(" & ")}</span>
         <span class="ziel">${r.land ? flagge(r.land) : "📍"}&nbsp;&nbsp;${ohneHtml(r.ziel)}</span>
-        <span class="wann">${r.von ? kurz(r.von) + " – " + kurz(r.bis) : t("irgendwann im {m}", { m: datum(r.monat + "-01").toLocaleDateString(LOC, { month: "long" }) })}</span></div>
+        <span class="wann">${r.von ? kurz(r.von) + " – " + kurz(r.bis) : t("irgendwann im {m}", { m: datum(r.monat + "-01").toLocaleDateString(LOC, { month: "long" }) })}${wunschMarke(r)}</span></div>
       <div class="art">${r.vielleicht ? '<span class="vielleicht-text">' + t("Vielleicht") + '</span>' : `<b>${naechte}</b><small>${t(naechte === 1 ? "Nacht" : "Nächte")}</small>`}</div></div>`;
   }
   document.getElementById("reise-liste").innerHTML = html || (ECHT ? `<div class="bald"><div style="font-size:44px">✈️</div><b>${t("Noch keine Reisen")}</b>${t("Trag deine nächste Reise ein. Wenn Freunde zur selben Zeit am selben Ort sind, zeigt Ahoi euch einen Treffer.")}</div>` : "");
@@ -1173,7 +1173,7 @@ tipps.forEach(x => x.ort = t(x.ort));
 // „Preis ansehen“: öffnet die Unterkunft mit Zeitraum und Personenzahl; aktueller Preis und Verfügbarkeit kommen immer von der Seite selbst.
 // Im Prototyp gibt es keine echten Inserat-Links, deshalb die Suche am Ort.
 function ansehenLink(i) {
-  const leuteZahl = 1 + i.dabei.length;
+  const leuteZahl = Math.max(1, (i.vonDabei === false ? 0 : 1) + i.dabei.length);
   if (i.echt && !/airbnb\./i.test(i.link)) return i.link;
   if (i.quelle === "booking.com") { const u = new URL("https://www.booking.com/searchresults.html"); u.searchParams.set("ss", i.ort); u.searchParams.set("group_adults", leuteZahl); if (i.anreise) { u.searchParams.set("checkin", i.anreise); u.searchParams.set("checkout", i.abreise); } return u.href; }
   const echt = !!i.link, u = new URL(i.link || `https://www.airbnb.de/s/${encodeURIComponent(i.ort)}/homes`);
@@ -1183,14 +1183,15 @@ function ansehenLink(i) {
 }
 // „Gebucht“: aus der Idee wird eine Reise für alle, die dabei sind
 function gebuchtMelden(i) {
-  const wer = [i.von, ...i.dabei];
+  const wer = [...(i.vonDabei === false ? [] : [i.von]), ...i.dabei];
   if (!i.anreise) {
     seiteZeigen("reise-neu");
     document.querySelector("#seite-reise-neu input").value = i.ort;
     return hinweis("Nur noch die Daten eintragen");
   }
   i.gebucht = true;
-  reisen.push({ wer, ziel: i.ort, land: i.land, von: i.anreise, bis: i.abreise });
+  for (let k = reisen.length - 1; k >= 0; k--) if (reisen[k].wunsch === i.id) reisen.splice(k, 1);
+  reisen.push({ wer, ziel: i.ort, land: i.land, von: i.anreise, bis: i.abreise, wunsch: i.id });
   reisenAufbauen();
   const c = ideeGruppe(i, true); c.nachrichten.push({ system: t("✅ <b>Gebucht!</b> {titel}, {daten} steht jetzt in den Reisen", { titel: t("{art} in {ort}", { art: i.art, ort: i.ort }), daten: kurz(i.anreise) + "–" + kurz(i.abreise) }) });
   ideenAufbauen();
@@ -1274,11 +1275,20 @@ function ideenAufbauen() {
   if (ECHT) return wishlistKnoepfe();
   document.querySelectorAll(".herzen").forEach(b => b.onclick = () => { ideen[b.dataset.n].herzen++; ideenAufbauen(); });
   document.querySelectorAll(".dabei-knopf").forEach(b => b.onclick = () => {
-    const i = ideen[b.dataset.n], k = i.dabei.indexOf("du");
-    if (i.von === "du") { i.vonDabei = i.vonDabei === false; return ideenAufbauen(); }
-    if (k >= 0) { i.dabei.splice(k, 1); ideeGruppe(i, false); }
-    else { i.dabei.push("du"); ideeGruppe(i, true); hinweis(t("{name} wird benachrichtigt · Gruppe im Chat", { name: person(i.von).name })); }
-    ideenAufbauen();
+    const i = ideen[b.dataset.n], k = i.dabei.indexOf("du"), eigen = i.von === "du", ja = eigen ? i.vonDabei === false : k < 0;
+    const meine = () => reisen.findIndex(r => r.wunsch === i.id && r.wer.includes("du"));
+    const fertig = reiseWeg => {
+      if (eigen) i.vonDabei = ja;
+      else if (ja) { i.dabei.push("du"); ideeGruppe(i, true); } else { i.dabei.splice(i.dabei.indexOf("du"), 1); ideeGruppe(i, false); }
+      const r = meine();
+      if (ja && i.anreise && r < 0) reisen.push({ wer: ["du"], ziel: i.ort, land: i.land, von: i.anreise, bis: i.abreise, wunsch: i.id });
+      if (!ja && r >= 0) { if (reiseWeg) reisen.splice(r, 1); else reisen[r].wunsch = null; }
+      reisenAufbauen(); ideenAufbauen();
+      hinweis(ja ? (i.anreise ? t("Du bist dabei · steht auch in deinen Reisen") : eigen ? t("Du bist dabei") : t("{name} wird benachrichtigt · Gruppe im Chat", { name: person(i.von).name }))
+        : reiseWeg ? t("Du bist nicht mehr dabei · auch aus Reisen entfernt") : t("Du bist nicht mehr dabei"));
+    };
+    if (!ja && meine() >= 0) return fragen(t("Du bist nicht mehr dabei. Auch aus deinen Reisen nehmen?"), [[t("Ja, aus Reisen nehmen"), () => fertig(true), true], [t("Nein, Reise behalten"), () => fertig(false)]]);
+    fertig(false);
   });
   document.querySelectorAll(".gebucht-knopf").forEach(b => b.onclick = () => gebuchtMelden(ideen[b.dataset.n]));
 }
@@ -1454,6 +1464,7 @@ async function wishlistLaden() {
   }
   if (!tp.error && !td.error) tipps.splice(0, tipps.length, ...tp.data.map(x => ({ id: x.id, echt: true, von: idVon(x.von), ort: x.ort, land: x.land, art: x.art, text: x.text, daumen: td.data.filter(y => y.tipp === x.id).map(y => idVon(y.person)) })).filter(x => person(x.von)));
   if (document.getElementById("seite-ideen").classList.contains("offen")) ideenAufbauen();
+  if (reisen.some(r => r.wunsch)) reisenAufbauen();
 }
 function wishlistKnoepfe() {
   const i = b => ideen[b.dataset.n];
@@ -1464,12 +1475,20 @@ function wishlistKnoepfe() {
   });
   document.querySelectorAll(".dabei-knopf").forEach(b => b.onclick = async () => {
     const x = i(b), eigen = x.von === "du", ja = eigen ? x.vonDabei === false : !x.dabei.includes("du");
-    beschaeftigt(b, true);
-    const { error } = await SB.rpc("wunsch_dabei_setzen", { w: x.id, ja });
-    beschaeftigt(b, false);
-    if (error) return hinweis(/voll/i.test(error.message) ? t("Leider voll") : t("Das hat nicht geklappt"));
-    hinweis(ja ? (eigen ? t("Du bist dabei") : t("Du bist dabei · {name} sieht das in eurer Gruppe im Chat", { name: person(x.von).name })) : t("Du bist nicht mehr dabei"));
-    await wishlistLaden(); chatsLaden().catch(() => {});
+    const los = async reiseWeg => {
+      beschaeftigt(b, true);
+      // reise_weg gibt es erst mit SQL 20 (erkennbar an ersteller_dabei)
+      const { error } = await SB.rpc("wunsch_dabei_setzen", x.eigenWahl ? { w: x.id, ja, reise_weg: !!reiseWeg } : { w: x.id, ja });
+      beschaeftigt(b, false);
+      if (error) return hinweis(/voll/i.test(error.message) ? t("Leider voll") : t("Das hat nicht geklappt"));
+      hinweis(ja ? (x.anreise && x.eigenWahl ? t("Du bist dabei · steht auch in deinen Reisen") : eigen ? t("Du bist dabei") : t("Du bist dabei · {name} sieht das in eurer Gruppe im Chat", { name: person(x.von).name }))
+        : reiseWeg ? t("Du bist nicht mehr dabei · auch aus Reisen entfernt") : t("Du bist nicht mehr dabei"));
+      await wishlistLaden(); reisenLaden(); chatsLaden().catch(() => {});
+    };
+    // Austreten: Reise in „Reisen“ mit löschen oder behalten?
+    if (!ja && reisen.some(r => r.wunsch === x.id && r.wer[0] === "du"))
+      return fragen(t("Du bist nicht mehr dabei. Auch aus deinen Reisen nehmen?"), [[t("Ja, aus Reisen nehmen"), () => los(true), true], [t("Nein, Reise behalten"), () => los(false)]]);
+    los(false);
   });
   document.querySelectorAll(".gebucht-knopf").forEach(b => b.onclick = () => {
     const x = i(b), wer = [...(x.vonDabei !== false ? [x.von] : []), ...x.dabei].map(id => id === "du" ? t("dich") : person(id).name).join(", ");
@@ -2136,6 +2155,12 @@ document.getElementById("einladen-unten").onclick = einladenWahl;
 document.getElementById("einladen-zeile").onclick = nomadeEinladen;
 document.getElementById("familie-einladen").onclick = familieErklaeren;
 
+// Reisen aus der Wishlist tragen eine kleine Marke: 🏡 Wishlist, nach dem Buchen ✅ Gebucht
+function wunschMarke(r) {
+  if (!r.wunsch) return "";
+  const w = ideen.find(i => i.id === r.wunsch);
+  return ` · <span class="reise-marke">${w && w.gebucht ? t("✅ Gebucht") : "🏡 " + t("Wishlist")}</span>`;
+}
 // ---------- Echte App: Reisen und Treffer ----------
 async function reisenLaden() {
   const { data, error } = await SB.from("reise").select("*").order("ankunft", { nullsFirst: false });
@@ -2143,7 +2168,7 @@ async function reisenLaden() {
   const heute = new Date().toISOString().slice(0, 10), monatJetzt = heute.slice(0, 7);
   const neu = data.filter(r => r.vielleicht ? r.monat >= monatJetzt : r.abreise >= heute).map(r => ({
     id: r.id, wer: [r.von === ECHT_DATEN.uid ? "du" : r.von], ziel: r.ort, land: r.land, lat: r.lat, lon: r.lon,
-    von: r.vielleicht ? null : r.ankunft, bis: r.vielleicht ? null : r.abreise, monat: r.vielleicht ? r.monat : null, vielleicht: r.vielleicht
+    von: r.vielleicht ? null : r.ankunft, bis: r.vielleicht ? null : r.abreise, monat: r.vielleicht ? r.monat : null, vielleicht: r.vielleicht, wunsch: r.wunsch || null
   }));
   reisen.splice(0, reisen.length, ...neu);
   reisenAufbauen(); trefferAufbauen();
@@ -2557,6 +2582,9 @@ async function ortNachfragen(sofort) {
 // ---------- Neu in Ahoi: nach jedem App-Update einmal eine kurze Übersicht ----------
 // Bei jedem Update oben einen Eintrag ergänzen (neueste zuerst). Wer neu dabei ist, sieht nur den neuesten.
 const NEUIGKEITEN = [
+  { id: "2026-11-25-reisen", punkte: [
+    "✈️ Wer in der Wishlist zusagt, hat die Reise jetzt automatisch in „Reisen“, für alle sichtbar. Neue Daten wandern mit, beim Absagen fragt Ahoi, ob die Reise auch weg soll."
+  ] },
   { id: "2026-11-25-wishlist", punkte: [
     "🏡 Wishlist: Wer etwas teilt, kann jetzt selbst wählen, ob er dabei ist, und Daten und Preis jederzeit über „✏️ Ändern“ anpassen.",
     "🔔 Mitteilungen sind kürzer und kommen in der Sprache, die du in Ahoi eingestellt hast."

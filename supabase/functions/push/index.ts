@@ -184,7 +184,7 @@ async function wunschEreignis(art: string, wunschId: string, wer: string | null)
 
 // ---------- Reisen und Treffer ----------
 async function reiseEreignis(reiseId: string) {
-  const [r] = await sql`select id, von, ort, land, lat, lon, ankunft, abreise, erstellt_am from public.reise where id = ${reiseId} and not vielleicht`;
+  const [r] = await sql`select id, von, ort, land, lat, lon, ankunft, abreise, erstellt_am, wunsch from public.reise where id = ${reiseId} and not vielleicht`;
   if (!r || !(await erstesMal(`reise:${r.id}`))) return 0;
   const name = await nameVon(r.von);
   const url = `${APP}?reisen=1`;
@@ -197,10 +197,11 @@ async function reiseEreignis(reiseId: string) {
     raus += await verschicken(an.map((x) => x.id), (s) => ({ title: text(s, "reise", { name, ort: r.ort }), body: zeitraum(r.ankunft, r.abreise, s), url, tag: `reise-${r.id}` }));
   }
   if (r.lat == null) return raus;
-  // Treffer: andere sind zur gleichen Zeit am gleichen Ort (unter 15 km); zusammen gebuchte Reisen zählen nicht
+  // Treffer: andere sind zur gleichen Zeit am gleichen Ort (unter 15 km); zusammen gebuchte Reisen und dieselbe Wishlist-Unterkunft zählen nicht
   const treffer = await sql`select x.von, greatest(x.ankunft, ${r.ankunft}::date) as von_d, least(x.abreise, ${r.abreise}::date) as bis_d from public.reise x
     where x.von <> ${r.von} and not x.vielleicht and x.lat is not null and x.ankunft <= ${r.abreise} and x.abreise >= ${r.ankunft}
       and public.abstand_km(x.lat, x.lon, ${r.lat}, ${r.lon}) < 15
+      and (${r.wunsch}::uuid is null or x.wunsch is distinct from ${r.wunsch}::uuid)
       and not (x.ort = ${r.ort} and x.ankunft = ${r.ankunft} and x.abreise = ${r.abreise} and abs(extract(epoch from x.erstellt_am - ${r.erstellt_am}::timestamptz)) < 300)`;
   for (const t of treffer) {
     if (!(await erstesMal(`treffer:${[r.von, t.von].sort().join(":")}:${r.ort}:${t.von_d.toISOString().slice(0, 10)}`))) continue;

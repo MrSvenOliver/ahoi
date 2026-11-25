@@ -830,4 +830,10 @@ const TEXTE = {
   "Alle, die dabei sind, bekommen Bescheid.": ["Everyone who's in gets notified.", "Všetci prihlásení dostanú upozornenie."],
   "🏡 Wishlist: Wer etwas teilt, kann jetzt selbst wählen, ob er dabei ist, und Daten und Preis jederzeit über „✏️ Ändern“ anpassen.": ["🏡 Wishlist: whoever shares a place can now choose whether they're in, and change dates and price any time with “✏️ Change”.", "🏡 Wishlist: kto zdieľa ubytovanie, si teraz sám vyberie, či ide, a dátumy aj cenu zmení kedykoľvek cez „✏️ Zmeniť“."],
   "🔔 Mitteilungen sind kürzer und kommen in der Sprache, die du in Ahoi eingestellt hast.": ["🔔 Notifications are shorter and come in the language you set in Ahoi.", "🔔 Upozornenia sú kratšie a prichádzajú v jazyku, ktorý máš nastavený v Ahoi."],
+  "Du bist dabei · steht auch in deinen Reisen": ["You're in · it's in your trips too", "Si pri tom · je to aj v tvojich cestách"],
+  "Du bist nicht mehr dabei · auch aus Reisen entfernt": ["You're out · removed from your trips too", "Už nejdeš · odstránené aj z ciest"],
+  "Du bist nicht mehr dabei. Auch aus deinen Reisen nehmen?": ["You're out. Remove it from your trips too?", "Už nejdeš. Odstrániť to aj z tvojich ciest?"],
+  "Ja, aus Reisen nehmen": ["Yes, remove from trips", "Áno, odstrániť z ciest"],
+  "Nein, Reise behalten": ["No, keep the trip", "Nie, cestu ponechať"],
+  "✈️ Wer in der Wishlist zusagt, hat die Reise jetzt automatisch in „Reisen“, für alle sichtbar. Neue Daten wandern mit, beim Absagen fragt Ahoi, ob die Reise auch weg soll.": ["✈️ If you say you're in on the Wishlist, the trip now shows up in “Trips” for everyone. New dates move along, and if you drop out, Ahoi asks whether to remove the trip too.", "✈️ Kto sa na Wishliste prihlási, má cestu automaticky v „Cestách“, viditeľnú pre všetkých. Nové dátumy sa presunú a pri odhlásení sa Ahoi spýta, či cestu odstrániť."],
 };
