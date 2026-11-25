@@ -16,7 +16,7 @@ const APP = "https://mrsvenoliver.github.io/ahoi/";
 const TEXTE: Record<string, Record<string, string>> = {
   de: {
     noch: "📍 Noch in {ort}?", nochText: "Kurz tippen zum Bestätigen", plan: "📍 Jetzt in {ort}?", planText: "So steht es in deinem Reiseplan",
-    wunschNeu: "🏡 {name} teilt eine Unterkunft", wunschDabei: "🙋 {name} ist dabei", dabeiText: "{ort} · {n} dabei", wunschMit: "🏡 {name} nimmt dich mit", mitText: "{ort} · steht in deinen Reisen",
+    wunschNeu: "🏡 {name} teilt eine Unterkunft", wunschDabei: "🙋 {name} ist dabei", dabeiText: "{ort} · {n} dabei", wunschMit: "🏡 {name} nimmt dich mit", mitText: "{ort} · steht in deinen Reisen", wunschWeg: "🏡 {name} hat die Unterkunft entfernt", wegAbgesagt: "Reise abgesagt", wegBleibt: "Deine Reise bleibt",
     wunschGebucht: "✅ Gebucht: {ort}", gebuchtText: "{zeit} · steht in deinen Reisen", wunschPreis: "💶 Preis für {ort}", preisText: "{pp} € pro Person · {n} dabei", preisZimmerText: "{pp} € pro Zimmer · {n} dabei",
     wunschZeit: "📅 Neue Daten: {ort}", zeitText: "{zeit} · {naechte}", nacht: "1 Nacht", naechte: "{n} Nächte",
     reise: "✈️ {name} reist nach {ort}", treffer: "📍 {name} am selben Ort", kommt: "📍 {name} am selben Ort", kommtText: "{zeit} · du bist gerade dort",
@@ -27,7 +27,7 @@ const TEXTE: Record<string, Record<string, string>> = {
   },
   en: {
     noch: "📍 Still in {ort}?", nochText: "Tap to confirm", plan: "📍 In {ort} now?", planText: "That's what your travel plan says",
-    wunschNeu: "🏡 {name} shared a place", wunschDabei: "🙋 {name} is in", dabeiText: "{ort} · {n} going", wunschMit: "🏡 {name} is taking you along", mitText: "{ort} · now in your trips",
+    wunschNeu: "🏡 {name} shared a place", wunschDabei: "🙋 {name} is in", dabeiText: "{ort} · {n} going", wunschMit: "🏡 {name} is taking you along", mitText: "{ort} · now in your trips", wunschWeg: "🏡 {name} removed the stay", wegAbgesagt: "Trip cancelled", wegBleibt: "Your trip stays",
     wunschGebucht: "✅ Booked: {ort}", gebuchtText: "{zeit} · now in your trips", wunschPreis: "💶 Price for {ort}", preisText: "{pp} € per person · {n} going", preisZimmerText: "{pp} € per room · {n} going",
     wunschZeit: "📅 New dates: {ort}", zeitText: "{zeit} · {naechte}", nacht: "1 night", naechte: "{n} nights",
     reise: "✈️ {name} is going to {ort}", treffer: "📍 {name} in the same place", kommt: "📍 {name} in the same place", kommtText: "{zeit} · you're there now",
@@ -38,7 +38,7 @@ const TEXTE: Record<string, Record<string, string>> = {
   },
   sk: {
     noch: "📍 Stále v {ort}?", nochText: "Ťukni a potvrď", plan: "📍 Teraz v {ort}?", planText: "Tak to stojí v tvojom pláne ciest",
-    wunschNeu: "🏡 {name} zdieľa ubytovanie", wunschDabei: "🙋 {name} ide tiež", dabeiText: "{ort} · prihlásení: {n}", wunschMit: "🏡 {name} ťa berie so sebou", mitText: "{ort} · už je v tvojich cestách",
+    wunschNeu: "🏡 {name} zdieľa ubytovanie", wunschDabei: "🙋 {name} ide tiež", dabeiText: "{ort} · prihlásení: {n}", wunschMit: "🏡 {name} ťa berie so sebou", mitText: "{ort} · už je v tvojich cestách", wunschWeg: "🏡 {name}: ubytovanie odstránené", wegAbgesagt: "Cesta zrušená", wegBleibt: "Tvoja cesta zostáva",
     wunschGebucht: "✅ Rezervované: {ort}", gebuchtText: "{zeit} · už je v tvojich cestách", wunschPreis: "💶 Cena za {ort}", preisText: "{pp} € na osobu · prihlásení: {n}", preisZimmerText: "{pp} € za izbu · prihlásení: {n}",
     wunschZeit: "📅 Nové dátumy: {ort}", zeitText: "{zeit} · {naechte}", nacht: "1 noc", naechte: "{n} nocí", naechte24: "{n} noci",
     reise: "✈️ {name} cestuje do {ort}", treffer: "📍 {name} na rovnakom mieste", kommt: "📍 {name} na rovnakom mieste", kommtText: "{zeit} · si práve tam",
@@ -162,6 +162,17 @@ async function wunschMit(wunschId: string, wer: string, an: string) {
   const name = await nameVon(wer);
   return verschicken(ziel.map((x) => x.id), (s) => ({ title: text(s, "wunschMit", { name }),
     body: w.anreise && w.abreise ? `${w.ort} · ${zeitraum(w.anreise, w.abreise, s)}` : text(s, "mitText", w.ort), url: `${APP}?wishlist=1`, tag: `wunsch-${w.id}` }));
+}
+
+// Unterkunft gelöscht: alle, die dabei waren, erfahren, ob ihre Reise bleibt oder abgesagt ist
+async function wunschWeg(id: string) {
+  const [v] = await sql`select g.id, g.von, g.ort, g.anreise, g.abreise, g.reisen_weg, g.an from public.wunsch_geloescht g where g.id = ${id}`;
+  if (!v || !(await erstesMal(`wunsch_weg:${v.id}`))) return 0;
+  const ziel = await sql`select id from public.profile where id = any(${v.an}::uuid[]) and push_wunsch_update`;
+  const name = v.von ? await nameVon(v.von) : "?";
+  return verschicken(ziel.map((x) => x.id), (s) => ({ title: text(s, "wunschWeg", { name }),
+    body: [v.ort, v.anreise && v.abreise ? zeitraum(v.anreise, v.abreise, s) : "", text(s, v.reisen_weg ? "wegAbgesagt" : "wegBleibt")].filter(Boolean).join(" · "),
+    url: `${APP}?reisen=1`, tag: `wunsch-weg-${v.id}` }));
 }
 
 // ---------- Fehler aus der App: neue Meldung an den Admin ----------
@@ -347,6 +358,7 @@ Deno.serve(async (req) => {
     else if (b.ereignis === "wunsch_mit" && uuid(b.wunsch) && uuid(b.wer) && uuid(b.an)) raus = await wunschMit(b.wunsch, b.wer, b.an);
     else if (b.ereignis === "fehler" && uuid(b.fehler)) raus = await fehlerEreignis(b.fehler);
     else if (b.ereignis === "hilton" && uuid(b.hotel)) raus = await hiltonEreignis(b.hotel);
+    else if (b.ereignis === "wunsch_weg" && uuid(b.vermerk)) raus = await wunschWeg(b.vermerk);
     else if (b.ereignis === "reise" && uuid(b.reise)) raus = await reiseEreignis(b.reise);
     else if (b.ereignis === "ort" && uuid(b.person)) raus = await ortEreignis(b.person);
     else if (b.ereignis === "neu_dabei" && uuid(b.person)) raus = await neuDabei(b.person);

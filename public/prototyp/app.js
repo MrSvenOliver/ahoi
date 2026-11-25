@@ -1811,12 +1811,28 @@ function wishlistKnoepfe() {
     }));
     naechteText();
   });
-  document.querySelectorAll(".idee-weg").forEach(b => b.onclick = () => fragen(t("Von der Wishlist löschen?"), [[t("Löschen"), async () => {
-    const x = i(b); const { error } = await SB.from("wunsch").delete().eq("id", x.id);
-    if (error) return hinweis(t("Das hat nicht geklappt"));
-    if (x.foto) SB.storage.from("wunschbilder").remove([x.foto]).catch(() => {});
-    await wishlistLaden();
-  }, true]]));
+  // Löschen: Reise behalten oder absagen; alle, die dabei sind, bekommen eine Mitteilung (SQL 27)
+  document.querySelectorAll(".idee-weg").forEach(b => b.onclick = () => {
+    const x = i(b), titel = (x.titel || "").split(" · ")[0] || x.ort || t("Unterkunft");
+    const andere = [...new Set([...parteien(x).map(y => y.id), ...mitreisende(x)])].filter(id => id !== "du" && person(id));
+    const namen = new Intl.ListFormat(LOC, { type: "conjunction" }).format(andere.map(id => person(id).name));
+    const reise = !!x.anreise && (x.vonDabei !== false || andere.length > 0);
+    const d = s => new Date(s + "T12:00").toLocaleDateString(LOC, { day: "numeric", month: "numeric" });
+    const zeile2 = andere.length ? t(andere.length === 1 ? "{namen} ist dabei und bekommt eine Nachricht." : "{namen} sind dabei und bekommen eine Nachricht.", { namen })
+      : reise ? t("Deine Reise nach {ort} ({zeit}) steht in deinen Reisen.", { ort: x.ort || titel, zeit: `${d(x.anreise)}–${d(x.abreise)}` }) : "";
+    const loeschen = async reisenWeg => {
+      const { error } = await SB.rpc("wunsch_loeschen", { w: x.id, reisen_weg: reisenWeg });
+      if (error) return hinweis(t("Das hat nicht geklappt"));
+      if (x.foto) SB.storage.from("wunschbilder").remove([x.foto]).catch(() => {});
+      hinweis(t(!reise ? "Von der Wishlist gelöscht" : reisenWeg ? (andere.length ? "Gelöscht, die Reise ist für alle abgesagt" : "Unterkunft und Reise gelöscht") : "Unterkunft gelöscht, die Reise bleibt"));
+      await wishlistLaden(); reisenLaden();
+    };
+    const frage = t("„{titel}“ löschen?", { titel }) + (zeile2 ? "\n" + zeile2 : "");
+    fragen(frage, reise ? [
+      [t(andere.length ? "Unterkunft löschen, Reisen behalten" : "Nur die Unterkunft löschen"), () => loeschen(false)],
+      [t(andere.length ? "Reise für alle absagen" : "Unterkunft und Reise löschen"), () => loeschen(true), true]
+    ] : [[t("Löschen"), () => loeschen(true), true]]);
+  });
 }
 // ---------- Familien-Ansicht ----------
 function naechsteReise(id) {
@@ -2857,6 +2873,7 @@ function pushZiel(url) {
   if (q.get("chat")) { const c = chats.find(x => x.id === q.get("chat")); if (c) gespraechOeffnen(c); else chatsLaden().then(() => { const c2 = chats.find(x => x.id === q.get("chat")); if (c2) gespraechOeffnen(c2); }); }
   if (q.get("ort") === "frage") ortNachfragen(true);
   if (q.get("wishlist")) { ideenReiter = "unterkunft"; seiteZeigen("ideen"); }
+  if (q.get("reisen")) seiteZeigen("reisen");
   if (q.get("hilton")) { ideenReiter = "hilton"; seiteZeigen("ideen"); if (ECHT) hiltonLaden().catch(() => {}); }
   if (q.get("verwaltung") && ECHT && ECHT_DATEN.profil && ECHT_DATEN.profil.ist_admin) { seiteZeigen("verwaltung"); verwaltungAufbauen(); }
   if (q.get("rundruf")) try { localStorage.setItem("ahoi-rundruf", Math.max(+q.get("rundruf"), +localStorage.getItem("ahoi-rundruf") || 0)); } catch (e) {}
@@ -3256,7 +3273,7 @@ function echtEinrichten() {
   if (p.art === "familie") return familieEchtStarten();
   familieListeAufbauen(); setTimeout(neuDabeiPruefen, 2500);
   verbindungenLaden().catch(() => {});
-  chatsLaden().then(chatVerbinden).then(() => { if (/[?&](chat|ort|rundruf|wishlist|verwaltung|hilton)=/.test(location.search)) { pushZiel(location.href); history.replaceState(null, "", location.pathname); } }).catch(() => {});
+  chatsLaden().then(chatVerbinden).then(() => { if (/[?&](chat|ort|rundruf|wishlist|verwaltung|hilton|reisen)=/.test(location.search)) { pushZiel(location.href); history.replaceState(null, "", location.pathname); } }).catch(() => {});
   setTimeout(pushPruefen, 1500); setTimeout(rundrufZeigen, 6000);
   // Vorschau „So sieht sie es“: die Familie sieht nur dich
   document.getElementById("familie-start").onclick = () => { FAMILIE_SIEHT = ["du"]; document.getElementById("fam-kopf").textContent = t("So sieht deine Familie dich"); document.getElementById("familie-ende").textContent = t("Zurück"); familieSetzen(true); };
