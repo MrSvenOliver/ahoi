@@ -1558,7 +1558,7 @@ function hiltonAufbauen() {
   const nachLand = (a, b) => (!a - !b) || hotelLand(a).localeCompare(hotelLand(b), LOC);
   const laender = [...new Set(hotels.map(h => h.land || ""))].sort(nachLand);
   if (!["alle", "lounge"].includes(hiltonFilter) && !laender.includes(hiltonFilter)) hiltonFilter = "alle";
-  const chips = [["alle", t("Alle|Filter")], ...(hotels.some(h => h.lounge) ? [["lounge", "🍸 " + t("Lounge")]] : []), ...laender.map(l => [l, (l ? flagge(l) + " " : "") + hotelLand(l)])];
+  const chips = [["alle", t("Alle|Filter")], ...(hotels.some(h => h.lounge) ? [["lounge", "💎 " + t("Lounge")]] : []), ...laender.map(l => [l, (l ? flagge(l) + " " : "") + hotelLand(l)])];
   document.getElementById("hilton-filter").innerHTML = chips.map(([l, n]) => `<button data-l="${l}" class="${l === hiltonFilter ? "aktiv" : ""}">${n}</button>`).join("");
   document.querySelectorAll("#hilton-filter button").forEach(b => b.onclick = () => { hiltonFilter = b.dataset.l; hiltonAufbauen(); });
   const liste = hotels.filter(h => hiltonFilter === "alle" || (hiltonFilter === "lounge" ? h.lounge : (h.land || "") === hiltonFilter))
@@ -1570,7 +1570,7 @@ function hiltonAufbauen() {
     const bildStil = h.bild ? `background:var(--trenner) center / cover url('${String(h.bild).replace(/['"()\\]/g, c => encodeURIComponent(c))}')` : `background:linear-gradient(135deg, #002f61, ${farbeVon(h.id)})`;
     const punkte = (h.texte && (h.texte[SPRACHE] || h.texte.de)) || [];
     const preisMarke = h.preis && h.preis < 60 ? `<span class="hotel-marke preis-top">🔥 ${t("Top-Preis")}</span>` : h.preis && h.preis < 100 ? `<span class="hotel-marke preis-gut">💶 ${t("Preiswert")}</span>` : "";
-    const marken = [h.kategorie ? `<span class="hotel-marke kat-${h.kategorie}">${KATEGORIEN[h.kategorie]}</span>` : "", h.lounge ? `<span class="hotel-marke lounge">🍸 ${t("Lounge")}</span>` : "", preisMarke].join("");
+    const marken = [h.kategorie ? `<span class="hotel-marke kat-${h.kategorie}">${KATEGORIEN[h.kategorie]}</span>` : "", h.lounge ? `<span class="hotel-marke lounge">💎 ${t("Lounge")}</span>` : "", preisMarke].join("");
     const zeile = [ohneHtml(h.ort || ""), h.preis ? t("ca. {n} € / Nacht", { n: h.preis.toLocaleString(LOC) }) : ""].filter(Boolean).map(x => `<span class="zus">${x}</span>`).join(" · ");
     const inhalt = status === "recherche" ? `<div class="hotel-status">✨ ${t("Danke fürs Teilen! Das Hotel ist in Bearbeitung. Foto, Lounge, Preis und die Top 5 kommen bald dazu.")}</div>`
       : status === "fehler" ? `<div class="hotel-status fehler">⚠️ ${t("Dieses Hotel haben wir nicht gefunden. Prüf bitte Name und Ort.")}</div>`
