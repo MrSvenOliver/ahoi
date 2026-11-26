@@ -2,6 +2,9 @@
 
 Jede Entscheidung mit Datum. Neue Einträge kommen oben dazu.
 
+## 26.11.2026
+- Ländernamen fest für China („China“, auch für Hainan; das iPhone zeigt sonst „China (Festland)“), Hongkong und Macau; gilt überall in der App (Hilton, Wishlist, Meine Länder).
+
 ## 25.11.2026
 - Wishlist-Unterkunft löschen (SQL 27): Die teilende Person wird gefragt „Nur aus der Wishlist nehmen, Reise findet statt“ oder „Reise absagen, für alle“ (allein: „Reise absagen“). Wer selbst nicht mitkommt, sagt über „Du bist dabei“ ab, statt zu löschen. Alle, die dabei sind (auch mitgenommene Mitglieder), bekommen „🏡 {Name} hat die Unterkunft entfernt“ mit Ort, Daten und „Deine Reise bleibt“ bzw. „Reise abgesagt“. Gelöscht wird nur noch über die Funktion wunsch_loeschen.
 - Hilton-Preise alle 10 Tage: Workflow „Hilton-Preise“ im privaten Repository ahoi-backup exportiert täglich die Hotelliste und trägt Preis-Updates aus hilton/updates/ ein (Geheimnis SUPABASE_DB_URL der Sicherung). Eine geplante Claude-Aufgabe recherchiert am 1., 11. und 21. jedes Monats die Durchschnittspreise und legt die Update-Datei an. Spalte hilton.preis_am (SQL 27).

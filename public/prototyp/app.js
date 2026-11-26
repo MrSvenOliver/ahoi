@@ -1286,7 +1286,7 @@ function ideenAufbauen() {
   if (ideenReiter === "tipps") tippsAufbauen();
   if (ideenReiter === "hilton") return hiltonAufbauen();
   const laender = ["alle", ...new Set(ideen.map(i => i.land).filter(Boolean))];
-  document.getElementById("ideen-filter").innerHTML = laender.map(l => `<button data-l="${l}" class="${l === ideenFilter ? "aktiv" : ""}">${l === "alle" ? t("Alle|Filter") : flagge(l) + " " + new Intl.DisplayNames([SPRACHE], { type: "region" }).of(l)}</button>`).join("");
+  document.getElementById("ideen-filter").innerHTML = laender.map(l => `<button data-l="${l}" class="${l === ideenFilter ? "aktiv" : ""}">${l === "alle" ? t("Alle|Filter") : flagge(l) + " " + landName(l)}</button>`).join("");
   document.querySelectorAll("#ideen-filter button").forEach(b => b.onclick = () => { ideenFilter = b.dataset.l; ideenAufbauen(); });
   document.getElementById("ideen-liste").innerHTML = ideen.map((i, n) => {
     if (ideenFilter !== "alle" && i.land !== ideenFilter) return "";
@@ -2033,7 +2033,9 @@ try { const g = JSON.parse(localStorage.getItem(LAENDER_SCHLUESSEL) || "null"); 
 // Ältere Einträge (eigene Gebiete) auf die Staaten umstellen
 { const sauber = [...new Set(besucht.map(staatVon).filter(Boolean))]; if (sauber.length !== besucht.length || sauber.some((c, i) => c !== besucht[i])) { besucht = sauber; besuchtSpeichern(); } }
 if (ECHT && ich().land) landDazu(ich().land);
-const landName = cc => { try { return new Intl.DisplayNames([SPRACHE], { type: "region" }).of(cc); } catch (e) { return cc; } };
+// Ländernamen: feste Namen, wo Geräte eigene Varianten zeigen (iPhone: „China (Festland)“)
+const LAENDER_FEST = { CN: { de: "China", en: "China", sk: "Čína" }, HK: { de: "Hongkong", en: "Hong Kong", sk: "Hongkong" }, MO: { de: "Macau", en: "Macau", sk: "Macao" } };
+const landName = cc => { if (LAENDER_FEST[cc]) return LAENDER_FEST[cc][SPRACHE] || LAENDER_FEST[cc].en; try { return new Intl.DisplayNames([SPRACHE], { type: "region" }).of(cc); } catch (e) { return cc; } };
 // Meine Länder: im Profil nur eine Zeile, eigene Seite mit Freirubbel-Karte
 const KONTINENTE = { EU: "Europa", AS: "Asien", AF: "Afrika", NA: "Nordamerika", SA: "Südamerika", OC: "Ozeanien", AN: "Antarktis" };
 let PIONIER = ECHT ? [] : ["VN", "HR"], PIONIERE_ALLE = {}; // Land → Person, die als Erste dort war (echte App: aus dem Orte-Verlauf)
