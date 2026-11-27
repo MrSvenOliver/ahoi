@@ -1895,6 +1895,8 @@ function familieAufbauen() {
 // Familien-Blatt ein- und ausklappen: am Griff tippen oder ziehen (iPhone und Android gleich), eingeklappt bleibt nur die Kopfzeile
 var famBlatt = (() => {
   const fb = document.getElementById("familie-blatt");
+  // Auf dem Computer (echte App ab 1000 Pixel) ist das Blatt eine feste Spalte links: dort nichts einklappen
+  const seitlich = () => ECHT && window.matchMedia("(min-width: 1000px)").matches;
   let zu = false, startY = null, dy = 0, zieht = false, startZeit = 0;
   const zuY = () => { const k = document.getElementById("fam-kopf"), rest = Math.max(0, parseFloat(getComputedStyle(fb).paddingBottom) - 16); return Math.max(0, fb.offsetHeight - (k.offsetTop + k.offsetHeight + 14 + rest)); };
   const setzen = z => {
@@ -1903,9 +1905,9 @@ var famBlatt = (() => {
     fb.style.transform = z ? `translateY(${zuY()}px)` : "";
     fb.classList.toggle("eingeklappt", z);
   };
-  const umschalten = () => { if (!breit()) setzen(!zu); };
+  const umschalten = () => { if (!seitlich()) setzen(!zu); };
   fb.querySelector(".griff").onclick = umschalten; document.getElementById("fam-kopf").onclick = umschalten;
-  fb.addEventListener("touchstart", e => { if (breit() || e.touches.length !== 1) { startY = null; return; } startY = e.touches[0].clientY; startZeit = performance.now(); dy = 0; zieht = false; }, { passive: true });
+  fb.addEventListener("touchstart", e => { if (seitlich() || e.touches.length !== 1) { startY = null; return; } startY = e.touches[0].clientY; startZeit = performance.now(); dy = 0; zieht = false; }, { passive: true });
   fb.addEventListener("touchmove", e => {
     if (startY == null) return;
     const d = e.touches[0].clientY - startY;
