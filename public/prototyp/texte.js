@@ -954,4 +954,7 @@ const TEXTE = {
   "Reise für alle abgesagt": ["Trip cancelled for everyone", "Cesta zrušená pre všetkých"],
   "Reise abgesagt": ["Trip cancelled", "Cesta zrušená"],
   "Aus der Wishlist genommen, die Reise findet statt": ["Removed from wishlist, the trip goes ahead", "Odstránené z wishlistu, cesta sa koná"],
+  "Gleichzeitig": ["At the same time", "Zároveň"],
+  "+{n} weitere": ["+{n} more", "+{n} ďalší"],
+  "läuft weiter bis {d}": ["continues until {d}", "pokračuje do {d}"],
 };

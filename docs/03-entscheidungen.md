@@ -2,6 +2,10 @@
 
 Jede Entscheidung mit Datum. Neue Einträge kommen oben dazu.
 
+## 27.11.2026
+- Feedback Klara: Reisen über mehrere Monate stehen jetzt in jedem Monat, ab dem zweiten als „↪ läuft weiter bis …“ oben im Monat; Zeitraum größer und mit Monatsnamen („1. Dez. – 15. Feb.“). Bei eigenen Reisen steht darunter „Gleichzeitig: …“, wer zur selben Zeit woanders unterwegs ist (bis 3 Namen, dann „+n weitere“). Keine Balken-Ansicht.
+- Fehler behoben: Treffer-Suche stürzte ab, solange der eigene Ort noch nicht geladen war (gemeldet automatisch bei Olivia).
+
 ## 26.11.2026
 - Ländernamen fest für China („China“, auch für Hainan; das iPhone zeigt sonst „China (Festland)“), Hongkong und Macau; gilt überall in der App (Hilton, Wishlist, Meine Länder).
 

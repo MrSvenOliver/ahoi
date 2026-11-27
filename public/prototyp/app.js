@@ -69,7 +69,7 @@ function entfernungKm(lat1, lon1, lat2, lon2) {
 }
 // Ein Ort ist so aktuell wie das letzte Öffnen der App. Älter als ein Tag: „zuletzt vor X Tagen“, und die App fragt nicht nach „zusammen unterwegs“.
 const ortAlterTage = p => p && p.stand ? Math.floor((Date.now() - new Date(p.stand)) / 864e5) : 0;
-const ortAktuell = p => ortAlterTage(p) < 1;
+const ortAktuell = p => !!p && ortAlterTage(p) < 1;
 const ortAlterText = p => { const n = ortAlterTage(p); return n < 1 ? "" : "🕓 " + (n === 1 ? t("gestern") : t("vor {n} Tagen", { n })); };
 const km = d => d < 1 ? t("Am selben Ort") : d.toLocaleString(LOC, { maximumFractionDigits: d < 10 ? 1 : 0 }) + " km";
 
@@ -851,6 +851,7 @@ const ava = (p, gross) => `<div class="klein-ava" style="${kopfStil(p)}${gross ?
 const reisen = ECHT ? [] : [
   { wer: ["alex"], ziel: "Marrakesch", land: "MA", von: "2026-12-03", bis: "2026-12-14" },
   { wer: ["sam"], ziel: "Wien", land: "AT", von: "2026-12-10", bis: "2026-12-12" },
+  { wer: ["nico"], ziel: "Heidelberg", land: "DE", von: "2026-12-01", bis: "2027-02-15" },
   { wer: ["mia"], ziel: "Oaxaca", land: "MX", von: "2026-12-20", bis: "2027-01-05" },
   // Beispiel für einen laufenden Aufenthalt (immer rund um heute)
   { wer: ["du"], ziel: "Málaga", land: "ES", lat: 36.7213, lon: -4.4214, von: new Date(Date.now() - 6 * 864e5).toISOString().slice(0, 10), bis: new Date(Date.now() + 9 * 864e5).toISOString().slice(0, 10) },
@@ -866,11 +867,25 @@ const reiseSchluessel = r => r.von || r.monat + "-32";
 const datum = iso => new Date(iso + "T12:00:00");
 const kurz = iso => datum(iso).toLocaleDateString(LOC, { day: "numeric", month: "numeric" });
 const monatName = iso => datum(iso.length === 7 ? iso + "-01" : iso).toLocaleDateString(LOC, { month: "long", year: "numeric" });
+// Monate, die eine Reise berührt (höchstens 24), z. B. 2026-12 bis 2027-02
+const monateZwischen = (von, bis) => {
+  const liste = []; let d = von.slice(0, 7);
+  while (d <= bis.slice(0, 7) && liste.length < 24) { liste.push(d); const [j, mo] = d.split("-").map(Number); d = mo === 12 ? `${j + 1}-01` : `${j}-${String(mo + 1).padStart(2, "0")}`; }
+  return liste;
+};
+const datumMittel = iso => datum(iso).toLocaleDateString(LOC, { day: "numeric", month: "short" });
 function reisenAufbauen() {
   reisen.sort((a, b) => reiseSchluessel(a).localeCompare(reiseSchluessel(b)));
-  let html = "", monat = "";
+  // Wer mehrere Monate an einem Ort ist, steht in jedem dieser Monate (ab dem zweiten als „läuft weiter“, oben im Monat)
+  const eintraege = [];
   for (const r of reisen) {
-    const m = monatName(r.von || r.monat);
+    if (!r.von) { eintraege.push({ r, m: r.monat, weiter: false, k: reiseSchluessel(r) }); continue; }
+    monateZwischen(r.von, r.bis).forEach((m, i) => eintraege.push({ r, m, weiter: i > 0, k: i ? `${m}-00${r.von}` : r.von }));
+  }
+  eintraege.sort((a, b) => a.k.localeCompare(b.k));
+  let html = "", monat = "";
+  for (const { r, m: mo, weiter } of eintraege) {
+    const m = monatName(mo);
     if (m !== monat) { monat = m; html += `<h2>${m}</h2>`; }
     const ps = r.wer.map(person).filter(Boolean);
     if (!ps.length) continue;
@@ -879,11 +894,14 @@ function reisenAufbauen() {
     // Laufender Aufenthalt: leicht hinterlegt, rechts „noch X Nächte“ (gezählt wie bei allen Reisen in Nächten)
     const heuteT = new Date().toISOString().slice(0, 10), aktuell = r.von && r.von <= heuteT && r.bis >= heuteT;
     const rest = aktuell ? Math.round((datum(r.bis) - datum(heuteT)) / 864e5) : 0;
-    html += `<div class="kasten reise${r.vielleicht ? " vielleicht" : ""}${aktuell ? " aktuell" : ""}${r.wer[0] === "du" ? " eigen" : ""}" data-n="${reisen.indexOf(r)}">
+    // Eigene Reise: wer ist zur selben Zeit woanders unterwegs?
+    const parallel = r.wer[0] === "du" && r.von && !weiter ? reisen.filter(x => x !== r && x.von && x.wer[0] !== "du" && person(x.wer[0]) && x.von <= r.bis && x.bis >= r.von) : [];
+    const parallelText = parallel.length ? `<span class="parallel">${t("Gleichzeitig")}: ${parallel.slice(0, 3).map(x => `${ohneHtml(person(x.wer[0]).name)} ${x.land ? flagge(x.land) : ""} ${ohneHtml(x.ziel)}`).join(" · ")}${parallel.length > 3 ? " · " + t("+{n} weitere", { n: parallel.length - 3 }) : ""}</span>` : "";
+    html += `<div class="kasten reise${r.vielleicht ? " vielleicht" : ""}${aktuell ? " aktuell" : ""}${weiter ? " weiter" : ""}${r.wer[0] === "du" ? " eigen" : ""}" data-n="${reisen.indexOf(r)}">
       <div class="gesichter">${gesichter}</div>
       <div class="text"><span class="wer">${ps.map(p => p.name).join(" & ")}</span>
         <span class="ziel">${r.land ? flagge(r.land) : "📍"}&nbsp;&nbsp;${ohneHtml(r.ziel)}</span>
-        <span class="wann">${r.von ? kurz(r.von) + " – " + kurz(r.bis) : t("irgendwann im {m}", { m: datum(r.monat + "-01").toLocaleDateString(LOC, { month: "long" }) })}${wunschMarke(r)}</span></div>
+        <span class="wann">${!r.von ? t("irgendwann im {m}", { m: datum(r.monat + "-01").toLocaleDateString(LOC, { month: "long" }) }) : weiter ? `↪ ${t("läuft weiter bis {d}", { d: datumMittel(r.bis) })}` : `${datumMittel(r.von)} – ${datumMittel(r.bis)}`}${wunschMarke(r)}</span>${parallelText}</div>
       <div class="art">${r.vielleicht ? '<span class="vielleicht-text">' + t("Vielleicht") + '</span>' : aktuell ? (rest ? `<small>${t("noch")}</small><b>${rest}</b><small>${t(rest === 1 ? "Nacht" : "Nächte")}</small>` : `<small>${t("heute")}</small><b>✈︎</b><small>${t("Abreise")}</small>`) : `<b>${naechte}</b><small>${t(naechte === 1 ? "Nacht" : "Nächte")}</small>`}</div></div>`;
   }
   document.getElementById("reise-liste").innerHTML = html || (ECHT ? `<div class="bald"><div style="font-size:44px">✈️</div><b>${t("Noch keine Reisen")}</b>${t("Trag deine nächste Reise ein. Wenn Freunde zur selben Zeit am selben Ort sind, zeigt Ahoi euch einen Treffer.")}</div>` : "");
@@ -2485,13 +2503,14 @@ async function reisenLaden() {
   if (familieModus) familieAufbauen();
 }
 // Reisen in ein ganzes Land (Ort noch offen) haben keine Koordinaten; sie treffen sich über das Land
-const nurLand = x => x.lat == null && !!x.land;
+const nurLand = x => !!x && x.lat == null && !!x.land;
 const nahe = (a, b) => !!a && !!b && (a.lat != null && b.lat != null ? entfernungKm(a.lat, a.lon, b.lat, b.lon) < NAH_KM : (nurLand(a) || nurLand(b)) && a.land === b.land);
 // Treffer: Nur was stimmt. Gleicher Ort heißt dieselbe Stadt (unter GLEICH_KM); bis NAH_KM ist es „in der Nähe“ mit beiden Orten.
 // Reisen in ein ganzes Land treffen sich als „beide in Vietnam“. „Vielleicht“-Reisen zählen nicht.
 const GLEICH_KM = 15;
 const abstandOrte = (a, b) => a && b && a.lat != null && b.lat != null ? entfernungKm(a.lat, a.lon, b.lat, b.lon) : null;
 function naeheArt(a, b) {
+  if (!a || !b) return null;
   const d = abstandOrte(a, b);
   if (d != null) return d < GLEICH_KM ? "gleich" : d < NAH_KM ? "nah" : null;
   return (nurLand(a) || nurLand(b)) && a.land && a.land === b.land ? "land" : null;

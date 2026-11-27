@@ -196,7 +196,12 @@
   .reise .text { min-width: 0; }
   .reise .wer { display: block; font-size: 13px; font-weight: 600; color: var(--text-leise); }
   .reise .ziel { display: block; font-size: 16px; font-weight: 700; margin: 1px 0 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .reise .wann { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text-leise); }
+  .reise .wann { display: flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 600; color: var(--text); opacity: 0.75; }
+  .reise .parallel { display: block; font-size: 12px; line-height: 1.35; color: var(--text-leise); margin-top: 3px; }
+  .reise .wann { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  [data-stil="mission"] .reise .wann { font-size: 12.5px; letter-spacing: 0; }
+  .reise.weiter { opacity: 0.8; }
+  .reise.weiter .wann { font-weight: 500; }
   .reise .art { min-width: 56px; height: 48px; border-radius: 12px; background: var(--trenner); display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1.1; }
   .reise .art b { font-size: 17px; }
   .reise .art small { font-size: 10px; color: var(--text-leise); font-weight: 600; }
