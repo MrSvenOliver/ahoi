@@ -884,33 +884,44 @@ const zeitraum = r => r.von ? `${datumMittel(r.von)} – ${datumMittel(r.bis)}` 
 const laufendeReise = id => { const h = heuteISO(); return reisen.filter(r => r.wer.includes(id) && r.von && r.von <= h && r.bis >= h).sort((a, b) => a.von.localeCompare(b.von))[0]; };
 function reisenAufbauen() {
   reisen.sort((a, b) => reiseSchluessel(a).localeCompare(reiseSchluessel(b)));
-  // Wer mehrere Monate an einem Ort ist, steht in jedem dieser Monate (ab dem zweiten als „läuft weiter“, oben im Monat)
-  const eintraege = [];
-  for (const r of reisen) {
-    if (!r.von) { eintraege.push({ r, m: r.monat, weiter: false, k: reiseSchluessel(r) }); continue; }
-    monateZwischen(r.von, r.bis).forEach((m, i) => eintraege.push({ r, m, weiter: i > 0, k: i ? `${m}-00${r.von}` : r.von }));
-  }
-  eintraege.sort((a, b) => a.k.localeCompare(b.k));
-  let html = "", monat = "";
-  for (const { r, m: mo, weiter } of eintraege) {
-    const m = monatName(mo);
-    if (m !== monat) { monat = m; html += `<h2>${m}</h2>`; }
+  // Aufbau wie bei Kalender-Apps: oben „Gerade unterwegs“ (jede laufende Reise einmal), darunter die späteren Reisen nach Startmonat.
+  // Wer länger bleibt, steht nur einmal; in den Folgemonaten eine schmale Zeile „Weiterhin: …“ statt einer zweiten Karte.
+  const heute = heuteISO(), monatJetzt = heute.slice(0, 7);
+  const aktiv = reisen.filter(r => r.von ? r.bis >= heute : r.monat >= monatJetzt);
+  const laufend = aktiv.filter(r => r.von && r.von <= heute).sort((a, b) => (a.wer[0] === "du" ? 0 : 1) - (b.wer[0] === "du" ? 0 : 1) || a.bis.localeCompare(b.bis));
+  const spaeter = aktiv.filter(r => !laufend.includes(r));
+  const karte = r => {
     const ps = r.wer.map(person).filter(Boolean);
-    if (!ps.length) continue;
+    if (!ps.length) return "";
     const gesichter = ps.slice(0, 2).map((p, i) => `<div class="klein-ava" style="left:${ps.length > 1 ? i * 20 : 10}px;z-index:${2 - i};${kopfStil(p)}">${kopfText(p)}</div>`).join("");
     const naechte = r.von ? Math.round((datum(r.bis) - datum(r.von)) / 864e5) : null;
-    // Laufender Aufenthalt: leicht hinterlegt, rechts „noch X Nächte“ (gezählt wie bei allen Reisen in Nächten)
-    const heuteT = heuteISO(), aktuell = r.von && r.von <= heuteT && r.bis >= heuteT;
-    const rest = aktuell ? Math.round((datum(r.bis) - datum(heuteT)) / 864e5) : 0;
-    // Eigene Reise: wer ist zur selben Zeit woanders unterwegs?
-    const parallel = r.wer[0] === "du" && r.von && !weiter ? reisen.filter(x => x !== r && x.von && x.wer[0] !== "du" && person(x.wer[0]) && x.von <= r.bis && x.bis >= r.von) : [];
-    const parallelText = parallel.length ? `<span class="parallel">${t("Gleichzeitig")}: ${parallel.slice(0, 3).map(x => `${ohneHtml(person(x.wer[0]).name)} ${x.land ? flagge(x.land) : ""} ${ohneHtml(x.ziel)}`).join(" · ")}${parallel.length > 3 ? " · " + t("+{n} weitere", { n: parallel.length - 3 }) : ""}</span>` : "";
-    html += `<div class="kasten reise${r.vielleicht ? " vielleicht" : ""}${aktuell ? " aktuell" : ""}${weiter ? " weiter" : ""}${r.wer[0] === "du" ? " eigen" : ""}" data-n="${reisen.indexOf(r)}">
+    const aktuell = laufend.includes(r), rest = aktuell ? Math.round((datum(r.bis) - datum(heute)) / 864e5) : 0;
+    // Eigene Reise: wer ist zur selben Zeit woanders unterwegs? Jede Person nur einmal, mit Flagge
+    let parallelText = "";
+    if (r.wer[0] === "du" && r.von) {
+      const proPerson = {};
+      reisen.filter(x => x !== r && x.von && x.wer[0] !== "du" && person(x.wer[0]) && x.von <= r.bis && x.bis >= r.von && x.bis >= heute)
+        .forEach(x => { const l = (proPerson[x.wer[0]] = proPerson[x.wer[0]] || new Set()); if (x.land) l.add(x.land); });
+      const ids = Object.keys(proPerson);
+      if (ids.length) parallelText = `<span class="parallel">${t("Gleichzeitig")}: ${aufzaehlen(ids.slice(0, 3).map(id => `${ohneHtml(person(id).name)} ${[...proPerson[id]].map(flagge).join(" ")}`.trim()))}${ids.length > 3 ? " " + t("+{n} weitere", { n: ids.length - 3 }) : ""}</span>`;
+    }
+    return `<div class="kasten reise${r.vielleicht ? " vielleicht" : ""}${aktuell ? " aktuell" : ""}${r.wer[0] === "du" ? " eigen" : ""}" data-n="${reisen.indexOf(r)}">
       <div class="gesichter">${gesichter}</div>
       <div class="text"><span class="wer">${ohneHtml(aufzaehlen(ps.map(p => p.name)))}</span>
         <span class="ziel">${r.land ? flagge(r.land) : "📍"}&nbsp;&nbsp;${ohneHtml(r.ziel)}</span>
-        <span class="wann">${!r.von ? t("irgendwann im {m}", { m: datum(r.monat + "-01").toLocaleDateString(LOC, { month: "long" }) }) : weiter ? `↪ ${t("läuft weiter bis {d}", { d: datumMittel(r.bis) })}` : `${datumMittel(r.von)} – ${datumMittel(r.bis)}`}${wunschMarke(r)}</span>${parallelText}</div>
+        <span class="wann">${zeitraum(r)}${wunschMarke(r)}</span>${parallelText}</div>
       <div class="art">${r.vielleicht ? '<span class="vielleicht-text">' + t("Vielleicht") + '</span>' : aktuell ? (rest ? `<small>${t("noch")}</small><b>${rest}</b><small>${t(rest === 1 ? "Nacht" : "Nächte")}</small>` : `<small>${t("heute")}</small><b>✈︎</b><small>${t("Abreise")}</small>`) : `<b>${naechte}</b><small>${t(naechte === 1 ? "Nacht" : "Nächte")}</small>`}</div></div>`;
+  };
+  let html = laufend.length ? `<h2>${t("Gerade unterwegs")}</h2>` + laufend.map(karte).join("") : "";
+  // Monate: mit Reisen, die dort beginnen, oder mit Leuten, die dort weiterhin unterwegs sind
+  const monate = new Set(spaeter.map(r => r.von ? r.von.slice(0, 7) : r.monat));
+  aktiv.filter(r => r.von).forEach(r => monateZwischen(r.von, r.bis).slice(1).forEach(m => { if (m > monatJetzt) monate.add(m); }));
+  for (const m of [...monate].sort()) {
+    const beginnen = spaeter.filter(r => (r.von ? r.von.slice(0, 7) : r.monat) === m);
+    const weiter = aktiv.filter(r => r.von && r.von.slice(0, 7) < m && r.bis.slice(0, 7) >= m && person(r.wer[0]));
+    html += `<h2>${monatName(m)}</h2>`;
+    if (weiter.length) html += `<p class="weiter-zeile">↪ ${t("Weiterhin")}: ${aufzaehlen(weiter.map(r => `${ohneHtml(aufzaehlen(r.wer.map(person).filter(Boolean).map(p => p.name)))} ${r.land ? flagge(r.land) : ""} ${ohneHtml(r.ziel)}`))}</p>`;
+    html += beginnen.map(karte).join("");
   }
   document.getElementById("reise-liste").innerHTML = html || (ECHT ? `<div class="bald"><div style="font-size:44px">✈️</div><b>${t("Noch keine Reisen")}</b>${t("Trag deine nächste Reise ein. Wenn Freunde zur selben Zeit am selben Ort sind, zeigt Ahoi euch einen Treffer.")}</div>` : "");
   document.querySelectorAll("#reise-liste .reise.eigen").forEach(k => k.onclick = () => {
@@ -2111,7 +2122,7 @@ function laenderListe(suche) {
 }
 document.getElementById("land-suche").addEventListener("input", e => laenderListe(e.target.value));
 stempelAufbauen();
-if (!ECHT) { reisenAufbauen(); chatListeAufbauen(); ideenAufbauen(); }
+if (!ECHT) { reisenAufbauen(); setTimeout(trefferAufbauen, 0); chatListeAufbauen(); ideenAufbauen(); }
 
 
 
@@ -2639,22 +2650,38 @@ function monatSpanne(von, bis) {
 // Farbig mit 📍 = selber Ort, hell mit 🧭 = in der Nähe, 🌍 = nur im selben Land.
 function trefferAufbauen() {
   const namen = ids => aufzaehlen(ids.map(person).filter(Boolean).map(p => p.name));
-  document.getElementById("treffer-liste").innerHTML = trefferFinden().map(x => {
-    const zeit = `${kurz(x.von)} – ${kurz(x.bis)}`, wer = ohneHtml(namen(x.wer)), ort = ohneHtml(x.ort || ""), ort2 = ohneHtml(x.ort2 || "");
-    const beide = x.wer.length > 1 ? "ihr alle in {ort}" : "ihr beide in {ort}";
+  const heute = heuteISO(), jahrJetzt = heute.slice(0, 4), du = ich();
+  // Zeitraum mit Jahr nur, wenn es nicht das laufende Jahr ist: „4. März – 14. März 2027“
+  const spanne = (von, bis) => `${datumMittel(von)} – ${datumMittel(bis)}${bis.slice(0, 4) !== jahrJetzt ? " " + bis.slice(0, 4) : ""}`;
+  const alle = trefferFinden();
+  // Jetzt am selben Ort: alle, deren Ort gerade bei dir ist, und alle, deren Reise heute am selben Ort läuft. Eine Karte für alle.
+  const gleichArten = ["reise", "kommt", "dort"];
+  const jetztTreffer = alle.filter(x => gleichArten.includes(x.art) && x.von <= heute && x.bis >= heute);
+  const hier = new Set(jetztTreffer.flatMap(x => x.wer));
+  if (du.lat != null && ortAktuell(du)) leute.forEach(p => { if (p.id !== "du" && ortAktuell(p) && naeheArt(du, p) === "gleich") hier.add(p.id); });
+  let html = "";
+  const ids = [...hier].filter(id => person(id));
+  if (ids.length) {
+    const ort = ortAktuell(du) && du.ort ? du.ort : (jetztTreffer[0] || {}).ort || "", land = ortAktuell(du) && du.land ? du.land : (jetztTreffer[0] || {}).land;
+    const gesichter = ids.slice(0, 6).map(id => `<span class="treffer-kopf" style="${kopfStil(person(id))}">${kopfText(person(id))}</span>`).join("");
+    html += `<div class="kasten treffer voll treffer-jetzt"><b>📍 ${t("Gerade mit dir in {ort}", { ort: `${land ? flagge(land) + " " : ""}${ohneHtml(ort)}` })}</b><span class="treffer-leute"><span class="treffer-koepfe">${gesichter}</span>${ohneHtml(namen(ids))}</span></div>`;
+  }
+  html += alle.filter(x => !jetztTreffer.includes(x)).map(x => {
+    const wer = ohneHtml(namen(x.wer)), ort = ohneHtml(x.ort || ""), ort2 = ohneHtml(x.ort2 || "");
     const muster = {
-      reise: () => ["📍", t("{namen} am selben Ort", { namen: wer }), t(beide, { ort }), false],
-      nah: () => ["🧭", t("{namen} in der Nähe", { namen: wer }), t("du in {ort}, {namen} in {ort2} · {km}", { ort, namen: wer, ort2, km: km(x.km) }), true],
-      land: () => ["🌍", t("{namen} im selben Land", { namen: wer }), t(x.wer.length > 1 ? "ihr alle in {ort}, wo genau ist noch offen" : "ihr beide in {ort}, wo genau ist noch offen", { ort }), true],
-      kommt: () => ["📍", t("{namen} am selben Ort", { namen: wer }), t(beide, { ort }), false],
-      "kommt-nah": () => ["🧭", t("{namen} in der Nähe", { namen: wer }), t("du in {ort}, {namen} in {ort2} · {km}", { ort: ort2, namen: wer, ort2: ort, km: km(x.km) }), true],
-      dort: () => ["📍", t("{namen} am selben Ort", { namen: wer }), t(beide, { ort }), false]
+      reise: () => ["📍", t("{namen} am selben Ort", { namen: wer }), ort],
+      kommt: () => ["📍", t("{namen} am selben Ort", { namen: wer }), ort],
+      dort: () => ["📍", t("{namen} am selben Ort", { namen: wer }), ort],
+      nah: () => ["🧭", t("{namen} in der Nähe", { namen: wer }), t("du in {ort}, {namen} in {ort2} · {km}", { ort, namen: wer, ort2, km: km(x.km) })],
+      "kommt-nah": () => ["🧭", t("{namen} in der Nähe", { namen: wer }), t("du in {ort}, {namen} in {ort2} · {km}", { ort: ort2, namen: wer, ort2: ort, km: km(x.km) })],
+      land: () => ["🌍", t("{namen} im selben Land", { namen: wer }), t("{ort}, wo genau ist noch offen", { ort })]
     };
-    const [symbol, kopf, wo, leise] = (muster[x.art] || muster.dort)();
+    const [symbol, kopf, wo] = (muster[x.art] || muster.dort)();
     // Farben: 📍 selber Ort kräftig grün, 🧭 in der Nähe zartes Pastellgrün, 🌍 selbes Land neutral
-    const farbe = symbol === "📍" ? " voll" : symbol === "🧭" ? " nah" : leise ? " leise" : "";
-    return `<div class="kasten treffer${farbe}"><b>${symbol} ${kopf} <small class="treffer-wann">(${monatSpanne(x.von, x.bis)})</small></b><span>${x.land ? flagge(x.land) + " " : ""}${zeit} · ${wo}</span></div>`;
+    const farbe = symbol === "📍" ? " voll" : symbol === "🧭" ? " nah" : " leise";
+    return `<div class="kasten treffer${farbe}"><b>${symbol} ${kopf}</b><span>${x.land ? flagge(x.land) + " " : ""}${wo} · ${spanne(x.von, x.bis)}</span></div>`;
   }).join("");
+  document.getElementById("treffer-liste").innerHTML = html;
 }
 
 // ---------- Feedback: Fehler, Ideen, Sonstiges an Sven ----------

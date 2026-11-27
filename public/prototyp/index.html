@@ -198,6 +198,11 @@
   .reise .ziel { display: block; font-size: 16px; font-weight: 700; margin: 1px 0 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .reise .wann { display: flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 600; color: var(--text); opacity: 0.75; }
   .reise .parallel { display: block; font-size: 12px; line-height: 1.35; color: var(--text-leise); margin-top: 3px; }
+  .weiter-zeile { margin: -2px 4px 10px; font-size: 13px; line-height: 1.4; color: var(--text-leise); }
+  .treffer-jetzt .treffer-leute { display: flex; align-items: center; gap: 8px; margin-top: 4px; }
+  .treffer-koepfe { display: inline-flex; flex: none; }
+  .treffer-kopf { width: 24px; height: 24px; border-radius: 50%; display: inline-grid; place-items: center; font-size: 10px; font-weight: 700; color: #fff; background-size: cover; background-position: center; box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.9); }
+  .treffer-kopf + .treffer-kopf { margin-left: -7px; }
   .reise .wann { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   [data-stil="mission"] .reise .wann { font-size: 12.5px; letter-spacing: 0; }
   .reise.weiter { opacity: 0.8; }
@@ -415,7 +420,7 @@
   .fam-karte .nr-daten { font-size: 14px; color: var(--text-leise); }
   .feedback-lasche { position: fixed; right: 0; top: 46%; z-index: 65; transform: translateY(-50%) rotate(-90deg); transform-origin: 100% 50%; translate: 0 0; border: 0; border-radius: 10px 10px 0 0; padding: 5px 10px; background: var(--tinte); color: var(--papier); font: inherit; font-size: 11px; font-weight: 700; letter-spacing: 0.3px; opacity: 0.55; cursor: pointer; margin-right: 13px; }
   .feedback-lasche:active { opacity: 1; }
-  html.tippt .feedback-lasche, html.familie .feedback-lasche { display: none; }
+  html.tippt .feedback-lasche, html.familie .feedback-lasche, html:has(#start:not(.weg)) .feedback-lasche, html:has(.zugang.offen) .feedback-lasche { display: none; }
   .hinweis { position: fixed; left: 50%; top: calc(env(safe-area-inset-top) + 86px); transform: translate(-50%, -10px); z-index: 20; background: var(--tinte); color: var(--papier); padding: 8px 14px; border-radius: 999px; font-size: 13px; opacity: 0; transition: opacity 0.25s, transform 0.25s; pointer-events: none; white-space: nowrap; }
   .hinweis.zeigen { opacity: 1; transform: translate(-50%, 0); }
 
@@ -1257,9 +1262,7 @@
 <!-- Reisen -->
 <section class="seite" id="seite-reisen">
   <div class="seite-kopf"><h1>Reisen</h1><button class="knopf-gross" id="reise-neu">+ Reise</button></div>
-  <div class="kasten treffer voll nur-proto"><b>📍 Lea &amp; Nico am selben Ort <small class="treffer-wann">(Januar 2027)</small></b><span>🇵🇹 10.1. – 15.1. · ihr alle in Lissabon</span></div>
-  <div class="kasten treffer nah nur-proto"><b>🧭 Alex in der Nähe <small class="treffer-wann">(Februar 2027)</small></b><span>🇵🇹 13.2. – 20.2. · du in Lissabon, Alex in Ericeira · 35 km</span></div>
-  <div id="treffer-liste" class="nur-echt"></div>
+  <div id="treffer-liste"></div>
   <div id="reise-liste"></div>
   <p class="hinweis-band nur-proto">Beispieldaten · Eintragen funktioniert ab Phase 3</p>
   <p class="hinweis-band nur-echt">Deine eigenen Reisen antippen zum Löschen · Treffer erscheinen, wenn ihr zur selben Zeit am selben Ort seid</p>
