@@ -198,7 +198,26 @@
   .reise .ziel { display: block; font-size: 16px; font-weight: 700; margin: 1px 0 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .reise .wann { display: flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 600; color: var(--text); opacity: 0.75; }
   .reise .parallel { display: block; font-size: 12px; line-height: 1.35; color: var(--text-leise); margin-top: 3px; }
-  .weiter-zeile { margin: -2px 4px 10px; font-size: 13px; line-height: 1.4; color: var(--text-leise); }
+  .jetzt-liste { padding: 4px 14px; }
+  .jetzt-zeile { display: grid; grid-template-columns: 34px 1fr auto; gap: 10px; align-items: center; padding: 9px 0; }
+  .jetzt-zeile + .jetzt-zeile { border-top: 1px solid var(--trenner); }
+  .zeile-kopf { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; font-size: 12px; font-weight: 700; color: #fff; background-size: cover; background-position: center; }
+  .jz-text { min-width: 0; display: flex; flex-direction: column; line-height: 1.3; }
+  .jz-text b { font-size: 15px; }
+  .jz-text span { font-size: 14px; color: var(--text-leise); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .jz-rechts { font-size: 13px; color: var(--text-leise); white-space: nowrap; }
+  .jetzt-zeile.eigen .jz-rechts { color: var(--text); font-weight: 600; }
+  .treffer-kasten { padding: 4px 14px; margin-bottom: 10px; }
+  .treffer-zeile { padding: 10px 0; display: flex; flex-direction: column; gap: 2px; }
+  .treffer-zeile + .treffer-zeile { border-top: 1px solid var(--trenner); }
+  .treffer-zeile b { font-size: 15px; color: #23955a; }
+  .treffer-zeile.nah b { color: var(--text); }
+  .treffer-zeile span { font-size: 13.5px; color: var(--text-leise); }
+  [data-stil="mission"] .treffer-zeile b { color: #5fe09a; }
+  [data-stil="mission"] .treffer-zeile.nah b { color: var(--amber); }
+  [data-stil="abenteuer"] .treffer-zeile b { color: #2f6b3a; }
+  [data-stil="abenteuer"] .treffer-zeile.nah b { color: #3a2414; }
+  .alle-reisen { display: block; width: 100%; margin: 4px 0 12px; }
   .treffer-jetzt .treffer-leute { display: flex; align-items: center; gap: 8px; margin-top: 4px; }
   .treffer-koepfe { display: inline-flex; flex: none; }
   .treffer-kopf { width: 24px; height: 24px; border-radius: 50%; display: inline-grid; place-items: center; font-size: 10px; font-weight: 700; color: #fff; background-size: cover; background-position: center; box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.9); }
