@@ -755,7 +755,7 @@ function seiteZeigen(name) {
 }
 document.querySelectorAll("#leiste button").forEach(b => b.onclick = () => seiteZeigen(b.dataset.seite));
 let vorFeedback = "karte";
-function feedbackOeffnen() { const offen = seiten.find(n => document.getElementById("seite-" + n).classList.contains("offen")); vorFeedback = offen || "karte"; seiteZeigen("feedback"); }
+function feedbackOeffnen() { steckbriefZu(); const offen = seiten.find(n => document.getElementById("seite-" + n).classList.contains("offen")); vorFeedback = offen || "karte"; seiteZeigen("feedback"); }
 function feedbackSchliessen() { seiteZeigen(vorFeedback); }
 document.getElementById("feedback-lasche").onclick = feedbackOeffnen;
 document.querySelectorAll("[data-hinweis]").forEach(b => b.onclick = () => hinweis(b.dataset.hinweis));
@@ -808,7 +808,7 @@ function reiseFormularLeeren() {
   ["reise-ort", "reise-an", "reise-ab"].forEach(id => document.getElementById(id).value = "");
   document.getElementById("reise-gewaehlt").textContent = ""; document.getElementById("reise-orte").innerHTML = "";
   document.getElementById("reise-vielleicht").classList.remove("an"); reiseArtZeigen();
-  const heute = new Date().toISOString().slice(0, 10);
+  const heute = heuteISO();
   document.getElementById("reise-an").removeAttribute("min"); document.getElementById("reise-ab").min = heute;
   // Monat als Liste der nächsten 24 Monate mit Jahr („April 2027“); die iPhone-Monatsauswahl ließ vergangene Monate zu
   const jetzt = new Date(), monate = Array.from({ length: 24 }, (_, k) => new Date(Date.UTC(jetzt.getFullYear(), jetzt.getMonth() + k, 1)));
@@ -834,7 +834,7 @@ document.getElementById("reise-speichern").onclick = async e => {
     daten.ankunft = document.getElementById("reise-an").value; daten.abreise = document.getElementById("reise-ab").value;
     if (!daten.ankunft || !daten.abreise) return hinweis(t("Bitte Ankunft und Abreise wählen"));
     if (daten.abreise < daten.ankunft) return hinweis(t("Die Abreise liegt vor der Ankunft"));
-    if (daten.abreise < new Date().toISOString().slice(0, 10)) return hinweis(t("Die Abreise liegt in der Vergangenheit"));
+    if (daten.abreise < heuteISO()) return hinweis(t("Die Abreise liegt in der Vergangenheit"));
   }
   if (reiseBearbeiten) { if (viel) { daten.ankunft = null; daten.abreise = null; } else daten.monat = null; daten.wunsch = null; }
   beschaeftigt(e.target, true);
@@ -867,6 +867,8 @@ const reisen = ECHT ? [] : [
 if (!ECHT) reisen.forEach(r => r.ziel = t(r.ziel));
 const reiseSchluessel = r => r.von || r.monat + "-32";
 const datum = iso => new Date(iso + "T12:00:00");
+// Heute nach der Uhr des Handys (nicht nach UTC), damit iPhone und Android um Mitternacht gleich zählen
+function heuteISO() { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; }
 const kurz = iso => datum(iso).toLocaleDateString(LOC, { day: "numeric", month: "numeric" });
 const monatName = iso => datum(iso.length === 7 ? iso + "-01" : iso).toLocaleDateString(LOC, { month: "long", year: "numeric" });
 // Monate, die eine Reise berührt (höchstens 24), z. B. 2026-12 bis 2027-02
@@ -876,6 +878,10 @@ const monateZwischen = (von, bis) => {
   return liste;
 };
 const datumMittel = iso => datum(iso).toLocaleDateString(LOC, { day: "numeric", month: "short" });
+// Zeitraum überall gleich: „1. Dez. – 15. Feb.“, ohne Daten „irgendwann im Dezember“
+const zeitraum = r => r.von ? `${datumMittel(r.von)} – ${datumMittel(r.bis)}` : t("irgendwann im {m}", { m: datum(r.monat + "-01").toLocaleDateString(LOC, { month: "long" }) });
+// Laufende Reise (heute zwischen Ankunft und Abreise) und die nächste danach
+const laufendeReise = id => { const h = heuteISO(); return reisen.filter(r => r.wer.includes(id) && r.von && r.von <= h && r.bis >= h).sort((a, b) => a.von.localeCompare(b.von))[0]; };
 function reisenAufbauen() {
   reisen.sort((a, b) => reiseSchluessel(a).localeCompare(reiseSchluessel(b)));
   // Wer mehrere Monate an einem Ort ist, steht in jedem dieser Monate (ab dem zweiten als „läuft weiter“, oben im Monat)
@@ -894,7 +900,7 @@ function reisenAufbauen() {
     const gesichter = ps.slice(0, 2).map((p, i) => `<div class="klein-ava" style="left:${ps.length > 1 ? i * 20 : 10}px;z-index:${2 - i};${kopfStil(p)}">${kopfText(p)}</div>`).join("");
     const naechte = r.von ? Math.round((datum(r.bis) - datum(r.von)) / 864e5) : null;
     // Laufender Aufenthalt: leicht hinterlegt, rechts „noch X Nächte“ (gezählt wie bei allen Reisen in Nächten)
-    const heuteT = new Date().toISOString().slice(0, 10), aktuell = r.von && r.von <= heuteT && r.bis >= heuteT;
+    const heuteT = heuteISO(), aktuell = r.von && r.von <= heuteT && r.bis >= heuteT;
     const rest = aktuell ? Math.round((datum(r.bis) - datum(heuteT)) / 864e5) : 0;
     // Eigene Reise: wer ist zur selben Zeit woanders unterwegs?
     const parallel = r.wer[0] === "du" && r.von && !weiter ? reisen.filter(x => x !== r && x.von && x.wer[0] !== "du" && person(x.wer[0]) && x.von <= r.bis && x.bis >= r.von) : [];
@@ -1310,7 +1316,7 @@ function ideenAufbauen() {
   document.querySelectorAll("#ideen-filter button").forEach(b => b.onclick = () => { ideenFilter = b.dataset.l; ideenAufbauen(); });
   document.getElementById("ideen-liste").innerHTML = ideen.map((i, n) => {
     if (ideenFilter !== "alle" && i.land !== ideenFilter) return "";
-    if (i.abreise && i.abreise < new Date().toISOString().slice(0, 10)) return "";
+    if (i.abreise && i.abreise < heuteISO()) return "";
     const eigen = i.von === "du", vonDabei = i.vonDabei !== false, ichSelbst = eigen ? vonDabei : i.dabei.includes("du");
     const mitWem = parteien(i).find(x => x.b.some(e => e.id === "du")), ichDabei = ichSelbst || !!mitWem;
     const verf = verfuegbar(i);
@@ -1753,7 +1759,7 @@ async function wishlistLaden() {
         dabei: d.data.filter(y => y.wunsch === x.id).map(y => idVon(y.person)), herzen: herz.length, herzIch: herz.some(y => y.person === ECHT_DATEN.uid),
         anteile: Object.fromEntries([[idVon(x.von), { p: x.ersteller_personen || 1, z: x.ersteller_zimmer || 1, b: begleitungVon(x.ersteller_begleitung) }], ...d.data.filter(y => y.wunsch === x.id).map(y => [idVon(y.person), { p: y.personen || 1, z: y.zimmer || 1, b: begleitungVon(y.begleitung) }])]),
         vonDabei: x.ersteller_dabei !== false, eigenWahl: "ersteller_dabei" in x, gebucht: x.gebucht, chat: x.chat, farbe: `linear-gradient(135deg, ${f}66, ${f})` };
-    }).filter(i => person(i.von) && !(i.abreise && i.abreise < new Date().toISOString().slice(0, 10) && !i.gebucht)));
+    }).filter(i => person(i.von) && !(i.abreise && i.abreise < heuteISO() && !i.gebucht)));
   }
   if (!tp.error && !td.error) tipps.splice(0, tipps.length, ...tp.data.map(x => ({ id: x.id, echt: true, von: idVon(x.von), ort: x.ort, land: x.land, art: x.art, text: x.text, daumen: td.data.filter(y => y.tipp === x.id).map(y => idVon(y.person)) })).filter(x => person(x.von)));
   if (document.getElementById("seite-ideen").classList.contains("offen")) ideenAufbauen();
@@ -1804,7 +1810,7 @@ function wishlistKnoepfe() {
   });
   // Wer geteilt hat, kann Zeitraum und Gesamtpreis jederzeit ändern
   document.querySelectorAll(".bearbeiten-knopf").forEach(b => b.onclick = () => {
-    const x = i(b), heute = new Date().toISOString().slice(0, 10);
+    const x = i(b), heute = heuteISO();
     const naechteText = () => {
       const an = document.getElementById("wunsch-an").value, ab = document.getElementById("wunsch-ab").value;
       const n = an && ab ? Math.round((new Date(ab) - new Date(an)) / 864e5) : 0;
@@ -1856,21 +1862,21 @@ function wishlistKnoepfe() {
 }
 // ---------- Familien-Ansicht ----------
 function naechsteReise(id) {
-  const heute = new Date().toISOString().slice(0, 10);
-  return reisen.filter(r => r.wer.includes(id) && r.von && r.bis >= heute).sort((a, b) => a.von.localeCompare(b.von))[0];
+  const heute = heuteISO(), jetzt = laufendeReise(id);
+  return jetzt || reisen.filter(r => r.wer.includes(id) && r.von && r.von > heute).sort((a, b) => a.von.localeCompare(b.von))[0];
 }
 function familieAufbauen() {
   const du = BETRACHTER, sichtbar = leute.filter(p => FAMILIE_SIEHT.includes(p.id) && p.lat != null);
   if (!sichtbar.length) { document.getElementById("familie-karten").innerHTML = `<p class="fam-leer">${t("Gerade teilt niemand seinen Ort mit dir.")}</p>`; return; }
   document.getElementById("familie-karten").innerHTML = sichtbar.map(p => {
-    const r = naechsteReise(p.id), heute = new Date().toISOString().slice(0, 10);
+    const r = naechsteReise(p.id), heute = heuteISO();
     const naechte = r ? Math.round((datum(r.bis) - datum(r.von)) / 864e5) : 0;
     const weitere = reisen.filter(x => x !== r && x.wer.includes(p.id) && (x.vielleicht || x.bis >= heute));
     return `<div class="fam-karte" data-id="${p.id}"><div class="ava" style="${kopfStil(p)}">${kopfText(p)}</div><div style="flex:1">
       <b class="fam-name">${ohneHtml(p.name)}</b><div class="wo">${flagge(p.land)}&nbsp; ${t(p.id === "du" ? "bist in" : "ist in")} <b style="display:inline;font-size:16px">${ohneHtml(p.ort)}</b></div>
       <div class="klein">${t("Dort ist es {z} Uhr", { z: uhrzeit(p.tz) })} · ${zeitDiffLang(p.tz)}${familieMitStandort ? " · " + (entfernungKm(du.lat, du.lon, p.lat, p.lon) < 1 ? t("Am selben Ort") : t("{km} von dir", { km: km(entfernungKm(du.lat, du.lon, p.lat, p.lon)) })) : ""}</div>
-      ${r ? `<div class="naechste"><span class="nr-titel">${t("✈︎ Nächste Reise")}</span><span class="nr-ort">${flagge(r.land)}&nbsp; ${ohneHtml(r.ziel)}</span><span class="nr-daten">${kurz(r.von)} – ${kurz(r.bis)} · ${naechte} ${t(naechte === 1 ? "Nacht" : "Nächte")}</span></div>` : ""}
-      ${weitere.length ? `<div class="weitere">${weitere.map(x => `${flagge(x.land)} ${ohneHtml(x.ziel)} · ${x.von ? kurz(x.von) + "–" + kurz(x.bis) : t("vielleicht im {m}", { m: datum(x.monat + "-01").toLocaleDateString(LOC, { month: "long" }) })}`).join("<br>")}</div>` : ""}
+      ${r ? `<div class="naechste"><span class="nr-titel">${r.von <= heute ? t("📍 Aktuelle Reise") : t("✈︎ Nächste Reise")}</span><span class="nr-ort">${flagge(r.land)}&nbsp; ${ohneHtml(r.ziel)}</span><span class="nr-daten">${zeitraum(r)} · ${naechte} ${t(naechte === 1 ? "Nacht" : "Nächte")}</span></div>` : ""}
+      ${weitere.length ? `<div class="weitere">${weitere.map(x => `${flagge(x.land)} ${ohneHtml(x.ziel)} · ${x.von ? zeitraum(x) : t("vielleicht im {m}", { m: datum(x.monat + "-01").toLocaleDateString(LOC, { month: "long" }) })}`).join("<br>")}</div>` : ""}
     </div></div>`;
   }).join("");
   document.querySelectorAll(".fam-karte").forEach(k => k.onclick = () => { const p = leute.find(x => x.id === k.dataset.id); map.flyTo({ center: [p.lon, p.lat], zoom: 10, speed: 1.3, essential: true }); });
@@ -2181,8 +2187,8 @@ function laenderVon(p) {
   return [p.land, ...pool].slice(0, p.laender);
 }
 function naechsteReiseSteckbrief(id) {
-  const heute = new Date().toISOString().slice(0, 10), monat = heute.slice(0, 7);
-  return reisen.filter(r => r.wer.includes(id) && (r.vielleicht ? r.monat >= monat : r.bis >= heute)).sort((a, b) => reiseSchluessel(a).localeCompare(reiseSchluessel(b)))[0];
+  const heute = heuteISO(), monat = heute.slice(0, 7);
+  return reisen.filter(r => r.wer.includes(id) && (r.vielleicht ? r.monat >= monat : r.von > heute)).sort((a, b) => reiseSchluessel(a).localeCompare(reiseSchluessel(b)))[0];
 }
 async function steckbriefOeffnen(p) {
   if (!welt) { try { welt = await (await fetch("weltkarte.json")).json(); } catch (e) { welt = []; } }
@@ -2195,7 +2201,7 @@ async function steckbriefOeffnen(p) {
   // Mit wem unterwegs: bestätigte Reisegruppe, sonst der Partner, wenn er am selben Ort ist
   const rg = gruppeVon(p.id), partner = p.paar && leute.find(q => q.id !== p.id && q.paar === p.paar && q.lat != null && p.lat != null && entfernungKm(p.lat, p.lon, q.lat, q.lon) < NAH_KM);
   const mit = rg ? rg.leute.filter(id => id !== p.id).map(person).filter(Boolean) : partner ? [partner] : [];
-  const reise = naechsteReiseSteckbrief(p.id);
+  const reise = naechsteReiseSteckbrief(p.id), jetztReise = laufendeReise(p.id);
   const name = selbst ? (p.echterName || t("Du")) : p.name;
   const akte = "AH-" + String([...p.id].reduce((a, c) => a + c.charCodeAt(0) * 7, 0) % 9000 + 1000);
   const titel = { modern: "", mission: `${t("Personalakte")} · ${akte} · ${t("Freigegeben")}`, abenteuer: t("Reisepass") }[stil];
@@ -2209,13 +2215,14 @@ async function steckbriefOeffnen(p) {
     feld(t("Ortszeit"), `${uhrzeit(p.tz)}${t(" Uhr")}${selbst ? "" : `<small class="sb-klein">${zeitDiffLang(p.tz)}</small>`}`);
   if (abstand != null) felder += feld(t("Entfernung"), abstand < 1 ? t("Am selben Ort") : km(abstand), true);
   if (mit.length) felder += feld(t("Reist mit"), ((!rg && partner) || (mit.length === 1 && mit[0].paar && mit[0].paar === p.paar) ? "❤️ " : "") + gruppenText(mit), true);
-  if (reise) felder += feld(t("Nächste Reise"), `${reise.land ? flagge(reise.land) : "📍"} ${ohneHtml(reise.ziel)} · ${reise.von ? kurz(reise.von) + " – " + kurz(reise.bis) : t("irgendwann im {m}", { m: datum(reise.monat + "-01").toLocaleDateString(LOC, { month: "long" }) })}`, true);
+  if (jetztReise) felder += feld(t("Aktuelle Reise"), `${jetztReise.land ? flagge(jetztReise.land) : "📍"} ${ohneHtml(jetztReise.ziel)} · ${zeitraum(jetztReise)}`, true);
+  if (reise) felder += feld(t("Nächste Reise"), `${reise.land ? flagge(reise.land) : "📍"} ${ohneHtml(reise.ziel)} · ${zeitraum(reise)}`, true);
   const zahlen = laenderVon(p) ? `<div class="sb-zahlen"><div><b data-zahl="${zahl}">${zahl}</b><span>${t(zahl === 1 ? "Land" : "Länder")}</span></div><div><b>${kont}/7</b><span>${t("Kontinente")}</span></div><div><b>${pio ? pio + "×" : "–"}</b><span>${t("Pionier")}</span></div></div><div class="sb-karte">${karte}</div>` : "";
   const sortiert = laender.filter(cc => STAATEN.has(cc)).slice(0, 11);
   const stempel = sortiert.length ? `<div class="sb-stempel">${sortiert.map((cc, i) => `<span class="stempel-ink${i % 3 === 1 ? " eckig" : ""}" style="--i:${i};--r:${((i * 37) % 26) - 13}deg;--sf:${STEMPEL_FARBEN[i % STEMPEL_FARBEN.length]}">${flagge(cc)}<small>${cc}</small></span>`).join("")}${zahl > sortiert.length ? `<span class="stempel-mehr">+${zahl - sortiert.length}</span>` : ""}</div>` : "";
   const alleLinks = (selbst ? meineLinks : p.links) || {}, termin = !selbst && linkZiel("calendly", alleLinks.calendly);
-  const linksHtml = Object.entries(alleLinks).map(([k, v]) => { if (k === "calendly" && termin) return ""; const u = linkZiel(k, v), a = LINK_ARTEN.find(x => x[0] === k); return u && a ? `<a href="${ohneHtml(u)}" target="_blank" rel="noopener">${a[1]}</a>` : ""; }).join("");
-  const knoepfe = (linksHtml ? `<div class="sb-links">${linksHtml}</div>` : "") + (termin ? `<a class="knopf-gross sb-termin" href="${ohneHtml(termin)}" target="_blank" rel="noopener">📅 ${t("Termin buchen")}</a>` : "") + (selbst ? "" : `<div class="sb-knoepfe"><button class="knopf-leise" id="sb-karte-zeigen">📍 ${t("Auf der Karte")}</button><button class="knopf-leise" id="sb-nachricht">💬 ${t("Nachricht")}</button></div>`) + (!selbst && (paarMoeglich(p) || mitreiseMoeglich(p)) ? `<div class="sb-knoepfe">${paarMoeglich(p) ? `<button class="knopf-leise" id="sb-paar">${paarKnopfText(p)}</button>` : ""}${mitreiseMoeglich(p) ? `<button class="knopf-leise" id="sb-mitreise">${mitreiseKnopfText(p)}</button>` : ""}</div>` : "");
+  const linksHtml = Object.entries(alleLinks).map(([k, v]) => { if (k === "calendly" && termin) return ""; const u = linkZiel(k, v), a = LINK_ARTEN.find(x => x[0] === k); return u && a ? `<a href="${ohneHtml(u)}" target="_blank" rel="noopener">${t(a[1])}</a>` : ""; }).join("");
+  const knoepfe = (linksHtml ? `<div class="sb-links">${linksHtml}</div>` : "") + (termin ? `<div class="sb-knoepfe"><a class="knopf-leise sb-termin" href="${ohneHtml(termin)}" target="_blank" rel="noopener">📅 ${t("Termin buchen")}</a></div>` : "") + (selbst ? "" : `<div class="sb-knoepfe"><button class="knopf-leise" id="sb-karte-zeigen">📍 ${t("Auf der Karte")}</button><button class="knopf-leise" id="sb-nachricht">💬 ${t("Nachricht")}</button></div>`) + (!selbst && (paarMoeglich(p) || mitreiseMoeglich(p)) ? `<div class="sb-knoepfe">${paarMoeglich(p) ? `<button class="knopf-leise" id="sb-paar">${paarKnopfText(p)}</button>` : ""}${mitreiseMoeglich(p) ? `<button class="knopf-leise" id="sb-mitreise">${mitreiseKnopfText(p)}</button>` : ""}</div>` : "");
   const blatt = document.getElementById("sb-blatt");
   blatt.style.setProperty("--sb-farbe", p.farbe || "#0a84ff");
   blatt.innerHTML = `<button class="sb-zu" id="sb-zu" aria-label="${t("Schließen")}">✕</button>
@@ -2567,7 +2574,7 @@ function wunschMarke(r) {
 async function reisenLaden() {
   const { data, error } = await SB.from("reise").select("*").order("ankunft", { nullsFirst: false });
   if (error) return hinweis(t("Laden hat nicht geklappt"));
-  const heute = new Date().toISOString().slice(0, 10), monatJetzt = heute.slice(0, 7);
+  const heute = heuteISO(), monatJetzt = heute.slice(0, 7);
   const neu = data.filter(r => r.vielleicht ? r.monat >= monatJetzt : r.abreise >= heute).map(r => ({
     id: r.id, wer: [r.von === ECHT_DATEN.uid ? "du" : r.von], ziel: r.ort, land: r.land, lat: r.lat, lon: r.lon,
     von: r.vielleicht ? null : r.ankunft, bis: r.vielleicht ? null : r.abreise, monat: r.vielleicht ? r.monat : null, vielleicht: r.vielleicht, wunsch: r.wunsch || null
@@ -2590,7 +2597,7 @@ function naeheArt(a, b) {
   return (nurLand(a) || nurLand(b)) && a.land && a.land === b.land ? "land" : null;
 }
 function trefferFinden() {
-  const heute = new Date().toISOString().slice(0, 10), du = ich(), treffer = [];
+  const heute = heuteISO(), du = ich(), treffer = [];
   const bald = n => new Date(Date.now() + n * 864e5).toISOString().slice(0, 10);
   const fest = reisen.filter(r => r.von), meine = fest.filter(r => r.wer[0] === "du" && r.bis >= heute), andere = fest.filter(r => r.wer[0] !== "du" && r.bis >= heute);
   const dazu = (art, x) => {
@@ -2981,7 +2988,7 @@ if ("serviceWorker" in navigator) navigator.serviceWorker.addEventListener("mess
 async function ortNachfragen(sofort) {
   if (!ECHT || familieModus || ECHT_DATEN.profil.geist) return;
   if (document.getElementById("aktion-blatt").classList.contains("offen")) return setTimeout(() => ortNachfragen(sofort), 1500);
-  const du = ich(), heute = new Date().toISOString().slice(0, 10);
+  const du = ich(), heute = heuteISO();
   let gefragt = {}; try { gefragt = JSON.parse(localStorage.getItem("ahoi-ortfrage") || "{}"); } catch (e) {}
   const merken = k => { gefragt[k] = heute; try { localStorage.setItem("ahoi-ortfrage", JSON.stringify(gefragt)); } catch (e) {} };
   const reise = reisen.find(r => r.wer[0] === "du" && r.von && r.von <= heute && r.bis >= heute);

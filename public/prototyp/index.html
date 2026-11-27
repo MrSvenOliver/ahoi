@@ -410,7 +410,7 @@
   .fam-karte .nr-titel { font-size: 12px; font-weight: 700; color: var(--text-leise); text-transform: uppercase; letter-spacing: 0.4px; }
   .fam-karte .nr-ort { font-size: 17px; font-weight: 700; margin-top: 2px; }
   .fam-karte .nr-daten { font-size: 14px; color: var(--text-leise); }
-  .feedback-lasche { position: fixed; right: 0; top: 46%; z-index: 44; transform: translateY(-50%) rotate(-90deg); transform-origin: 100% 50%; translate: 0 0; border: 0; border-radius: 10px 10px 0 0; padding: 5px 10px; background: var(--tinte); color: var(--papier); font: inherit; font-size: 11px; font-weight: 700; letter-spacing: 0.3px; opacity: 0.55; cursor: pointer; margin-right: 13px; }
+  .feedback-lasche { position: fixed; right: 0; top: 46%; z-index: 65; transform: translateY(-50%) rotate(-90deg); transform-origin: 100% 50%; translate: 0 0; border: 0; border-radius: 10px 10px 0 0; padding: 5px 10px; background: var(--tinte); color: var(--papier); font: inherit; font-size: 11px; font-weight: 700; letter-spacing: 0.3px; opacity: 0.55; cursor: pointer; margin-right: 13px; }
   .feedback-lasche:active { opacity: 1; }
   html.tippt .feedback-lasche { display: none; }
   .hinweis { position: fixed; left: 50%; top: calc(env(safe-area-inset-top) + 86px); transform: translate(-50%, -10px); z-index: 20; background: var(--tinte); color: var(--papier); padding: 8px 14px; border-radius: 999px; font-size: 13px; opacity: 0; transition: opacity 0.25s, transform 0.25s; pointer-events: none; white-space: nowrap; }
@@ -1021,7 +1021,8 @@
   .link-feld input { padding-right: 46px; }
   .link-weg { position: absolute; right: 6px; top: 50%; transform: translateY(calc(-50% + 3px)); width: 34px; height: 34px; border-radius: 50%; border: 0; background: var(--trenner); color: var(--text); font-size: 14px; cursor: pointer; }
   [data-stil="mission"] .link-weg { border-radius: 2px; }
-  .sb-termin { display: block; width: 100%; margin-top: 10px; text-align: center; text-decoration: none; box-sizing: border-box; }
+  .sb-termin { flex: 1; display: block; text-align: center; text-decoration: none; box-sizing: border-box; }
+  .sb-knoepfe + .sb-knoepfe { margin-top: 8px; }
   .marke-knopf { display: block; width: 100%; box-sizing: border-box; margin-top: 8px; text-align: center; text-decoration: none; color: #fff !important; border: 0; }
   .marke-airbnb { background: #ff385c !important; box-shadow: 0 6px 16px rgba(255, 56, 92, .28); }
   .marke-booking { background: #003b95 !important; box-shadow: 0 6px 16px rgba(0, 59, 149, .25); }

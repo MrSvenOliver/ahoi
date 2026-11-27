@@ -521,6 +521,8 @@ const TEXTE = {
   "Gerade in": ["Right now in", "Práve v"],
   "Entfernung": ["Distance", "Vzdialenosť"],
   "Nächste Reise": ["Next trip", "Ďalšia cesta"],
+  "Aktuelle Reise": ["Current trip", "Aktuálna cesta"],
+  "📍 Aktuelle Reise": ["📍 Current trip", "📍 Aktuálna cesta"],
   "Kontinente": ["Continents", "Kontinenty"],
   "Auf der Karte": ["On the map", "Na mape"],
   "Nachricht": ["Message", "Správa"],
