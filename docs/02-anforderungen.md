@@ -6,7 +6,7 @@ Gesammelte Wünsche und Entscheidungen von Sven. Gebaut wird erst, wenn die Anfo
 - Testphase über Wochen/Monate, nur auf Einladung, anfangs max. 10 Leute
 - Skalierbarkeit im Hinterkopf: später evtl. App Store und weitere Sprachen
 - Sprachen schon in der Beta: die komplette App auf Deutsch, Englisch oder Slowakisch; automatisch nach Handysprache (Deutsch → Deutsch, Slowakisch → Slowakisch, alles andere → Englisch); kleine Flagge am Profilknopf zeigt die Sprache, im Profil unter „Darstellung“ als klassische Einstellungszeile (Sprache › aktueller Wert), Auswahlliste mit Haken; Ortsnamen auf der Karte und Chat-Übersetzung folgen der Sprache; Texte der App stehen in einer eigenen Datei (texte.js), Nachrichten der Freunde bleiben im Original
-- Fast alle nutzen iPhone, mindestens eine Person Android; zusätzlich normale Website für Desktop
+- Fast alle nutzen iPhone, mindestens eine Person Android; zusätzlich Computer-Version der echten App ab 1000 Pixel Breite: links feste Spalte (Bereiche oben, darunter der Inhalt), rechts immer die Karte; Chat mit Liste und Gespräch nebeneinander; Wishlist als Raster; der Prototyp bleibt wie auf dem Handy
 - Interner Arbeitsname: Ahoi; der Prototyp heißt auf dem Home-Bildschirm „Ahoi Test“ und hat ein blaues Symbol
 - Logo: A Kompassrose mit zwei Pins (Schatzkarten-Stil, ohne Text); Entwürfe heißen ahoi_logo_a-kompass_01.png usw., Endstand ahoi_logo_master.png
 - Offizieller Name: später; soll "Nomad" enthalten und wie ein Name klingen ("Nomadi", "Nomadia", "Nomado" bereits vergeben)

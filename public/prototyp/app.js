@@ -743,8 +743,11 @@ function stilWechseln(neu) {
 // ---------- Bereiche wechseln ----------
 const seiten = ["reisen", "reise-neu", "hilton-neu", "chat", "unterhaltung", "gruppe-neu", "ideen", "idee-neu", "tipp-neu", "profil", "meine-laender", "laender", "feedback", "verwaltung", "konto", "links", "freunde"];
 const TAB_VON = { "reise-neu": "reisen", "idee-neu": "ideen", "tipp-neu": "ideen", "unterhaltung": "chat", "gruppe-neu": "chat" };
+// Computer (echte App, ab 1000 px): Chatliste bleibt neben dem Gespräch offen, die Karte passt sich der Spalte an
+const amComputer = () => ECHT && window.matchMedia("(min-width: 1000px)").matches;
 function seiteZeigen(name) {
-  for (const s of seiten) document.getElementById("seite-" + s).classList.toggle("offen", s === name);
+  const daneben = amComputer() && name === "unterhaltung";
+  for (const s of seiten) document.getElementById("seite-" + s).classList.toggle("offen", s === name || (daneben && s === "chat"));
   document.querySelectorAll("#leiste button").forEach(b => b.setAttribute("aria-current", b.dataset.seite === name ? "page" : "false"));
   document.querySelectorAll("#leiste button").forEach(b => b.classList.toggle("aktiv", b.dataset.seite === (TAB_VON[name] || name)));
   document.getElementById("info").classList.remove("offen");
@@ -752,6 +755,9 @@ function seiteZeigen(name) {
   if (name === "chat") chatListeAufbauen();
   if (name === "ideen") { ideenAufbauen(); if (ECHT) wishlistLaden().catch(() => {}); }
   if (name === "karte") { blattSetzen(false); map.resize(); }
+  if (daneben) chatListeAufbauen();
+  document.querySelectorAll(".chat-zeile").forEach(z => z.classList.toggle("gewaehlt", daneben && !!aktuellerChat && z.dataset.id === aktuellerChat.id));
+  if (ECHT) requestAnimationFrame(() => map.resize());
 }
 document.querySelectorAll("#leiste button").forEach(b => b.onclick = () => seiteZeigen(b.dataset.seite));
 let vorFeedback = "karte";

@@ -1228,6 +1228,71 @@
   @keyframes neu-rein { from { transform: translate(-50%, -18px); opacity: 0; } to { transform: translateX(-50%); opacity: 1; } }
   [data-stil="mission"] .neu-banner { border-radius: 2px; border-color: var(--amber); color: var(--amber); font-family: var(--mono); font-size: 12px; text-transform: uppercase; letter-spacing: 1px; }
   .fam-leer { color: var(--text-leise); font-size: 14px; padding: 10px 2px; }
+  /* =====================================================================
+     Computer (nur echte App, ab 1000 px Breite): links eine feste Spalte mit den Bereichen
+     und dem Inhalt (Wer ist wo?, Reisen, Chat, Wishlist, Profil), rechts immer die Karte.
+     Chat: Liste links, Gespräch rechts daneben. Wishlist: breitere Spalte mit Raster.
+     ===================================================================== */
+  @media (min-width: 1000px) {
+    html.echt { --spalte: 420px; --spalte-kopf: 140px; }
+    html.echt:has(#seite-ideen.offen) { --spalte: clamp(420px, 62vw, 1100px); }
+    html.echt.familie { --spalte: 400px; }
+    html.echt #map { left: var(--spalte); }
+    html.echt .kopf { top: 18px; left: 16px; right: 16px; z-index: 41; }
+    html.echt.familie .kopf { z-index: 41; }
+
+    /* Bereiche als Reihe oben in der Spalte */
+    html.echt[data-stil] .leiste { left: 0; right: auto; top: 0; bottom: auto; width: var(--spalte); height: var(--spalte-kopf); max-width: none; margin: 0; padding: 74px 14px 12px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; border: 0; border-right: 1px solid var(--trenner); border-bottom: 1px solid var(--trenner); border-radius: 0; box-shadow: none; background-color: var(--flaeche); -webkit-backdrop-filter: none; backdrop-filter: none; }
+    html.echt.tippt[data-stil] .leiste { display: grid; }
+    html.echt[data-stil] .leiste button { flex-direction: row; gap: 7px; height: 48px; border-radius: 14px; font-size: 13.5px; letter-spacing: 0; }
+    html.echt[data-stil] .leiste button svg { width: 20px; height: 20px; }
+    html.echt[data-stil] .leiste button:hover:not(.aktiv) { background: var(--trenner); }
+    html.echt[data-stil="mission"] .leiste button { font-size: 11px; letter-spacing: 1px; border-radius: 3px; }
+    html.echt[data-stil="mission"] .leiste button.aktiv { background: rgba(95, 212, 234, 0.08); }
+    html.echt[data-stil="mission"] .leiste button.aktiv::before { top: auto; bottom: 0; }
+    html.echt[data-stil="abenteuer"] .leiste button { font-size: 19px; }
+    html.echt[data-stil="abenteuer"] .leiste button.aktiv { background: rgba(122, 90, 58, 0.12); }
+    html.echt[data-stil] .leiste .punkt { position: static; margin-left: -2px; }
+
+    /* Wer ist wo? füllt die Spalte */
+    html.echt[data-stil] .blatt { left: 0 !important; right: auto; top: var(--spalte-kopf); bottom: 0 !important; width: var(--spalte); max-width: none; margin: 0; padding-bottom: 0 !important; display: flex; flex-direction: column; border: 0; border-right: 1px solid var(--trenner); border-radius: 0; box-shadow: none; background-color: var(--flaeche); -webkit-backdrop-filter: none; backdrop-filter: none; }
+    html.echt[data-stil] .blatt-kopf { padding: 18px 20px 10px; }
+    html.echt .blatt .liste { flex: 1; max-height: none; padding: 0 10px 10px; }
+    html.echt .blatt .einladen-zeile { margin: 0 16px 16px; }
+    html.echt .liste li:hover { background: var(--trenner); }
+
+    /* Alle Seiten in der Spalte */
+    html.echt[data-stil] .seite { left: 0; right: auto; top: var(--spalte-kopf); bottom: 0; width: var(--spalte); padding: 20px 20px 28px; border-right: 1px solid var(--trenner); }
+    html.echt[data-stil] .seite-kopf h1 { font-size: 30px; }
+    html.echt[data-stil="abenteuer"] .seite-kopf h1 { font-size: 40px; }
+
+    /* Chat: Gespräch rechts neben der Liste */
+    html.echt[data-stil] #seite-unterhaltung { left: var(--spalte); right: 0; width: auto; top: 0; bottom: 0; z-index: 36; padding: 18px max(24px, calc((100vw - var(--spalte) - 780px) / 2)) 0; border-right: 0; }
+    html.echt .gespraech-kopf { padding-right: 60px; }
+    html.echt .gespraech-kopf .zurueck { display: none; }
+    html.echt:has(#seite-unterhaltung.offen) #knopf-welt, html.echt:has(#seite-unterhaltung.offen) #knopf-ich { display: none; }
+    html.echt .eingabe { padding-bottom: 18px; }
+    html.echt .chat-zeile .zeile-vorn { padding-left: 8px; padding-right: 8px; }
+    html.echt .chat-zeile:hover .zeile-vorn, html.echt .chat-zeile.gewaehlt .zeile-vorn { background: color-mix(in srgb, var(--text) 7%, var(--flaeche)); }
+    html.echt .blase { max-width: 62%; }
+
+    /* Wishlist als Raster */
+    html.echt #ideen-liste, html.echt #hilton-liste, html.echt #tipps-liste { display: grid; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); gap: 12px; align-items: start; }
+    html.echt #ideen-liste > *, html.echt #hilton-liste > *, html.echt #tipps-liste > * { margin: 0; }
+    html.echt #ideen-liste > :not(.kasten), html.echt #hilton-liste > :not(.kasten), html.echt #tipps-liste > :not(.kasten) { grid-column: 1 / -1; }
+    html.echt #hilton-liste > h2 { margin-top: 14px; }
+
+    /* Fenster über der Karte statt am unteren Rand */
+    html.echt .sb-blatt { left: var(--spalte); right: 0; bottom: 24px; max-height: calc(100% - 48px); border-radius: 26px; padding-bottom: 22px; }
+    html.echt .aktion-blatt { align-items: center; }
+    html.echt .aktion-blatt .innen { max-width: 420px; border-radius: 22px; padding-bottom: 16px; }
+    html.echt .neu-banner, html.echt .hinweis { left: calc(var(--spalte) + (100vw - var(--spalte)) / 2); }
+    html.echt[data-stil] .deko-ecke { left: calc(var(--spalte) + 14px); bottom: 14px; }
+    html.echt[data-stil="mission"] .deko-ecke.hud { bottom: 34px; }
+
+    /* Familie: Spalte links, Karte rechts */
+    html.echt[data-stil] .familie-blatt { left: 0; right: auto; top: 0; bottom: 0; width: var(--spalte); max-width: none; max-height: none; margin: 0; padding: 82px 20px 24px; border: 0; border-right: 1px solid var(--trenner); border-radius: 0; box-shadow: none; background-color: var(--flaeche); -webkit-backdrop-filter: none; backdrop-filter: none; }
+  }
 </style>
 </head>
 <body>
