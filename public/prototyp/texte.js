@@ -526,6 +526,7 @@ const TEXTE = {
   "Als Nächstes": ["Up next", "Ďalej"],
   "Alle weiteren Reisen": ["All other trips", "Všetky ďalšie cesty"],
   "Weniger anzeigen": ["Show less", "Zobraziť menej"],
+  "Alle Reisen einklappen": ["Collapse all trips", "Zbaliť všetky cesty"],
   "Alle Reisen anzeigen ({n})": ["Show all trips ({n})", "Zobraziť všetky cesty ({n})"],
   "noch {n}": ["{n} left", "ešte {n}"],
   "heute Abreise": ["leaving today", "dnes odchod"],

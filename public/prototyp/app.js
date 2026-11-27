@@ -890,19 +890,6 @@ function reisenAufbauen() {
   const heute = heuteISO(), monatJetzt = heute.slice(0, 7);
   const aktiv = reisen.filter(r => (r.von ? r.bis >= heute : r.monat >= monatJetzt) && person(r.wer[0]));
   const reihenfolge = (a, b) => (a.id === "du" ? 0 : 1) - (b.id === "du" ? 0 : 1) || a.name.localeCompare(b.name);
-  const gesicht = p => `<span class="zeile-kopf" style="${kopfStil(p)}">${kopfText(p)}</span>`;
-  const naechteText = n => `${n} ${t(n === 1 ? "Nacht" : "Nächte")}`;
-  // Jetzt: laufende Reise, sonst der letzte Standort von der Karte
-  const jetzt = [];
-  for (const p of [...leute].filter(p => p.art !== "familie").sort(reihenfolge)) {
-    const r = aktiv.find(x => x.von && x.von <= heute && x.wer.includes(p.id));
-    if (r) {
-      const rest = Math.round((datum(r.bis) - datum(heute)) / 864e5);
-      jetzt.push(`<div class="jetzt-zeile${p.id === "du" && r.wer[0] === "du" ? " eigen" : ""}" data-n="${reisen.indexOf(r)}">${gesicht(p)}<span class="jz-text"><b>${ohneHtml(rufname(p))}</b><span>${r.land ? flagge(r.land) + " " : ""}${ohneHtml(r.ziel)}</span></span><span class="jz-rechts">${rest ? t("noch {n}", { n: naechteText(rest) }) : t("heute Abreise")}</span></div>`);
-    } else if (p.ort) {
-      jetzt.push(`<div class="jetzt-zeile">${gesicht(p)}<span class="jz-text"><b>${ohneHtml(rufname(p))}</b><span>${p.land ? flagge(p.land) + " " : ""}${ohneHtml(p.ort)}</span></span><span class="jz-rechts"></span></div>`);
-    }
-  }
   // Als Nächstes: pro Person die nächste Reise, die noch nicht begonnen hat
   const spaeter = aktiv.filter(r => !(r.von && r.von <= heute));
   const naechste = [];
@@ -910,7 +897,8 @@ function reisenAufbauen() {
     const r = spaeter.find(x => x.wer[0] === p.id);
     if (r) naechste.push(r);
   }
-  const rest = spaeter.filter(r => !naechste.includes(r));
+  // Alle Reisen (auch laufende, damit man die eigene bearbeiten kann), ohne die schon gezeigten
+  const rest = aktiv.filter(r => !naechste.includes(r));
   const karte = r => {
     const ps = r.wer.map(person).filter(Boolean);
     const gesichter = ps.slice(0, 2).map((p, i) => `<div class="klein-ava" style="left:${ps.length > 1 ? i * 20 : 10}px;z-index:${2 - i};${kopfStil(p)}">${kopfText(p)}</div>`).join("");
@@ -924,11 +912,9 @@ function reisenAufbauen() {
       <div class="art">${r.vielleicht ? '<span class="vielleicht-text">' + t("Vielleicht") + '</span>' : `<b>${naechte}</b><small>${t(naechte === 1 ? "Nacht" : "Nächte")}</small>`}</div></div>`;
   };
   let html = "";
-  if (jetzt.length) html += `<h2>${t("Jetzt")}</h2><div class="kasten jetzt-liste">${jetzt.join("")}</div>`;
   if (naechste.length) html += `<h2>${t("Als Nächstes")}</h2>` + naechste.map(karte).join("");
-  if (rest.length) html += alleReisenOffen
-    ? `<h2>${t("Alle weiteren Reisen")}</h2>` + rest.map(karte).join("") + `<button class="knopf-leise alle-reisen" id="alle-reisen">${t("Weniger anzeigen")}</button>`
-    : `<button class="knopf-leise alle-reisen" id="alle-reisen">${t("Alle Reisen anzeigen ({n})", { n: rest.length })}</button>`;
+  // Ein Knopf an derselben Stelle: aufklappen ▾ / einklappen ▴
+  if (rest.length) html += `<button class="knopf-leise alle-reisen" id="alle-reisen">${alleReisenOffen ? t("Alle Reisen einklappen") + " ▴" : t("Alle Reisen anzeigen ({n})", { n: rest.length }) + " ▾"}</button>` + (alleReisenOffen ? rest.map(karte).join("") : "");
   document.getElementById("reise-liste").innerHTML = html || (ECHT ? `<div class="bald"><div style="font-size:44px">✈️</div><b>${t("Noch keine Reisen")}</b>${t("Trag deine nächste Reise ein. Wenn Freunde zur selben Zeit am selben Ort sind, zeigt Ahoi euch einen Treffer.")}</div>` : "");
   const ak = document.getElementById("alle-reisen"); if (ak) ak.onclick = () => { alleReisenOffen = !alleReisenOffen; reisenAufbauen(); };
   document.querySelectorAll("#reise-liste .eigen").forEach(k => k.onclick = () => {
@@ -2444,7 +2430,7 @@ async function reisegruppeVerlassen() {
   if (ECHT) { const { error } = await SB.rpc("gruppe_verlassen"); if (error) return hinweis(t("Das hat nicht geklappt")); }
   g.leute = g.leute.filter(id => id !== "du");
   reisegruppen = reisegruppen.filter(x => x.leute.length > 1);
-  gruppenSpeichern(); pinsSetzen(); listeAufbauen(); mitreiseWertZeigen(); hinweis(t("Du reist jetzt allein weiter"));
+  gruppenSpeichern(); pinsSetzen(); listeAufbauen(); mitreiseWertZeigen(); trefferAufbauen(); hinweis(t("Du reist jetzt allein weiter"));
   if (document.getElementById("info").classList.contains("offen")) infoZeigen(infoGruppe);
 }
 let infoGruppe = null;
@@ -3199,7 +3185,7 @@ async function verbindungenLaden() {
     ANFRAGEN.mitreiseRaus = offen.filter(x => x.von === uid).map(x => idVon(x.an));
     ANFRAGEN.mitreiseRein = offen.filter(x => x.an === uid).map(x => idVon(x.von));
   }
-  pinsSetzen(); listeAufbauen(); mitreiseWertZeigen();
+  pinsSetzen(); listeAufbauen(); mitreiseWertZeigen(); reisenAufbauen(); trefferAufbauen();
   if (ersteVerbindungen) { ersteVerbindungen = false; setTimeout(anfragenBeantworten, 2800); }
   else anfragenBeantworten();
 }
