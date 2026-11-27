@@ -439,6 +439,8 @@ function gruppenPruefen() {
   if (geaendert || vorher !== reisegruppen.length) gruppenSpeichern();
 }
 const rufname = p => p.id === "du" ? t("Du") : p.name;
+// Aufzählung: „Klara, Noah, Tilman & Barb“ (Komma, nur vor dem letzten Namen ein &)
+const aufzaehlen = namen => namen.length < 2 ? (namen[0] || "") : namen.slice(0, -1).join(", ") + " & " + namen[namen.length - 1];
 // „Alex ❤️ Sam · Lea · Mia“
 function gruppenText(ps) {
   const fertig = new Set(), teile = [];
@@ -447,7 +449,7 @@ function gruppenText(ps) {
     const partner = p.paar && ps.find(q => q.id !== p.id && q.paar === p.paar && !fertig.has(q.id));
     if (partner) { fertig.add(partner.id); teile.push(`${ohneHtml(rufname(p))} ❤️ ${ohneHtml(rufname(partner))}`); } else teile.push(ohneHtml(rufname(p)));
   }
-  return teile.join(" · ");
+  return aufzaehlen(teile);
 }
 // Wer am selben Ort ist, zerfällt in Reisegruppen, Paare und Einzelne
 function ortTeilen(g) {
@@ -558,7 +560,7 @@ function listeAufbauen() {
   for (const p of andere) {
     let paarText = "";
     const rg = gruppeVon(p.id), dabei = rg ? rg.leute.filter(id => id !== p.id).map(person).filter(Boolean) : [];
-    if (dabei.length) paarText = ` · ${t("mit")} ${dabei.map(q => q.id === "du" ? t("dir") : ohneHtml(q.name)).join(", ")}`;
+    if (dabei.length) paarText = ` · ${t("mit")} ${aufzaehlen(dabei.map(q => q.id === "du" ? t("dir") : ohneHtml(q.name)))}`;
     const li = document.createElement("li");
     li.innerHTML = `<div class="ava" style="${kopfStil(p)}">${kopfText(p)}</div>
       <div class="zeile"><b>${ohneHtml(p.name)}</b><span>${flagge(p.land)} ${ohneHtml(p.ort)} · ${ortAktuell(p) ? uhrzeit(p.tz) + t(" Uhr") : `<i class="ort-alt">${ortAlterText(p)}</i>`}${paarText}</span>${statusText(p) ? `<small class="status-klein">${ohneHtml(statusText(p))}</small>` : ""}</div>
@@ -571,7 +573,7 @@ function listeAufbauen() {
 
 function infoZeigen(gruppe) {
   const du = familieModus ? BETRACHTER : ich(), p = gruppe[0], info = document.getElementById("info");
-  const name = gruppe.map(x => x.name).join(" & ");
+  const name = aufzaehlen(gruppe.map(x => x.name));
   let text = (gruppe.length === 1 && statusText(p) && !familieModus ? `<span class="status-zeile">${ohneHtml(statusText(p))}</span><br>` : "") + `${flagge(p.land)} <b>${ohneHtml(p.ort)}</b> · ${t("Ortszeit")} <b>${uhrzeit(p.tz)}${t(" Uhr")}</b>${p.id !== "du" && zeitDiffKurz(p.tz) ? ` <span class="zeit-diff">${zeitDiffKurz(p.tz)}</span>` : ""}` + (gruppe.length === 1 && !ortAktuell(p) ? `<br><i class="ort-alt">${ortAlterText(p)}</i>` : "");
   const abstand = p.id !== du.id && du.lat != null ? entfernungKm(du.lat, du.lon, p.lat, p.lon) : null;
   if (abstand != null && (!familieModus || familieMitStandort) && !gruppe.some(x => x.id === du.id)) text += abstand < 1 ? `<br>📍 <b>${t("Am selben Ort")}</b>` : `<br>${t("Entfernung zu dir:")} <b data-km="${abstand}">${km(abstand)}</b>`;
@@ -580,7 +582,7 @@ function infoZeigen(gruppe) {
     if (istPaar(gruppe)) text += `<br>${t("❤️ Paar · gerade zusammen unterwegs")}`;
     else {
       teil.gruppen.forEach(g => text += `<br>${g.length === 2 && istPaar(g) ? "❤️" : "👥"} ${t("Zusammen unterwegs:")} <b>${gruppenText(g)}</b>`);
-      if (teil.frei.length) text += `<br>📍 ${t("Am selben Ort:")} ${teil.frei.map(x => ohneHtml(rufname(x))).join(", ")}`;
+      if (teil.frei.length) text += `<br>📍 ${t("Am selben Ort:")} ${aufzaehlen(teil.frei.map(x => ohneHtml(rufname(x))))}`;
     }
   } else if (!familieModus) { const rg = gruppeVon(p.id); if (rg) text += `<br>👥 ${t("Reist mit")} <b>${gruppenText(rg.leute.filter(id => id !== p.id).map(person).filter(Boolean))}</b>`; }
   if (gruppe.length === 1 && !familieModus) { const n = p.id === "du" ? laenderZahl() : p.laender; if (n) text += `<br>🌍 ${anzahl(n, "laender")}`; }
@@ -596,7 +598,7 @@ function infoZeigen(gruppe) {
   paarKnopfSetzen(gruppe);
   gruppeKnopfSetzen(gruppe);
   const sbBox = document.getElementById("info-steckbriefe");
-  sbBox.innerHTML = familieModus ? "" : gruppe.slice(0, 4).map((x, i) => `<button class="knopf-leise" data-sb="${i}">🪪 ${gruppe.length > 1 ? ohneHtml(rufname(x)) : t("Steckbrief")}</button>`).join("");
+  sbBox.innerHTML = familieModus ? "" : gruppe.map((x, i) => `<button class="knopf-leise" data-sb="${i}">🪪 ${gruppe.length > 1 ? ohneHtml(rufname(x)) : t("Steckbrief")}</button>`).join("");
   sbBox.querySelectorAll("button").forEach(b => b.onclick = () => steckbriefOeffnen(gruppe[+b.dataset.sb]));
   info.classList.remove("offen"); void info.offsetWidth;
   info.classList.add("offen");
@@ -899,7 +901,7 @@ function reisenAufbauen() {
     const parallelText = parallel.length ? `<span class="parallel">${t("Gleichzeitig")}: ${parallel.slice(0, 3).map(x => `${ohneHtml(person(x.wer[0]).name)} ${x.land ? flagge(x.land) : ""} ${ohneHtml(x.ziel)}`).join(" · ")}${parallel.length > 3 ? " · " + t("+{n} weitere", { n: parallel.length - 3 }) : ""}</span>` : "";
     html += `<div class="kasten reise${r.vielleicht ? " vielleicht" : ""}${aktuell ? " aktuell" : ""}${weiter ? " weiter" : ""}${r.wer[0] === "du" ? " eigen" : ""}" data-n="${reisen.indexOf(r)}">
       <div class="gesichter">${gesichter}</div>
-      <div class="text"><span class="wer">${ps.map(p => p.name).join(" & ")}</span>
+      <div class="text"><span class="wer">${ohneHtml(aufzaehlen(ps.map(p => p.name)))}</span>
         <span class="ziel">${r.land ? flagge(r.land) : "📍"}&nbsp;&nbsp;${ohneHtml(r.ziel)}</span>
         <span class="wann">${!r.von ? t("irgendwann im {m}", { m: datum(r.monat + "-01").toLocaleDateString(LOC, { month: "long" }) }) : weiter ? `↪ ${t("läuft weiter bis {d}", { d: datumMittel(r.bis) })}` : `${datumMittel(r.von)} – ${datumMittel(r.bis)}`}${wunschMarke(r)}</span>${parallelText}</div>
       <div class="art">${r.vielleicht ? '<span class="vielleicht-text">' + t("Vielleicht") + '</span>' : aktuell ? (rest ? `<small>${t("noch")}</small><b>${rest}</b><small>${t(rest === 1 ? "Nacht" : "Nächte")}</small>` : `<small>${t("heute")}</small><b>✈︎</b><small>${t("Abreise")}</small>`) : `<b>${naechte}</b><small>${t(naechte === 1 ? "Nacht" : "Nächte")}</small>`}</div></div>`;
@@ -1110,7 +1112,7 @@ function gespraechOeffnen(c) {
   kopfBild.setAttribute("style", kb.stil); kopfBild.innerHTML = kb.inhalt;
   glockeSetzen();
   const p = c.art === "einzel" && personOder(c.mit);
-  document.getElementById("gespraech-unter").textContent = c.art === "alle" ? t("Alle Mitglieder · nur in der Beta") : c.art === "gruppe" ? c.mitglieder.map(id => id === "du" ? t("Du") : personOder(id).name).join(", ") : p.ort ? `${flagge(p.land)} ${p.ort} · ${uhrzeit(p.tz)}${t(" Uhr")}` : "";
+  document.getElementById("gespraech-unter").textContent = c.art === "alle" ? t("Alle Mitglieder · nur in der Beta") : c.art === "gruppe" ? aufzaehlen(c.mitglieder.map(id => id === "du" ? t("Du") : personOder(id).name)) : p.ort ? `${flagge(p.land)} ${p.ort} · ${uhrzeit(p.tz)}${t(" Uhr")}` : "";
   if (ECHT) chatGelesen(c);
   document.getElementById("uebersetzen").style.display = c.nachrichten.some(istFremd) ? "" : "none";
   seiteZeigen("unterhaltung");
@@ -1241,7 +1243,7 @@ function gebuchtMelden(i) {
   reisenAufbauen();
   const c = ideeGruppe(i, true); c.nachrichten.push({ system: t("✅ <b>Gebucht!</b> {titel}, {daten} steht jetzt in den Reisen", { titel: t("{art} in {ort}", { art: i.art, ort: i.ort }), daten: kurz(i.anreise) + "–" + kurz(i.abreise) }) });
   ideenAufbauen();
-  hinweis(t("In Reisen eingetragen für {wer}", { wer: wer.map(id => id === "du" ? t("dich") : person(id).name).join(", ") }));
+  hinweis(t("In Reisen eingetragen für {wer}", { wer: aufzaehlen(wer.map(id => id === "du" ? t("dich") : person(id).name)) }));
 }
 function tippsAufbauen() {
   const laender = ["alle", ...new Set(tipps.map(x => x.land))];
@@ -1787,7 +1789,7 @@ function wishlistKnoepfe() {
   });
   wishlistInfoKnoepfe();
   document.querySelectorAll(".gebucht-knopf").forEach(b => b.onclick = () => {
-    const x = i(b), wer = [...new Set([...(x.vonDabei !== false ? [x.von] : []), ...x.dabei, ...mitreisende(x)])].map(id => id === "du" ? t("dich") : person(id).name).join(", ");
+    const x = i(b), werListe = ([...new Set([...(x.vonDabei !== false ? [x.von] : []), ...x.dabei, ...mitreisende(x)])].map(id => id === "du" ? t("dich") : person(id).name)), wer = aufzaehlen(werListe);
     if (!wer) return hinweis(t("Noch niemand ist dabei"));
     fragen(t("Habt ihr gebucht? Dann steht es für {wer} als gebucht.", { wer }), [[t("✓ Ja, gebucht"), async () => {
       const { error } = await SB.rpc("wunsch_gebucht", { w: x.id });
@@ -2108,34 +2110,60 @@ if (!ECHT) { reisenAufbauen(); chatListeAufbauen(); ideenAufbauen(); }
 
 
 // ---------- Paar: in der Info-Karte „Wir sind ein Paar“, die andere Person bestätigt ----------
-let paarAnfrage = null;
+var paarAnfrage = null;
+var ANFRAGEN = { paarRein: [], mitreiseRein: [], mitreiseRaus: [] };
 const meinPartner = () => ich().paar ? leute.find(p => p.id !== "du" && p.paar === ich().paar) : null;
-function paarWertZeigen() { const p = meinPartner(); document.getElementById("paar-wert").textContent = p ? "❤️ " + p.name : paarAnfrage ? t("Anfrage gesendet") : t("Nicht verknüpft"); }
-function paarLoesen() {
+function paarWertZeigen() {
+  const p = meinPartner(), rein = ECHT ? ANFRAGEN.paarRein.map(person).filter(Boolean) : [];
+  document.getElementById("paar-wert").textContent = p ? "❤️ " + p.name : rein.length ? t("Anfrage von {name}", { name: rein[0].name }) : paarAnfrage && person(paarAnfrage) ? t("Anfrage an {name} gesendet", { name: person(paarAnfrage).name }) : t("Nicht verknüpft");
+}
+function paarLoesen(danach) {
   const p = meinPartner(); if (!p) return;
   fragen(t("Verknüpfung mit {name} lösen?", { name: p.name }), [[t("Lösen"), async () => {
     if (ECHT) { const { error } = await SB.rpc("paar_loesen"); if (error) return hinweis(t("Das hat nicht geklappt")); }
-    delete p.paar; delete ich().paar; paarWertZeigen(); pinsSetzen(); listeAufbauen(); hinweis(t("Verknüpfung gelöst"));
+    delete p.paar; delete ich().paar; paarWertZeigen(); pinsSetzen(); listeAufbauen(); hinweis(t("Verknüpfung gelöst")); if (danach) danach();
   }, true]]);
 }
+// Paar-Anfrage an eine Person: aus der Info-Karte, dem Steckbrief oder dem Profil („Partner“)
+function paarAnfrageStarten(p, danach) {
+  if (meinPartner()) return hinweis(t("Du bist schon mit {name} verknüpft", { name: meinPartner().name }));
+  if (ECHT && ANFRAGEN.paarRein.includes(p.id)) return anfrageAntworten("paar_antworten", p.id, true).then(() => danach && danach());
+  if (paarAnfrage === p.id) return hinweis(t("Anfrage an {name} gesendet", { name: p.name }));
+  fragen(t("Mit {name} als Paar verknüpfen? {name} bestätigt. Danach zeigt die Karte ❤️, wenn ihr am selben Ort seid.", { name: p.name }), [[t("Anfrage senden"), async () => {
+    if (ECHT) { await paarEchtAnfragen(p); if (danach) danach(); return; }
+    paarAnfrage = p.id; paarWertZeigen(); if (danach) danach(); hinweis(t("Anfrage an {name} gesendet", { name: p.name }));
+    // Prototyp: die Bestätigung kommt nach kurzer Zeit von selbst
+    setTimeout(() => { if (paarAnfrage !== p.id) return; paarAnfrage = null; ich().paar = p.paar = "p-du"; paarWertZeigen(); pinsSetzen(); listeAufbauen(); hinweis(t("{name} hat bestätigt ❤️", { name: p.name })); if (danach) danach(); }, 3500);
+  }]]);
+}
+// Knopftext für eine Person: Paar, Anfrage gesendet, Anfrage bekommen oder „Wir sind ein Paar“
+function paarKnopfText(p) {
+  if (ich().paar && p.paar === ich().paar) return t("❤️ Ihr seid ein Paar");
+  if (ECHT && ANFRAGEN.paarRein.includes(p.id)) return t("❤️ Paar bestätigen");
+  if (paarAnfrage === p.id) return t("❤️ Anfrage gesendet");
+  return t("❤️ Wir sind ein Paar");
+}
+const paarMoeglich = p => !familieModus && p && p.id !== "du" && (!p.paar || p.paar === ich().paar) && (!meinPartner() || meinPartner() === p);
 function paarKnopfSetzen(gruppe) {
   const k = document.getElementById("info-paar"), p = gruppe[0];
-  const zeigen = !familieModus && gruppe.length === 1 && p.id !== "du" && (!p.paar || p.paar === ich().paar);
+  const zeigen = gruppe.length === 1 && paarMoeglich(p);
   k.style.display = zeigen ? "inline-block" : "none";
   if (!zeigen) return;
-  const istPartner = ich().paar && p.paar === ich().paar;
-  k.textContent = istPartner ? t("❤️ Ihr seid ein Paar") : paarAnfrage === p.id ? t("❤️ Anfrage gesendet") : t("❤️ Wir sind ein Paar");
-  k.onclick = () => {
-    if (istPartner) return paarLoesen();
-    if (paarAnfrage === p.id) return;
-    if (meinPartner()) return hinweis(t("Du bist schon mit {name} verknüpft", { name: meinPartner().name }));
-    fragen(t("Mit {name} als Paar verknüpfen? {name} bestätigt. Danach zeigt die Karte ❤️, wenn ihr am selben Ort seid.", { name: p.name }), [[t("Anfrage senden"), () => {
-      if (ECHT) return paarEchtAnfragen(p, gruppe);
-      paarAnfrage = p.id; paarWertZeigen(); paarKnopfSetzen(gruppe); hinweis(t("Anfrage an {name} gesendet", { name: p.name }));
-      // Prototyp: die Bestätigung kommt nach kurzer Zeit von selbst
-      setTimeout(() => { if (paarAnfrage !== p.id) return; paarAnfrage = null; ich().paar = p.paar = "p-du"; paarWertZeigen(); pinsSetzen(); hinweis(t("{name} hat bestätigt ❤️", { name: p.name })); if (document.getElementById("info").classList.contains("offen")) paarKnopfSetzen(gruppe); }, 3500);
-    }]]);
-  };
+  k.textContent = paarKnopfText(p);
+  k.onclick = () => ich().paar && p.paar === ich().paar ? paarLoesen(() => infoZeigen(gruppe)) : paarAnfrageStarten(p, () => infoZeigen(gruppe));
+}
+// Profil → Partner: Person aus der Liste wählen (am selben Ort zuerst), Anfragen an mich zuerst beantworten
+function partnerWaehlen() {
+  if (meinPartner()) return paarLoesen();
+  const rein = ECHT ? ANFRAGEN.paarRein.map(person).filter(Boolean) : [];
+  if (rein.length) return fragen(t("{name} möchte euch als Paar verknüpfen. Seid ihr ein Paar?", { name: rein[0].name }), [
+    [t("Ja, wir sind ein Paar ❤️"), () => anfrageAntworten("paar_antworten", rein[0].id, true)],
+    [t("Nein"), () => anfrageAntworten("paar_antworten", rein[0].id, false)]]);
+  const du = ich(), weg = q => du.lat != null && q.lat != null ? entfernungKm(du.lat, du.lon, q.lat, q.lon) : 1e9;
+  const wahl = leute.filter(q => q.id !== "du" && !q.paar && q.art !== "familie").sort((a, b) => weg(a) - weg(b) || a.name.localeCompare(b.name));
+  if (!wahl.length) return hinweis(t("Noch keine Freunde hier. Lade jemanden ein!"));
+  fragen(paarAnfrage && person(paarAnfrage) ? t("Anfrage an {name} gesendet. Wer ist dein Partner?", { name: person(paarAnfrage).name }) : t("Wer ist dein Partner? Die Person bestätigt in der App."),
+    wahl.map(q => [`${q.name}${weg(q) < 1 ? " · 📍" : ""}`, () => paarAnfrageStarten(q)]));
 }
 // ---------- Steckbrief: eine Person auf einen Blick (zuerst nur im Prototyp) ----------
 // Modern: Farbverlauf, Zahlen zählen hoch · Mission: Personalakte mit Scan · Abenteuer: Reisepass mit Länderstempeln
@@ -2187,7 +2215,7 @@ async function steckbriefOeffnen(p) {
   const stempel = sortiert.length ? `<div class="sb-stempel">${sortiert.map((cc, i) => `<span class="stempel-ink${i % 3 === 1 ? " eckig" : ""}" style="--i:${i};--r:${((i * 37) % 26) - 13}deg;--sf:${STEMPEL_FARBEN[i % STEMPEL_FARBEN.length]}">${flagge(cc)}<small>${cc}</small></span>`).join("")}${zahl > sortiert.length ? `<span class="stempel-mehr">+${zahl - sortiert.length}</span>` : ""}</div>` : "";
   const alleLinks = (selbst ? meineLinks : p.links) || {}, termin = !selbst && linkZiel("calendly", alleLinks.calendly);
   const linksHtml = Object.entries(alleLinks).map(([k, v]) => { if (k === "calendly" && termin) return ""; const u = linkZiel(k, v), a = LINK_ARTEN.find(x => x[0] === k); return u && a ? `<a href="${ohneHtml(u)}" target="_blank" rel="noopener">${a[1]}</a>` : ""; }).join("");
-  const knoepfe = (linksHtml ? `<div class="sb-links">${linksHtml}</div>` : "") + (termin ? `<a class="knopf-gross sb-termin" href="${ohneHtml(termin)}" target="_blank" rel="noopener">📅 ${t("Termin buchen")}</a>` : "") + (selbst ? "" : `<div class="sb-knoepfe"><button class="knopf-leise" id="sb-karte-zeigen">📍 ${t("Auf der Karte")}</button><button class="knopf-leise" id="sb-nachricht">💬 ${t("Nachricht")}</button></div>`);
+  const knoepfe = (linksHtml ? `<div class="sb-links">${linksHtml}</div>` : "") + (termin ? `<a class="knopf-gross sb-termin" href="${ohneHtml(termin)}" target="_blank" rel="noopener">📅 ${t("Termin buchen")}</a>` : "") + (selbst ? "" : `<div class="sb-knoepfe"><button class="knopf-leise" id="sb-karte-zeigen">📍 ${t("Auf der Karte")}</button><button class="knopf-leise" id="sb-nachricht">💬 ${t("Nachricht")}</button></div>`) + (!selbst && paarMoeglich(p) ? `<div class="sb-knoepfe"><button class="knopf-leise" id="sb-paar">${paarKnopfText(p)}</button></div>` : "");
   const blatt = document.getElementById("sb-blatt");
   blatt.style.setProperty("--sb-farbe", p.farbe || "#0a84ff");
   blatt.innerHTML = `<button class="sb-zu" id="sb-zu" aria-label="${t("Schließen")}">✕</button>
@@ -2202,6 +2230,7 @@ async function steckbriefOeffnen(p) {
   document.getElementById("sb-zu").onclick = steckbriefZu;
   const zk = document.getElementById("sb-karte-zeigen"); if (zk) zk.onclick = () => { steckbriefZu(); seiteZeigen("karte"); zuPerson(p); };
   const nk = document.getElementById("sb-nachricht"); if (nk) nk.onclick = () => { steckbriefZu(); einzelChat(p.id); };
+  const pk = document.getElementById("sb-paar"); if (pk) pk.onclick = () => { const neu = () => { const q = person(p.id); if (!q || !paarMoeglich(q)) pk.parentNode.remove(); else pk.textContent = paarKnopfText(q); }; ich().paar && p.paar === ich().paar ? paarLoesen(neu) : paarAnfrageStarten(p, neu); };
   if (ruhig) return;
   if (stil === "modern") blatt.querySelectorAll("[data-zahl]").forEach(el => { const ziel = +el.dataset.zahl, start = performance.now(); const schritt = j => { const q = Math.min(1, (j - start - 300) / 900); if (q < 0) return requestAnimationFrame(schritt); el.textContent = Math.round(ziel * (1 - Math.pow(1 - q, 3))); if (q < 1) requestAnimationFrame(schritt); }; el.textContent = "0"; requestAnimationFrame(schritt); });
   if (stil === "mission") { const n = blatt.querySelector(".sb-name"), voll = n.textContent; n.textContent = ""; n.classList.add("tippt"); let i = 0; const tippen = () => { n.textContent = voll.slice(0, ++i); if (i < voll.length) setTimeout(tippen, 55); else setTimeout(() => n.classList.remove("tippt"), 900); }; setTimeout(tippen, 450); }
@@ -2427,7 +2456,7 @@ function nachbarnFragen() {
     [t("Nein, nur am selben Ort"), () => { merken(); setTimeout(nachbarnFragen, 600); }]
   ]);
 }
-document.getElementById("paar-zeile").onclick = () => meinPartner() ? paarLoesen() : fragen(t("So verknüpfst du dich: Tippe auf der Karte auf deinen Partner und dann auf „❤️ Wir sind ein Paar“."), [[t("Verstanden"), () => {}]]);
+document.getElementById("paar-zeile").onclick = partnerWaehlen;
 paarWertZeigen();
 
 // ---------- Einladen: zuerst fragen, wen ----------
@@ -2557,7 +2586,7 @@ function monatSpanne(von, bis) {
 // Überschrift „Symbol · Wer · Beziehung (Monat Jahr)“, darunter „Flagge · Zeitraum · wo genau“.
 // Farbig mit 📍 = selber Ort, hell mit 🧭 = in der Nähe, 🌍 = nur im selben Land.
 function trefferAufbauen() {
-  const namen = ids => ids.map(person).filter(Boolean).map(p => p.name).join(" & ");
+  const namen = ids => aufzaehlen(ids.map(person).filter(Boolean).map(p => p.name));
   document.getElementById("treffer-liste").innerHTML = trefferFinden().map(x => {
     const zeit = `${kurz(x.von)} – ${kurz(x.bis)}`, wer = ohneHtml(namen(x.wer)), ort = ohneHtml(x.ort || ""), ort2 = ohneHtml(x.ort2 || "");
     const beide = x.wer.length > 1 ? "ihr alle in {ort}" : "ihr beide in {ort}";
@@ -2651,7 +2680,7 @@ function neuDabeiPruefen() {
 }
 function neuBannerZeigen(neu) {
   const b = document.getElementById("neu-banner");
-  b.textContent = "👋 " + t("Neu dabei: {namen}", { namen: neu.map(p => p.name).join(", ") });
+  b.textContent = "👋 " + t("Neu dabei: {namen}", { namen: aufzaehlen(neu.map(p => p.name)) });
   b.hidden = false;
   b.onclick = () => { b.hidden = true; const p = leute.find(x => x.id === neu[0].id); if (p) { zuPerson(p); infoZeigen([p]); } };
   clearTimeout(neuBannerZeigen.uhr); neuBannerZeigen.uhr = setTimeout(() => b.hidden = true, 7000);
@@ -3038,7 +3067,6 @@ function neuigkeitenZeigen() {
 setTimeout(neuigkeitenZeigen, ECHT ? 2200 : 2000);
 
 // ---------- Echte App: Paare, Reisegruppen, Länder und offene Anfragen aus der Datenbank ----------
-const ANFRAGEN = { paarRein: [], mitreiseRein: [], mitreiseRaus: [] };
 const idVon = uid => uid === ECHT_DATEN.uid ? "du" : uid;
 let ersteVerbindungen = true;
 async function verbindungenLaden() {
@@ -3089,8 +3117,10 @@ async function verbindungenLaden() {
     reisegruppen = Object.entries(nachGruppe).map(([id, ids]) => ({ id, leute: ids })).filter(g => g.leute.length > 1);
   }
   if (!anfr.error) {
-    ANFRAGEN.mitreiseRaus = anfr.data.filter(x => x.von === uid).map(x => idVon(x.an));
-    ANFRAGEN.mitreiseRein = anfr.data.filter(x => x.an === uid).map(x => idVon(x.von));
+    // Anfragen zwischen Leuten, die schon in derselben Gruppe sind, sind erledigt (sonst fragt die App bei jedem Start erneut)
+    const offen = anfr.data.filter(x => { const g = gruppeVon(idVon(x.von)); return !(g && g.leute.includes(idVon(x.an))); });
+    ANFRAGEN.mitreiseRaus = offen.filter(x => x.von === uid).map(x => idVon(x.an));
+    ANFRAGEN.mitreiseRein = offen.filter(x => x.an === uid).map(x => idVon(x.von));
   }
   pinsSetzen(); listeAufbauen();
   if (ersteVerbindungen) { ersteVerbindungen = false; setTimeout(anfragenBeantworten, 2800); }
@@ -3126,13 +3156,13 @@ async function anfrageAntworten(fn, id, ja) {
   else if (ja) hinweis(t("Ihr reist jetzt zusammen 👥"));
   await verbindungenLaden();
 }
-async function paarEchtAnfragen(p, gruppe) {
+async function paarEchtAnfragen(p) {
   const { data, error } = await SB.rpc("paar_anfragen", { ziel: p.uid });
   if (error) return hinweis(t("Das hat nicht geklappt"));
   if (data === "vergeben") return hinweis(t("{name} ist schon mit jemandem verknüpft", { name: p.name }));
   if (data === "bestaetigt") hinweis(t("{name} und du seid jetzt ein Paar ❤️", { name: p.name }));
   else hinweis(t("Anfrage an {name} gesendet. {name} bestätigt in der App.", { name: p.name }));
-  await verbindungenLaden(); paarKnopfSetzen(gruppe);
+  await verbindungenLaden();
 }
 async function gruppeEchtAnfragen(p) {
   const { data, error } = await SB.rpc("mitreisen_anfragen", { ziel: p.uid });
