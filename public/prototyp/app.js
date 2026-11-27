@@ -903,7 +903,7 @@ function reisenAufbauen() {
     const ps = r.wer.map(person).filter(Boolean);
     const gesichter = ps.slice(0, 2).map((p, i) => `<div class="klein-ava" style="left:${ps.length > 1 ? i * 20 : 10}px;z-index:${2 - i};${kopfStil(p)}">${kopfText(p)}</div>`).join("");
     const naechte = r.von ? Math.round((datum(r.bis) - datum(r.von)) / 864e5) : null;
-    const jahr = (r.von || r.monat).slice(0, 4) !== heute.slice(0, 4) ? " " + (r.von || r.monat).slice(0, 4) : "";
+    const jahr = (r.von || r.monat).slice(0, 4) !== heute.slice(0, 4) ? "\u00a0" + (r.von || r.monat).slice(0, 4) : "";
     return `<div class="kasten reise${r.vielleicht ? " vielleicht" : ""}${r.wer[0] === "du" ? " eigen" : ""}" data-n="${reisen.indexOf(r)}">
       <div class="gesichter">${gesichter}</div>
       <div class="text"><span class="wer">${ohneHtml(aufzaehlen(ps.map(p => rufname(p))))}</span>
