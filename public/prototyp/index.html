@@ -401,6 +401,9 @@
   html.familie .familie-blatt { display: block; }
   html.familie .leiste, html.familie .blatt, html.familie #knopf-ich, html.familie .profil-knopf { display: none !important; }
   .fam-karte { display: flex; gap: 14px; align-items: flex-start; padding: 14px 0; border-bottom: 1px solid var(--trenner); cursor: pointer; }
+  .fam-standort { margin-top: 8px; flex-wrap: nowrap; border-bottom: 1px solid var(--trenner); }
+  .fam-standort > div { flex: 1; min-width: 0; }
+  .fam-standort .schalter { flex: none; }
   .fam-karte .ava { width: 56px; height: 56px; font-size: 18px; }
   .fam-karte b { font-size: 20px; display: block; }
   .fam-karte .wo { font-size: 16px; margin-top: 2px; }
@@ -412,7 +415,7 @@
   .fam-karte .nr-daten { font-size: 14px; color: var(--text-leise); }
   .feedback-lasche { position: fixed; right: 0; top: 46%; z-index: 65; transform: translateY(-50%) rotate(-90deg); transform-origin: 100% 50%; translate: 0 0; border: 0; border-radius: 10px 10px 0 0; padding: 5px 10px; background: var(--tinte); color: var(--papier); font: inherit; font-size: 11px; font-weight: 700; letter-spacing: 0.3px; opacity: 0.55; cursor: pointer; margin-right: 13px; }
   .feedback-lasche:active { opacity: 1; }
-  html.tippt .feedback-lasche { display: none; }
+  html.tippt .feedback-lasche, html.familie .feedback-lasche { display: none; }
   .hinweis { position: fixed; left: 50%; top: calc(env(safe-area-inset-top) + 86px); transform: translate(-50%, -10px); z-index: 20; background: var(--tinte); color: var(--papier); padding: 8px 14px; border-radius: 999px; font-size: 13px; opacity: 0; transition: opacity 0.25s, transform 0.25s; pointer-events: none; white-space: nowrap; }
   .hinweis.zeigen { opacity: 1; transform: translate(-50%, 0); }
 
@@ -1499,8 +1502,8 @@
 <section class="familie-blatt" id="familie-blatt">
   <div class="griff"></div>
   <p class="fam-kopf" id="fam-kopf">Familien-Ansicht · Beispiel: Mama sieht dich und Alex</p>
+  <div class="zeile-einst fam-standort"><div>Meinen Standort zeigen<small>Nur für dich, um die Entfernung zu sehen. Niemand sonst sieht ihn.</small></div><button class="schalter" id="familie-standort"></button></div>
   <div id="familie-karten"></div>
-  <div class="zeile-einst"><div>Meinen Standort zeigen<small>Nur für dich, um die Entfernung zu sehen. Niemand sonst sieht ihn.</small></div><button class="schalter" id="familie-standort"></button></div>
   <div class="familie-knoepfe"><button class="knopf-leise nur-echt" id="familie-sprache">🌐 Sprache</button><button class="knopf-leise" id="familie-ende">Prototyp: zurück zur Nomaden-Ansicht</button></div>
 </section>
 <button class="feedback-lasche" id="feedback-lasche" aria-label="Feedback an Sven">Feedback</button>
