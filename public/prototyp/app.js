@@ -2215,7 +2215,7 @@ async function steckbriefOeffnen(p) {
   const stempel = sortiert.length ? `<div class="sb-stempel">${sortiert.map((cc, i) => `<span class="stempel-ink${i % 3 === 1 ? " eckig" : ""}" style="--i:${i};--r:${((i * 37) % 26) - 13}deg;--sf:${STEMPEL_FARBEN[i % STEMPEL_FARBEN.length]}">${flagge(cc)}<small>${cc}</small></span>`).join("")}${zahl > sortiert.length ? `<span class="stempel-mehr">+${zahl - sortiert.length}</span>` : ""}</div>` : "";
   const alleLinks = (selbst ? meineLinks : p.links) || {}, termin = !selbst && linkZiel("calendly", alleLinks.calendly);
   const linksHtml = Object.entries(alleLinks).map(([k, v]) => { if (k === "calendly" && termin) return ""; const u = linkZiel(k, v), a = LINK_ARTEN.find(x => x[0] === k); return u && a ? `<a href="${ohneHtml(u)}" target="_blank" rel="noopener">${a[1]}</a>` : ""; }).join("");
-  const knoepfe = (linksHtml ? `<div class="sb-links">${linksHtml}</div>` : "") + (termin ? `<a class="knopf-gross sb-termin" href="${ohneHtml(termin)}" target="_blank" rel="noopener">📅 ${t("Termin buchen")}</a>` : "") + (selbst ? "" : `<div class="sb-knoepfe"><button class="knopf-leise" id="sb-karte-zeigen">📍 ${t("Auf der Karte")}</button><button class="knopf-leise" id="sb-nachricht">💬 ${t("Nachricht")}</button></div>`) + (!selbst && paarMoeglich(p) ? `<div class="sb-knoepfe"><button class="knopf-leise" id="sb-paar">${paarKnopfText(p)}</button></div>` : "");
+  const knoepfe = (linksHtml ? `<div class="sb-links">${linksHtml}</div>` : "") + (termin ? `<a class="knopf-gross sb-termin" href="${ohneHtml(termin)}" target="_blank" rel="noopener">📅 ${t("Termin buchen")}</a>` : "") + (selbst ? "" : `<div class="sb-knoepfe"><button class="knopf-leise" id="sb-karte-zeigen">📍 ${t("Auf der Karte")}</button><button class="knopf-leise" id="sb-nachricht">💬 ${t("Nachricht")}</button></div>`) + (!selbst && (paarMoeglich(p) || mitreiseMoeglich(p)) ? `<div class="sb-knoepfe">${paarMoeglich(p) ? `<button class="knopf-leise" id="sb-paar">${paarKnopfText(p)}</button>` : ""}${mitreiseMoeglich(p) ? `<button class="knopf-leise" id="sb-mitreise">${mitreiseKnopfText(p)}</button>` : ""}</div>` : "");
   const blatt = document.getElementById("sb-blatt");
   blatt.style.setProperty("--sb-farbe", p.farbe || "#0a84ff");
   blatt.innerHTML = `<button class="sb-zu" id="sb-zu" aria-label="${t("Schließen")}">✕</button>
@@ -2230,7 +2230,8 @@ async function steckbriefOeffnen(p) {
   document.getElementById("sb-zu").onclick = steckbriefZu;
   const zk = document.getElementById("sb-karte-zeigen"); if (zk) zk.onclick = () => { steckbriefZu(); seiteZeigen("karte"); zuPerson(p); };
   const nk = document.getElementById("sb-nachricht"); if (nk) nk.onclick = () => { steckbriefZu(); einzelChat(p.id); };
-  const pk = document.getElementById("sb-paar"); if (pk) pk.onclick = () => { const neu = () => { const q = person(p.id); if (!q || !paarMoeglich(q)) pk.parentNode.remove(); else pk.textContent = paarKnopfText(q); }; ich().paar && p.paar === ich().paar ? paarLoesen(neu) : paarAnfrageStarten(p, neu); };
+  const mk = document.getElementById("sb-mitreise"); if (mk) mk.onclick = () => { const neu = () => { const q = person(p.id); if (!q || !mitreiseMoeglich(q)) mk.remove(); else mk.textContent = mitreiseKnopfText(q); }; mitreiseStarten(p, neu); };
+  const pk = document.getElementById("sb-paar"); if (pk) pk.onclick = () => { const neu = () => { const q = person(p.id); if (!q || !paarMoeglich(q)) pk.remove(); else pk.textContent = paarKnopfText(q); }; ich().paar && p.paar === ich().paar ? paarLoesen(neu) : paarAnfrageStarten(p, neu); };
   if (ruhig) return;
   if (stil === "modern") blatt.querySelectorAll("[data-zahl]").forEach(el => { const ziel = +el.dataset.zahl, start = performance.now(); const schritt = j => { const q = Math.min(1, (j - start - 300) / 900); if (q < 0) return requestAnimationFrame(schritt); el.textContent = Math.round(ziel * (1 - Math.pow(1 - q, 3))); if (q < 1) requestAnimationFrame(schritt); }; el.textContent = "0"; requestAnimationFrame(schritt); });
   if (stil === "mission") { const n = blatt.querySelector(".sb-name"), voll = n.textContent; n.textContent = ""; n.classList.add("tippt"); let i = 0; const tippen = () => { n.textContent = voll.slice(0, ++i); if (i < voll.length) setTimeout(tippen, 55); else setTimeout(() => n.classList.remove("tippt"), 900); }; setTimeout(tippen, 450); }
@@ -2397,8 +2398,8 @@ async function qrVerbinden(code) {
 
 // ---------- Reisegruppe: „Reist du zusammen mit …?“ ----------
 let gruppenAnfrage = null;
-function gruppeBeitreten(p, still) {
-  if (ECHT) return gruppeEchtAnfragen(p);
+function gruppeBeitreten(p, danach) {
+  if (ECHT) return gruppeEchtAnfragen(p).then(() => danach && danach());
   // Prototyp: die andere Person bestätigt nach kurzer Zeit von selbst
   gruppenAnfrage = p.id; hinweis(t("Anfrage an {name} gesendet", { name: p.name }));
   setTimeout(() => {
@@ -2409,7 +2410,7 @@ function gruppeBeitreten(p, still) {
     else if (seine) seine.leute.push("du");
     else reisegruppen.push({ id: "g-" + Date.now(), leute: ["du", p.id] });
     gruppenSpeichern(); pinsSetzen(); listeAufbauen();
-    hinweis(t("{name} hat bestätigt: ihr reist zusammen", { name: p.name }));
+    hinweis(t("{name} hat bestätigt: ihr reist zusammen", { name: p.name })); mitreiseWertZeigen(); if (danach) danach();
     if (document.getElementById("info").classList.contains("offen")) infoZeigen(infoGruppe);
   }, 3500);
 }
@@ -2418,7 +2419,7 @@ async function reisegruppeVerlassen() {
   if (ECHT) { const { error } = await SB.rpc("gruppe_verlassen"); if (error) return hinweis(t("Das hat nicht geklappt")); }
   g.leute = g.leute.filter(id => id !== "du");
   reisegruppen = reisegruppen.filter(x => x.leute.length > 1);
-  gruppenSpeichern(); pinsSetzen(); listeAufbauen(); hinweis(t("Du reist jetzt allein weiter"));
+  gruppenSpeichern(); pinsSetzen(); listeAufbauen(); mitreiseWertZeigen(); hinweis(t("Du reist jetzt allein weiter"));
   if (document.getElementById("info").classList.contains("offen")) infoZeigen(infoGruppe);
 }
 let infoGruppe = null;
@@ -2437,6 +2438,50 @@ function gruppeKnopfSetzen(gruppe) {
   k.textContent = gruppenAnfrage === p.id || (ECHT && ANFRAGEN.mitreiseRaus.includes(p.id)) ? t("👥 Anfrage gesendet") : offen.length === 1 ? t("👥 Mit {name} unterwegs", { name: p.name }) : t("👥 Zusammen unterwegs");
   k.onclick = () => { if (gruppenAnfrage === p.id || (ECHT && ANFRAGEN.mitreiseRaus.includes(p.id))) return; offen.length === 1 ? gruppeBeitreten(p) : fragen(t("Mit wem reist du zusammen?"), offen.map(q => [q.name, () => gruppeBeitreten(q)])); };
 }
+// ---------- Zusammen unterwegs (ohne Paar): wie beim Paar im Steckbrief und unter Profil → Zusammen unterwegs ----------
+const naheBeiMir = p => { const du = ich(); return du.lat != null && p.lat != null && entfernungKm(du.lat, du.lon, p.lat, p.lon) < NAH_KM; };
+const reistMitMir = p => { const g = gruppeVon("du"); return !!g && g.leute.includes(p.id); };
+const mitreiseGesendet = p => gruppenAnfrage === p.id || (ECHT && ANFRAGEN.mitreiseRaus.includes(p.id));
+const mitreiseBekommen = p => ECHT && ANFRAGEN.mitreiseRein.includes(p.id);
+const mitreiseMoeglich = p => !familieModus && p && p.id !== "du" && (reistMitMir(p) || mitreiseBekommen(p) || naheBeiMir(p));
+function mitreiseKnopfText(p) {
+  if (reistMitMir(p)) return t("👥 Ihr reist zusammen");
+  if (mitreiseBekommen(p)) return t("👥 Zusammen unterwegs bestätigen");
+  if (mitreiseGesendet(p)) return t("👥 Anfrage gesendet");
+  return t("👥 Wir reisen zusammen");
+}
+function mitreiseStarten(p, danach) {
+  if (reistMitMir(p)) return fragen(t("Nicht mehr zusammen unterwegs? Die anderen sehen dich dann wieder einzeln."), [[t("Gruppe verlassen"), async () => { await reisegruppeVerlassen(); if (danach) danach(); }, true]]);
+  if (mitreiseBekommen(p)) return anfrageAntworten("mitreisen_antworten", p.id, true).then(() => { mitreiseWertZeigen(); if (danach) danach(); });
+  if (mitreiseGesendet(p)) return hinweis(t("Anfrage an {name} gesendet", { name: p.name }));
+  fragen(t("Mit {name} zusammen unterwegs? {name} bestätigt. Danach zeigt die Karte euch als Gruppe. Zieht jemand über 50 km weiter, endet das von selbst.", { name: p.name }),
+    [[t("Anfrage senden"), () => { const w = gruppeBeitreten(p, () => { mitreiseWertZeigen(); if (danach) danach(); }); mitreiseWertZeigen(); if (!ECHT && danach) danach(); return w; }]]);
+}
+function mitreiseWertZeigen() {
+  const el = document.getElementById("mitreise-wert"); if (!el) return;
+  const g = gruppeVon("du"), rein = ECHT ? ANFRAGEN.mitreiseRein.map(person).filter(Boolean) : [];
+  const raus = [...(ECHT ? ANFRAGEN.mitreiseRaus : []), ...(gruppenAnfrage ? [gruppenAnfrage] : [])].map(person).filter(Boolean);
+  el.textContent = rein.length ? t("Anfrage von {name}", { name: rein[0].name })
+    : g ? aufzaehlen(g.leute.filter(id => id !== "du").map(person).filter(Boolean).map(q => q.name))
+    : raus.length ? t("Anfrage an {name} gesendet", { name: raus[0].name }) : t("Allein unterwegs");
+}
+// Profil → Zusammen unterwegs: Anfragen an mich zuerst, sonst Leute in der Nähe wählen oder die Gruppe verlassen
+function mitreiseWaehlen() {
+  if (familieModus) return;
+  const rein = ECHT ? ANFRAGEN.mitreiseRein.map(person).filter(Boolean) : [];
+  if (rein.length) return fragen(t("{name} sagt, ihr reist gerade zusammen. Stimmt das?", { name: rein[0].name }), [
+    [t("Ja, wir reisen zusammen"), () => anfrageAntworten("mitreisen_antworten", rein[0].id, true).then(mitreiseWertZeigen)],
+    [t("Nein, nur am selben Ort"), () => anfrageAntworten("mitreisen_antworten", rein[0].id, false).then(mitreiseWertZeigen)]]);
+  const du = ich(), g = gruppeVon("du"), weg = q => entfernungKm(du.lat, du.lon, q.lat, q.lon);
+  const nahe = leute.filter(q => q.id !== "du" && naheBeiMir(q) && !reistMitMir(q)).sort((a, b) => weg(a) - weg(b) || a.name.localeCompare(b.name));
+  const knoepfe = nahe.map(q => [`${q.name}${weg(q) < 1 ? " · 📍" : ` · ${km(weg(q))}`}`, () => mitreiseStarten(q)]);
+  if (g) knoepfe.push([t("Gruppe verlassen"), () => mitreiseStarten(person(g.leute.find(id => id !== "du")))]);
+  if (!knoepfe.length) return hinweis(t("Gerade ist niemand in deiner Nähe (unter 50 km)"));
+  fragen(g ? t("Du reist mit {namen}. Wer ist noch dabei?", { namen: aufzaehlen(g.leute.filter(id => id !== "du").map(person).filter(Boolean).map(q => q.name)) })
+    : t("Mit wem bist du gerade zusammen unterwegs? Die Person bestätigt in der App."), knoepfe);
+}
+document.getElementById("mitreise-zeile").onclick = mitreiseWaehlen;
+mitreiseWertZeigen();
 const nachbarnDieseSitzung = new Set(); // „Abbrechen“ fragt erst beim nächsten Start wieder
 // Beim Öffnen: Ist jemand in deiner Nähe, mit dem du noch nicht als Gruppe unterwegs bist, fragt die App einmal pro Ort nach
 function nachbarnFragen() {
@@ -3122,7 +3167,7 @@ async function verbindungenLaden() {
     ANFRAGEN.mitreiseRaus = offen.filter(x => x.von === uid).map(x => idVon(x.an));
     ANFRAGEN.mitreiseRein = offen.filter(x => x.an === uid).map(x => idVon(x.von));
   }
-  pinsSetzen(); listeAufbauen();
+  pinsSetzen(); listeAufbauen(); mitreiseWertZeigen();
   if (ersteVerbindungen) { ersteVerbindungen = false; setTimeout(anfragenBeantworten, 2800); }
   else anfragenBeantworten();
 }
