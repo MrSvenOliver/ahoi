@@ -2237,6 +2237,7 @@ async function steckbriefOeffnen(p) {
     <div class="sb-felder">${felder}</div>${zahlen}${stempel}${knoepfe}`;
   blatt.scrollTop = 0;
   const sb = document.getElementById("steckbrief");
+  blatt.style.animation = blatt.style.transform = blatt.style.transition = ""; document.getElementById("sb-hinten").style.opacity = "";
   sb.classList.remove("zu"); sb.classList.add("offen");
   document.getElementById("sb-zu").onclick = steckbriefZu;
   const zk = document.getElementById("sb-karte-zeigen"); if (zk) zk.onclick = () => { steckbriefZu(); seiteZeigen("karte"); zuPerson(p); };
@@ -2250,10 +2251,49 @@ async function steckbriefOeffnen(p) {
 function steckbriefZu() {
   const sb = document.getElementById("steckbrief");
   if (!sb.classList.contains("offen")) return;
+  const bl = document.getElementById("sb-blatt"); bl.style.animation = bl.style.transform = bl.style.transition = ""; document.getElementById("sb-hinten").style.opacity = "";
   sb.classList.add("zu");
   setTimeout(() => sb.classList.remove("offen", "zu"), ruhig ? 0 : 240);
 }
 document.getElementById("sb-hinten").onclick = steckbriefZu;
+// Steckbrief nach unten wegziehen (iPhone und Android gleich): nur wenn der Inhalt ganz oben ist
+(() => {
+  const blatt = document.getElementById("sb-blatt"), hinten = document.getElementById("sb-hinten");
+  let startY = null, startZeit = 0, dy = 0, zieht = false;
+  blatt.addEventListener("touchstart", e => {
+    if (e.touches.length !== 1) { startY = null; return; }
+    startY = e.touches[0].clientY; startZeit = performance.now(); dy = 0; zieht = false;
+  }, { passive: true });
+  blatt.addEventListener("touchmove", e => {
+    if (startY == null) return;
+    const d = e.touches[0].clientY - startY;
+    if (!zieht) {
+      if (d > 6 && blatt.scrollTop <= 0) { zieht = true; blatt.style.animation = "none"; blatt.style.transition = "none"; }
+      else if (d < -6 || blatt.scrollTop > 0) { startY = null; return; }
+      else return;
+    }
+    e.preventDefault();
+    dy = Math.max(0, d);
+    blatt.style.transform = `translateY(${dy}px)`;
+    hinten.style.opacity = String(Math.max(0.2, 1 - dy / 500));
+  }, { passive: false });
+  const ende = () => {
+    if (startY == null) return;
+    startY = null;
+    if (!zieht) return;
+    const tempo = dy / Math.max(1, performance.now() - startZeit);
+    if (dy > 120 || (dy > 40 && tempo > 0.6)) {
+      blatt.style.transition = "transform 0.22s ease-in"; blatt.style.transform = "translateY(105%)";
+      hinten.style.transition = "opacity 0.22s"; hinten.style.opacity = "0";
+      setTimeout(() => { document.getElementById("steckbrief").classList.remove("offen", "zu"); blatt.style.transform = blatt.style.transition = blatt.style.animation = ""; hinten.style.opacity = hinten.style.transition = ""; }, 230);
+    } else {
+      blatt.style.transition = "transform 0.25s cubic-bezier(0.2, 0.9, 0.3, 1)"; blatt.style.transform = "translateY(0)";
+      hinten.style.transition = "opacity 0.25s"; hinten.style.opacity = "";
+    }
+    zieht = false;
+  };
+  blatt.addEventListener("touchend", ende); blatt.addEventListener("touchcancel", ende);
+})();
 document.addEventListener("keydown", e => { if (e.key === "Escape") steckbriefZu(); });
 document.getElementById("steckbrief-selbst").onclick = () => steckbriefOeffnen(ich());
 

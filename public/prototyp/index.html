@@ -832,7 +832,7 @@
   .steckbrief { position: fixed; inset: 0; z-index: 60; display: none; }
   .steckbrief.offen { display: block; }
   .sb-hinten { position: absolute; inset: 0; background: rgba(0, 0, 0, 0.38); animation: sbHinten 0.25s ease both; }
-  .sb-blatt { position: absolute; left: 0; right: 0; bottom: 0; max-width: 560px; margin: 0 auto; max-height: calc(100% - env(safe-area-inset-top) - 20px); overflow-y: auto; overscroll-behavior: contain; background: var(--flaeche); color: var(--text); border-radius: 26px 26px 0 0; padding: 22px 18px calc(env(safe-area-inset-bottom) + 22px); animation: sbHoch 0.45s cubic-bezier(0.2, 0.9, 0.3, 1) both; }
+  .sb-blatt { position: absolute; left: 0; right: 0; bottom: 0; max-width: 560px; margin: 0 auto; max-height: calc(100% - env(safe-area-inset-top) - 20px); overflow-y: auto; overscroll-behavior: none; -webkit-overflow-scrolling: touch; touch-action: pan-y; background: var(--flaeche); color: var(--text); border-radius: 26px 26px 0 0; padding: 22px 18px calc(env(safe-area-inset-bottom) + 22px); animation: sbHoch 0.45s cubic-bezier(0.2, 0.9, 0.3, 1) both; }
   .steckbrief.zu .sb-blatt { animation: sbRunter 0.25s ease-in both; } .steckbrief.zu .sb-hinten { animation: sbHinten 0.25s ease reverse both; }
   @keyframes sbHoch { from { transform: translateY(100%); } to { transform: none; } }
   @keyframes sbRunter { to { transform: translateY(100%); } }
