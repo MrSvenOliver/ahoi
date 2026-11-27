@@ -553,6 +553,7 @@ function hochzaehlen(wurzel) {
 // ---------- Liste und Infokarte ----------
 function listeAufbauen() {
   const du = ich();
+  if (!du) return; // Familie: eigene Ansicht ohne eigenen Pin
   const andere = sichtbareLeute().filter(p => p.id !== "du").map(p => ({ ...p, d: du.lat == null ? 0 : entfernungKm(du.lat, du.lon, p.lat, p.lon) })).sort((x, y) => x.d - y.d);
   const laenderZahl = new Set(andere.map(p => p.land)).size;
   document.getElementById("zusammenfassung").textContent = `${anzahl(andere.length, "freunde")} · ${anzahl(laenderZahl, "laender")} · ${versionText(VERSION)}`;
@@ -1891,7 +1892,44 @@ function familieAufbauen() {
   }).join("");
   document.querySelectorAll(".fam-karte").forEach(k => k.onclick = () => { const p = leute.find(x => x.id === k.dataset.id); map.flyTo({ center: [p.lon, p.lat], zoom: 10, speed: 1.3, essential: true }); });
 }
+// Familien-Blatt ein- und ausklappen: am Griff tippen oder ziehen (iPhone und Android gleich), eingeklappt bleibt nur die Kopfzeile
+var famBlatt = (() => {
+  const fb = document.getElementById("familie-blatt");
+  let zu = false, startY = null, dy = 0, zieht = false, startZeit = 0;
+  const zuY = () => { const k = document.getElementById("fam-kopf"), rest = Math.max(0, parseFloat(getComputedStyle(fb).paddingBottom) - 16); return Math.max(0, fb.offsetHeight - (k.offsetTop + k.offsetHeight + 14 + rest)); };
+  const setzen = z => {
+    zu = z; fb.style.transition = "transform 0.3s cubic-bezier(0.2, 0.9, 0.3, 1)";
+    if (z) fb.scrollTop = 0;
+    fb.style.transform = z ? `translateY(${zuY()}px)` : "";
+    fb.classList.toggle("eingeklappt", z);
+  };
+  const umschalten = () => { if (!breit()) setzen(!zu); };
+  fb.querySelector(".griff").onclick = umschalten; document.getElementById("fam-kopf").onclick = umschalten;
+  fb.addEventListener("touchstart", e => { if (breit() || e.touches.length !== 1) { startY = null; return; } startY = e.touches[0].clientY; startZeit = performance.now(); dy = 0; zieht = false; }, { passive: true });
+  fb.addEventListener("touchmove", e => {
+    if (startY == null) return;
+    const d = e.touches[0].clientY - startY;
+    if (!zieht) {
+      if (zu ? Math.abs(d) > 6 : (d > 6 && fb.scrollTop <= 0)) { zieht = true; fb.style.transition = "none"; }
+      else if (!zu && (d < -6 || fb.scrollTop > 0)) { startY = null; return; }
+      else return;
+    }
+    e.preventDefault();
+    dy = d;
+    const basis = zu ? zuY() : 0;
+    fb.style.transform = `translateY(${Math.min(zuY(), Math.max(0, basis + d))}px)`;
+  }, { passive: false });
+  const ende = () => {
+    if (startY == null) return; startY = null;
+    if (!zieht) return; zieht = false;
+    const tempo = dy / Math.max(1, performance.now() - startZeit);
+    if (zu) setzen(!(dy < -60 || tempo < -0.4)); else setzen(dy > 90 || tempo > 0.5);
+  };
+  fb.addEventListener("touchend", ende); fb.addEventListener("touchcancel", ende);
+  return { auf: () => setzen(false) };
+})();
 function familieSetzen(an) {
+  if (famBlatt) famBlatt.auf();
   familieModus = an;
   document.documentElement.classList.toggle("familie", an);
   seiteZeigen("karte");
@@ -2688,6 +2726,7 @@ function monatSpanne(von, bis) {
 // Überschrift „Symbol · Wer · Beziehung (Monat Jahr)“, darunter „Flagge · Zeitraum · wo genau“.
 // Farbig mit 📍 = selber Ort, hell mit 🧭 = in der Nähe, 🌍 = nur im selben Land.
 function trefferAufbauen() {
+  if (!ich()) return;
   const namen = ids => aufzaehlen(ids.map(person).filter(Boolean).map(p => p.name));
   const heute = heuteISO(), jahrJetzt = heute.slice(0, 4), du = ich();
   // Zeitraum mit Jahr nur, wenn es nicht das laufende Jahr ist: „4. März – 14. März 2027“
@@ -3179,6 +3218,7 @@ setTimeout(neuigkeitenZeigen, ECHT ? 2200 : 2000);
 const idVon = uid => uid === ECHT_DATEN.uid ? "du" : uid;
 let ersteVerbindungen = true;
 async function verbindungenLaden() {
+  if (familieModus || !ich()) return;
   if (!ECHT || familieModus || ECHT_DATEN.profil.art === "familie") return;
   const uid = ECHT_DATEN.uid;
   const [lae, paare, mitgl, anfr, pio] = await Promise.all([
