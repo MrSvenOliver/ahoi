@@ -39,6 +39,7 @@
 - `25-hilton-recherche.sql`: Hilton mit automatischer Recherche (Status, Kategorie, Lounge, Preis, Top 5 je Sprache); Mitglieder schreiben nur Name und Ort; (die Edge Function „hilton“ wurde mit 26 wieder abgeschafft)
 - `26-hilton-chat.sql`: Hilton-Recherche über Claude im Chat: Mitglieder dürfen nur „neu recherchieren“ anfragen, geänderte Hotels warten wieder, Mitteilung „🏨 Hilton-Hotel wartet“ an den Admin; danach die Edge Function „push“ neu veröffentlichen
 - `27-wunsch-loeschen.sql`: Wishlist-Unterkunft löschen mit Wahl „Reisen behalten“ oder „für alle absagen“ (`wunsch_loeschen`), Mitteilung an alle Beteiligten; Spalte `hilton.preis_am` für das Preis-Update; danach die Edge Function „push“ neu veröffentlichen
+- `28-anfragen-push.sql`: Mitteilung bei Paar-Anfrage („❤️ {Name} möchte euch als Paar verknüpfen“) und Mitreise-Anfrage („👥 {Name} sagt, ihr reist zusammen“) an die angefragte Person (Schalter „Neue Leute und Anfragen“); offene Mitreise-Anfragen innerhalb einer Reisegruppe werden gelöscht; danach die Edge Function „push“ neu veröffentlichen
 - `functions/vorschau/index.ts`: Edge Function „vorschau“ (Titel und Bild eines geteilten Links; „Verify JWT“ an, nur für angemeldete Mitglieder)
 - `functions/push/index.ts`: Edge Function „push“ (im Dashboard unter Edge Functions angelegt; „Verify JWT“ aus, weil die Datenbank sie ohne Anmeldung aufruft; sie erzeugt ihre Push-Schlüssel selbst)
 

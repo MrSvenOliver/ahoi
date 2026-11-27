@@ -23,6 +23,7 @@ const TEXTE: Record<string, Record<string, string>> = {
     naehe: "🧭 {name} in der Nähe", naeheText: "{ort} · {km} km von dir", naeheGleich: "{ort} · am selben Ort",
     neu: "👋 {name} ist neu bei Ahoi", neuText: "Gerade in {ort}", neuHallo: "Sag Hallo im Chat",
     anfrage: "🤝 {name} möchte sich verbinden", anfrageText: "Kurz tippen zum Bestätigen",
+    paarAnfrage: "❤️ {name} möchte euch als Paar verknüpfen", mitreiseAnfrage: "👥 {name} sagt, ihr reist zusammen",
     fehler: "🐞 Fehler in Ahoi", hilton: "🏨 Hilton-Hotel wartet",
   },
   en: {
@@ -34,6 +35,7 @@ const TEXTE: Record<string, Record<string, string>> = {
     naehe: "🧭 {name} nearby", naeheText: "{ort} · {km} km away", naeheGleich: "{ort} · same place",
     neu: "👋 {name} joined Ahoi", neuText: "Now in {ort}", neuHallo: "Say hello in the chat",
     anfrage: "🤝 {name} wants to connect", anfrageText: "Tap to confirm",
+    paarAnfrage: "❤️ {name} wants to link you as a couple", mitreiseAnfrage: "👥 {name} says you're travelling together",
     fehler: "🐞 Error in Ahoi", hilton: "🏨 Hilton hotel waiting",
   },
   sk: {
@@ -45,6 +47,7 @@ const TEXTE: Record<string, Record<string, string>> = {
     naehe: "🧭 {name} je nablízku", naeheText: "{ort} · {km} km od teba", naeheGleich: "{ort} · na rovnakom mieste",
     neu: "👋 {name} je teraz v Ahoi", neuText: "Práve v {ort}", neuHallo: "Pozdrav v chate",
     anfrage: "🤝 {name} sa chce spojiť", anfrageText: "Ťukni a potvrď",
+    paarAnfrage: "❤️ {name} vás chce prepojiť ako pár", mitreiseAnfrage: "👥 {name} hovorí, že cestujete spolu",
     fehler: "🐞 Chyba v Ahoi", hilton: "🏨 Hotel Hilton čaká",
   },
 };
@@ -302,6 +305,18 @@ async function anfrage(von: string, an: string) {
   return verschicken(ziel.map((x) => x.id), (s) => ({ title: text(s, "anfrage", { name }), body: text(s, "anfrageText"), url: `${APP}?freunde=1`, tag: `anfrage-${von}` }));
 }
 
+// Paar- und Mitreise-Anfrage an die angefragte Person (höchstens einmal am Tag pro Paar von Leuten)
+async function paarMitreiseAnfrage(art: "paar" | "mitreise", von: string, an: string) {
+  const offen = art === "paar"
+    ? await sql`select 1 from public.paar where von = ${von} and an = ${an} and not bestaetigt`
+    : await sql`select 1 from public.mitreise_anfrage where von = ${von} and an = ${an}`;
+  if (!offen.length) return 0;
+  if (!(await erstesMal(`${art}:${von}:${an}:${new Date().toISOString().slice(0, 10)}`))) return 0;
+  const ziel = await sql`select id from public.profile where id = ${an} and push_leute`;
+  const name = await nameVon(von);
+  return verschicken(ziel.map((x) => x.id), (s) => ({ title: text(s, art === "paar" ? "paarAnfrage" : "mitreiseAnfrage", { name }), body: text(s, "anfrageText"), url: APP, tag: `${art}-${von}` }));
+}
+
 // ---------- Ort-Frage (täglich über pg_cron) ----------
 async function ortFrage() {
   // Mit Abo, freigegeben, nicht im Geistermodus, höchstens einmal im Monat gefragt:
@@ -363,6 +378,8 @@ Deno.serve(async (req) => {
     else if (b.ereignis === "ort" && uuid(b.person)) raus = await ortEreignis(b.person);
     else if (b.ereignis === "neu_dabei" && uuid(b.person)) raus = await neuDabei(b.person);
     else if (b.ereignis === "anfrage" && uuid(b.von) && uuid(b.an)) raus = await anfrage(b.von, b.an);
+    else if (b.ereignis === "paar_anfrage" && uuid(b.von) && uuid(b.an)) raus = await paarMitreiseAnfrage("paar", b.von, b.an);
+    else if (b.ereignis === "mitreise_anfrage" && uuid(b.von) && uuid(b.an)) raus = await paarMitreiseAnfrage("mitreise", b.von, b.an);
     return new Response(JSON.stringify({ ok: true, raus }), { headers: { "Content-Type": "application/json", ...CORS } });
   } catch (e) {
     return new Response(JSON.stringify({ ok: false, fehler: String(e) }), { status: 500, headers: { "Content-Type": "application/json", ...CORS } });
